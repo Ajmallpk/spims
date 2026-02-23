@@ -28,4 +28,16 @@ export const resendOtp = (data)=>{
 export const loginUser = (data) => {
   return API.post("auth/login/", data)
 }
+export const getblockverification = () => {
+  return API.get("/api/admin/block_verifications/")
+}
+
+
+
+
+
+
+
+
+
 

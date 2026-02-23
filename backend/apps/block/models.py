@@ -13,6 +13,8 @@ class BlockVerification(models.Model):
     
     full_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
+    block_name = models.CharField(max_length=20)
+    district = models.CharField(max_length=20)
     aadhaar_image = models.ImageField(upload_to="block_verification/aadhaar_id/")
     appointment_letter = models.FileField(upload_to="block_verification/appointment_letters/")
     live_selfie = models.ImageField(upload_to="block_verification/selfies/")

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import AdminDashboardLayout from "@/layouts/admin/Admindashboardlayout";
-import StatCard from "@/components/admin/StatCard";
+import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout";
+import BlockStatsCard from "@/components/admin/BlockStatsCard";
 import BlockFilterBar from "@/components/admin/BlockFilterBar";
 import BlockListTable from "@/components/admin/BlockListTable";
 
@@ -85,16 +85,21 @@ function ListBlocksContent() {
 
   // Filtered records
   const filteredBlocks = useMemo(() => {
-    return blocks.filter((b) => {
+  return blocks
+    .filter((b) => b.status !== "Pending")
+    .filter((b) => {
       const matchesSearch =
         searchTerm === "" ||
         b.blockName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.district.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = selectedStatus === "All" || b.status === selectedStatus;
+
+      const matchesStatus =
+        selectedStatus === "All" || b.status === selectedStatus;
+
       return matchesSearch && matchesStatus;
     });
-  }, [blocks, searchTerm, selectedStatus]);
+}, [blocks, searchTerm, selectedStatus]);
 
   const hasFilters = searchTerm !== "" || selectedStatus !== "All";
 
@@ -160,7 +165,7 @@ function ListBlocksContent() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
+        <BlockStatsCard
           title="Total Blocks"
           value={stats.total}
           subtext="All registered authorities"
@@ -168,7 +173,7 @@ function ListBlocksContent() {
           trend={`${stats.total} total`}
           icon={<TotalIcon />}
         />
-        <StatCard
+        <BlockStatsCard
           title="Active Blocks"
           value={stats.active}
           subtext="Fully operational"
@@ -176,7 +181,7 @@ function ListBlocksContent() {
           trend={`${Math.round((stats.active / stats.total) * 100)}% rate`}
           icon={<ActiveIcon />}
         />
-        <StatCard
+        <BlockStatsCard
           title="Pending Verification"
           value={stats.pending}
           subtext="Awaiting admin review"
@@ -184,7 +189,7 @@ function ListBlocksContent() {
           trend={stats.pending > 0 ? "Action needed" : "All clear"}
           icon={<PendingIcon />}
         />
-        <StatCard
+        <BlockStatsCard
           title="Suspended Blocks"
           value={stats.suspended}
           subtext="Access restricted"
@@ -218,7 +223,6 @@ function ListBlocksContent() {
             {/* Status legend */}
             {[
               { label: "Active", dot: "bg-emerald-400" },
-              { label: "Pending", dot: "bg-amber-400" },
               { label: "Suspended", dot: "bg-red-400" },
             ].map((l) => (
               <div key={l.label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/40">
@@ -258,9 +262,5 @@ function ListBlocksContent() {
 
 // ─── Page Export ──────────────────────────────────────────────────────────────
 export default function ListBlocksPage() {
-  return (
-    <AdminDashboardLayout defaultPage="blocks">
-      <ListBlocksContent />
-    </AdminDashboardLayout>
-  );
+  return <ListBlocksContent />
 }

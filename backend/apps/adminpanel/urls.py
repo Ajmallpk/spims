@@ -4,6 +4,7 @@ from . import views
 
 
 urlpatterns = [
+    path("login/", views.AdminLoginView.as_view(), name="admin_login"),
     path("me/", views.AdminMeView.as_view()),
     path("dashboard/", views.AdminDashboardView.as_view()),
     path("block-verifications/", views.BlockVerificationListView.as_view(),name="list_block"),

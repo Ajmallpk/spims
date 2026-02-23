@@ -13,13 +13,9 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
 
         requested_role = attrs.get("role")
-
-        # Let SimpleJWT handle authentication using email automatically
         data = super().validate(attrs)
-
         user = self.user
 
-        # Role validation
         if requested_role and requested_role != user.role:
             raise serializers.ValidationError("Invalid role selected")
 

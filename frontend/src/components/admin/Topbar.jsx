@@ -20,7 +20,7 @@ export default function Topbar({ title = "Dashboard", subtitle = "Overview & Ana
 
   return (
     <header
-      className="flex items-center justify-between px-8 relative"
+      className="flex items-center justify-between px-8 relative z-[999]"
       style={{
         height: "70px",
         background: "rgba(8,14,28,0.85)",

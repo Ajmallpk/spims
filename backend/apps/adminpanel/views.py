@@ -7,7 +7,16 @@ from apps.block.models import BlockVerification
 from django.contrib.auth import get_user_model
 from apps.accounts.models import User
 from apps.block.models import BlockVerification
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import AdminLoginSerializer
+
 # Create your views here.
+
+
+
+class AdminLoginView(TokenObtainPairView):
+    serializer_class = AdminLoginSerializer
+
 
 
 class BlockVerificationListView(APIView):
@@ -23,6 +32,7 @@ class BlockVerificationListView(APIView):
             
             data.append({
                 "id":item.id,
+                "block_name":item.block_name,
                 "email":item.user.email,
                 "full_name":item.full_name,
                 "submitted_at":item.submitted_at,
@@ -50,6 +60,8 @@ class BlockVerificationDetailView(APIView):
             "email":verification.user.email,
             "full_name":verification.full_name,
             "phone_number":verification.phone_number,
+            "block_name":verification.block_name,
+            "district":verification.district,
             "aadhaar_image":verification.aadhaar_image.url,
             "appointment_letter":verification.appointment_letter.url,
             "live_selfie":verification.live_selfie.url,

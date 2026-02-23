@@ -1,8 +1,4 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"
-
-
-
 
 const navItems = [
   {
@@ -50,8 +46,6 @@ const navItems = [
 
 export default function Sidebar({ activeItem = "dashboard", onNavigate }) {
   const [hovered, setHovered] = useState(null);
-  const navigate = useNavigate()
-  const location = useLocation()
 
   return (
     <aside

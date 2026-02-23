@@ -1,7 +1,6 @@
 const STATUS_OPTIONS = [
   { value: "All", label: "All Statuses" },
   { value: "Active", label: "Active" },
-  { value: "Pending", label: "Pending" },
   { value: "Suspended", label: "Suspended" },
 ];
 

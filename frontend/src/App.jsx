@@ -5,7 +5,6 @@ import Authentication from '@/pages/common/Authentication'
 //Block
 
 // import RoleSelectionLanding from "@/pages/RoleSelectionLanding"
-
 // import BlockLogin from "@/features/block/pages/BlockLogin"
 // import BlockSignup from "@/features/block/pages/BlockSignup"
 
@@ -27,13 +26,15 @@ import PanchayathProfile from '@/pages/panjayath/PanchayathProfile'
 import PanchayathVerification from '@/pages/panjayath/PanchayathVerification'
 import WardApproval from '@/pages/panjayath/WardApproval'
 
-///Admin///
-
-import AdminDashboardLayout from "@/layouts/admin/Admindashboardlayout"
-import BlockApproval from "@/pages/admin/BlockApproval"
+// Admin Pages
 import Dashboard from "@/pages/admin/Dashboard"
-import ListBlock from "@/pages/admin/ListBlocks"
+import BlockApprovals from "@/pages/admin/BlockApprovals"
+import ListBlocks from "@/pages/admin/ListBlocks"
 import Profile from "@/pages/admin/Profile"
+import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout"
+import AdminLogin from "@/pages/auth/AdminLogin"
+import AdminProtectedRoute from "@/routes/AdminProtectedRoute"
+
 
 
 export default function App() {
@@ -61,7 +62,7 @@ export default function App() {
       </Route>
 
 
-       {/* <Route path="/panchayath" element={<BlockLayout />}>
+      {/* <Route path="/panchayath" element={<BlockLayout />}>
 
         <Route index element={<PanchayathHome />} />
         <Route path="panchaythprofile" element={<PanchayathProfile />} />
@@ -71,20 +72,26 @@ export default function App() {
       {/* <Route path="monitoring" element={<PanchayathMonitoring />} /> */}
       {/* <Route path="communication" element={<Communication />} /> */}
 
-      {/* </Route>   */} 
+      {/* </Route>   */}
 
       {/* <Route>
       <LandingPage/>
     </Route> */}
+      <Route path="/admin/login" element={<AdminLogin />} />
 
-    <Route path="/admin" element={<AdminDashboardLayout/>}>
-
-    <Route path="adminprofile" element={<Profile/>}/>
-    <Route path="admindashboard" element={<Dashboard/>}/>
-    <Route path="adminblockapproval" element={<BlockApproval/>}/>
-    <Route path="adminlistblock" element={<ListBlock/>}/>
-      
-    </Route>
+      <Route
+        path="/admin"
+        element={
+          <AdminProtectedRoute>
+            <AdminDashboardLayout />
+          </AdminProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="approvals" element={<BlockApprovals />} />
+        <Route path="blocks" element={<ListBlocks />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
 
     </Routes>
   )

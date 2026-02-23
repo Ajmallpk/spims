@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'apps.block',
     'apps.panchayath',
     "corsheaders",
-    "adminpanel"
+    "apps.adminpanel"
     
     
 ]

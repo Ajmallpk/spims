@@ -1,79 +1,59 @@
 import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout";
-import StatCard from "@/components/admin/StatCard";
-import Verification from "@/components/admin/Verification";
-import SystemHelth from "@/components/admin/SystemHelth";
+import StatsCard from "@/components/admin/StatsCard";
+import VerificationPanel from "@/components/admin/VerificationPanel";
+import SystemHealthPanel from "@/components/admin/SystemHealthPanel";
 import CriticalAlertsPanel from "@/components/admin/CriticalAlertsPanel";
+import { useEffect,useState } from "react";
+import axios from "@/api/axiosInstance";
 
-const statsData = [
-  {
-    title: "Total Blocks",
-    value: "152",
-    subtext: "+100% active",
-    trend: "+100%",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Total Panchayaths",
-    value: "941",
-    subtext: "Synced 2m ago",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-        <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Ward Members",
-    value: "15,932",
-    subtext: "98% verified",
-    trend: "+2.1%",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Total Citizens",
-    value: "3.2M",
-    subtext: "+12% this week",
-    trend: "+12%",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-        <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Total Complaints",
-    value: "8,420",
-    subtext: "450 open",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Pending Verifications",
-    value: "87",
-    subtext: "Action Required",
-    highlightColor: "blue",
-    trend: "⚑ NOW",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-[18px] h-[18px]">
-        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-];
+
 
 // ─── Dashboard Content (the actual page body) ────────────────────
 function DashboardContent() {
+  const [stats,setStats] = useState(null)
+  const [loading,setLoading] = useState(true)
+
+  useEffect(()=>{
+    const fetchDashboard = async ()=>{
+      try{
+        const res = await axios.get("/api/admin/dashboard/");
+        setStats(res.data)
+      }catch(err){
+        console.error("Dashboard API error:",err);
+      }finally{
+        setLoading(false)
+      }
+    }
+
+    fetchDashboard()
+  },[])
+  if (loading){
+    return <div className="text-white p-10">Loading Dashboard...</div>
+  }
+
+const statsData = [
+  {
+    title:"Total Blocks",
+    value:stats?.total_blocks || 0,
+    highlightColor : "blue"
+  },
+  {
+    title:"Active Blocks",
+    value:stats?.active_blocks || 0,
+    highlightColor : "blue"
+  },
+  {
+    title:"Suspended Blocks",
+    value:stats?.suspended_blocks || 0,
+    highlightColor : "blue"
+  },
+  {
+    title:"Pending Verifications",
+    value:stats?.pending_block_verifications || 0,
+    highlightColor : "blue"
+  }
+]
+
   return (
     <div className="flex flex-col gap-7">
 
@@ -102,7 +82,7 @@ function DashboardContent() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {statsData.map((stat) => (
-            <StatCard key={stat.title} {...stat} />
+            <StatsCard key={stat.title} {...stat} />
           ))}
         </div>
       </section>
@@ -113,8 +93,8 @@ function DashboardContent() {
           Operations & Intelligence
         </p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <Verification />
-          <SystemHelth />
+          <VerificationPanel />
+          <SystemHealthPanel />
           <CriticalAlertsPanel />
         </div>
       </section>
@@ -123,10 +103,7 @@ function DashboardContent() {
   );
 }
 
+// ─── Page Export (wraps content inside the layout) ───────────────
 export default function DashboardPage() {
-  return (
-    <AdminDashboardLayout defaultPage="dashboard">
-      <DashboardContent />
-    </AdminDashboardLayout>
-  );
+  return <DashboardContent />;
 }

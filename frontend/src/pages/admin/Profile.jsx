@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AdminDashboardLayout from "@/layouts/admin/Admindashboardlayout";
+import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout";
 import ProfileCard from "@/components/admin/ProfileCard";
 import AccountSecurityPanel from "@/components/admin/AccountSecurityPanel";
 
@@ -127,9 +127,5 @@ function ProfileContent() {
 
 // ─── Page Export ──────────────────────────────────────────────────────────────
 export default function ProfilePage() {
-  return (
-    <AdminDashboardLayout defaultPage="profile">
-      <ProfileContent />
-    </AdminDashboardLayout>
-  );
+  return <ProfileContent />
 }
