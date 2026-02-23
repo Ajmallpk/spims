@@ -1,0 +1,45 @@
+import axios from "axios";
+
+const axiosInstance = axios.create({
+  baseURL: "http://127.0.0.1:8000",
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      const refresh = localStorage.getItem("refresh");
+
+      if (refresh) {
+        try {
+          const response = await axios.post(
+            "http://127.0.0.1:8000/api/auth/token/refresh/",
+            { refresh }
+          );
+
+          localStorage.setItem("access", response.data.access);
+
+          error.config.headers.Authorization =
+            `Bearer ${response.data.access}`;
+
+          return axios(error.config);
+        } catch (refreshError) {
+          localStorage.clear();
+          window.location.href = "/";
+        }
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;
