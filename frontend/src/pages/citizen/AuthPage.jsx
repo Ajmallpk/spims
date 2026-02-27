@@ -16,32 +16,6 @@ const MapIcon = ({ size = 14 }) => <svg width={size} height={size} viewBox="0 0 
 const FileIcon = ({ size = 14 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>;
 const CheckIcon = ({ size = 12, color = "#94a3b8" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>;
 
-// ── Shared Input Field ─────────────────────────────────────────────
-// function InputField({ label, type = "text", placeholder, LeftIcon, rightSlot }) {
-//   return (
-//     <div className="mb-4">
-//       <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
-//       <div className="relative flex items-center">
-//         {LeftIcon && (
-//           <span className="absolute left-3 text-slate-400 flex items-center pointer-events-none">
-//             <LeftIcon />
-//           </span>
-//         )}
-//         <input
-//           type={type}
-//           placeholder={placeholder}
-//           className="w-full py-3 pr-10 border-2 border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 outline-none transition-all placeholder-slate-400 focus:border-blue-500 focus:bg-white"
-//           style={{ paddingLeft: LeftIcon ? "2.25rem" : "0.875rem" }}
-//         />
-//         {rightSlot && (
-//           <span className="absolute right-3 flex items-center">{rightSlot}</span>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-
 
 function InputField({
   label,
@@ -90,48 +64,9 @@ function EyeToggle({ show, onToggle }) {
   );
 }
 
-// function RoleSelect() {
-//   return (
-//     <div className="mb-4">
-//       <label className="block text-sm font-semibold text-slate-700 mb-1.5">Role</label>
-//       <div className="relative">
-//         <select
-//           className="w-full py-3 px-3.5 border-2 border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 outline-none cursor-pointer appearance-none focus:border-blue-500 focus:bg-white transition-all"
-//           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 0.75rem center" }}
-//         >
-//           <option>Citizen</option>
-//           <option>Ward Officer</option>
-//           <option>Panchayat Admin</option>
-//           <option>Inspector</option>
-//         </select>
-//       </div>
-//     </div>
-//   );
-// }
 
-// ── Login Form ─────────────────────────────────────────────────────
-// function LoginForm() {
-//   const [show, setShow] = useState(false);
-//   return (
-//     <div>
-//       <InputField label="Email Address" type="email" placeholder="you@example.com" LeftIcon={MailIcon} />
-//       <InputField label="Password" type={show ? "text" : "password"} placeholder="Enter your password" LeftIcon={LockIcon}
-//         rightSlot={<EyeToggle show={show} onToggle={() => setShow(p => !p)} />} />
-//       <div className="flex justify-between items-center -mt-2 mb-4">
-//         <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-//           <input type="checkbox" className="w-3.5 h-3.5 accent-blue-600" /> Remember me
-//         </label>
-//         <a href="#" className="text-sm font-semibold text-blue-600 hover:underline">Forgot password?</a>
-//       </div>
-//       {/* <RoleSelect /> */}
-//       <button className="w-full mt-1 py-3.5 rounded-xl text-sm font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5"
-//         style={{ background: "#111827", boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }}>
-//         Sign In
-//       </button>
-//     </div>
-//   );
-// }
 
+// login form 
 
 function LoginForm() {
   const [show, setShow] = useState(false);
@@ -209,149 +144,8 @@ function LoginForm() {
   );
 }
 
-// ── Sign Up Form ───────────────────────────────────────────────────
-// function SignUpForm() {
-//   const [showP, setShowP] = useState(false);
-//   const [showC, setShowC] = useState(false);
-//   return (
-//     <div>
-//       <InputField label="Full Name" placeholder="Enter your full name" LeftIcon={UserIcon} />
-//       <InputField label="Email Address" type="email" placeholder="you@example.com" LeftIcon={MailIcon} />
-//       <InputField label="Password" type={showP ? "text" : "password"} placeholder="Min. 8 characters" LeftIcon={LockIcon}
-//         rightSlot={<EyeToggle show={showP} onToggle={() => setShowP(p => !p)} />} />
-//       <InputField label="Confirm Password" type={showC ? "text" : "password"} placeholder="Re-enter your password" LeftIcon={LockIcon}
-//         rightSlot={<EyeToggle show={showC} onToggle={() => setShowC(p => !p)} />} />
-//       {/* <RoleSelect /> */}
-//       <div className="flex items-start gap-2 mb-4 text-sm text-slate-600">
-//         <input type="checkbox" className="w-3.5 h-3.5 accent-blue-600 mt-0.5 flex-shrink-0" />
-//         <span>I agree to the <a href="#" className="text-blue-600 font-semibold hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 font-semibold hover:underline">Privacy Policy</a></span>
-//       </div>
-//       <button className="w-full py-3.5 rounded-xl text-sm font-bold text-white border-none cursor-pointer transition-all hover:-translate-y-0.5"
-//         style={{ background: "#111827", boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }}>
-//         Register
-//       </button>
-//     </div>
-//   );
-// }
 
-
-// function CitizenSignUpForm() {
-//   const [showP, setShowP] = useState(false);
-//   const [showC, setShowC] = useState(false);
-
-//   const [username, setUsername] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [confirmPassword, setConfirmPassword] = useState("");
-
-//   const [message, setMessage] = useState("");
-//   const [error, setError] = useState("");
-
-//   const handleRegister = async () => {
-//     setError("");
-//     setMessage("");
-
-//     if (password !== confirmPassword) {
-//       setError("Passwords do not match");
-//       return;
-//     }
-
-//     try {
-//       await citizenapi.register({
-//         username,
-//         email,
-//         password,
-//         confirm_password: confirmPassword,
-//       });
-
-//       setMessage("OTP sent to your email");
-
-//     } catch (err) {
-//       setError(
-//         err.response?.data?.error ||
-//         "Registration failed"
-//       );
-//     }
-//   };
-
-//   try {
-//     const response = await axios.post(
-//       "http://127.0.0.1:8000/signup/citizen/",
-//       {
-//         username,
-//         email,
-//         password,
-//         confirm_password: confirmPassword,
-//       }
-//     );
-
-//     setMessage("OTP sent to your email");
-//   } catch (err) {
-//     setError(
-//       err.response?.data?.error ||
-//       "Registration failed"
-//     );
-//   }
-// };
-
-// return (
-//   <div>
-//     <InputField
-//       label="Full Name"
-//       placeholder="Enter your full name"
-//       LeftIcon={UserIcon}
-//       value={username}
-//       onChange={(e) => setUsername(e.target.value)}
-//     />
-
-//     <InputField
-//       label="Email Address"
-//       type="email"
-//       placeholder="you@example.com"
-//       LeftIcon={MailIcon}
-//       value={email}
-//       onChange={(e) => setEmail(e.target.value)}
-//     />
-
-//     <InputField
-//       label="Password"
-//       type={showP ? "text" : "password"}
-//       placeholder="Min. 8 characters"
-//       LeftIcon={LockIcon}
-//       value={password}
-//       onChange={(e) => setPassword(e.target.value)}
-//       rightSlot={<EyeToggle show={showP} onToggle={() => setShowP(p => !p)} />}
-//     />
-
-//     <InputField
-//       label="Confirm Password"
-//       type={showC ? "text" : "password"}
-//       placeholder="Re-enter your password"
-//       LeftIcon={LockIcon}
-//       value={confirmPassword}
-//       onChange={(e) => setConfirmPassword(e.target.value)}
-//       rightSlot={<EyeToggle show={showC} onToggle={() => setShowC(p => !p)} />}
-//     />
-
-//     {error && (
-//       <p className="text-red-500 text-sm mb-2">{error}</p>
-//     )}
-
-//     {message && (
-//       <p className="text-green-600 text-sm mb-2">{message}</p>
-//     )}
-
-//     <button
-//       onClick={handleRegister}
-//       className="w-full py-3.5 rounded-xl text-sm font-bold text-white"
-//       style={{ background: "#111827" }}
-//     >
-//       Register as Citizen
-//     </button>
-//   </div>
-// );
-// }
-
+// signup form 
 
 function CitizenSignUpForm({ onSuccess }) {
   const [showP, setShowP] = useState(false);
@@ -468,7 +262,6 @@ function CitizenSignUpForm({ onSuccess }) {
     }
   };
 
-  // ✅ RETURN MUST BE INSIDE THE COMPONENT
   return (
     <div>
       {!otpSent && (
