@@ -1,24 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo,useEffect } from "react";
 import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout";
 import BlockStatsCard from "@/components/admin/BlockStatsCard";
 import BlockFilterBar from "@/components/admin/BlockFilterBar";
 import BlockListTable from "@/components/admin/BlockListTable";
+import { adminapi } from "@/service/adminurls";
 
-// ─── Dummy Data ───────────────────────────────────────────────────────────────
-const BLOCKS_DATA = [
-  { id: 1, blockName: "Tirur Block", email: "tirur.admin@spims.gov.in", phone: "+91 94460 11001", district: "Malappuram", status: "Active", totalPanchayaths: 62, totalWards: 744, createdDate: "12 Jan 2024", avatarColor: "#3b82f6" },
-  { id: 2, blockName: "Tanur Block", email: "tanur.admin@spims.gov.in", phone: "+91 94460 11002", district: "Malappuram", status: "Active", totalPanchayaths: 44, totalWards: 528, createdDate: "14 Jan 2024", avatarColor: "#22c55e" },
-  { id: 3, blockName: "Ponnani Block", email: "ponnani.admin@spims.gov.in", phone: "+91 94460 11003", district: "Malappuram", status: "Pending", totalPanchayaths: 0, totalWards: 0, createdDate: "16 Feb 2026", avatarColor: "#f59e0b" },
-  { id: 4, blockName: "Perinthalmanna Block", email: "perinthalmanna.admin@spims.gov.in", phone: "+91 94460 11004", district: "Malappuram", status: "Active", totalPanchayaths: 55, totalWards: 660, createdDate: "20 Jan 2024", avatarColor: "#8b5cf6" },
-  { id: 5, blockName: "Kondotty Block", email: "kondotty.admin@spims.gov.in", phone: "+91 94460 11005", district: "Malappuram", status: "Suspended", totalPanchayaths: 38, totalWards: 456, createdDate: "25 Jan 2024", avatarColor: "#ef4444" },
-  { id: 6, blockName: "Manjeri Block", email: "manjeri.admin@spims.gov.in", phone: "+91 94460 11006", district: "Malappuram", status: "Active", totalPanchayaths: 71, totalWards: 852, createdDate: "02 Feb 2024", avatarColor: "#06b6d4" },
-  { id: 7, blockName: "Nilambur Block", email: "nilambur.admin@spims.gov.in", phone: "+91 94460 11007", district: "Malappuram", status: "Active", totalPanchayaths: 49, totalWards: 588, createdDate: "05 Feb 2024", avatarColor: "#f97316" },
-  { id: 8, blockName: "Eranad Block", email: "eranad.admin@spims.gov.in", phone: "+91 94460 11008", district: "Malappuram", status: "Pending", totalPanchayaths: 0, totalWards: 0, createdDate: "18 Feb 2026", avatarColor: "#a78bfa" },
-  { id: 9, blockName: "Tirur Municipality", email: "tirurm.admin@spims.gov.in", phone: "+91 94460 11009", district: "Malappuram", status: "Suspended", totalPanchayaths: 22, totalWards: 264, createdDate: "10 Mar 2024", avatarColor: "#fb7185" },
-  { id: 10, blockName: "Malappuram Block", email: "malappuram.admin@spims.gov.in", phone: "+91 94460 11010", district: "Malappuram", status: "Active", totalPanchayaths: 78, totalWards: 936, createdDate: "15 Mar 2024", avatarColor: "#34d399" },
-  { id: 11, blockName: "Tirurrangadi Block", email: "tirurrangadi.admin@spims.gov.in", phone: "+91 94460 11011", district: "Malappuram", status: "Active", totalPanchayaths: 33, totalWards: 396, createdDate: "20 Mar 2024", avatarColor: "#60a5fa" },
-  { id: 12, blockName: "Valanchery Block", email: "valanchery.admin@spims.gov.in", phone: "+91 94460 11012", district: "Malappuram", status: "Pending", totalPanchayaths: 0, totalWards: 0, createdDate: "20 Feb 2026", avatarColor: "#fbbf24" },
-];
+
 
 // ─── Stat icon helpers ─────────────────────────────────────────────────────
 const TotalIcon = () => (
@@ -46,24 +33,63 @@ const SuspendedIcon = () => (
 
 // ─── Page Content ─────────────────────────────────────────────────────────────
 function ListBlocksContent() {
-  const [blocks, setBlocks] = useState(BLOCKS_DATA);
+  const [blocks, setBlocks] = useState([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [toast, setToast] = useState(null);
+
+
+  useEffect(() => {
+    const fetchBlocks = async () => {
+      try {
+        const res = await adminapi.getBlocks();
+        setBlocks(res.data);
+      } catch (err) {
+        console.error("Block list error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlocks();
+  }, []);
 
   const showToast = (msg, type = "info") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleSuspend = (id) => {
-    setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, status: "Suspended" } : b)));
-    showToast("Block authority has been suspended.", "error");
+  const handleSuspend = async (id) => {
+    try {
+      await adminapi.suspendBlock(id);
+
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === id ? { ...b, status: "Suspended" } : b
+        )
+      );
+
+      showToast("Block authority has been suspended.", "error");
+    } catch (err) {
+      console.error("Suspend error:", err);
+    }
   };
 
-  const handleActivate = (id) => {
-    setBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, status: "Active" } : b)));
-    showToast("Block authority has been reactivated.", "success");
+  const handleActivate = async (id) => {
+    try {
+      await adminapi.activateBlock(id);
+
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === id ? { ...b, status: "Active" } : b
+        )
+      );
+
+      showToast("Block authority has been reactivated.", "success");
+    } catch (err) {
+      console.error("Activate error:", err);
+    }
   };
 
   const handleViewProfile = (block) => {
@@ -85,23 +111,27 @@ function ListBlocksContent() {
 
   // Filtered records
   const filteredBlocks = useMemo(() => {
-  return blocks
-    .filter((b) => b.status !== "Pending")
-    .filter((b) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        b.blockName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.district.toLowerCase().includes(searchTerm.toLowerCase());
+    return blocks
+      .filter((b) => b.status !== "Pending")
+      .filter((b) => {
+        const matchesSearch =
+          searchTerm === "" ||
+          b.blockName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          b.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          b.district.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus =
-        selectedStatus === "All" || b.status === selectedStatus;
+        const matchesStatus =
+          selectedStatus === "All" || b.status === selectedStatus;
 
-      return matchesSearch && matchesStatus;
-    });
-}, [blocks, searchTerm, selectedStatus]);
+        return matchesSearch && matchesStatus;
+      });
+  }, [blocks, searchTerm, selectedStatus]);
 
   const hasFilters = searchTerm !== "" || selectedStatus !== "All";
+
+  if (loading) {
+    return <div className="text-white p-10">Loading blocks...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-6 relative">
@@ -109,23 +139,21 @@ function ListBlocksContent() {
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-5 right-5 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl transition-all duration-300 ${
-            toast.type === "success"
-              ? "bg-emerald-950/95 border-emerald-500/30 text-emerald-300"
-              : toast.type === "error"
+          className={`fixed top-5 right-5 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl transition-all duration-300 ${toast.type === "success"
+            ? "bg-emerald-950/95 border-emerald-500/30 text-emerald-300"
+            : toast.type === "error"
               ? "bg-red-950/95 border-red-500/30 text-red-300"
               : "bg-slate-800/95 border-slate-600/50 text-slate-300"
-          }`}
+            }`}
           style={{ backdropFilter: "blur(12px)" }}
         >
           <div
-            className={`w-2 h-2 rounded-full flex-shrink-0 ${
-              toast.type === "success"
-                ? "bg-emerald-400"
-                : toast.type === "error"
+            className={`w-2 h-2 rounded-full flex-shrink-0 ${toast.type === "success"
+              ? "bg-emerald-400"
+              : toast.type === "error"
                 ? "bg-red-400"
                 : "bg-blue-400"
-            }`}
+              }`}
           />
           <span className="text-sm font-semibold font-mono">{toast.msg}</span>
         </div>

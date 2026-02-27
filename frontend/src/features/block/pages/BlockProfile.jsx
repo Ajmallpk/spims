@@ -102,7 +102,7 @@ export default function BlockProfile() {
   useEffect(() => {
   const fetchProfile = async () => {
     try {
-      const response = await axios.get("/api/block/me/");
+      const response = await axios.get("/block/me/");
 
       setFullName(response.data.username);
       setOfficialEmail(response.data.email);
@@ -225,7 +225,7 @@ export default function BlockProfile() {
                 onMouseEnter={(e) => (e.currentTarget.style.background = "#2563eb")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "#1a56db")}
               >
-                Save Changes
+                Save Change
               </button>
             </div>
           </div>

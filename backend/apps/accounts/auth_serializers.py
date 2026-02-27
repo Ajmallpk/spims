@@ -4,23 +4,34 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
 
-    username_field = User.EMAIL_FIELD   # 🔥 THIS IS THE REAL FIX
-
+    username_field = User.EMAIL_FIELD
     role = serializers.CharField(required=False)
 
     def validate(self, attrs):
 
         requested_role = attrs.get("role")
+
         data = super().validate(attrs)
         user = self.user
+        if user.is_locked():
+            raise serializers.ValidationError("Account temporarily locked")
 
-        if requested_role and requested_role != user.role:
-            raise serializers.ValidationError("Invalid role selected")
+        if requested_role:
+            if user.is_superuser:
+                if requested_role != "ADMIN":
+                    raise serializers.ValidationError("Invalid role selected")
+            else:
+                if requested_role != user.role:
+                    raise serializers.ValidationError("Invalid role selected")
 
-        data["role"] = user.role
+        if user.status in [User.Status.SUSPENDED, User.Status.REJECTED]:
+            raise serializers.ValidationError("Account is suspended or rejected")
+
+        data["role"] = "ADMIN" if user.is_superuser else user.role
         data["status"] = user.status
-        data["username"] = user.username
+        data["is_superuser"] = user.is_superuser
 
         return data

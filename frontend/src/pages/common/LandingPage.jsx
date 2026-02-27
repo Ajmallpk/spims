@@ -506,11 +506,13 @@ function Navbar() {
         ))}
       </ul>
       <div className="nav-actions">
+       
+        <a href="#roles"> <button className="role-btn" style={{ background: 'green' }}>Are you Authority?<Ico d={I.arrow} s={14} c="white" /></button> </a>
         <Link to="/login">
           <button className="btn-ghost">Sign In</button>
         </Link>
 
-        <Link to="/login">
+        <Link to="/signup/citizen">
           <button className="btn-fill">Register →</button>
         </Link>
       </div>
@@ -529,6 +531,10 @@ function Hero() {
         <div className="hero-btns">
           <button className="hbtn-p">Login to Portal <Ico d={I.arrow} s={16} c="white" /></button>
           <button className="hbtn-s">Register as Citizen</button>
+        </div>
+        <div>
+
+      
         </div>
         <div className="hero-trust">
           {[[I.verify, "Government Certified", "var(--green-light)", "var(--green)"], [I.lock, "End-to-End Encrypted", "var(--blue-light)", "var(--blue)"], [I.clock, "24/7 Available", "#fff8e6", "var(--gold)"]].map(([ic, lb, bg, co]) => (

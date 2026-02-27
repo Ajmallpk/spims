@@ -7,8 +7,6 @@ import { useEffect,useState } from "react";
 import axios from "@/api/axiosInstance";
 
 
-
-// ─── Dashboard Content (the actual page body) ────────────────────
 function DashboardContent() {
   const [stats,setStats] = useState(null)
   const [loading,setLoading] = useState(true)

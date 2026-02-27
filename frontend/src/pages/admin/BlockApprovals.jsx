@@ -1,9 +1,9 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout";
 import BlockApprovalTable from "@/components/admin/BlockApprovalTable";
 import BlockApprovalDetailsModal from "@/components/admin/BlockApprovalDetailsModal";
 import RejectReasonModal from "@/components/admin/RejectReasonModal";
-import axios from "@/api/axiosInstance";
+import { adminapi } from "@/service/adminurls";
 
 
 
@@ -25,8 +25,8 @@ const tabStyle = {
 
 // ─── Page Content ────────────────────────────────────────────────────────────
 function BlockApprovalsContent() {
-  const [records,setRecords] = useState([])
-  const [loading,setLoading] = useState(true)
+  const [records, setRecords] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -36,31 +36,57 @@ function BlockApprovalsContent() {
   const [toast, setToast] = useState(null);
 
 
-  useEffect(()=>{
-    const fetchVerifications = async()=>{
-      try{
-        const res = await getblockverification()
-        setRecords()
-      }catch(err){
-        console.error("Block Verification error:",err)
-      }finally{
+  useEffect(() => {
+    const fetchVerifications = async () => {
+      try {
+        const res = await adminapi.getBlockVerifications()
+        setRecords(
+          res.data.map((item) => ({
+            id: item.id,
+            blockName: item.block_name,
+            name: item.full_name,
+            email: item.email,
+            phone: item.phone,
+            district:item.district,
+            submittedDate: new Date(item.submitted_at).toLocaleDateString("en-IN"),
+            status:
+              item.status === "ACTIVE"
+                ? "Approved"
+                : item.status === "SUSPENDED"
+                  ? "Rejected"
+                  : "Pending",
+          }))
+        );
+      } catch (error) {
+        console.error("Block Verification error:", error)
+      } finally {
         setLoading(false)
       }
     }
     fetchVerifications()
-  },[])
+  }, [])
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleApprove = (id) => {
-    setRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: "Approved" } : r))
-    );
-    showToast("Block authority has been approved successfully.", "success");
-  };
+  const handleApprove = async (id) => {
+    try {
+      await adminapi.handleapprove(id)
+      setRecords((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, status: "Approved" }
+            : item
+        )
+      )
+      showToast("Block Approved successfully.", "success")
+    } catch (err) {
+      console.error("Approve error:", err);
+      showToast("Failed to approve block.", "error")
+    }
+  }
 
   const handleRejectOpen = (block) => {
     setRejectTarget(block);
@@ -68,13 +94,27 @@ function BlockApprovalsContent() {
     setShowRejectModal(true);
   };
 
-  const handleRejectConfirm = (id, reason) => {
-    setRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: "Rejected", rejectReason: reason } : r))
-    );
-    setShowRejectModal(false);
-    setRejectTarget(null);
-    showToast("Block authority request has been rejected.", "error");
+  const handleRejectConfirm = async (id, reason) => {
+    try {
+      await adminapi.handlereject(id,reason);
+
+      setRecords((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? { ...r, status: "Rejected", rejectReason: reason }
+            : r
+        )
+      );
+
+      showToast("Block authority request has been rejected.", "error");
+
+    } catch (err) {
+      console.error("Reject error:", err);
+      showToast("Failed to reject block.", "error");
+    } finally {
+      setShowRejectModal(false);
+      setRejectTarget(null);
+    }
   };
 
   const handleView = (block) => {
@@ -92,7 +132,7 @@ function BlockApprovalsContent() {
       r.email.toLowerCase().includes(search.toLowerCase())
     );
 
-  if(loading){
+  if (loading) {
     return <div className="text-white p-10">Loading...</div>
   }
 
@@ -102,11 +142,10 @@ function BlockApprovalsContent() {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl transition-all duration-300 ${
-            toast.type === "success"
-              ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-300"
-              : "bg-red-950/90 border-red-500/30 text-red-300"
-          }`}
+          className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl transition-all duration-300 ${toast.type === "success"
+            ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-300"
+            : "bg-red-950/90 border-red-500/30 text-red-300"
+            }`}
           style={{ backdropFilter: "blur(12px)" }}
         >
           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${toast.type === "success" ? "bg-emerald-400" : "bg-red-400"}`} />
@@ -160,11 +199,10 @@ function BlockApprovalsContent() {
                 <button
                   key={tab}
                   onClick={() => setFilter(tab)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border font-mono transition-all duration-150 ${
-                    isActive
-                      ? ts.active
-                      : "text-slate-600 bg-transparent border-transparent hover:text-slate-400 hover:border-slate-700/50"
-                  }`}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border font-mono transition-all duration-150 ${isActive
+                    ? ts.active
+                    : "text-slate-600 bg-transparent border-transparent hover:text-slate-400 hover:border-slate-700/50"
+                    }`}
                 >
                   {tab}
                   <span className={`px-1.5 py-0.5 rounded-md text-xs leading-none ${isActive ? ts.count : "text-slate-700"}`}>

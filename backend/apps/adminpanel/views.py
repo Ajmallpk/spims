@@ -1,148 +1,156 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from .permissions import IsSuperAdmin
-from apps.block.models import BlockVerification
+from django.db.models import Count
+from apps.panchayath.models import PanchayathVerification
+from rest_framework.permissions import IsAdminUser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from apps.ward.models import WardVerification
 from django.contrib.auth import get_user_model
-from apps.accounts.models import User
-from apps.block.models import BlockVerification
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import AdminLoginSerializer
 
-# Create your views here.
-
-
-
-class AdminLoginView(TokenObtainPairView):
-    serializer_class = AdminLoginSerializer
-
-
-
-class BlockVerificationListView(APIView):
-    permission_classes = [IsAuthenticated,IsSuperAdmin]
-    
-    def get(self,request):
-        verifications = BlockVerification.objects.all()
-        
-        data = []
-        
-        for item in verifications:
-            status = item.user.status
-            
-            data.append({
-                "id":item.id,
-                "block_name":item.block_name,
-                "email":item.user.email,
-                "full_name":item.full_name,
-                "submitted_at":item.submitted_at,
-                "status":status,
-            })
-            
-        return Response(data)
-    
-    
-class BlockVerificationDetailView(APIView):
-    permission_classes = [IsAuthenticated,IsSuperAdmin]
-    
-    def get(self,request,pk):
-        
-        try:
-            verification = BlockVerification.objects.get(id=pk)
-        except BlockVerification.DoesNotExist:
-            return Response(
-                {"error":"Not found"},
-                status=404
-            )
-            
-        return Response({
-            "id":verification.id,
-            "email":verification.user.email,
-            "full_name":verification.full_name,
-            "phone_number":verification.phone_number,
-            "block_name":verification.block_name,
-            "district":verification.district,
-            "aadhaar_image":verification.aadhaar_image.url,
-            "appointment_letter":verification.appointment_letter.url,
-            "live_selfie":verification.live_selfie.url,
-            "submitted_at":verification.submitted_at,
-            "user_status":verification.user.status,
-        })
-
-
-class BlockApproveView(APIView):
-    permission_classes = [IsAuthenticated,IsSuperAdmin]
-    
-    def post(self,request,pk):
-        try:
-            verification = BlockVerification.objects.get(id=pk)
-        except BlockVerification.DoesNotExist:
-            return Response(
-                {"error":"Not found"},
-                status=404
-            )
-        user = verification.user
-        
-        if user.status == "ACTIVE":
-            return Response({"message":"Block already approved"})
-        
-        user.status = "ACTIVE"
-        user.is_verified = True
-        user.save()
-        
-        return Response({"message":"Block approved successfully"})
-    
-    
-    
-class BlockRejectView(APIView):
-    
-    permission_classes = [IsAuthenticated,IsSuperAdmin]
-    
-    def post(self,request,pk):
-        reason = request.data.get("reason")
-        
-        if not reason:
-            return Response({"error":"Reject reason required"},status=400)
-        try:
-            verification = BlockVerification.objects.get(id=pk)
-        except BlockVerification.DoesNotExist:
-            return Response({"error":"Not found"},status=404)
-        
-        user = verification.user
-        user.status = "SUSPENDED"
-        user.is_verified = False
-        user.save()
-        
-        return Response({"message":"Block Rejected Successfully"})
-        
-    
-class AdminMeView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdmin]
-
-    def get(self, request):
-        return Response({
-            "email": request.user.email,
-            "username": request.user.username,
-            "is_superuser": request.user.is_superuser,
-            "role": "SYSTEM_ADMIN"
-        })
-        
+User = get_user_model()
 
 
 class AdminDashboardView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdmin]
+    permission_classes = [IsSuperAdmin]
 
     def get(self, request):
 
-        total_blocks = User.objects.filter(role="BLOCK").count()
-        active_blocks = User.objects.filter(role="BLOCK", status="ACTIVE").count()
-        suspended_blocks = User.objects.filter(role="BLOCK", status="SUSPENDED").count()
-        pending_verifications = User.objects.filter(role="BLOCK", status="PENDING").count()
+        total_panchayath = User.objects.filter(role="PANCHAYATH").count()
+        active_panchayath = User.objects.filter(role="PANCHAYATH", status="ACTIVE").count()
+        pending_panchayath = User.objects.filter(role="PANCHAYATH", status="PENDING").count()
+        suspended_panchayath = User.objects.filter(role="PANCHAYATH", status="SUSPENDED").count()
+
+        total_wards = User.objects.filter(role="WARD").count()
 
         return Response({
-            "total_blocks": total_blocks,
-            "active_blocks": active_blocks,
-            "suspended_blocks": suspended_blocks,
-            "pending_block_verifications": pending_verifications,
-            "message": "Admin dashboard loaded successfully"
+            "total_panchayath": total_panchayath,
+            "active_panchayath": active_panchayath,
+            "pending_panchayath": pending_panchayath,
+            "suspended_panchayath": suspended_panchayath,
+            "total_wards": total_wards,
         })
+        
+
+
+
+class PanchayathVerificationListView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+
+        verifications = PanchayathVerification.objects.all()
+        data = []
+
+        for v in verifications:
+            data.append({
+                "id": v.id,
+                "panchayath_name": v.panchayath_name,
+                "username": v.user.username,
+                "email": v.user.email,
+                "phone": v.phone,
+                "district": v.district,
+                "status": v.status,
+                "submitted_at": v.submitted_at,
+            })
+
+        return Response(data)
+    
+    
+    
+    
+class PanchayathVerificationDetailView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request, pk):
+        try:
+            v = PanchayathVerification.objects.get(pk=pk)
+        except PanchayathVerification.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        return Response({
+            "id": v.id,
+            "panchayath_name": v.panchayath_name,
+            "username": v.user.username,
+            "email": v.user.email,
+            "phone": v.phone,
+            "district": v.district,
+            "status": v.status,
+            "reject_reason": v.reject_reason,
+            "aadhaar_image": v.aadhaar_image.url if v.aadhaar_image else None,
+            "selfie_image": v.selfie_image.url if v.selfie_image else None,
+            "submitted_at": v.submitted_at,
+        })
+
+
+
+class ApprovePanchayathView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def patch(self, request, pk):
+
+        try:
+            v = PanchayathVerification.objects.get(pk=pk)
+        except PanchayathVerification.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        v.status = "APPROVED"
+        v.save()
+        v.user.status = User.Status.ACTIVE
+        v.user.save()
+        return Response({"message": "Approved successfully"})
+
+
+
+class RejectPanchayathView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def patch(self, request, pk):
+
+        reason = request.data.get("reason")
+        try:
+            v = PanchayathVerification.objects.get(pk=pk)
+        except PanchayathVerification.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        v.status = "REJECTED"
+        v.reject_reason = reason
+        v.save()
+
+        v.user.status = User.Status.SUSPENDED
+        v.user.save()
+
+        return Response({"message": "Rejected successfully"})
+
+
+
+                             
+class SuspendPanchayathView(APIView):
+    permission_classes = [IsSuperAdmin]
+    
+    def post(self,request,user_id):
+        try:
+            user = User.objects.get(id=user_id,role=User.Role.PANCHAYATH)
+        except User.DoesNotExist:
+            return Response({"error":"Panchayath not found"},status=404)
+        
+        user.status = User.Status.SUSPENDED
+        user.save()
+        return Response({"message":"Panchayath Suspended"})
+    
+    
+class ActivatePanchayathView(APIView):
+    permission_classes = [IsSuperAdmin]
+    
+    def post(self,request,user_id):
+        try:
+            user = User.objects.get(id=user_id,role=User.Role.PANCHAYATH)
+        except User.DoesNotExist:
+            return Response({"error":"Panchayath not found"},status=404)
+        user.status = User.Status.ACTIVE
+        user.save()
+        return Response({"message":"Panchayath activated"})
+
+

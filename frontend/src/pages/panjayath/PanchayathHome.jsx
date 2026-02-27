@@ -1,9 +1,21 @@
-import { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
-import StatCard from '@/components/panjayath/StatCard'
+import useScrollReveal from "@/components/common/useScrollReveal";
+import StatCard from "@/components/common/StatCard";
+
+
+import {
+  Users,
+  Clock,
+  AlertTriangle,
+  TrendingUp
+} from "lucide-react";
+
+const revealStyle = {
+  opacity: 0,
+  transform: "translateY(24px)",
+  transition: "opacity 0.7s ease, transform 0.7s ease",
+};
 
 export default function PanchayathHome() {
-  const { profile } = useSelector((state) => state.panchayath);
 
   const heroRef = useScrollReveal(0);
   const gridRef = useScrollReveal(100);
@@ -18,21 +30,16 @@ export default function PanchayathHome() {
         .font-body    { font-family: 'Outfit', sans-serif !important; }
       `}</style>
 
-      {/* Page Wrapper */}
       <div className="bg-[#f8faff] text-[#475569] font-body min-h-screen">
-        <div
-          className="max-w-[1140px] mx-auto py-24 px-16 max-md:py-16 max-md:px-8 space-y-16"
-        >
+        <div className="max-w-[1140px] mx-auto py-24 px-16 max-md:py-16 max-md:px-8 space-y-16">
 
-          {/* ── Hero Section */}
+          {/* ── Hero Section ───────────────────────────── */}
           <div ref={heroRef} style={revealStyle}>
 
-            {/* Eyebrow */}
             <p className="text-[0.68rem] font-bold tracking-[.14em] uppercase text-[#1a56db] mb-5">
               Administrative Dashboard
             </p>
 
-            {/* H1 */}
             <h1
               className="font-black leading-[1.06] tracking-[-0.02em] text-[#0f172a] mb-5"
               style={{
@@ -42,36 +49,52 @@ export default function PanchayathHome() {
             >
               Welcome,{" "}
               <span className="text-[#1a56db]">
-                {profile?.fullName || "Panchayath Authority"}
+                Panchayath Authority
               </span>
             </h1>
 
-            {/* Body */}
             <p className="text-[0.9rem] leading-[1.75] text-[#475569] max-w-2xl">
-              This is your administrative overview dashboard.
-              Monitor approvals, escalations, and Panchayath performance.
+              Monitor ward activities, review verification requests, and manage
+              governance operations within your Panchayath jurisdiction.
             </p>
           </div>
 
-          {/* ── Stats Grid */}
-          <div
-            ref={gridRef}
-            style={revealStyle}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            <StatCard title="Total Panchayaths" value="18"  delay={0}   />
-            <StatCard title="Pending Approvals" value="6"   delay={80}  />
-            <StatCard title="Escalated Issues"  value="12"  delay={160} />
-            <StatCard title="Resolution Rate"   value="82%" delay={240} />
-          </div>
+          {/* ── Stats Grid ───────────────────────────── */}
+          <StatCard
+            title="Total Wards"
+            value="12"
+            icon={Users}
+            color="#1a56db"
+          />
 
-          {/* ── Gradient Impact Card */}
+          <StatCard
+            title="Pending Approvals"
+            value="4"
+            icon={Clock}
+            color="#d97706"
+          />
+
+          <StatCard
+            title="Escalated Issues"
+            value="9"
+            icon={AlertTriangle}
+            color="#dc2626"
+          />
+
+          <StatCard
+            title="Resolution Rate"
+            value="74%"
+            icon={TrendingUp}
+            color="#059669"
+          />
+
+          {/* ── Gradient Impact Card ───────────────────── */}
           <div
             ref={cardRef}
             style={{ ...revealStyle, position: "relative" }}
             className="bg-gradient-to-br from-[#1a56db] to-[#1e40af] text-white rounded-2xl p-8 overflow-hidden"
           >
-            {/* Orb 1 */}
+            {/* Decorative Orbs */}
             <div
               style={{
                 position: "absolute",
@@ -84,7 +107,6 @@ export default function PanchayathHome() {
                 right: "-50px",
               }}
             />
-            {/* Orb 2 */}
             <div
               style={{
                 position: "absolute",
@@ -98,15 +120,11 @@ export default function PanchayathHome() {
               }}
             />
 
-            {/* Content */}
             <div className="relative z-10">
-
-              {/* Eyebrow */}
               <p className="text-[0.68rem] font-bold tracking-[.14em] uppercase text-white/60 mb-4">
                 Monthly Summary
               </p>
 
-              {/* Section Heading */}
               <h2
                 className="font-black leading-tight text-white mb-4"
                 style={{
@@ -114,13 +132,13 @@ export default function PanchayathHome() {
                   fontSize: "clamp(2rem, 3vw, 2.8rem)",
                 }}
               >
-                Governance Performance
+                Panchayath Governance Performance
               </h2>
 
-              {/* Body */}
               <p className="text-[0.9rem] leading-[1.75] text-white/80 max-w-lg">
-                Your administrative efficiency across Panchayaths
-                is performing at a strong level this month.
+                Ward-level governance activities are progressing steadily.
+                Continue monitoring escalations and ensure timely resolution
+                across your Panchayath.
               </p>
             </div>
           </div>
@@ -130,5 +148,3 @@ export default function PanchayathHome() {
     </>
   );
 }
-
-

@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {signupUser,verifyOtp,resendOtp,loginUser} from "@/service/auth"
+import { signupUser, verifyOtp, resendOtp, loginUser } from "@/service/auth"
 import { replace, useNavigate } from "react-router-dom"
 import {
   Card,
@@ -30,26 +30,43 @@ import {
 
 
 const roles = [
-  { value: "CITIZEN", label: "Citizen" },
   { value: "WARD", label: "Ward Member" },
   { value: "PANCHAYATH", label: "Panchayath Authority" },
-  { value: "BLOCK", label: "Block Authority" },
 ]
 
 export function AuthForm() {
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const [mode, setMode] = useState("login")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
+  const [remainingResends, setRemainingResends] = useState(3)
+  const [timer, setTimer] = useState(60)
+  const [canResend, setCanResend] = useState(false)
+
+  useEffect(() => {
+    let interval
+
+    if (otpSent && timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1)
+      }, 1000)
+    }
+
+    if (timer === 0) {
+      setCanResend(true)
+    }
+
+    return () => clearInterval(interval)
+  }, [otpSent, timer])
 
   // Login state
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
-    role: "CITIZEN",
+    role: "WARD",
   })
 
   // Signup state
@@ -58,7 +75,7 @@ export function AuthForm() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "CITIZEN",
+    role: "WARD",
   })
 
   // OTP state
@@ -91,7 +108,7 @@ export function AuthForm() {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupData.email)) {
       newErrors.email = "Enter a valid email address"
     }
-   
+
     if (!signupData.password) {
       newErrors.password = "Password is required"
     } else if (signupData.password.length < 8) {
@@ -110,133 +127,137 @@ export function AuthForm() {
   //////////////////////////login///////////////////////
 
   const handleLogin = async (e) => {
-  e.preventDefault()
-  if (!validateLogin()) return
+    e.preventDefault()
+    if (!validateLogin()) return
 
-  setIsSubmitting(true)
+    setIsSubmitting(true)
 
-  try {
-    const response = await loginUser({
-      email: loginData.email,
-      password: loginData.password,
-      role: loginData.role
-    })
+    try {
+      const response = await loginUser({
+        email: loginData.email,
+        password: loginData.password,
+        role: loginData.role
+      })
 
-    // Save tokens
-    localStorage.setItem("access", response.data.access)
-    localStorage.setItem("refresh", response.data.refresh)
-    localStorage.setItem("role", response.data.role)
-    localStorage.setItem("status", response.data.status)
-    localStorage.setItem("is_verified", response.data.is_verified)
+      // Save tokens
+      localStorage.setItem("access", response.data.access)
+      localStorage.setItem("refresh", response.data.refresh)
+      localStorage.setItem("role", response.data.role)
+      localStorage.setItem("status", response.data.status)
+      localStorage.setItem("is_verified", response.data.is_verified)
 
-    // Check if ACTIVE
-    const role = response.data.role 
+      // Check if ACTIVE
+      const role = response.data.role
+      const isVerified = String(response.data.is_verified);
 
-    // if (role==="CITIZEN"){
-    //   navigate("/citizen",{ replace: true })
-    // }else if(role==="WARD"){
-    //   navigate("/ward",{replace:true})
-    // }else if(role==="PANCHAYATH"){
-    //   navigate("/panchayath",{replace:true})
-    // }else if(role=="BLOCK"){
-    //   navigate("/block",{replace:true})
-    // }
+      // if (role==="CITIZEN"){
+      //   navigate("/citizen",{ replace: true })
+      // }else if(role==="WARD"){
+      //   navigate("/ward",{replace:true})
+      // }else if(role==="PANCHAYATH"){
+      //   navigate("/panchayath",{replace:true})
+      // }else if(role=="BLOCK"){
+      //   navigate("/block",{replace:true})
+      // }
 
-  if (response.data.status === "SUSPENDED") {
-  alert("Your account is suspended.")
-  return
-}
+      if (response.data.status === "SUSPENDED") {
+        alert("Your account is suspended.")
+        return
+      }
 
-if (role === "BLOCK") {
+      if (role === "PANCHAYATH") {
+        if (isVerified === "true") {
+          navigate("/panchayath")
+        } else {
+          navigate("/panchayath/profile")
+        }
+      } else {
+        alert("this modules not built yet")
+      }
 
-  const isVerified = String(response.data.is_verified);
 
-  if (isVerified === "true") {
-    navigate("/block", { replace: true });
-  } else {
-    navigate("/block/profile", { replace: true });
+    } catch (error) {
+      console.log(error)
+      alert(error.response?.data?.detail || "Login failed")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-}else{
-  alert("this modules not built yet")
-}
-    
+  /////////////////////////////////////////////////
 
-  } catch (error) {
-    console.log(error)
-    alert("Invalid credentials")
-  } finally {
-    setIsSubmitting(false)
-  }
-}
-
-/////////////////////////////////////////////////
-
-//////////////////////////sigup///////////////////////
+  //////////////////////////sigup///////////////////////
 
   const handleSignup = async (e) => {
-  e.preventDefault()
-  if (!validateSignup()) return
+    e.preventDefault()
+    if (!validateSignup()) return
 
-  setIsSubmitting(true)
+    setIsSubmitting(true)
 
-  try {
-    
-    const response = await signupUser({
-      username: signupData.fullName,
-      email: signupData.email,
-      password: signupData.password,
-      confirm_password: signupData.confirmPassword,
-      role: signupData.role,
-    })
+    try {
 
-    setOtpSent(true)
+      const response = await signupUser({
+        username: signupData.fullName,
+        email: signupData.email,
+        password: signupData.password,
+        confirm_password: signupData.confirmPassword,
+        role: signupData.role,
+      })
 
-  } catch (error) {
-    alert(error.response?.data.error || "signup failed")
-  } finally {
-    setIsSubmitting(false)
+      setOtpSent(true)
+
+    } catch (error) {
+      alert(error.response?.data.error || "signup failed")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-}
 
-////////////////////////////////
+  ////////////////////////////////
 
   const handleVerifyOtp = async (e) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  if (isSubmitting) return   // PREVENT DOUBLE CALL
+    if (isSubmitting) return   // PREVENT DOUBLE CALL
 
-  if (otp.length !== 6) {
-    setErrors({ otp: "Enter a valid 6-digit OTP" })
-    return
+    if (otp.length !== 6) {
+      setErrors({ otp: "Enter a valid 6-digit OTP" })
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await verifyOtp({
+        email: signupData.email,
+        otp: otp,
+      })
+
+      setOtpVerified(true)
+    } catch (error) {
+      alert(error.response?.data?.error || "Invalid OTP")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-
-  setIsSubmitting(true)
-
-  try {
-    await verifyOtp({
-      email: signupData.email,
-      otp: otp,
-    })
-
-    setOtpVerified(true)
-  } catch (error) {
-    alert(error.response?.data?.error || "Invalid OTP")
-  } finally {
-    setIsSubmitting(false)
-  }
-}
 
   const handleResendOtp = async () => {
+    if (!canResend || isResending) return
+
     setIsResending(true)
-    try{
-      await resendOtp({
-        email:signupData.email,
+
+    try {
+      const response = await resendOtp({
+        email: signupData.email,
       })
-      alert("OTP resend successfully")
-    }catch(error){
+
+      setRemainingResends(response.data.remaining)
+      setTimer(60)
+      setCanResend(false)
+
+    } catch (error) {
       alert(error.response?.data?.error || "Resend Failed")
-    }finally{
+    } finally {
       setIsResending(false)
     }
   }
@@ -256,24 +277,31 @@ if (role === "BLOCK") {
     return (
       <Card className="w-full max-w-md border-border shadow-md">
         <CardContent className="flex flex-col items-center py-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
-            <CheckCircle2 className="h-8 w-8 text-accent" />
-          </div>
-          <h3 className="mt-6 text-xl font-bold text-foreground">
-            Registration Successful
+          <CheckCircle2 className="h-12 w-12 text-green-500" />
+
+          <h3 className="mt-6 text-xl font-bold">
+            Registration Submitted
           </h3>
-          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Your account has been verified and created successfully.
-            You can now log in to the SPIMS portal.
+
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            Your {signupData.role === "WARD" ? "Ward" : "Panchayath"} account
+            has been created successfully.
+            <br />
+            It is currently <strong>pending admin approval</strong>.
           </p>
+
+          <p className="mt-2 text-xs text-muted-foreground">
+            You will be able to login once approved by the system administrator.
+          </p>
+
           <Button
-            className="mt-8 w-full max-w-xs gap-2 text-sm font-semibold"
+            className="mt-8 w-full max-w-xs"
             onClick={() => {
               switchMode("login")
               setOtpVerified(false)
             }}
           >
-            Proceed to Login
+            Go to Login
           </Button>
         </CardContent>
       </Card>
@@ -302,22 +330,20 @@ if (role === "BLOCK") {
           <button
             type="button"
             onClick={() => switchMode("login")}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-              mode === "login"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${mode === "login"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+              }`}
           >
             Login
           </button>
           <button
             type="button"
             onClick={() => switchMode("signup")}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-              mode === "signup"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${mode === "signup"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+              }`}
           >
             Sign Up
           </button>
@@ -658,59 +684,81 @@ if (role === "BLOCK") {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    disabled={isResending}
-                    className="text-xs font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
-                  >
-                    {isResending ? "Resending..." : "Resend OTP"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOtpSent(false)
-                      setOtp("")
-                    }}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    <ArrowLeft className="h-3 w-3" />
-                    Edit details
-                  </button>
+                    <div className="flex flex-col gap-1 text-xs">
+
+                      {remainingResends > 0 ? (
+                        canResend ? (
+                          <button
+                            type="button"
+                            onClick={handleResendOtp}
+                            disabled={isResending}
+                            className="font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
+                          >
+                            {isResending ? "Resending..." : "Resend OTP"}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            Resend OTP in {timer}s
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-destructive">
+                          Resend limit reached
+                        </span>
+                      )}
+
+                      {remainingResends > 0 && (
+                        <span className="text-muted-foreground">
+                          Attempts left: {remainingResends}
+                        </span>
+                      )}
+
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtpSent(false)
+                        setOtp("")
+                      }}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                      Edit details
+                    </button>
+                  </div>
                 </div>
-              </div>
             )}
 
-            <Button
-              type="submit"
-              className="mt-2 w-full gap-2 text-sm font-semibold"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {otpSent ? "Verifying..." : "Sending OTP..."}
-                </>
-              ) : otpSent ? (
-                "Verify OTP"
-              ) : (
-                "Register"
-              )}
-            </Button>
+                <Button
+                  type="submit"
+                  className="mt-2 w-full gap-2 text-sm font-semibold"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {otpSent ? "Verifying..." : "Sending OTP..."}
+                    </>
+                  ) : otpSent ? (
+                    "Verify OTP"
+                  ) : (
+                    "Register"
+                  )}
+                </Button>
 
-            <p className="text-center text-xs text-muted-foreground">
-              {"Already have an account? "}
-              <button
-                type="button"
-                onClick={() => switchMode("login")}
-                className="font-semibold text-primary underline-offset-4 hover:underline"
-              >
-                Login
-              </button>
-            </p>
-          </form>
-        )}
-      </CardContent>
+                <p className="text-center text-xs text-muted-foreground">
+                  {"Already have an account? "}
+                  <button
+                    type="button"
+                    onClick={() => switchMode("login")}
+                    className="font-semibold text-primary underline-offset-4 hover:underline"
+                  >
+                    Login
+                  </button>
+                </p>
+              </form>
+            )}
+          </CardContent>
     </Card>
   )
 }

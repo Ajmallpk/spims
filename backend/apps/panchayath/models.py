@@ -1,43 +1,35 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 
-# Create your models here.
+User = get_user_model()
+
+
 class PanchayathVerification(models.Model):
-
+    STATUS_CHOICES =(
+        ("PENDING","Pending"),
+        ("APPROVED","Approved"),
+        ("REJECTED","Rejected")
+    )
+    
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name="panchayath_verification"
     )
-
-    full_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15)
-
-    aadhaar_image = models.ImageField(
-        upload_to="panchayath_verification/aadhaar_images/"
-    )
-
-    appointment_letter = models.FileField(
-        upload_to="panchayath_verification/appointment_letters/"
-    )
     
-    live_selfie = models.ImageField(
-        upload_to="panchayath_verification/selfies/"
-    )
-
-    approved = models.BooleanField(default=False)
-    rejected = models.BooleanField(default=False)
-    rejection_reason = models.TextField(null=True, blank=True)
-
-    reviewed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="reviewed_panchayaths"
-    )
-
-    submitted_at = models.DateTimeField(auto_now_add=True)
-
+    panchayath_name = models.CharField(max_length=50)
+    phone = models.CharField(max_length=50)
+    district = models.CharField(max_length=100)
+    
+    aadhaar_image = models.ImageField(upload_to="panchayath/aadhaar/")
+    selfie_image = models.ImageField(upload_to="panchayath/selfie/")
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default="PENDING")
+    reject_reason = models.TextField(blank=True,null=True)
+    
     def __str__(self):
-        return f"Panchayath Verification - {self.user.email}"
+        return f"{self.panchayath_name}-{self.status}"
+    
+    
+    
+    
+    

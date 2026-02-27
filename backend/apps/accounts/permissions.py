@@ -1,27 +1,55 @@
 from rest_framework.permissions import BasePermission
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
-
-
-"""This file defines custom role-based permission classes.
-    It ensures that only authenticated users with specific roles (Citizen, Ward, Panchayath, Block) and ACTIVE status can access certain APIs """
 
 class IsCitizen(BasePermission):
-    def has_permission(self,request,view):
-        return request.user.is_authenticated and request.user.role == "CITIZEN"
-    
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and
+            request.user.role == User.Role.CITIZEN and
+            request.user.status == User.Status.ACTIVE
+        )
+
+
 class IsWard(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "WARD"
-    
-class IsPanchayath(BasePermission):
-    def has_permission(self,request,view):
-        return request.user.is_authenticated and request.user.role == "PANCHAYATH"
-    
-class IsBlock(BasePermission):
+        return (
+            request.user.is_authenticated and
+            request.user.role == User.Role.WARD
+        )
+
+
+class IsActiveWard(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "BLOCK"
-    
+        return (
+            request.user.is_authenticated and
+            request.user.role == User.Role.WARD and
+            request.user.status == User.Status.ACTIVE
+        )
+
+
+class IsPanchayath(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and
+            request.user.role == User.Role.PANCHAYATH
+        )
+
+
+class IsActivePanchayath(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and
+            request.user.role == User.Role.PANCHAYATH and
+            request.user.status == User.Status.ACTIVE
+        )
+
+
 class IsActiveUser(BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.status == "ACTIVE"
+        return (
+            request.user.is_authenticated and
+            request.user.status == User.Status.ACTIVE
+        )

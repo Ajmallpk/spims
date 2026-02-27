@@ -21,10 +21,13 @@ import PanchayathApprovals from "@/features/block/pages/PanchayathApprovals"
 
 // panchayath // 
 
-import PanchayathHome from '@/pages/panjayath/PanchayathHome'
-import PanchayathProfile from '@/pages/panjayath/PanchayathProfile'
-import PanchayathVerification from '@/pages/panjayath/PanchayathVerification'
-import WardApproval from '@/pages/panjayath/WardApproval'
+/* ───────── PANCHAYATH MODULE ───────── */
+import PanchayathLayout from "@/layouts/panjayath/PanchayathDashboardLayout";
+import PanchayathHome from "@/pages/panjayath/PanchayathHome";
+import PanchayathProfile from "@/pages/panjayath/PanchayathProfile";
+import PanchayathVerification from "@/pages/panjayath/PanchayathVerification";
+import WardApprovals from "@/pages/panjayath/WardApproval";
+import EscalatedComplaints from "@/pages/panjayath/EscalatedComplaints";
 
 // Admin Pages
 import Dashboard from "@/pages/admin/Dashboard"
@@ -36,19 +39,24 @@ import AdminLogin from "@/pages/auth/AdminLogin"
 import AdminProtectedRoute from "@/routes/AdminProtectedRoute"
 
 
+// citizen pages 
+
+import AuthPage from "@/pages/citizen/AuthPage"
+
+
 
 export default function App() {
   return (
     <Routes>
 
-      {/* Landing */}
+      <Route path="/citizen/registration" element={<AuthPage/>}/>
+
+      {/* ───────── PUBLIC ROUTES ───────── */}
       <Route path="/" element={<LandingPage />} />
-
-      {/* Block Auth */}
       <Route path="/login" element={<Authentication />} />
-      {/* <Route path="/block/signup" element={<BlockSignup />} /> */}
+      
 
-      {/* Block Protected Layout */}
+      {/* ───────── BLOCK ROUTES ───────── */}
       <Route path="/block" element={<BlockLayout />}>
 
         <Route index element={<BlockHome />} />
@@ -61,22 +69,21 @@ export default function App() {
 
       </Route>
 
+      {/* ───────── PANCHAYATH ROUTES ───────── */}
 
-      {/* <Route path="/panchayath" element={<BlockLayout />}>
-
+      <Route path="/panchayath" element={<PanchayathLayout />}>
         <Route index element={<PanchayathHome />} />
-        <Route path="panchaythprofile" element={<PanchayathProfile />} />
-        <Route path="panchayathverification" element={<PanchayathVerification />} />
-        <Route path="panchayathapprovals" element={<WardApproval />} />
-        {/* <Route path="escalations" element={<EscalatedComplaints />} /> */}
-      {/* <Route path="monitoring" element={<PanchayathMonitoring />} /> */}
-      {/* <Route path="communication" element={<Communication />} /> */}
+        <Route path="profile" element={<PanchayathProfile />} />
+        <Route path="verification" element={<PanchayathVerification />} />
+        <Route path="approvals" element={<WardApprovals />} />
+        <Route path="escalations" element={<EscalatedComplaints />} />
+        <Route path="monitoring" element={<PageLocked />} />
+        <Route path="communication" element={<PageLocked />} />
+      </Route>
+      
 
-      {/* </Route>   */}
+      {/* ───────── ADMIN ROUTES ───────── */}
 
-      {/* <Route>
-      <LandingPage/>
-    </Route> */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
       <Route
