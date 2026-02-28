@@ -33,5 +33,6 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["role"] = "ADMIN" if user.is_superuser else user.role
         data["status"] = user.status
         data["is_superuser"] = user.is_superuser
+        data["is_verified"] = user.is_verified
 
         return data

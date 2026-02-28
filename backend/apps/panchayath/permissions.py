@@ -17,7 +17,8 @@ class IsActivePanchayath(BasePermission):
         return (
             request.user.is_authenticated and
             request.user.role == User.Role.PANCHAYATH and
-            request.user.status == User.Status.ACTIVE
+            request.user.status == User.Status.ACTIVE and
+            request.user.is_verified is True
         )
         
         

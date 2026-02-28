@@ -22,12 +22,12 @@ import PanchayathApprovals from "@/features/block/pages/PanchayathApprovals"
 // panchayath // 
 
 /* ───────── PANCHAYATH MODULE ───────── */
-import PanchayathLayout from "@/layouts/panjayath/PanchayathDashboardLayout";
-import PanchayathHome from "@/pages/panjayath/PanchayathHome";
+import PanchayathLayout from "@/layouts/panjayath/PanchayathLayout";
+
+import PanchayathDashboard from "@/pages/panjayath/PanchayathDashboard";
 import PanchayathProfile from "@/pages/panjayath/PanchayathProfile";
-import PanchayathVerification from "@/pages/panjayath/PanchayathVerification";
-import WardApprovals from "@/pages/panjayath/WardApproval";
-import EscalatedComplaints from "@/pages/panjayath/EscalatedComplaints";
+import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests";
+import WardList from "@/pages/panjayath/WardList";
 
 // Admin Pages
 import Dashboard from "@/pages/admin/Dashboard"
@@ -49,12 +49,12 @@ export default function App() {
   return (
     <Routes>
 
-      <Route path="/citizen/registration" element={<AuthPage/>}/>
+      <Route path="/citizen/registration" element={<AuthPage />} />
 
       {/* ───────── PUBLIC ROUTES ───────── */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Authentication />} />
-      
+
 
       {/* ───────── BLOCK ROUTES ───────── */}
       <Route path="/block" element={<BlockLayout />}>
@@ -71,16 +71,18 @@ export default function App() {
 
       {/* ───────── PANCHAYATH ROUTES ───────── */}
 
+      {/* ───────── PANCHAYATH ROUTES ───────── */}
+
       <Route path="/panchayath" element={<PanchayathLayout />}>
-        <Route index element={<PanchayathHome />} />
+        <Route index element={<PanchayathDashboard />} />
+        <Route path="dashboard" element={<PanchayathDashboard />} />
         <Route path="profile" element={<PanchayathProfile />} />
-        <Route path="verification" element={<PanchayathVerification />} />
-        <Route path="approvals" element={<WardApprovals />} />
-        <Route path="escalations" element={<EscalatedComplaints />} />
-        <Route path="monitoring" element={<PageLocked />} />
-        <Route path="communication" element={<PageLocked />} />
+        <Route path="ward-verifications" element={<WardVerificationRequests />} />
+        <Route path="wards" element={<WardList />} />
+        {/* <Route path="ward/:id" element={<WardDetail />} /> */}
+
       </Route>
-      
+
 
       {/* ───────── ADMIN ROUTES ───────── */}
 

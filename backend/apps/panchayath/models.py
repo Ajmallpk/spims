@@ -18,13 +18,17 @@ class PanchayathVerification(models.Model):
     )
     
     panchayath_name = models.CharField(max_length=50)
+    full_name = models.CharField(max_length=50)
     phone = models.CharField(max_length=50)
     district = models.CharField(max_length=100)
+    email = models.EmailField()
     
     aadhaar_image = models.ImageField(upload_to="panchayath/aadhaar/")
     selfie_image = models.ImageField(upload_to="panchayath/selfie/")
     status = models.CharField(max_length=20,choices=STATUS_CHOICES,default="PENDING")
     reject_reason = models.TextField(blank=True,null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.panchayath_name}-{self.status}"

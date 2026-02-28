@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.ward.models import WardVerification
 from django.contrib.auth import get_user_model
-
+from django.utils import timezone
 User = get_user_model()
 
 
@@ -86,20 +86,25 @@ class PanchayathVerificationDetailView(APIView):
 
 
 
+
+
 class ApprovePanchayathView(APIView):
     permission_classes = [IsSuperAdmin]
 
     def patch(self, request, pk):
-
         try:
             v = PanchayathVerification.objects.get(pk=pk)
         except PanchayathVerification.DoesNotExist:
             return Response({"error": "Not found"}, status=404)
 
         v.status = "APPROVED"
+        v.reject_reason = None
+        v.reviewed_at = timezone.now()
         v.save()
         v.user.status = User.Status.ACTIVE
+        v.user.is_verified = True
         v.user.save()
+
         return Response({"message": "Approved successfully"})
 
 
@@ -110,6 +115,7 @@ class RejectPanchayathView(APIView):
     def patch(self, request, pk):
 
         reason = request.data.get("reason")
+
         try:
             v = PanchayathVerification.objects.get(pk=pk)
         except PanchayathVerification.DoesNotExist:
@@ -117,9 +123,10 @@ class RejectPanchayathView(APIView):
 
         v.status = "REJECTED"
         v.reject_reason = reason
+        v.reviewed_at = timezone.now()
         v.save()
-
         v.user.status = User.Status.SUSPENDED
+        v.user.is_verified = False
         v.user.save()
 
         return Response({"message": "Rejected successfully"})

@@ -46,21 +46,7 @@ export function AuthForm() {
   const [timer, setTimer] = useState(60)
   const [canResend, setCanResend] = useState(false)
 
-  useEffect(() => {
-    let interval
 
-    if (otpSent && timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prev => prev - 1)
-      }, 1000)
-    }
-
-    if (timer === 0) {
-      setCanResend(true)
-    }
-
-    return () => clearInterval(interval)
-  }, [otpSent, timer])
 
   // Login state
   const [loginData, setLoginData] = useState({
@@ -83,6 +69,22 @@ export function AuthForm() {
   const [otpSent, setOtpSent] = useState(false)
   const [otpVerified, setOtpVerified] = useState(false)
   const [isResending, setIsResending] = useState(false)
+
+  useEffect(() => {
+    let interval
+
+    if (otpSent && timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => prev - 1)
+      }, 1000)
+    }
+
+    if (timer === 0) {
+      setCanResend(true)
+    }
+
+    return () => clearInterval(interval)
+  }, [otpSent, timer])
 
   const validateLogin = useCallback(() => {
     const newErrors = {}
@@ -684,81 +686,81 @@ export function AuthForm() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-1 text-xs">
+                  <div className="flex flex-col gap-1 text-xs">
 
-                      {remainingResends > 0 ? (
-                        canResend ? (
-                          <button
-                            type="button"
-                            onClick={handleResendOtp}
-                            disabled={isResending}
-                            className="font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
-                          >
-                            {isResending ? "Resending..." : "Resend OTP"}
-                          </button>
-                        ) : (
-                          <span className="text-muted-foreground">
-                            Resend OTP in {timer}s
-                          </span>
-                        )
+                    {remainingResends > 0 ? (
+                      canResend ? (
+                        <button
+                          type="button"
+                          onClick={handleResendOtp}
+                          disabled={isResending}
+                          className="font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
+                        >
+                          {isResending ? "Resending..." : "Resend OTP"}
+                        </button>
                       ) : (
-                        <span className="text-destructive">
-                          Resend limit reached
-                        </span>
-                      )}
-
-                      {remainingResends > 0 && (
                         <span className="text-muted-foreground">
-                          Attempts left: {remainingResends}
+                          Resend OTP in {timer}s
                         </span>
-                      )}
+                      )
+                    ) : (
+                      <span className="text-destructive">
+                        Resend limit reached
+                      </span>
+                    )}
 
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOtpSent(false)
-                        setOtp("")
-                      }}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      <ArrowLeft className="h-3 w-3" />
-                      Edit details
-                    </button>
+                    {remainingResends > 0 && (
+                      <span className="text-muted-foreground">
+                        Attempts left: {remainingResends}
+                      </span>
+                    )}
+
                   </div>
-                </div>
-            )}
-
-                <Button
-                  type="submit"
-                  className="mt-2 w-full gap-2 text-sm font-semibold"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {otpSent ? "Verifying..." : "Sending OTP..."}
-                    </>
-                  ) : otpSent ? (
-                    "Verify OTP"
-                  ) : (
-                    "Register"
-                  )}
-                </Button>
-
-                <p className="text-center text-xs text-muted-foreground">
-                  {"Already have an account? "}
                   <button
                     type="button"
-                    onClick={() => switchMode("login")}
-                    className="font-semibold text-primary underline-offset-4 hover:underline"
+                    onClick={() => {
+                      setOtpSent(false)
+                      setOtp("")
+                    }}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Login
+                    <ArrowLeft className="h-3 w-3" />
+                    Edit details
                   </button>
-                </p>
-              </form>
+                </div>
+              </div>
             )}
-          </CardContent>
+
+            <Button
+              type="submit"
+              className="mt-2 w-full gap-2 text-sm font-semibold"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {otpSent ? "Verifying..." : "Sending OTP..."}
+                </>
+              ) : otpSent ? (
+                "Verify OTP"
+              ) : (
+                "Register"
+              )}
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground">
+              {"Already have an account? "}
+              <button
+                type="button"
+                onClick={() => switchMode("login")}
+                className="font-semibold text-primary underline-offset-4 hover:underline"
+              >
+                Login
+              </button>
+            </p>
+          </form>
+        )}
+      </CardContent>
     </Card>
   )
 }

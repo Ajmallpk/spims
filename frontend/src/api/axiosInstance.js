@@ -20,29 +20,75 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     if (error.response?.status === 401) {
+//       const refresh = localStorage.getItem("refresh");
+
+//       if (refresh) {
+//         try {
+//           const response = await axios.post(
+//             "http://127.0.0.1:8000/api/auth/token/refresh/",
+//             { refresh }
+//           );
+
+//           localStorage.setItem("access", response.data.access);
+
+//           error.config.headers.Authorization =
+//             `Bearer ${response.data.access}`;
+
+//           return axiosInstance(error.config);
+//         } catch (refreshError) {
+//           localStorage.clear();
+//           window.location.href = "/";
+//         }
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// export default axiosInstance;
+
+
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
       const refresh = localStorage.getItem("refresh");
 
-      if (refresh) {
-        try {
-          const response = await axios.post(
-            "http://127.0.0.1:8000/api/auth/token/refresh/",
-            { refresh }
-          );
+      if (!refresh) {
+        localStorage.clear();
+        window.location.href = "/";
+        return Promise.reject(error);
+      }
 
-          localStorage.setItem("access", response.data.access);
+      try {
+        const response = await axios.post(
+          "http://127.0.0.1:8000/api/auth/token/refresh/",
+          { refresh }
+        );
 
-          error.config.headers.Authorization =
-            `Bearer ${response.data.access}`;
+        const newAccess = response.data.access;
+        localStorage.setItem("access", newAccess);
 
-          return axios(error.config);
-        } catch (refreshError) {
-          localStorage.clear();
-          window.location.href = "/";
-        }
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        localStorage.clear();
+        window.location.href = "/";
+        return Promise.reject(refreshError);
       }
     }
 
@@ -50,4 +96,5 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance;
+
+export default axiosInstance

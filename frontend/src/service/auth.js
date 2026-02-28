@@ -1,7 +1,7 @@
 import axiosInstance from "@/api/axiosInstance"
 
-export const signupUser = (data) => {
-  return axiosInstance.post("auth/signup/", data)
+export  const signupUser = (data) => {
+  return axiosInstance.post("auth/signup/authority/", data)
 }
 
 export const verifyOtp = (data)=>{
@@ -13,7 +13,7 @@ export const resendOtp = (data)=>{
 }
 
 export const loginUser = (data) => {
-  return axiosInstance.post("auth/login/", data)
+  return axiosInstance.post("auth/login/authority/", data)
 }
 export const getblockverification = () => {
   return axiosInstance.get("/api/admin/block_verifications/")

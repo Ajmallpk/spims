@@ -191,6 +191,7 @@ import { Link } from "react-router-dom"
 
 
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom"
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -512,7 +513,7 @@ function Navbar() {
           <button className="btn-ghost">Sign In</button>
         </Link>
 
-        <Link to="/signup/citizen">
+        <Link to="/citizen/registration">
           <button className="btn-fill">Register →</button>
         </Link>
       </div>
@@ -662,6 +663,7 @@ const rdata = [
   { icon: I.building, title: "Block Authority", desc: "Manage multiple panchayaths, review high-priority escalations, deliver final administrative decisions, and access comprehensive analytics dashboards.", tag: "Block Login", tc: "#f8f0ff", tt: "#8b5cf6", ib: "#f8f0ff", ic: "#8b5cf6" },
 ];
 function Roles() {
+  const navigate = useNavigate()
   return (
     <section className="section roles" id="roles">
       <div className="si">
@@ -683,7 +685,7 @@ function Roles() {
               <div className="role-desc">{r.desc}</div>
               <div className="role-footer">
                 <span className="role-access">Secure portal access</span>
-                <button className="role-btn" style={{ background: r.ic }}>Enter Portal <Ico d={I.arrow} s={14} c="white" /></button>
+                <button className="role-btn" style={{ background: r.ic }} onClick={() => navigate("/login")}>Enter Portal <Ico d={I.arrow} s={14} c="white" /></button>
               </div>
             </div>
           ))}
