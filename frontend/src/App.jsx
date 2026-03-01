@@ -2,24 +2,20 @@ import { Routes, Route } from "react-router-dom"
 import LandingPage from '@/pages/common/LandingPage'
 import Authentication from '@/pages/common/Authentication'
 
-//Block
-
-// import RoleSelectionLanding from "@/pages/RoleSelectionLanding"
-// import BlockLogin from "@/features/block/pages/BlockLogin"
-// import BlockSignup from "@/features/block/pages/BlockSignup"
-
-import BlockLayout from "@/features/block/layout/BlockLayout"
-import BlockHome from "@/features/block/pages/BlockHome"
-import BlockProfile from "@/features/block/pages/BlockProfile"
-import BlockVerification from "@/features/block/pages/BlockVerification"
-import PageLocked from "@/features/block/pages/PageLocked"
-import PanchayathApprovals from "@/features/block/pages/PanchayathApprovals"
-// import EscalatedComplaints from "@/features/block/pages/EscalatedComplaints"
-// import PanchayathMonitoring from "@/features/block/pages/PanchayathMonitoring"
-// import Communication from "@/features/block/pages/Communication"
 
 
-// panchayath // 
+/* ───────── ADMIN MODULE ───────── */
+import AdminLayout from "@/layouts/admin/AdminLayout"
+import AdminLogin from "@/pages/admin/AdminLogin"
+import AdminDashboard from "@/pages/admin/AdminDashboard"
+import PanchayathVerificationRequests from "@/pages/admin/PanchayathVerificationRequests"
+import PanchayathList from "@/pages/admin/PanchayathList"
+import AdminWardList from "@/pages/admin/AdminWardlist"
+import AdminProfile from "@/pages/admin/AdminProfile"
+
+
+
+
 
 /* ───────── PANCHAYATH MODULE ───────── */
 import PanchayathLayout from "@/layouts/panjayath/PanchayathLayout";
@@ -30,13 +26,7 @@ import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests
 import WardList from "@/pages/panjayath/WardList";
 
 // Admin Pages
-import Dashboard from "@/pages/admin/Dashboard"
-import BlockApprovals from "@/pages/admin/BlockApprovals"
-import ListBlocks from "@/pages/admin/ListBlocks"
-import Profile from "@/pages/admin/Profile"
-import AdminDashboardLayout from "@/layouts/admin/AdminDashboardLayout"
-import AdminLogin from "@/pages/auth/AdminLogin"
-import AdminProtectedRoute from "@/routes/AdminProtectedRoute"
+
 
 
 // citizen pages 
@@ -51,27 +41,18 @@ export default function App() {
 
       <Route path="/citizen/registration" element={<AuthPage />} />
 
-      {/* ───────── PUBLIC ROUTES ───────── */}
+      // PUBLIC ROUTES FOR AUTHORITY //
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Authentication />} />
 
+      // ADMIN LOGIN (NO LAYOUT) //
+      <Route path="/admin/login" element={<AdminLogin />} />
 
-      {/* ───────── BLOCK ROUTES ───────── */}
-      <Route path="/block" element={<BlockLayout />}>
 
-        <Route index element={<BlockHome />} />
-        <Route path="profile" element={<BlockProfile />} />
-        <Route path="blockverification" element={<BlockVerification />} />
-        <Route path="approvals" element={<PanchayathApprovals />} />
-        <Route path="escalations" element={<PageLocked />} />
-        <Route path="monitoring" element={<PageLocked />} />
-        <Route path="communication" element={<PageLocked />} />
+  
+      
 
-      </Route>
-
-      {/* ───────── PANCHAYATH ROUTES ───────── */}
-
-      {/* ───────── PANCHAYATH ROUTES ───────── */}
+      //PANCHAYATH ROUTES //
 
       <Route path="/panchayath" element={<PanchayathLayout />}>
         <Route index element={<PanchayathDashboard />} />
@@ -84,22 +65,15 @@ export default function App() {
       </Route>
 
 
-      {/* ───────── ADMIN ROUTES ───────── */}
+      //ADMIN ROUTES//
 
-      <Route path="/admin/login" element={<AdminLogin />} />
-
-      <Route
-        path="/admin"
-        element={
-          <AdminProtectedRoute>
-            <AdminDashboardLayout />
-          </AdminProtectedRoute>
-        }
-      >
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="approvals" element={<BlockApprovals />} />
-        <Route path="blocks" element={<ListBlocks />} />
-        <Route path="profile" element={<Profile />} />
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="panchayath-verifications" element={<PanchayathVerificationRequests />} />
+        <Route path="panchayaths" element={<PanchayathList />} />
+        <Route path="wards" element={<AdminWardList />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Route>
 
     </Routes>

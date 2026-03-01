@@ -18,7 +18,7 @@ class AdminLoginSerializer(TokenObtainPairSerializer):
                 "You are not authorized as system administrator."
             )
 
-        data["role"] = "SYSTEM_ADMIN"
+        data["role"] = "ADMIN"
         data["status"] = "ACTIVE"
         data["username"] = user.username
 
