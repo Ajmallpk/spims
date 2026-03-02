@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import LoginInput from "@/components/admin/Logininput";
 import LoginButton from "@/components/admin/Loginbutton";
+import { adminapi } from "@/service/adminurls";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -30,11 +30,7 @@ const LoginForm = () => {
 
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/auth/login/", {
-        email: email.trim().toLowerCase(),
-        password,
-        role: "ADMIN",
-      });
+      const { data } = await adminapi.login(email, password);
 
       // Validate that the returned role is ADMIN
       if (data.role !== "ADMIN") {
@@ -46,7 +42,6 @@ const LoginForm = () => {
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
       localStorage.setItem("role", data.role);
-      localStorage.setItem("is_verified", data.is_verified);
       localStorage.setItem("status", data.status);
 
       navigate("/admin/dashboard", { replace: true });
@@ -63,7 +58,7 @@ const LoginForm = () => {
         setError(detail || "Invalid email or password. Please try again.");
       } else if (status === 403) {
         setError("Your account does not have permission to access this portal.");
-      } else if (status === 423 || data?.status === "SUSPENDED") {
+      } else if (status === 423) {
         setError("Your account has been suspended. Please contact support.");
       } else {
         setError(

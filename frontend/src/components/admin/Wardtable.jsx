@@ -12,7 +12,7 @@ const SkeletonRow = () => (
   </tr>
 );
 
-const WardTable = ({ wards, isLoading, panchayathId }) => {
+const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
   const navigate = useNavigate();
 
   return (
@@ -64,26 +64,39 @@ const WardTable = ({ wards, isLoading, panchayathId }) => {
                   <td className="px-5 py-4 text-gray-600 font-medium">{formatNumber(ward.total_complaints)}</td>
                   <td className="px-5 py-4">
                     <span
-                      className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        ward.pending_complaints > 0
+                      className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${ward.pending_complaints > 0
                           ? "bg-orange-100 text-orange-700"
                           : "bg-gray-100 text-gray-500"
-                      }`}
+                        }`}
                     >
                       {formatNumber(ward.pending_complaints)}
                     </span>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 flex gap-2">
+                    {/* View Button */}
                     <button
                       onClick={() => navigate(`/admin/wards/${ward.id}`)}
                       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-indigo-600 hover:text-white transition-all duration-150"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
                       View
                     </button>
+
+                    {/* Suspend / Activate Button */}
+                    {ward.status === "ACTIVE" ? (
+                      <button
+                        onClick={() => onSuspend(ward.id)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-150"
+                      >
+                        Suspend
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => onActivate(ward.id)}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all duration-150"
+                      >
+                        Activate
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))

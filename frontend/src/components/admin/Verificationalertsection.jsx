@@ -23,7 +23,7 @@ const VerificationAlertSection = ({ verifications, isLoading }) => {
           </div>
         </div>
         <button
-          onClick={() => navigate("/admin/panchayath-verification")}
+          onClick={() => navigate("/admin/panchayath-verifications")}
           className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-150"
         >
           View All
@@ -62,7 +62,7 @@ const VerificationAlertSection = ({ verifications, isLoading }) => {
               }`}
               actionLabel="Review"
               onAction={() =>
-                navigate(`/admin/panchayath-verification/${item.id}`)
+                navigate(`/admin/panchayath-verifications/${item.id}`)
               }
             />
           ))

@@ -12,6 +12,7 @@ import PanchayathVerificationRequests from "@/pages/admin/PanchayathVerification
 import PanchayathList from "@/pages/admin/PanchayathList"
 import AdminWardList from "@/pages/admin/AdminWardlist"
 import AdminProfile from "@/pages/admin/AdminProfile"
+import PanchayathDetail from "./pages/admin/PanchayathDetail"
 
 
 
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="panchayaths" element={<PanchayathList />} />
         <Route path="wards" element={<AdminWardList />} />
         <Route path="profile" element={<AdminProfile />} />
+        <Route path="/admin/panchayaths/:id" element={<PanchayathDetail />} />
       </Route>
 
     </Routes>

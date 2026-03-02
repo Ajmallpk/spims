@@ -8,9 +8,8 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("access");
-    const role = localStorage.getItem("role");
 
-    if (!token || role !== "ADMIN") {
+    if (!token) {
       navigate("/admin/login", { replace: true });
     }
   }, [navigate]);

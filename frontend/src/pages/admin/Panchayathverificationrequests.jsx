@@ -3,6 +3,7 @@ import axios from "axios";
 import VerificationTable from "@/components/admin/Verificationtable";
 import PanchayathApprovalModal from "@/components/admin/Panchayathapprovalmodal";
 import { ClipboardCheck, RefreshCw, CheckCircle, XCircle } from "lucide-react";
+import { adminapi } from "@/service/adminurls";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -17,11 +18,10 @@ const Toast = ({ message, type, onDismiss }) => {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold transition-all duration-300 ${
-        type === "success"
+      className={`fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold transition-all duration-300 ${type === "success"
           ? "bg-emerald-600 text-white"
           : "bg-red-600 text-white"
-      }`}
+        }`}
     >
       {type === "success" ? (
         <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -49,9 +49,7 @@ const PanchayathVerificationRequests = () => {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get("/api/admin/panchayath-verifications/", {
-        headers: getAuthHeaders(),
-      });
+      const { data } = await adminapi.panchayathVerificationList()
       setRequests(Array.isArray(data) ? data : data.results || []);
     } catch (err) {
       console.error("Error fetching panchayath verifications:", err);
@@ -64,9 +62,14 @@ const PanchayathVerificationRequests = () => {
     fetchRequests();
   }, [fetchRequests]);
 
-  const handleView = (req) => {
-    setSelectedRequest(req);
-    setIsModalOpen(true);
+  const handleView = async (req) => {
+    try {
+      const { data } = await adminapi.getVerificationDetail(req.id);
+      setSelectedRequest(data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching verification detail:", error);
+    }
   };
 
   const handleModalClose = () => {

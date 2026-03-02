@@ -5,6 +5,7 @@ import SearchBar from "@/components/admin/Searchbar";
 import PanchayathFilter from "@/components/admin/Panchayathfilter";
 import WardTable from "@/components/admin/Wardtable";
 import Pagination from "@/components/admin/Pagination";
+import { adminapi } from "@/service/adminurls";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -17,6 +18,11 @@ const WardList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPanchayath, setSelectedPanchayath] = useState("");
+  const [actionModal, setActionModal] = useState({
+    open: false,
+    type: null,
+    id: null,
+  });
 
   const fetchWards = useCallback(
     async (page = 1, search = "", panchayath = "") => {
@@ -26,10 +32,12 @@ const WardList = () => {
         if (search) params.search = search;
         if (panchayath) params.panchayath = panchayath;
 
-        const { data } = await axios.get("/api/admin/wards/", {
-          headers: getAuthHeaders(),
-          params,
-        });
+        const { data } = await adminapi.getWards(
+          "approved",
+          page,
+          search,
+          panchayath
+        )
 
         if (Array.isArray(data)) {
           setWards(data);
@@ -66,6 +74,31 @@ const WardList = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+
+  const handleSuspendWard = (id) => {
+    setActionModal({ open: true, type: "suspend", id });
+  };
+
+  const handleActivateWard = (id) => {
+    setActionModal({ open: true, type: "activate", id });
+  };
+
+
+  const handleConfirmAction = async () => {
+    try {
+      if (actionModal.type === "suspend") {
+        await adminapi.suspendWard(actionModal.id);
+      } else if (actionModal.type === "activate") {
+        await adminapi.activateWard(actionModal.id);
+      }
+
+      setActionModal({ open: false, type: null, id: null });
+      fetchWards(currentPage, searchQuery, selectedPanchayath);
+    } catch (err) {
+      console.error("Ward action failed:", err);
+    }
   };
 
   return (
@@ -131,7 +164,12 @@ const WardList = () => {
       )}
 
       {/* Table */}
-      <WardTable wards={wards} isLoading={loading} />
+      <WardTable
+        wards={wards}
+        isLoading={loading}
+        onSuspend={handleSuspendWard}
+        onActivate={handleActivateWard}
+      />
 
       {/* Pagination */}
       <Pagination
@@ -139,6 +177,45 @@ const WardList = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+
+      {actionModal.open && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">
+              Confirm {actionModal.type === "suspend" ? "Suspension" : "Activation"}
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to{" "}
+              <span className="font-semibold">
+                {actionModal.type === "suspend" ? "suspend" : "activate"}
+              </span>{" "}
+              this Ward authority?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() =>
+                  setActionModal({ open: false, type: null, id: null })
+                }
+                className="px-4 py-2 text-sm font-semibold bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmAction}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg text-white ${actionModal.type === "suspend"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                  }`}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

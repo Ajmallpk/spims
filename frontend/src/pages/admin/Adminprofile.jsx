@@ -3,6 +3,7 @@ import axios from "axios";
 import { UserCog } from "lucide-react";
 import AdminInfoCard from "@/components/admin/Admininfocard";
 import SecuritySettingsCard from "@/components/admin/Securitysettingscard";
+import { adminapi } from "@/service/adminurls";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -16,9 +17,7 @@ const AdminProfile = () => {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get("/api/admin/profile/", {
-          headers: getAuthHeaders(),
-        });
+        const { data } = await adminapi.profile()
         setProfile(data);
       } catch (err) {
         console.error("Error fetching admin profile:", err);

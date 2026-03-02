@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import StatusBadge from "@/components/admin/Statusbadge";
 import RejectReasonSection from "@/components/admin/Rejectreasonsection";
+import { adminapi } from "@/service/adminurls";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -32,6 +33,9 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
   const [rejectReason, setRejectReason] = useState("");
   const [reasonError, setReasonError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+
+
 
   // Close on Escape key
   const handleKeyDown = useCallback(
@@ -56,11 +60,7 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
   const handleApprove = async () => {
     setIsSubmitting(true);
     try {
-      await axios.post(
-        `/api/admin/approve-panchayath/${request.id}/`,
-        {},
-        { headers: getAuthHeaders() }
-      );
+      await adminapi.approvePanchayath(request.id)
       onSuccess("Panchayath approved successfully.");
       onClose();
     } catch (err) {
@@ -78,11 +78,7 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
     setReasonError(null);
     setIsSubmitting(true);
     try {
-      await axios.post(
-        `/api/admin/reject-panchayath/${request.id}/`,
-        { reason: rejectReason.trim() },
-        { headers: getAuthHeaders() }
-      );
+      await adminapi.rejectPanchayath(request.id, rejectReason.trim())
       onSuccess("Panchayath registration rejected.");
       onClose();
     } catch (err) {
@@ -139,44 +135,43 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
 
           {/* Details Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <DetailRow label="Officer Name" value={request.username} />
             <DetailRow label="Panchayath Name" value={request.panchayath_name} />
+            <DetailRow label="District" value={request.district} />
             <DetailRow label="Email" value={request.email} />
             <DetailRow label="Phone" value={request.phone} />
-            <DetailRow label="License Number" value={request.license_number} />
             <DetailRow
               label="Submitted Date"
-              value={formatDate(request.submitted_date || request.created_at)}
+              value={formatDate(request.submitted_at)}
             />
-            <DetailRow label="Office Address" value={request.office_address} />
           </div>
 
           {/* Document Preview */}
-          {request.document_url && (
+          {request.aadhaar_image && (
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Uploaded Document
+                Aadhaar Image
               </p>
-              {/\.(jpg|jpeg|png|gif|webp)$/i.test(request.document_url) ? (
-                <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                  <img
-                    src={request.document_url}
-                    alt="Verification Document"
-                    className="w-full max-h-64 object-contain"
-                  />
-                </div>
-              ) : (
-                <a
-                  href={request.document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-sm font-medium hover:bg-blue-100 transition-colors duration-150"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                  </svg>
-                  View Uploaded Document
-                </a>
-              )}
+              <img
+                src={request.aadhaar_image}
+                alt="Aadhaar"
+                onClick={() => setPreviewImage(request.aadhaar_image)}
+                className="w-full max-h-64 object-contain rounded-lg border cursor-zoom-in hover:opacity-90 transition"
+              />
+            </div>
+          )}
+
+          {request.selfie_image && (
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-4">
+                Selfie Image
+              </p>
+              <img
+                src={request.selfie_image}
+                alt="Aadhaar"
+                onClick={() => setPreviewImage(request.selfie_image)}
+                className="w-full max-h-64 object-contain rounded-lg border cursor-zoom-in hover:opacity-90 transition"
+              />
             </div>
           )}
 
@@ -265,6 +260,19 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
           </div>
         )}
       </div>
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[60] bg-black bg-opacity-90 flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <img
+            src={previewImage}
+            alt="Preview"
+            onClick={(e) => e.stopPropagation()}
+            className="w-auto h-auto max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-transform duration-200 scale-100 hover:scale-105"
+          />
+        </div>
+      )}
     </div>
   );
 };

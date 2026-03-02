@@ -1,13 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { adminapi } from "@/service/adminurls";
 import StatsGrid from "@/components/admin/Statsgrid";
 import VerificationAlertSection from "@/components/admin/Verificationalertsection";
 import CriticalAlertSection from "@/components/admin/Criticalalertsection";
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("access");
-  return { Authorization: `Bearer ${token}` };
-};
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -21,9 +17,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const { data } = await axios.get("/api/admin/dashboard-stats/", {
-          headers: getAuthHeaders(),
-        });
+        const { data } = await adminapi.dashboard()
         setStats(data);
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
@@ -34,9 +28,7 @@ const AdminDashboard = () => {
 
     const fetchRecentVerifications = async () => {
       try {
-        const { data } = await axios.get("/api/admin/recent-verifications/", {
-          headers: getAuthHeaders(),
-        });
+        const { data } = await adminapi.recentVerification()
         setVerifications(data);
       } catch (err) {
         console.error("Error fetching recent verifications:", err);
@@ -47,9 +39,7 @@ const AdminDashboard = () => {
 
     const fetchCriticalAlerts = async () => {
       try {
-        const { data } = await axios.get("/api/admin/critical-alerts/", {
-          headers: getAuthHeaders(),
-        });
+        const { data } = await adminapi.criticalAlert()
         setCriticalAlerts(data);
       } catch (err) {
         console.error("Error fetching critical alerts:", err);
