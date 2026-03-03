@@ -33,7 +33,7 @@ class WardVerification(models.Model):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
     reject_reason = models.TextField(blank=True, null=True)
-
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

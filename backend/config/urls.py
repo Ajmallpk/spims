@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/',include('apps.accounts.urls')),
     path('api/panchayath/',include('apps.panchayath.urls')),
+    path('api/ward/',include('apps.ward.urls')),
     path("api/admin/", include("apps.adminpanel.urls")),
   
 ]
