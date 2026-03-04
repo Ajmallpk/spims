@@ -50,7 +50,7 @@ export default function WardDetail() {
             {ward.ward_name}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Ward #{ward.ward_number}
+            <p>Ward ID: {ward.id}</p>
           </p>
         </div>
       </div>

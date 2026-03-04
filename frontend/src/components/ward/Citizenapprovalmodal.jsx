@@ -1,8 +1,8 @@
 import { useState } from "react";
-import StatusBadge from "./StatusBadge";
-import RejectReasonSection from "./RejectReasonSection";
+import StatusBadge from "@/components/ward/Statusbadge";
+import RejectReasonSection from "@/components/ward/RejectReasonSection";
+import wardapi from "@/service/wardurls";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -25,7 +25,7 @@ function DetailRow({ label, value }) {
 }
 
 export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
-  const token = localStorage.getItem("access");
+
 
   const [showReject, setShowReject] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -37,11 +37,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
   const handleApprove = async () => {
     try {
       setIsSubmitting(true);
-      const res = await fetch(`${API_BASE}/api/ward/approve-citizen/${citizen.id}/`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await wardapi.approveCitizen(citizen.id);
       onSuccess("Citizen verification approved successfully.");
       onClose();
     } catch (err) {
@@ -56,19 +52,10 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
       setRejectError("Reason must be at least 10 characters.");
       return;
     }
-    setRejectError("");
 
     try {
       setIsSubmitting(true);
-      const res = await fetch(`${API_BASE}/api/ward/reject-citizen/${citizen.id}/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ reason: rejectReason.trim() }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await wardapi.rejectCitizen(citizen.id, rejectReason.trim());
       onSuccess("Citizen verification rejected.");
       onClose();
     } catch (err) {

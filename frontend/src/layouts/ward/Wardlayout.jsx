@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import WardSidebar from "./WardSidebar";
-import WardHeader from "./WardHeader";
-import VerificationRequiredModal from "../components/VerificationRequiredModal";
-import VerificationPendingModal from "../components/VerificationPendingModal";
+import WardSidebar from "@/components/ward/Wardsidebar";
+import WardHeader from "@/components/ward/Wardheader";
+import VerificationRequiredModal from "@/components/panjayath/VerificationRequiredModal";
+import VerificationPendingModal from "@/components/panjayath/VerificationPendingModal";
+import axiosInstance from "@/api/axiosInstance";
 
 const PROTECTED_PATHS = [
   "/ward/dashboard",
@@ -22,6 +23,27 @@ export default function WardLayout() {
   const role = localStorage.getItem("role");
   const isVerified = localStorage.getItem("is_verified") === "true";
   const verificationSubmitted = localStorage.getItem("verification_submitted") === "true";
+
+  useEffect(() => {
+    const syncVerification = async () => {
+      try {
+        const res = await axiosInstance.get("/ward/profile/");
+        const status = res.data.verification_status;
+
+        const isApproved = status === "APPROVED";
+
+        localStorage.setItem("is_verified", isApproved ? "true" : "false");
+        localStorage.setItem(
+          "verification_submitted",
+          status === "PENDING" ? "true" : "false"
+        );
+      } catch (err) {
+        console.error("Verification sync failed:", err);
+      }
+    };
+
+    syncVerification();
+  }, []);
 
   useEffect(() => {
     if (role !== "WARD") {

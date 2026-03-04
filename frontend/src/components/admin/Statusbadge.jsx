@@ -5,20 +5,20 @@
  */
 
 const statusConfig = {
+  active: {
+    label: "Active",
+    classes: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  suspended: {
+    label: "Suspended",
+    classes: "bg-red-100 text-red-700 border-red-200",
+    dot: "bg-red-500",
+  },
   pending: {
     label: "Pending",
     classes: "bg-yellow-100 text-yellow-700 border-yellow-200",
     dot: "bg-yellow-500",
-  },
-  approved: {
-    label: "Approved",
-    classes: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    dot: "bg-emerald-500",
-  },
-  rejected: {
-    label: "Rejected",
-    classes: "bg-red-100 text-red-700 border-red-200",
-    dot: "bg-red-500",
   },
 };
 

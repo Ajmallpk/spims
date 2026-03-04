@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import PageNumberPagination
 from apps.ward.models import WardVerification
 from django.db.models import Q
+from django.db import transaction
 User = get_user_model()
 
 
@@ -41,24 +42,56 @@ class AdminProfileView(APIView):
 
 
 
+# class AdminDashboardView(APIView):
+#     permission_classes = [IsSuperAdmin]
+
+#     def get(self, request):
+
+#         total_panchayath = User.objects.filter(role="PANCHAYATH").count()
+#         active_panchayath = User.objects.filter(role="PANCHAYATH", status="ACTIVE").count()
+#         pending_panchayath = User.objects.filter(role="PANCHAYATH", status="PENDING").count()
+#         suspended_panchayath = User.objects.filter(role="PANCHAYATH", status="SUSPENDED").count()
+
+#         total_wards = User.objects.filter(role="WARD").count()
+
+#         return Response({
+#             "total_panchayath": total_panchayath,
+#             "active_panchayath": active_panchayath,
+#             "pending_panchayath": pending_panchayath,
+#             "suspended_panchayath": suspended_panchayath,
+#             "total_wards": total_wards,
+#         })
+
+
+
+
 class AdminDashboardView(APIView):
     permission_classes = [IsSuperAdmin]
 
     def get(self, request):
 
-        total_panchayath = User.objects.filter(role="PANCHAYATH").count()
-        active_panchayath = User.objects.filter(role="PANCHAYATH", status="ACTIVE").count()
-        pending_panchayath = User.objects.filter(role="PANCHAYATH", status="PENDING").count()
-        suspended_panchayath = User.objects.filter(role="PANCHAYATH", status="SUSPENDED").count()
+        total_panchayaths = User.objects.filter(role="PANCHAYATH").count()
+        active_panchayaths = User.objects.filter(role="PANCHAYATH", status="ACTIVE").count()
+        pending_panchayaths = User.objects.filter(role="PANCHAYATH", status="PENDING").count()
+        suspended_panchayaths = User.objects.filter(role="PANCHAYATH", status="SUSPENDED").count()
 
         total_wards = User.objects.filter(role="WARD").count()
 
+        # total_complaints = Complaint.objects.count()
+
+        pending_panchayath_verifications = PanchayathVerification.objects.filter(status="PENDING").count()
+        pending_ward_verifications = WardVerification.objects.filter(status="PENDING").count()
+
         return Response({
-            "total_panchayath": total_panchayath,
-            "active_panchayath": active_panchayath,
-            "pending_panchayath": pending_panchayath,
-            "suspended_panchayath": suspended_panchayath,
+            "total_panchayaths": total_panchayaths,
+            "active_panchayaths": active_panchayaths,
+            "pending_panchayaths": pending_panchayaths,
+            "suspended_panchayaths": suspended_panchayaths,
             "total_wards": total_wards,
+            # "total_citizens": total_citizens,
+            # "total_complaints": total_complaints,
+            "pending_panchayath_verifications": pending_panchayath_verifications,
+            "pending_ward_verifications": pending_ward_verifications,
         })
         
 
@@ -116,6 +149,25 @@ class PanchayathVerificationDetailView(APIView):
 
 
 
+# class ApprovePanchayathView(APIView):
+#     permission_classes = [IsSuperAdmin]
+
+#     def post(self, request, pk):
+#         try:
+#             v = PanchayathVerification.objects.get(pk=pk)
+#         except PanchayathVerification.DoesNotExist:
+#             return Response({"error": "Not found"}, status=404)
+
+#         v.status = "APPROVED"
+#         v.reject_reason = None
+#         v.reviewed_at = timezone.now()
+#         v.save()
+#         v.user.status = User.Status.ACTIVE
+#         v.user.is_verified = True
+#         v.user.save()
+
+#         return Response({"message": "Approved successfully"})
+
 class ApprovePanchayathView(APIView):
     permission_classes = [IsSuperAdmin]
 
@@ -125,16 +177,47 @@ class ApprovePanchayathView(APIView):
         except PanchayathVerification.DoesNotExist:
             return Response({"error": "Not found"}, status=404)
 
-        v.status = "APPROVED"
-        v.reject_reason = None
-        v.reviewed_at = timezone.now()
-        v.save()
-        v.user.status = User.Status.ACTIVE
-        v.user.is_verified = True
-        v.user.save()
+        with transaction.atomic():
+
+            v.status = "APPROVED"
+            v.reject_reason = None
+            v.reviewed_at = timezone.now()
+            v.save()
+
+            v.user.status = User.Status.ACTIVE
+            v.user.is_verified = True
+            v.user.save()
 
         return Response({"message": "Approved successfully"})
 
+
+
+# class RejectPanchayathView(APIView):
+#     permission_classes = [IsSuperAdmin]
+
+#     def post(self, request, pk):
+
+#         reason = request.data.get("reason")
+#         if not reason or len(reason.strip()) < 10:
+#             return Response(
+#                 {"error": "Rejection reason must be at least 10 characters."},
+#                 status=400
+#             )
+
+#         try:
+#             v = PanchayathVerification.objects.get(pk=pk)
+#         except PanchayathVerification.DoesNotExist:
+#             return Response({"error": "Not found"}, status=404)
+
+#         v.status = "REJECTED"
+#         v.reject_reason = reason
+#         v.reviewed_at = timezone.now()
+#         v.save()
+#         v.user.status = User.Status.SUSPENDED
+#         v.user.is_verified = False
+#         v.user.save()
+
+#         return Response({"message": "Rejected successfully"})
 
 
 class RejectPanchayathView(APIView):
@@ -143,6 +226,7 @@ class RejectPanchayathView(APIView):
     def post(self, request, pk):
 
         reason = request.data.get("reason")
+
         if not reason or len(reason.strip()) < 10:
             return Response(
                 {"error": "Rejection reason must be at least 10 characters."},
@@ -154,13 +238,14 @@ class RejectPanchayathView(APIView):
         except PanchayathVerification.DoesNotExist:
             return Response({"error": "Not found"}, status=404)
 
-        v.status = "REJECTED"
-        v.reject_reason = reason
-        v.reviewed_at = timezone.now()
-        v.save()
-        v.user.status = User.Status.SUSPENDED
-        v.user.is_verified = False
-        v.user.save()
+        with transaction.atomic():
+            v.status = "REJECTED"
+            v.reject_reason = reason.strip()
+            v.reviewed_at = timezone.now()
+            v.save()
+            v.user.status = User.Status.SUSPENDED
+            v.user.is_verified = False
+            v.user.save()
 
         return Response({"message": "Rejected successfully"})
     
@@ -207,21 +292,50 @@ class AdminPanchayathListView(APIView):
 
 
                              
+# class SuspendPanchayathView(APIView):
+#     permission_classes = [IsSuperAdmin]
+    
+#     def post(self,request,user_id):
+#         try:
+#             user = User.objects.get(id=user_id,role=User.Role.PANCHAYATH)
+#         except User.DoesNotExist:
+#             return Response({"error":"Panchayath not found"},status=404)
+        
+#         if user.status == User.Status.SUSPENDED:
+#             return Response({"error": "Already suspended"}, status=400)
+        
+#         user.status = User.Status.SUSPENDED
+#         user.save()
+#         return Response({"message":"Panchayath Suspended"})
+
+
 class SuspendPanchayathView(APIView):
     permission_classes = [IsSuperAdmin]
     
-    def post(self,request,user_id):
+    def post(self, request, user_id):
         try:
-            user = User.objects.get(id=user_id,role=User.Role.PANCHAYATH)
+            user = User.objects.get(id=user_id, role=User.Role.PANCHAYATH)
         except User.DoesNotExist:
-            return Response({"error":"Panchayath not found"},status=404)
+            return Response({"error": "Panchayath not found"}, status=404)
         
         if user.status == User.Status.SUSPENDED:
             return Response({"error": "Already suspended"}, status=400)
         
-        user.status = User.Status.SUSPENDED
-        user.save()
-        return Response({"message":"Panchayath Suspended"})
+        with transaction.atomic():
+            user.status = User.Status.SUSPENDED
+            user.is_verified = False
+            user.save(update_fields=["status", "is_verified"])
+            ward_verifications = WardVerification.objects.filter(
+                panchayath=user
+            )
+            ward_users = User.objects.filter(
+                id__in=ward_verifications.values_list("user_id", flat=True)
+            )
+            ward_users.update(
+                status=User.Status.SUSPENDED,
+                is_verified=False
+            )
+        return Response({"message": "Panchayath and its wards suspended"})
     
     
     
@@ -235,7 +349,8 @@ class ActivatePanchayathView(APIView):
         except User.DoesNotExist:
             return Response({"error":"Panchayath not found"},status=404)
         user.status = User.Status.ACTIVE
-        user.save()
+        user.is_verified = True
+        user.save(update_fields=["status", "is_verified"])
         return Response({"message":"Panchayath activated"})
 
 

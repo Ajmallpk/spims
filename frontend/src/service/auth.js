@@ -15,9 +15,20 @@ export const resendOtp = (data)=>{
 export const loginUser = (data) => {
   return axiosInstance.post("auth/login/authority/", data)
 }
-export const getblockverification = () => {
-  return axiosInstance.get("/api/admin/block_verifications/")
+
+export const forgotPassword = (data) =>{
+  return axiosInstance.post("auth/forgot-password/", data)
 }
+
+export const verifyResetOtp = (data) =>{
+  return axiosInstance.post("auth/verify-reset-otp/", data)
+}
+
+export const resetPassword = (data) =>{
+  return axiosInstance.post("auth/reset-password/", data)
+}
+  
+  
 
 
 

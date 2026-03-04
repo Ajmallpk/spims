@@ -4,8 +4,17 @@ import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { signupUser, verifyOtp, resendOtp, loginUser } from "@/service/auth"
+import {
+  signupUser,
+  verifyOtp,
+  resendOtp,
+  loginUser,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword
+} from "@/service/auth"
 import { replace, useNavigate } from "react-router-dom"
+
 import {
   Card,
   CardContent,
@@ -45,6 +54,16 @@ export function AuthForm() {
   const [remainingResends, setRemainingResends] = useState(3)
   const [timer, setTimer] = useState(60)
   const [canResend, setCanResend] = useState(false)
+  const [forgotMode, setForgotMode] = useState(false)
+  const [resetStep, setResetStep] = useState(1)
+  const [resetEmail, setResetEmail] = useState("")
+  const [resetOtp, setResetOtp] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmResetPassword, setConfirmResetPassword] = useState("")
+  const [resetTimer, setResetTimer] = useState(60)
+  const [resetCanResend, setResetCanResend] = useState(false)
+  const [resetRemainingResends, setResetRemainingResends] = useState(3)
+  const [isResetResending, setIsResetResending] = useState(false)
 
 
 
@@ -86,6 +105,22 @@ export function AuthForm() {
     return () => clearInterval(interval)
   }, [otpSent, timer])
 
+  useEffect(() => {
+    let interval
+
+    if (resetStep === 2 && resetTimer > 0) {
+      interval = setInterval(() => {
+        setResetTimer((prev) => prev - 1)
+      }, 1000)
+    }
+
+    if (resetTimer === 0) {
+      setResetCanResend(true)
+    }
+
+    return () => clearInterval(interval)
+  }, [resetStep, resetTimer])
+
   const validateLogin = useCallback(() => {
     const newErrors = {}
     if (!loginData.email.trim()) {
@@ -102,9 +137,11 @@ export function AuthForm() {
 
   const validateSignup = useCallback(() => {
     const newErrors = {}
+
     if (!signupData.fullName.trim()) {
       newErrors.fullName = "Full name is required"
     }
+
     if (!signupData.email.trim()) {
       newErrors.email = "Email is required"
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupData.email)) {
@@ -115,12 +152,22 @@ export function AuthForm() {
       newErrors.password = "Password is required"
     } else if (signupData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters"
+    } else if (!/[A-Z]/.test(signupData.password)) {
+      newErrors.password = "Must contain at least one uppercase letter"
+    } else if (!/[a-z]/.test(signupData.password)) {
+      newErrors.password = "Must contain at least one lowercase letter"
+    } else if (!/[0-9]/.test(signupData.password)) {
+      newErrors.password = "Must contain at least one number"
+    } else if (!/[!@#$%^&*]/.test(signupData.password)) {
+      newErrors.password = "Must contain a special character"
     }
+
     if (!signupData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password"
     } else if (signupData.password !== signupData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match"
     }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }, [signupData])
@@ -150,37 +197,37 @@ export function AuthForm() {
 
       // Check if ACTIVE
       const role = response.data.role
-      const isVerified = String(response.data.is_verified);
-
-      // if (role==="CITIZEN"){
-      //   navigate("/citizen",{ replace: true })
-      // }else if(role==="WARD"){
-      //   navigate("/ward",{replace:true})
-      // }else if(role==="PANCHAYATH"){
-      //   navigate("/panchayath",{replace:true})
-      // }else if(role=="BLOCK"){
-      //   navigate("/block",{replace:true})
-      // }
+      const isVerified = String(response.data.is_verified)
 
       if (response.data.status === "SUSPENDED") {
         alert("Your account is suspended.")
         return
       }
 
-      if (role === "PANCHAYATH") {
+      if (role === "WARD") {
+        if (isVerified === "true") {
+          navigate("/ward")
+        } else {
+          navigate("/ward/profile")
+        }
+
+      } else if (role === "PANCHAYATH") {
         if (isVerified === "true") {
           navigate("/panchayath")
         } else {
           navigate("/panchayath/profile")
         }
+
       } else {
-        alert("this modules not built yet")
+        alert("Role not supported yet")
       }
 
 
     } catch (error) {
       console.log(error)
-      alert(error.response?.data?.detail || "Login failed")
+      setErrors({
+        password: error.response?.data?.detail || "Invalid email or password"
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -216,6 +263,30 @@ export function AuthForm() {
   }
 
   ////////////////////////////////
+
+  const validateResetPassword = () => {
+    const newErrors = {}
+
+    if (!newPassword) {
+      newErrors.newPassword = "Password is required"
+    } else if (newPassword.length < 8) {
+      newErrors.newPassword = "Password must be at least 8 characters"
+    } else if (!/[A-Z]/.test(newPassword)) {
+      newErrors.newPassword = "Must contain at least one uppercase letter"
+    } else if (!/[0-9]/.test(newPassword)) {
+      newErrors.newPassword = "Must contain at least one number"
+    } else if (!/[!@#$%^&*]/.test(newPassword)) {
+      newErrors.newPassword = "Must contain a special character"
+    }
+    if (!confirmResetPassword) {
+      newErrors.confirmResetPassword = "Please confirm your password"
+    } else if (newPassword !== confirmResetPassword) {
+      newErrors.confirmResetPassword = "Passwords do not match"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault()
@@ -274,7 +345,192 @@ export function AuthForm() {
     setShowConfirmPassword(false)
   }
 
+  const handleForgotPassword = async () => {
+    try {
+      await forgotPassword({ email: resetEmail })
+      alert("OTP sent to email")
+
+      setResetStep(2)
+
+      setResetTimer(60)
+      setResetCanResend(false)
+
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed")
+    }
+  }
+
+  const handleVerifyResetOtp = async () => {
+    try {
+      await verifyResetOtp({
+        email: resetEmail,
+        otp: resetOtp,
+      })
+      alert("OTP verified")
+      setResetStep(3)
+    } catch (error) {
+      alert(error.response?.data?.error || "Invalid OTP")
+    }
+  }
+
+  const handleResetPassword = async () => {
+
+    if (!validateResetPassword()) return
+
+    try {
+      await resetPassword({
+        email: resetEmail,
+        new_password: newPassword,
+        confirm_password: confirmResetPassword
+      })
+
+      alert("Password reset successful")
+      setForgotMode(false)
+      setMode("login")
+
+    } catch (error) {
+      alert(error.response?.data?.error || "Reset failed")
+    }
+  }
+
+  const handleResendResetOtp = async () => {
+    if (!resetCanResend || isResetResending) return
+
+    setIsResetResending(true)
+
+    try {
+      const response = await forgotPassword({
+        email: resetEmail
+      })
+
+      alert("OTP resent successfully")
+
+      setResetTimer(60)
+      setResetCanResend(false)
+
+    } catch (error) {
+      alert(error.response?.data?.error || "Resend failed")
+    } finally {
+      setIsResetResending(false)
+    }
+  }
+
+
+
   // Success state after OTP verification
+  if (forgotMode) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col gap-4 p-6">
+
+          {resetStep === 1 && (
+            <>
+              <h3>Enter Email</h3>
+
+              <Input
+                placeholder="Enter your email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+
+              <Button onClick={handleForgotPassword}>
+                Send OTP
+              </Button>
+            </>
+          )}
+
+          {resetStep === 2 && (
+            <>
+              <h3>Verify OTP</h3>
+
+              <Input
+                placeholder="Enter OTP"
+                value={resetOtp}
+                onChange={(e) => setResetOtp(e.target.value)}
+              />
+
+              <div className="flex justify-between text-xs mt-2">
+
+                {resetCanResend ? (
+                  <button
+                    type="button"
+                    onClick={handleResendResetOtp}
+                    className="text-primary hover:underline"
+                  >
+                    {isResetResending ? "Resending..." : "Resend OTP"}
+                  </button>
+                ) : (
+                  <span className="text-muted-foreground">
+                    Resend OTP in {resetTimer}s
+                  </span>
+                )}
+
+              </div>
+
+              <Button onClick={handleVerifyResetOtp}>
+                Verify OTP
+              </Button>
+            </>
+          )}
+
+          {resetStep === 3 && (
+            <>
+              <h3>Reset Password</h3>
+
+              <Input
+                type="password"
+                placeholder="New password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value)
+                  if (errors.newPassword) {
+                    setErrors({ ...errors, newPassword: undefined })
+                  }
+                }}
+              />
+
+              {errors.newPassword && (
+                <p className="text-xs text-red-500">{errors.newPassword}</p>
+              )}
+
+              <Input
+                type="password"
+                placeholder="Confirm password"
+                value={confirmResetPassword}
+                onChange={(e) => {
+                  setConfirmResetPassword(e.target.value)
+                  if (errors.confirmResetPassword) {
+                    setErrors({ ...errors, confirmResetPassword: undefined })
+                  }
+                }}
+              />
+
+              {errors.confirmResetPassword && (
+                <p className="text-xs text-red-500">
+                  {errors.confirmResetPassword}
+                </p>
+              )}
+
+              <Button onClick={handleResetPassword}>
+                Reset Password
+              </Button>
+            </>
+          )}
+
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setForgotMode(false)
+              setResetStep(1)
+            }}
+          >
+            Back to Login
+          </Button>
+
+        </CardContent>
+      </Card>
+    )
+  }
   if (otpVerified) {
     return (
       <Card className="w-full max-w-md border-border shadow-md">
@@ -309,6 +565,22 @@ export function AuthForm() {
       </Card>
     )
   }
+
+  const getPasswordStrength = (password) => {
+    let score = 0
+
+    if (password.length >= 8) score++
+    if (/[A-Z]/.test(password)) score++
+    if (/[a-z]/.test(password)) score++
+    if (/[0-9]/.test(password)) score++
+    if (/[!@#$%^&*]/.test(password)) score++
+
+    if (score <= 2) return "weak"
+    if (score === 3 || score === 4) return "medium"
+    return "strong"
+  }
+
+  const passwordStrength = getPasswordStrength(signupData.password)
 
   return (
     <Card className="w-full max-w-md border-border shadow-md">
@@ -351,7 +623,9 @@ export function AuthForm() {
           </button>
         </div>
 
+
         {/* Login Form */}
+
         {mode === "login" && (
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             {/* Email */}
@@ -408,9 +682,19 @@ export function AuthForm() {
                   )}
                 </button>
               </div>
+              <p className="text-right text-xs">
+                <button
+                  type="button"
+                  onClick={() => setForgotMode(true)}
+                  className="text-primary hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </p>
               {errors.password && (
                 <p className="text-xs text-destructive">{errors.password}</p>
               )}
+
             </div>
 
             {/* Role Selector */}
@@ -516,30 +800,6 @@ export function AuthForm() {
               )}
             </div>
 
-            {/* Phone */}
-            {/* <div className="flex flex-col gap-2">
-              <Label htmlFor="signup-phone">Phone Number</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="signup-phone"
-                  type="tel"
-                  placeholder="10-digit phone number"
-                  className="pl-10"
-                  value={signupData.phone}
-                  onChange={(e) => {
-                    setSignupData({ ...signupData, phone: e.target.value })
-                    if (errors.phone)
-                      setErrors({ ...errors, phone: undefined })
-                  }}
-                  disabled={otpSent}
-                  aria-invalid={!!errors.phone}
-                />
-              </div>
-              {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
-              )}
-            </div> */}
 
             {/* Password */}
             <div className="flex flex-col gap-2">
@@ -549,7 +809,7 @@ export function AuthForm() {
                 <Input
                   id="signup-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Min. 8 characters"
+                  placeholder="Min 8 chars, 1 uppercase, 1 number, 1 special char"
                   className="pl-10 pr-10"
                   value={signupData.password}
                   onChange={(e) => {
@@ -575,6 +835,23 @@ export function AuthForm() {
               </div>
               {errors.password && (
                 <p className="text-xs text-destructive">{errors.password}</p>
+              )}
+              {signupData.password && (
+                <div className="mt-1 text-xs font-medium">
+
+                  {passwordStrength === "weak" && (
+                    <span className="text-red-500">Weak 🔴</span>
+                  )}
+
+                  {passwordStrength === "medium" && (
+                    <span className="text-yellow-500">Medium 🟡</span>
+                  )}
+
+                  {passwordStrength === "strong" && (
+                    <span className="text-green-500">Strong 🟢</span>
+                  )}
+
+                </div>
               )}
             </div>
 

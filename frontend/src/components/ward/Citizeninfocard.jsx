@@ -1,4 +1,4 @@
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "@/components/ward/StatusBadge";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";

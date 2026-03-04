@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.adminpanel",
     'apps.ward',
     'apps.citizen',
+    "apps.complaints",
     
     
 ]

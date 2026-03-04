@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import StatsGrid from "../components/StatsGrid";
-import VerificationAlertSection from "../components/VerificationAlertSection";
+import StatsGrid from "@/components/ward/Statsgrid";
+import VerificationAlertSection from "@/components/ward/Verificationalertsection";
+import wardapi from "@/service/wardurls";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
 
 export default function WardDashboard() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("access");
 
   const [stats, setStats] = useState(null);
   const [verifications, setVerifications] = useState([]);
@@ -22,12 +22,8 @@ export default function WardDashboard() {
   const fetchDashboardStats = async () => {
     try {
       setIsLoadingStats(true);
-      const res = await fetch(`${API_BASE}/api/ward/dashboard-stats/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setStats(data);
+      const res = await wardapi.dashboard();
+      setStats(res.data);
     } catch (err) {
       console.error("Failed to fetch dashboard stats:", err);
     } finally {
@@ -38,12 +34,8 @@ export default function WardDashboard() {
   const fetchRecentVerifications = async () => {
     try {
       setIsLoadingVerifications(true);
-      const res = await fetch(`${API_BASE}/api/ward/recent-citizen-verifications/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setVerifications(Array.isArray(data) ? data.slice(0, 5) : data.results?.slice(0, 5) ?? []);
+      const res = await wardapi.recentVerifications();
+      setVerifications(res.data ?? []);
     } catch (err) {
       console.error("Failed to fetch recent verifications:", err);
     } finally {

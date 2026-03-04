@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import CitizenVerificationTable from "../components/CitizenVerificationTable";
-import CitizenApprovalModal from "../components/CitizenApprovalModal";
+import CitizenVerificationTable from "@/components/ward/Citizenverificationtable";
+import CitizenApprovalModal from "@/components/ward/Citizenapprovalmodal";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 

@@ -13,12 +13,16 @@ class IsPanchayath(BasePermission):
 
 
 class IsActivePanchayath(BasePermission):
+
     def has_permission(self, request, view):
+
+        if not request.user or not request.user.is_authenticated:
+            return False
+        user = User.objects.get(id=request.user.id)
         return (
-            request.user.is_authenticated and
-            request.user.role == User.Role.PANCHAYATH and
-            request.user.status == User.Status.ACTIVE and
-            request.user.is_verified is True
+            user.role == User.Role.PANCHAYATH
+            and user.status == User.Status.ACTIVE
+            and user.is_verified is True
         )
         
         

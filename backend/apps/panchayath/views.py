@@ -9,6 +9,7 @@ from .models import PanchayathVerification
 from apps.ward.models import WardVerification
 from django.utils import timezone
 from django.db.models import Count, Q
+from django.db import transaction
 
 
 User = get_user_model()
@@ -131,6 +132,7 @@ class PanchayathWardListView(APIView):
                 "email": ward.user.email,
                 "phone": ward.phone,
                 "district": ward.district,
+                "approved_at": ward.reviewed_at,
                 "submitted_at": ward.submitted_at,
             })
 
@@ -152,6 +154,14 @@ class WardVerificationDetailView(APIView):
             )
         except WardVerification.DoesNotExist:
             return Response({"error": "Ward not found"}, status=404)
+        
+        documents = []
+
+        if ward.aadhaar_image:
+            documents.append(ward.aadhaar_image.url)
+
+        if ward.selfie_image:
+            documents.append(ward.selfie_image.url)
 
         return Response({
             "id": ward.id,
@@ -162,10 +172,33 @@ class WardVerificationDetailView(APIView):
             "district": ward.district,
             "status": ward.status,
             "reject_reason": ward.reject_reason,
-            "aadhaar_image": ward.aadhaar_image.url if ward.aadhaar_image else None,
-            "selfie_image": ward.selfie_image.url if ward.selfie_image else None,
+            "documents": documents,
             "submitted_at": ward.submitted_at,
         })
+
+
+
+# class ApproveWardView(APIView):
+#     permission_classes = [IsActivePanchayath]
+
+#     def post(self, request, pk):
+
+#         user = request.user
+
+#         try:
+#             ward = WardVerification.objects.get(
+#                 pk=pk,
+#                 panchayath=user
+#             )
+#         except WardVerification.DoesNotExist:
+#             return Response({"error": "Ward not found"}, status=404)
+
+#         ward.status = "APPROVED"
+#         ward.save()
+#         ward.user.status = User.Status.ACTIVE
+#         ward.user.save()
+
+#         return Response({"message": "Ward approved successfully"})
 
 
 
@@ -184,13 +217,54 @@ class ApproveWardView(APIView):
         except WardVerification.DoesNotExist:
             return Response({"error": "Ward not found"}, status=404)
 
-        ward.status = "APPROVED"
-        ward.save()
-        ward.user.status = User.Status.ACTIVE
-        ward.user.save()
+        with transaction.atomic():
+            if ward.status != "PENDING":
+                return Response(
+                    {"error": "This ward request has already been reviewed."},
+                    status=400
+                )
+
+            ward.status = "APPROVED"
+            ward.reviewed_at = timezone.now()
+            ward.reject_reason = None
+            ward.save()
+
+            ward.user.status = User.Status.ACTIVE
+            ward.user.is_verified = True
+            ward.user.save()
 
         return Response({"message": "Ward approved successfully"})
 
+
+
+# class RejectWardView(APIView):
+#     permission_classes = [IsActivePanchayath]
+
+#     def post(self, request, pk):
+
+#         user = request.user
+#         reason = request.data.get("reason")
+#         if not reason or len(reason.strip()) < 10:
+#             return Response(
+#                 {"error": "Rejection reason must be at least 10 characters"},
+#                 status=400
+#             )
+
+#         try:
+#             ward = WardVerification.objects.get(
+#                 pk=pk,
+#                 panchayath=user
+#             )
+#         except WardVerification.DoesNotExist:
+#             return Response({"error": "Ward not found"}, status=404)
+
+#         ward.status = "REJECTED"
+#         ward.reject_reason = reason
+#         ward.save()
+#         ward.user.status = User.Status.SUSPENDED
+#         ward.user.save()
+
+#         return Response({"message": "Ward rejected successfully"})
 
 
 class RejectWardView(APIView):
@@ -200,6 +274,7 @@ class RejectWardView(APIView):
 
         user = request.user
         reason = request.data.get("reason")
+
         if not reason or len(reason.strip()) < 10:
             return Response(
                 {"error": "Rejection reason must be at least 10 characters"},
@@ -214,11 +289,19 @@ class RejectWardView(APIView):
         except WardVerification.DoesNotExist:
             return Response({"error": "Ward not found"}, status=404)
 
-        ward.status = "REJECTED"
-        ward.reject_reason = reason
-        ward.save()
-        ward.user.status = User.Status.SUSPENDED
-        ward.user.save()
+        with transaction.atomic():
+            if ward.status != "PENDING":
+                return Response(
+                    {"error": "This ward request has already been reviewed."},
+                    status=400
+                )
+            ward.status = "REJECTED"
+            ward.reject_reason = reason.strip()
+            ward.reviewed_at = timezone.now()
+            ward.save()
+            ward.user.status = User.Status.SUSPENDED
+            ward.user.is_verified = False
+            ward.user.save()
 
         return Response({"message": "Ward rejected successfully"})
     

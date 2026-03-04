@@ -17,5 +17,6 @@ class IsActiveWard(BasePermission):
         return (
             request.user.is_authenticated and
             request.user.role == User.Role.WARD and
-            request.user.status == User.Status.ACTIVE
+            request.user.status == User.Status.ACTIVE and
+            request.user.is_verified == True
         )

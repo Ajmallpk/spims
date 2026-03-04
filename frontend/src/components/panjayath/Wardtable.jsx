@@ -204,7 +204,7 @@ export default function WardTable({ wards, isLoading }) {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
             : wards.map((ward) => (
-                <WardRow key={ward.id ?? ward.ward_id ?? ward.email} ward={ward} />
+                <WardRow key={ward.id} ward={ward} />
               ))}
         </tbody>
       </table>

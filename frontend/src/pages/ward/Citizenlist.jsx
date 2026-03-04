@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import CitizenTable from "../components/CitizenTable";
-import SearchBar from "../components/SearchBar";
-import Pagination from "../components/Pagination";
+import CitizenTable from "@/components/ward/Citizentable";
+import SearchBar from "@/components/ward/Searchbar";
+import Pagination from "@/components/panjayath/Pagination";
+import wardapi from "@/service/wardurls";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
 
 export default function CitizenList() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("access");
 
   const [citizens, setCitizens] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,36 +20,20 @@ export default function CitizenList() {
   const fetchCitizens = useCallback(async (page, search) => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams({
-        status: "approved",
-        page: String(page),
-        ...(search ? { search } : {}),
-      });
 
-      const res = await fetch(`${API_BASE}/api/ward/citizens/?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await wardapi.getCitizens(page, search);
+      const data = res.data;
 
-      const data = await res.json();
+      setCitizens(data.results ?? []);
+      setTotalCount(data.count ?? 0);
+      setTotalPages(Math.ceil((data.count ?? 0) / 10) || 1);
 
-      // Support both paginated { results, count } and plain array responses
-      if (Array.isArray(data)) {
-        setCitizens(data);
-        setTotalPages(1);
-        setTotalCount(data.length);
-      } else {
-        setCitizens(data.results ?? []);
-        setTotalCount(data.count ?? 0);
-        const pageSize = data.results?.length || 10;
-        setTotalPages(Math.ceil((data.count ?? 0) / pageSize) || 1);
-      }
     } catch (err) {
       console.error("Failed to fetch citizens:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchCitizens(currentPage, searchQuery);

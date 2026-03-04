@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import CitizenStatsGrid from "../components/CitizenStatsGrid";
-import CitizenInfoCard from "../components/CitizenInfoCard";
-import ComplaintHistoryTable from "../components/ComplaintHistoryTable";
+import CitizenStatsGrid from "@/components/ward/Citizenstatsgrid";
+import CitizenInfoCard from "@/components/ward/Citizeninfocard";
+import ComplaintHistoryTable from "@/components/ward/Complainthistorytable";
+import wardapi from "@/service/wardurls";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 export default function CitizenDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("access");
 
   const [citizenData, setCitizenData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,9 +23,8 @@ export default function CitizenDetails() {
     try {
       setIsLoading(true);
       setNotFound(false);
-      const res = await fetch(`${API_BASE}/api/ward/citizen/${id}/details/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await wardapi.getCitizenDetails(id);
+      setCitizen(res.data);
       if (res.status === 404) { setNotFound(true); return; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();

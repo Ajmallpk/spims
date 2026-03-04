@@ -36,7 +36,7 @@ def verify_otp(email, entered_otp, purpose):
     if data["attempts"] >= MAX_ATTEMPTS:
         return False, "Too many attempts"
 
-    if data["otp"] != entered_otp:
+    if str(data["otp"]) != str(entered_otp):
         data["attempts"] += 1
         cache.set(key, data, timeout=OTP_EXPIRY)
         return False, "Invalid OTP"

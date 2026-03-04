@@ -1,4 +1,4 @@
-import StatCard from "./StatCard";
+import StatCard from "@/components/ward/StatCard";
 
 export default function StatsGrid({ stats, isLoading }) {
   if (isLoading) {

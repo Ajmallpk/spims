@@ -1,4 +1,4 @@
-import DetailStatCard from "./DetailStatCard";
+import DetailStatCard from "@/components/ward/DetailStatCard";
 
 export default function CitizenStatsGrid({ stats, isLoading }) {
   const cards = [
