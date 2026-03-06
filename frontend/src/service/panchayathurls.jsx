@@ -24,8 +24,17 @@ const panchayathApi = {
   wardVerifications: () => {return axiosInstance.get("/panchayath/ward-verifications/");},
   submitVerification: (formData) => {return axiosInstance.post("/panchayath/submit-verification/",formData,{headers: {"Content-Type": "multipart/form-data",},});},
   approveWard: (id) => {return axiosInstance.post(`/panchayath/approve-ward/${id}/`);},
-  rejectWard: (id, reason) => {return axiosInstance.post(`/panchayath/reject-ward/${id}/`, {reason,});},
-  listWard:()=> {return axiosInstance.get("/panchayath/wards/")}
+  rejectWard: (id, reason) =>{return axiosInstance.post(`/panchayath/reject-ward/${id}/`, {reason: reason})},
+  listWard:()=> {return axiosInstance.get("/panchayath/wards/")},
+  wardDetail: (id) =>{return axiosInstance.get(`/panchayath/ward/${id}/`)},
+  handleAuthError:(err) => {
+  if (err.response?.status === 401) {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+
+    window.location.href = "/login";
+  }
+}
 
 };
 

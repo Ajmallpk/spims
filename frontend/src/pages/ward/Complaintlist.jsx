@@ -4,7 +4,7 @@ import ComplaintTable from "@/components/ward/Complainttable";
 import ComplaintFilter from "@/components/ward/Complaintfilter";
 import SearchBar from "@/components/ward/Searchbar";
 import Pagination from "@/components/panjayath/Pagination";
-
+import toast from "react-hot-toast";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 export default function ComplaintList() {
@@ -43,7 +43,7 @@ export default function ComplaintList() {
         setTotalPages(Math.ceil((data.count ?? 0) / pageSize) || 1);
       }
     } catch (err) {
-      console.error("Failed to fetch complaints:", err);
+      toast.error("Failed to fetch complaints:", err);
     } finally {
       setIsLoading(false);
     }

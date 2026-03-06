@@ -3,6 +3,7 @@ import { adminapi } from "@/service/adminurls";
 import StatsGrid from "@/components/admin/Statsgrid";
 import VerificationAlertSection from "@/components/admin/Verificationalertsection";
 import CriticalAlertSection from "@/components/admin/Criticalalertsection";
+import toast from "react-hot-toast";
 
 
 const AdminDashboard = () => {
@@ -20,7 +21,7 @@ const AdminDashboard = () => {
         const { data } = await adminapi.dashboard()
         setStats(data);
       } catch (err) {
-        console.error("Error fetching dashboard stats:", err);
+        toast.error("Error fetching dashboard stats:", err);
       } finally {
         setLoadingStats(false);
       }
@@ -31,7 +32,7 @@ const AdminDashboard = () => {
         const { data } = await adminapi.recentVerification()
         setVerifications(data);
       } catch (err) {
-        console.error("Error fetching recent verifications:", err);
+        toast.error("Error fetching recent verifications:", err);
       } finally {
         setLoadingVerifications(false);
       }
@@ -42,7 +43,7 @@ const AdminDashboard = () => {
         const { data } = await adminapi.criticalAlert()
         setCriticalAlerts(data);
       } catch (err) {
-        console.error("Error fetching critical alerts:", err);
+        toast.error("Error fetching critical alerts:", err);
       } finally {
         setLoadingAlerts(false);
       }

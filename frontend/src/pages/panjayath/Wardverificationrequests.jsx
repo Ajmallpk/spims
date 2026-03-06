@@ -9,14 +9,13 @@
 import { useState, useEffect, useCallback } from "react";
 import panchayathApi from "@/service/panchayathurls";
 import WardApprovalModal from "@/components/panjayath/Wardapprovalmodal";
-import StatusBadge from "@/components/panjayath/Statusbadge";
-
+import StatusBadge from "@/components/panjayath/StatusBadge";
+// import { handleAuthError } from "@/service/panchayathurls";
+import toast from "react-hot-toast";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getAuthHeader() {
-  const token = localStorage.getItem("access");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+
+
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -54,9 +53,8 @@ function Toast({ message, type, onDismiss }) {
     >
       {/* Icon */}
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-          isSuccess ? "bg-emerald-100" : "bg-rose-100"
-        }`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isSuccess ? "bg-emerald-100" : "bg-rose-100"
+          }`}
       >
         {isSuccess ? (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 text-emerald-600">
@@ -159,18 +157,16 @@ function FilterTab({ label, count, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 ${
-        active
+      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 ${active
           ? "bg-blue-600 text-white shadow-sm"
           : "text-slate-500 hover:bg-slate-100"
-      }`}
+        }`}
     >
       {label}
       {count !== undefined && (
         <span
-          className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-            active ? "bg-white/20 text-white" : "bg-slate-200 text-slate-600"
-          }`}
+          className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${active ? "bg-white/20 text-white" : "bg-slate-200 text-slate-600"
+            }`}
         >
           {count}
         </span>
@@ -203,12 +199,13 @@ export default function WardVerificationRequests() {
       setRequests(Array.isArray(data) ? data : (data.results ?? []));
     } catch (err) {
       if (err.response?.status === 401) {
-        console.error("Unauthorized: JWT may be expired.");
+         panchayathApi.handleAuthError(err);
+        toast.error("Unauthorized: JWT may be expired.");
       }
       setFetchError(
         err.response?.data?.detail ||
-          err.message ||
-          "An unexpected error occurred while fetching requests."
+        err.message ||
+        "An unexpected error occurred while fetching requests."
       );
     } finally {
       setIsLoading(false);
@@ -226,8 +223,10 @@ export default function WardVerificationRequests() {
       rejected: "Ward verification has been rejected with reason.",
     };
     setToast({ message: messages[action] ?? "Action completed.", type: "success" });
-    fetchRequests(); 
-    window.dispatchEvent(new Event("ward-status-updated"));
+    fetchRequests();
+    setTimeout(() => {
+      window.dispatchEvent(new Event("ward-status-updated"));
+    }, 300);
   };
 
 
@@ -436,7 +435,7 @@ export default function WardVerificationRequests() {
 
                     {/* Status */}
                     <td className="px-5 py-4">
-                      <StatusBadge status={ward.status} />
+                      <StatusBadge status={ward.status || "PENDING"} />
                     </td>
 
                     {/* Action */}

@@ -11,14 +11,12 @@ class CitizenVerification(models.Model):
         ("REJECTED", "Rejected"),
     ]
 
-    # Link to Citizen user
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="citizen_verification"
     )
 
-    # Link to Ward user
     ward = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -61,3 +59,30 @@ class CitizenVerification(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.status}"
+    
+    
+    
+from django.db import models
+from django.conf import settings
+
+
+class CitizenProfile(models.Model):
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="citizen_profile"
+    )
+
+    profile_image = models.ImageField(
+        upload_to="citizen/profile/",
+        null=True,
+        blank=True
+    )
+
+    bio = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.email

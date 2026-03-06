@@ -8,6 +8,7 @@
 
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "@/components/panjayath/StatusBadge";
+import React from "react";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -53,7 +54,7 @@ function SkeletonRow() {
 
 // ─── Data Row ─────────────────────────────────────────────────────────────────
 
-function WardRow({ ward }) {
+const WardRow = React.memo(function WardRow({ ward }) {
   const navigate = useNavigate();
   const name = ward.ward_name || ward.name || "—";
   const initials = name
@@ -163,7 +164,7 @@ function WardRow({ ward }) {
       </td>
     </tr>
   );
-}
+})
 
 // ─── Main Table Component ─────────────────────────────────────────────────────
 

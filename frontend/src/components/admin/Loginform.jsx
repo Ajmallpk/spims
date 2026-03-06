@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import LoginInput from "@/components/admin/Logininput";
 import LoginButton from "@/components/admin/Loginbutton";
 import { adminapi } from "@/service/adminurls";
+import toast from "react-hot-toast";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const LoginForm = () => {
 
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      console.error("Login error:", err);
+      toast.error("Login error:", err);
 
       const status = err.response?.status;
       const detail =

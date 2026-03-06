@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import panchayathApi from "@/api/panchayathApi";
+import { handleAuthError } from "@/service/panchayathurls";
+import toast from "react-hot-toast";
 
 export default function WardDetail() {
   const { id } = useParams();
@@ -16,7 +18,8 @@ export default function WardDetail() {
         const res = await panchayathApi.wardDetail(id);
         setWard(res.data);
       } catch (err) {
-        console.error("Ward detail error:", err);
+        handleAuthError(err);
+        toast.error("Ward detail error:", err);
         setError("Failed to load ward details.");
       } finally {
         setIsLoading(false);
@@ -60,9 +63,9 @@ export default function WardDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <DetailItem label="Email" value={ward.email} />
-          <DetailItem label="Phone" value={ward.phone} />
+          <DetailItem label="Contact" value={ward.official_contact} />
           <DetailItem label="Status" value={ward.status} />
-          <DetailItem label="Joined Date" value={formatDate(ward.joined_at)} />
+          <DetailItem label="Joined Date" value={formatDate(ward.date_joined)} />
 
         </div>
       </div>

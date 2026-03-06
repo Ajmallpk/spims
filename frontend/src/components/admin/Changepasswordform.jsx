@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle } from "lucide-react";
-
+import toast from "react-hot-toast";
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
 });
@@ -117,7 +117,7 @@ const ChangePasswordForm = () => {
       setForm({ current_password: "", new_password: "", confirm_password: "" });
       setErrors({});
     } catch (err) {
-      console.error("Error changing password:", err);
+      toast.error("Error changing password:", err);
       const msg =
         err.response?.data?.detail ||
         err.response?.data?.message ||

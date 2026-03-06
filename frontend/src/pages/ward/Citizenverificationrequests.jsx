@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import CitizenVerificationTable from "@/components/ward/Citizenverificationtable";
 import CitizenApprovalModal from "@/components/ward/Citizenapprovalmodal";
+import toast from "react-hot-toast";
+
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -23,7 +25,7 @@ export default function CitizenVerificationRequests() {
       const data = await res.json();
       setRequests(Array.isArray(data) ? data : (data.results ?? []));
     } catch (err) {
-      console.error("Failed to fetch citizen verifications:", err);
+      toast.error("Failed to fetch citizen verifications:", err);
     } finally {
       setIsLoading(false);
     }

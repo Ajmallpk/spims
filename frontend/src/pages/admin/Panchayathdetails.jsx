@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -54,7 +55,7 @@ const PanchayathDetails = () => {
         );
         setData(res);
       } catch (err) {
-        console.error("Error fetching panchayath details:", err);
+        toast.error("Error fetching panchayath details:", err);
       } finally {
         setLoading(false);
       }

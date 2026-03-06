@@ -71,14 +71,17 @@
 
 
 
-
+import toast from "react-hot-toast";
 import axios from "axios";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 const axiosInstance = axios.create({
   baseURL: "http://127.0.0.1:8000/api/",
 });
 
 axiosInstance.interceptors.request.use((config) => {
+  NProgress.start();
   const token = localStorage.getItem("access");
 
   const isAuthRoute =
@@ -99,18 +102,22 @@ axiosInstance.interceptors.request.use((config) => {
 
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    NProgress.done();
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+    const url = originalRequest?.url || "";
 
     const isAuthRoute =
-      originalRequest.url.includes("auth/login") ||
-      originalRequest.url.includes("auth/signup") ||
-      originalRequest.url.includes("auth/verify-otp") ||
-      originalRequest.url.includes("auth/resend-otp") ||
-      originalRequest.url.includes("auth/forgot-password") ||
-      originalRequest.url.includes("auth/verify-reset-otp") ||
-      originalRequest.url.includes("auth/reset-password");
+      url.includes("auth/login") ||
+      url.includes("auth/signup") ||
+      url.includes("auth/verify-otp") ||
+      url.includes("auth/resend-otp") ||
+      url.includes("auth/forgot-password") ||
+      url.includes("auth/verify-reset-otp") ||
+      url.includes("auth/reset-password");
 
     if (isAuthRoute) {
       return Promise.reject(error);
@@ -122,7 +129,8 @@ axiosInstance.interceptors.response.use(
       const refresh = localStorage.getItem("refresh");
 
       if (!refresh) {
-        localStorage.clear();
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
         window.location.href = "/login";
         return Promise.reject(error);
       }
@@ -142,12 +150,37 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
 
       } catch (refreshError) {
-        localStorage.clear();
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
 
+    if (error.response) {
+      const status = error.response.status;
+
+      if (status === 403) {
+        toast.error("You don't have permission to perform this action.");
+      }
+
+      else if (status === 404) {
+        toast.error("Requested resource not found.");
+      }
+
+      else if (status === 500) {
+        toast.error("Server error. Please try again later.");
+      }
+
+      else if (status !== 401) {
+        toast.error(error.response.data?.detail || "Request failed.");
+      }
+
+    } else {
+      toast.error("Network error. Please check your internet connection.");
+    }
+
+    NProgress.done();
     return Promise.reject(error);
   }
 );

@@ -1,6 +1,11 @@
 import { Routes, Route } from "react-router-dom"
 import LandingPage from '@/pages/common/LandingPage'
 import Authentication from '@/pages/common/Authentication'
+import VerificationGuard from "@/components/panjayath/VerificationGuard"
+import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "@/routes/ProtectedRoute";
+import CitizenProtectedRoute from "./routes/CitizenProtectedRouters";
+import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 
 
 
@@ -20,7 +25,6 @@ import PanchayathDetail from "./pages/admin/PanchayathDetail"
 
 /* ───────── PANCHAYATH MODULE ───────── */
 import PanchayathLayout from "@/layouts/panjayath/PanchayathLayout";
-
 import PanchayathDashboard from "@/pages/panjayath/PanchayathDashboard";
 import PanchayathProfile from "@/pages/panjayath/PanchayathProfile";
 import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests";
@@ -44,69 +48,160 @@ import ComplaintDetails from "@/pages/ward/ComplaintDetails";
 // citizen pages 
 
 import AuthPage from "@/pages/citizen/AuthPage"
+import CitizenLayout from "@/layouts/citizen/CitizenLayout";
+import CitizenProfile from "@/pages/citizen/CitizenProfile";
+import Home from "@/pages/citizen/Home";
+import CitizenVerification from "@/pages/citizen/CitizenVerification";
+import PostIssue from "./pages/citizen/PostIssue";
 
 
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <Toaster position="top-right" />
+      <Routes>
 
-      <Route path="/citizen/registration" element={<AuthPage />} />
+        <Route path="/citizen/registration" element={<AuthPage />} />
 
       // PUBLIC ROUTES FOR AUTHORITY //
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Authentication />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Authentication />} />
 
       // ADMIN LOGIN (NO LAYOUT) //
-      <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
+
+        {/* ───────── CITIZEN ROUTES ───────── */}
+
+        <Route
+          path="/citizen"
+          element={
+            <CitizenProtectedRoute>
+              <CitizenLayout />
+            </CitizenProtectedRoute>
+          }
+        >
+
+          <Route index element={<Home />} />
+          <Route path="home" element={<Home />} />
+
+          <Route path="post-issue" element={<PostIssue />} />
+
+          <Route path="verification" element={<CitizenVerification />} />
+
+          <Route path="profile" element={<CitizenProfile />} />
+
+          {/* <Route path="messages" element={<Messages />} /> */}
+
+          {/* <Route path="notifications" element={<Notifications />} /> */}
+
+          {/* <Route path="explore" element={<ExploreIssues />} /> */}
+
+          {/* <Route path="insights" element={<Insights />} /> */}
+
+        </Route>
 
 
 
 
       //PANCHAYATH ROUTES //
 
-      <Route path="/panchayath" element={<PanchayathLayout />}>
-        <Route index element={<PanchayathDashboard />} />
-        <Route path="dashboard" element={<PanchayathDashboard />} />
-        <Route path="profile" element={<PanchayathProfile />} />
-        <Route path="ward-verifications" element={<WardVerificationRequests />} />
-        <Route path="wards" element={<WardList />} />
-        {/* <Route path="ward/:id" element={<WardDetail />} /> */}
+        <Route
+          path="/panchayath"
+          element={
+            <ProtectedRoute allowedRoles={["PANCHAYATH"]}>
+              <PanchayathLayout />
+            </ProtectedRoute>
+          }
+        >
 
-      </Route>
+          <Route
+            index
+            element={
+              <VerificationGuard>
+                <PanchayathDashboard />
+              </VerificationGuard>
+            }
+          />
+
+          <Route
+            path="dashboard"
+            element={
+              <VerificationGuard>
+                <PanchayathDashboard />
+              </VerificationGuard>
+            }
+          />
+
+          <Route path="profile" element={<PanchayathProfile />} />
+
+          <Route
+            path="ward-verifications"
+            element={
+              <VerificationGuard>
+                <WardVerificationRequests />
+              </VerificationGuard>
+            }
+          />
+
+          <Route
+            path="wards"
+            element={
+              <VerificationGuard>
+                <WardList />
+              </VerificationGuard>
+            }
+          />
+
+        </Route>
 
 
       //ADMIN ROUTES//
 
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminDashboard />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="panchayath-verifications" element={<PanchayathVerificationRequests />} />
-        <Route path="panchayaths" element={<PanchayathList />} />
-        <Route path="wards" element={<AdminWardList />} />
-        <Route path="profile" element={<AdminProfile />} />
-        <Route path="/admin/panchayaths/:id" element={<PanchayathDetail />} />
-      </Route>
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="panchayath-verifications" element={<PanchayathVerificationRequests />} />
+          <Route path="panchayaths" element={<PanchayathList />} />
+          <Route path="wards" element={<AdminWardList />} />
+          <Route path="profile" element={<AdminProfile />} />
+          <Route path="panchayaths/:id" element={<PanchayathDetail />} />
+        </Route>
 
 
 
-      {/* ───────── WARD ROUTES ───────── */}
+        {/* ───────── WARD ROUTES ───────── */}
 
-      <Route path="/ward" element={<WardLayout />}>
-        <Route index element={<WardDashboard />} />
-        <Route path="dashboard" element={<WardDashboard />} />
-        <Route path="profile" element={<WardProfile />} />
-        <Route path="citizen-verifications" element={<CitizenVerificationRequests />} />
-        <Route path="citizens" element={<CitizenList />} />
-        <Route path="citizens/:id" element={<CitizenDetails />} />
+        <Route
+          path="/ward"
+          element={
+            <ProtectedRoute allowedRoles={["WARD"]}>
+              <WardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<WardDashboard />} />
+          <Route path="dashboard" element={<WardDashboard />} />
+          <Route path="profile" element={<WardProfile />} />
+          <Route path="citizen-verifications" element={<CitizenVerificationRequests />} />
+          <Route path="citizens" element={<CitizenList />} />
+          <Route path="citizens/:id" element={<CitizenDetails />} />
 
-        {/* Complaint module (UI ready, backend next week) */}
-        <Route path="complaints" element={<ComplaintList />} />
-        <Route path="complaints/:id" element={<ComplaintDetails />} />
-      </Route>
+          {/* Complaint module (UI ready, backend next week) */}
+          <Route path="complaints" element={<ComplaintList />} />
+          <Route path="complaints/:id" element={<ComplaintDetails />} />
+        </Route>
 
-    </Routes>
+      </Routes>
+    </>
   )
 }
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import StatsGrid from "@/components/ward/Statsgrid";
 import VerificationAlertSection from "@/components/ward/Verificationalertsection";
 import wardapi from "@/service/wardurls";
-
+import toast from "react-hot-toast";
 
 
 export default function WardDashboard() {
@@ -25,7 +25,7 @@ export default function WardDashboard() {
       const res = await wardapi.dashboard();
       setStats(res.data);
     } catch (err) {
-      console.error("Failed to fetch dashboard stats:", err);
+      toast.error("Failed to fetch dashboard stats:", err);
     } finally {
       setIsLoadingStats(false);
     }
@@ -37,7 +37,7 @@ export default function WardDashboard() {
       const res = await wardapi.recentVerifications();
       setVerifications(res.data ?? []);
     } catch (err) {
-      console.error("Failed to fetch recent verifications:", err);
+      toast.error("Failed to fetch recent verifications:", err);
     } finally {
       setIsLoadingVerifications(false);
     }

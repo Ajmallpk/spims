@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import toast from "react-hot-toast";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const MIN_CHARS = 10;
 
@@ -31,7 +31,7 @@ export default function ResolveModal({ complaintId, onClose, onSuccess }) {
       onSuccess("Complaint marked as resolved successfully.");
       onClose();
     } catch (err) {
-      console.error("Resolve complaint error:", err);
+      toast.error("Resolve complaint error:", err);
     } finally {
       setIsSubmitting(false);
     }

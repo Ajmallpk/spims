@@ -43,12 +43,20 @@ const wardapi = {
     rejectCitizen: (id, reason) =>
         axiosInstance.post(`/ward/reject-citizen/${id}/`, { reason }),
 
-    submitVerification: (formData) =>
-        axiosInstance.post("/ward/submit-verification/", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        }),
+    submitWardVerification : (data) => {
+        return axiosInstance.post(
+            "ward/submit-verification/",
+            data,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            }
+        );
+    },
 
     profile: () => axiosInstance.get("/ward/profile/"),
+    getPanchayathDropdown: () => { return axiosInstance.get("ward/panchayath-dropdown/"); }
 };
 
 export default wardapi;

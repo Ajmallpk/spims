@@ -6,6 +6,7 @@ import ComplaintActionPanel from "@/components/ward/Complaintactionpanel";
 import ResolveModal from "@/components/ward/Resolvemodal";
 import EscalateModal from "@/components/ward/Escalatemodal";
 import ChatPanel from "@/pages/ward/Chatpanel";
+import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -45,7 +46,7 @@ export default function ComplaintDetails() {
       const data = await res.json();
       setComplaintData(data);
     } catch (err) {
-      console.error("Fetch complaint details error:", err);
+      toast.error("Fetch complaint details error:", err);
     } finally {
       setIsLoading(false);
     }

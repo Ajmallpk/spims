@@ -4,7 +4,7 @@ import CitizenTable from "@/components/ward/Citizentable";
 import SearchBar from "@/components/ward/Searchbar";
 import Pagination from "@/components/panjayath/Pagination";
 import wardapi from "@/service/wardurls";
-
+import toast from "react-hot-toast";
 
 
 export default function CitizenList() {
@@ -29,7 +29,7 @@ export default function CitizenList() {
       setTotalPages(Math.ceil((data.count ?? 0) / 10) || 1);
 
     } catch (err) {
-      console.error("Failed to fetch citizens:", err);
+      toast.error("Failed to fetch citizens:", err);
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import ChatMessage from "@/pages/ward/Chatmessage";
+import toast from "react-hot-toast";
+
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const POLL_INTERVAL = 8000;
@@ -25,7 +27,7 @@ export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) 
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : (data.results ?? []));
     } catch (err) {
-      console.error("Fetch messages error:", err);
+      toast.error("Fetch messages error:", err);
     } finally {
       setIsLoadingMessages(false);
     }
@@ -59,7 +61,7 @@ export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) 
       setInputValue("");
       await fetchMessages();
     } catch (err) {
-      console.error("Send message error:", err);
+      toast.error("Send message error:", err);
     } finally {
       setIsSending(false);
     }
@@ -84,7 +86,7 @@ export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) 
       setIsChatClosed(true);
       clearInterval(pollRef.current);
     } catch (err) {
-      console.error("Close chat error:", err);
+      toast.error("Close chat error:", err);
     } finally {
       setIsClosing(false);
     }

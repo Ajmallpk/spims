@@ -12,6 +12,7 @@
 import { useState } from "react";
 import DocumentUploadField from "@/components/panjayath/Documentuploadfield";
 import panchayathapi from "@/service/panchayathurls";
+// import { handleAuthError } from "@/service/panchayathurls";
 
 
 // ─── Field component ─────────────────────────────────────────────────────────
@@ -224,11 +225,8 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
       onSuccess();
     } catch (err) {
-      if (err.response?.status === 401) {
-        console.error("[VerificationForm] Unauthorized – JWT may be expired.");
-      } else {
-        console.error("[VerificationForm] Submission error:", err);
-      }
+      panchayathapi.handleAuthError(err);
+      toast.error("[VerificationForm] Submission error:", err);
 
       // Handle field-level backend errors
       const data = err.response?.data;

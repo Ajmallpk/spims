@@ -6,6 +6,7 @@ import PanchayathFilter from "@/components/admin/Panchayathfilter";
 import WardTable from "@/components/admin/Wardtable";
 import Pagination from "@/components/admin/Pagination";
 import { adminapi } from "@/service/adminurls";
+import toast from "react-hot-toast";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -49,7 +50,7 @@ const WardList = () => {
           );
         }
       } catch (err) {
-        console.error("Error fetching wards:", err);
+        toast.error("Error fetching wards:", err);
       } finally {
         setLoading(false);
       }
@@ -97,7 +98,7 @@ const WardList = () => {
       setActionModal({ open: false, type: null, id: null });
       fetchWards(currentPage, searchQuery, selectedPanchayath);
     } catch (err) {
-      console.error("Ward action failed:", err);
+      toast.error("Ward action failed:", err);
     }
   };
 

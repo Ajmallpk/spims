@@ -10,8 +10,6 @@ urlpatterns = [
     path("citizen/<int:pk>/details/", views.CitizenVerificationDetailView.as_view()),
     path("approve-citizen/<int:pk>/",views.ApproveCitizenView.as_view()),
     path("reject-citizen/<int:pk>",views.RejectCitizenView.as_view()),
-    path(
-    "recent-citizen-verifications/",
-    views.RecentCitizenVerificationView.as_view()
-),
+    path("recent-citizen-verifications/",views.RecentCitizenVerificationView.as_view()),
+    path("panchayath-dropdown/", views.PanchayathDropdownListView.as_view()),
 ]

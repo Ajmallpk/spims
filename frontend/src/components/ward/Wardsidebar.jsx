@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   UserCheck,
@@ -28,6 +29,7 @@ export default function WardSidebar({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleNavClick = (e, item) => {
     if (item.protected && !isVerified) {
@@ -42,9 +44,8 @@ export default function WardSidebar({
 
   return (
     <aside
-      className={`relative flex flex-col bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
+      className={`relative flex flex-col bg-white border-r border-gray-200 shadow-sm transition-all duration-300 ${collapsed ? "w-16" : "w-64"
+        }`}
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-100">
@@ -70,15 +71,16 @@ export default function WardSidebar({
               key={item.path}
               to={item.path}
               onClick={(e) => handleNavClick(e, item)}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                  locked
+              className={() => {
+                const isActive = location.pathname.startsWith(item.path);
+
+                return `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${locked
                     ? "text-gray-400 cursor-pointer hover:bg-gray-50"
                     : isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`
-              }
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`;
+              }}
             >
               <span className="flex-shrink-0">
                 <Icon className="w-5 h-5" />

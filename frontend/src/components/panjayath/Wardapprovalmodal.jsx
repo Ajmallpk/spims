@@ -11,7 +11,7 @@ import { useState, useEffect, useRef } from "react";
 import panchayathApi from "@/service/panchayathurls";
 import RejectReasonSection from "@/components/panjayath/Rejectreasonsection";
 import StatusBadge from "@/components/panjayath/StatusBadge";
-
+import toast from "react-hot-toast";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -149,6 +149,7 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
 
     // ── Approve ────────────────────────────────────────────────────────────────
     const handleApprove = async () => {
+      if (isSubmitting) return;
       setApiError("");
       setIsSubmitting(true);
       try {
@@ -157,10 +158,10 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
         onClose();
       } catch (err) {
         if (err.response?.status === 401) {
-          console.error("Unauthorized: JWT may be expired.");
+          toast.error("Unauthorized: JWT may be expired.");
         }
         setApiError(
-          err.response?.data?.detail ||
+          err.response?.data?.error ||
           err.response?.data?.message ||
           "Failed to approve ward. Please try again."
         );
@@ -177,7 +178,7 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
     };
 
     const handleRejectSubmit = async () => {
-      // Validate
+      if (isSubmitting) return;
       if (rejectReason.trim().length < 10) {
         setRejectError("Rejection reason must be at least 10 characters.");
         return;
@@ -197,7 +198,7 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
         onClose();
       } catch (err) {
         if (err.response?.status === 401) {
-          console.error("Unauthorized: JWT may be expired.");
+          toast.error("Unauthorized: JWT may be expired.");
         }
         setApiError(
           err.response?.data?.detail ||

@@ -17,6 +17,7 @@ import ProfileInfoCard from "@/components/panjayath/Profileinfocard";
 import VerificationStatusCard from "@/components/panjayath/Verificationstatuscard";
 import VerificationForm from "@/components/panjayath/Verificationform";
 import panchayathapi from "@/service/panchayathurls"
+import toast from "react-hot-toast";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
@@ -173,9 +174,10 @@ export default function PanchayathProfile() {
       setProfile(data);
     } catch (err) {
       if (err.response?.status === 401) {
-        console.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
+        panchayathapi.handleAuthError(err);
+        toast.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
       } else {
-        console.error("[PanchayathProfile] Profile fetch error:", err);
+        toast.error("[PanchayathProfile] Profile fetch error:", err);
       }
       setProfileError(
         err.response?.data?.detail ||
@@ -204,9 +206,10 @@ export default function PanchayathProfile() {
       );
     } catch (err) {
       if (err.response?.status === 401) {
-        console.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
+        handleAuthError(err);
+        toast.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
       } else {
-        console.error("[PanchayathProfile] Verification status fetch error:", err);
+        toast.error("[PanchayathProfile] Verification status fetch error:", err);
       }
       setStatusError(
         err.response?.data?.detail ||

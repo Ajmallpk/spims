@@ -111,6 +111,10 @@ class WardVerification(models.Model):
 
         if self.panchayath.role != User.Role.PANCHAYATH:
             raise ValidationError("Selected user must have PANCHAYATH role.")
+        
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.ward_name} - {self.status}"

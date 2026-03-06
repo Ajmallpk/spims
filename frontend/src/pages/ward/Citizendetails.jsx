@@ -4,6 +4,7 @@ import CitizenStatsGrid from "@/components/ward/Citizenstatsgrid";
 import CitizenInfoCard from "@/components/ward/Citizeninfocard";
 import ComplaintHistoryTable from "@/components/ward/Complainthistorytable";
 import wardapi from "@/service/wardurls";
+import toast from "react-hot-toast";
 
 
 export default function CitizenDetails() {
@@ -30,7 +31,7 @@ export default function CitizenDetails() {
       const data = await res.json();
       setCitizenData(data);
     } catch (err) {
-      console.error("Failed to fetch citizen details:", err);
+      toast.error("Failed to fetch citizen details:", err);
     } finally {
       setIsLoading(false);
     }

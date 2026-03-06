@@ -1,4 +1,4 @@
-import StatusBadge from "@/components/ward/Statusbadge";
+import StatusBadge from "@/components/ward/StatusBadge";
 
 const STATUS_CONFIG = {
   not_submitted: {

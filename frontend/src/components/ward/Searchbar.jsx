@@ -9,6 +9,12 @@ export default function SearchBar({ value, onChange, placeholder = "Search citiz
     setLocalValue(value ?? "");
   }, [value]);
 
+  useEffect(() => {
+    return () => {
+      clearTimeout(timerRef.current);
+    };
+  }, []);
+
   const handleChange = (e) => {
     const val = e.target.value;
     setLocalValue(val);

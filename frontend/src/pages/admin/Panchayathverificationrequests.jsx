@@ -4,7 +4,7 @@ import VerificationTable from "@/components/admin/Verificationtable";
 import PanchayathApprovalModal from "@/components/admin/Panchayathapprovalmodal";
 import { ClipboardCheck, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
-
+import toast from "react-hot-toast";
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
 });
@@ -44,7 +44,7 @@ const PanchayathVerificationRequests = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [toast, setToast] = useState(null); // { message, type }
+  // const [toast, setToast] = useState(null); // { message, type }
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
@@ -52,7 +52,7 @@ const PanchayathVerificationRequests = () => {
       const { data } = await adminapi.panchayathVerificationList()
       setRequests(Array.isArray(data) ? data : data.results || []);
     } catch (err) {
-      console.error("Error fetching panchayath verifications:", err);
+      toast.error("Error fetching panchayath verifications:", err);
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ const PanchayathVerificationRequests = () => {
       setSelectedRequest(data);
       setIsModalOpen(true);
     } catch (error) {
-      console.error("Error fetching verification detail:", error);
+      toast.error("Error fetching verification detail:", error);
     }
   };
 

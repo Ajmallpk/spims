@@ -24,9 +24,7 @@ export default function WardSearchBar({ value, onChange, disabled = false }) {
   const handleChange = (e) => {
     const raw = e.target.value;
     setLocalValue(raw);
-
-    // Cancel any pending debounce
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    clearTimeout(debounceTimer.current);
 
     debounceTimer.current = setTimeout(() => {
       onChange(raw);
@@ -58,9 +56,8 @@ export default function WardSearchBar({ value, onChange, disabled = false }) {
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
-          className={`w-4 h-4 transition-colors duration-150 ${
-            hasValue ? "text-blue-500" : "text-slate-400"
-          }`}
+          className={`w-4 h-4 transition-colors duration-150 ${hasValue ? "text-blue-500" : "text-slate-400"
+            }`}
         >
           <path
             strokeLinecap="round"
@@ -90,10 +87,9 @@ export default function WardSearchBar({ value, onChange, disabled = false }) {
           outline-none
           transition-all duration-150
           disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50
-          ${
-            hasValue
-              ? "border-blue-400 ring-1 ring-blue-200 shadow-sm"
-              : "border-slate-300 hover:border-slate-400 focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
+          ${hasValue
+            ? "border-blue-400 ring-1 ring-blue-200 shadow-sm"
+            : "border-slate-300 hover:border-slate-400 focus:border-blue-400 focus:ring-1 focus:ring-blue-200"
           }
         `}
       />

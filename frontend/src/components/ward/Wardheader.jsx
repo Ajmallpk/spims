@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Bell, LogOut, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const PAGE_TITLES = {
   "/ward/dashboard": "Dashboard",
@@ -14,6 +14,7 @@ export default function WardHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const title =
     Object.entries(PAGE_TITLES).find(([path]) =>
@@ -21,9 +22,24 @@ export default function WardHeader() {
     )?.[1] ?? "Ward Portal";
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
     navigate("/login", { replace: true });
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
@@ -47,7 +63,7 @@ export default function WardHeader() {
         </span>
 
         {/* User Menu */}
-        <div className="relative">
+        <div ref={dropdownRef} className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"

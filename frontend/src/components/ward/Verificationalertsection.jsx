@@ -59,7 +59,7 @@ export default function VerificationAlertSection({ verifications, isLoading, onV
         ) : (
           verifications.map((v, index) => (
             <div
-              key={v.id ?? index}
+              key={v.id}
               className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">

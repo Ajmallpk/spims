@@ -4,6 +4,7 @@ import { UserCog } from "lucide-react";
 import AdminInfoCard from "@/components/admin/Admininfocard";
 import SecuritySettingsCard from "@/components/admin/Securitysettingscard";
 import { adminapi } from "@/service/adminurls";
+import toast from "react-hot-toast";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -20,7 +21,7 @@ const AdminProfile = () => {
         const { data } = await adminapi.profile()
         setProfile(data);
       } catch (err) {
-        console.error("Error fetching admin profile:", err);
+        toast.error("Error fetching admin profile:", err);
       } finally {
         setLoading(false);
       }

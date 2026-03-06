@@ -7,7 +7,7 @@
 //   verificationStatus  {object}  - Status object: { status, rejection_reason, reviewed_at, submitted_at }
 //   isLoading           {boolean} - Show skeleton
 
-import StatusBadge from "@/components/panjayath/Statusbadge";
+import StatusBadge from "@/components/panjayath/StatusBadge";
 
 function formatDate(dateStr) {
   if (!dateStr) return null;

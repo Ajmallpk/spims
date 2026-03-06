@@ -95,7 +95,7 @@ function LoginForm() {
       localStorage.setItem("access", response.data.access);
       localStorage.setItem("refresh", response.data.refresh);
 
-      window.location.href = "/citizen/dashboard";
+      window.location.href = "/citizen/home";
 
     } catch (err) {
       setError(

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import StatusBadge from "@/components/ward/Statusbadge";
+import StatusBadge from "@/components/ward/StatusBadge";
 import RejectReasonSection from "@/components/ward/RejectReasonSection";
 import wardapi from "@/service/wardurls";
-
+import toast from "react-hot-toast";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -41,7 +41,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
       onSuccess("Citizen verification approved successfully.");
       onClose();
     } catch (err) {
-      console.error("Approve citizen error:", err);
+      toast.error("Approve citizen error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -59,7 +59,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
       onSuccess("Citizen verification rejected.");
       onClose();
     } catch (err) {
-      console.error("Reject citizen error:", err);
+      toast.error("Reject citizen error:", err);
     } finally {
       setIsSubmitting(false);
     }

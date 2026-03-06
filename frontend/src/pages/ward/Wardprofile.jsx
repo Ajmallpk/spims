@@ -3,8 +3,7 @@ import WardInfoCard from "@/components/ward/Wardinfocard";
 import VerificationStatusCard from "@/components/ward/Verificationstatuscard";
 import VerificationProgress from "@/components/ward/Verificationprogress";
 import WardVerificationForm from "@/components/ward/Wardverificationform";
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+import toast from "react-hot-toast";
 
 // ── Right panel states ────────────────────────────────────────────────────────
 
@@ -124,7 +123,7 @@ export default function WardProfile() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setProfile(await res.json());
     } catch (err) {
-      console.error("Fetch ward profile error:", err);
+      toast.error("Fetch ward profile error:", err);
     } finally {
       setIsLoadingProfile(false);
     }
@@ -139,7 +138,7 @@ export default function WardProfile() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setVerificationStatus(await res.json());
     } catch (err) {
-      console.error("Fetch verification status error:", err);
+      toast.error("Fetch verification status error:", err);
     } finally {
       setIsLoadingVerification(false);
     }

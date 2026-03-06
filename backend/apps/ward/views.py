@@ -11,6 +11,7 @@ from apps.citizen.models import CitizenVerification
 from apps.complaints.models import Complaint  
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
+from apps.panchayath.models import PanchayathVerification
 # Create your views here.
 
 
@@ -43,7 +44,7 @@ class WardProfile(APIView):
             "official_contact": verification.official_contact,
 
             "ward_name": verification.ward_name,
-            "panchayath_name": verification.panchayath_name,
+            "panchayath_name": verification.panchayath.username,
             "office_address": verification.office_address,
 
             "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
@@ -404,6 +405,8 @@ class RejectCitizenView(APIView):
         citizen.user.save()
         return Response({"message": "Citizen rejected successfully"})
     
+
+    
     
     
 class CitizenPagination(PageNumberPagination):
@@ -465,5 +468,27 @@ class RecentCitizenVerificationView(APIView):
 
         return Response(data)
     
-        
+
+class PanchayathDropdownListView(APIView):
+
+    permission_classes = [IsActiveWard]
+
+    def get(self, request):
+
+        panchayaths = User.objects.filter(
+            role=User.Role.PANCHAYATH,
+            status=User.Status.ACTIVE,
+            is_verified=True
+        )
+        data = []
+
+        for p in panchayaths:
+            verification = PanchayathVerification.objects.filter(user=p).first()
+
+            data.append({
+                "id": p.id,
+                "panchayath_name": verification.panchayath_name if verification else p.username
+            })
+
+        return Response(data)        
         

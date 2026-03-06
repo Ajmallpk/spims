@@ -19,9 +19,9 @@ class PanchayathVerification(models.Model):
     
     panchayath_name = models.CharField(max_length=50)
     full_name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15,unique=True)
     district = models.CharField(max_length=100)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     
     aadhaar_image = models.ImageField(upload_to="panchayath/aadhaar/")
     selfie_image = models.ImageField(upload_to="panchayath/selfie/")
@@ -32,7 +32,6 @@ class PanchayathVerification(models.Model):
     
     def __str__(self):
         return f"{self.panchayath_name}-{self.status}"
-    
     
     
     

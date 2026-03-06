@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Filter, ChevronDown } from "lucide-react";
-
+import toast from "react-hot-toast";
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
 });
@@ -26,7 +26,7 @@ const PanchayathFilter = ({ value, onChange }) => {
         const list = Array.isArray(data) ? data : data.results || [];
         setPanchayaths(list);
       } catch (err) {
-        console.error("Error fetching panchayaths for filter:", err);
+        toast.error("Error fetching panchayaths for filter:", err);
       } finally {
         setLoading(false);
       }

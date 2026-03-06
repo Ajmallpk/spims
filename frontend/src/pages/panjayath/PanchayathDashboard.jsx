@@ -6,6 +6,8 @@
 // ─── Static mock data ────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";
 import panchayathApi from "@/service/panchayathurls";
+// import { handleAuthError } from "@/service/panchayathurls";
+import toast from "react-hot-toast";
 
 
 
@@ -220,6 +222,9 @@ export default function Dashboard() {
   const pending = dashboardData?.pending_wards ?? 0;
   const rejected = dashboardData?.rejected_wards ?? 0;
 
+  const verificationProgress =
+    total > 0 ? ((approved / total) * 100).toFixed(1) : 0;
+
   const WARD_PROGRESS = [
     { label: "Approved", count: approved, total, barCls: "bg-emerald-500" },
     { label: "Pending", count: pending, total, barCls: "bg-amber-400" },
@@ -233,9 +238,10 @@ export default function Dashboard() {
         const res = await panchayathApi.dashboard();
         setDashboardData(res.data);
       } catch (err) {
-        console.error("Dashboard fetch error:", err);
+        panchayathApi.handleAuthError(err);
+        toast.error("Dashboard fetch error:", err);
         setError("Failed to load dashboard.");
-      } finally {
+      }finally {
         setIsLoading(false);
       }
     };
@@ -254,7 +260,7 @@ export default function Dashboard() {
   if (isLoading) {
     return <div className="p-6">Loading dashboard...</div>;
   }
-  
+
   return (
     <div className="space-y-8">
       {/* ── Welcome banner ── */}
@@ -280,7 +286,9 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="text-center px-4 py-2.5 bg-white/15 rounded-xl backdrop-blur-sm border border-white/20">
-              <p className="text-2xl font-black leading-none">79%</p>
+              <p className="text-2xl font-black leading-none">
+                {verificationProgress}%
+              </p>
               <p className="text-[10px] text-blue-100 font-semibold mt-0.5">Verification</p>
             </div>
           </div>
@@ -354,12 +362,14 @@ export default function Dashboard() {
               <div className="pt-3 border-t border-slate-100">
                 <div className="flex justify-between mb-1.5">
                   <span className="text-xs font-bold text-slate-700">Overall Progress</span>
-                  <span className="text-sm font-black text-emerald-600">79.2%</span>
+                  <span className="text-sm font-black text-emerald-600">
+                    {verificationProgress}%
+                  </span>
                 </div>
                 <div className="h-3 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-700"
-                    style={{ width: "79.2%" }}
+                    style={{ width: `${verificationProgress}%` }}
                   />
                 </div>
               </div>

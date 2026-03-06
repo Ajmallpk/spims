@@ -11,7 +11,8 @@ import WardSearchBar from "@/components/panjayath/Wardsearchbar";
 import WardTable from "@/components/panjayath/Wardtable";
 import Pagination from "@/components/panjayath/Pagination";
 import panchayathApi from "@/service/panchayathurls";
-
+// import { handleAuthError } from "@/service/panchayathurls";
+import toast from "react-hot-toast";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -161,9 +162,10 @@ export default function WardList() {
         }
       } catch (err) {
         if (err.response?.status === 401) {
-          console.error("[WardList] Unauthorized – JWT may be expired.");
+          panchayathApi.handleAuthError(err);
+          toast.error("[WardList] Unauthorized – JWT may be expired.");
         } else {
-          console.error("[WardList] Fetch error:", err);
+          toast.error("[WardList] Fetch error:", err);
         }
         setFetchError(
           err.response?.data?.detail ||

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import axios from "axios";
 import {
   ArrowLeft,
@@ -71,7 +72,7 @@ const WardDetails = () => {
         );
         setData(res);
       } catch (err) {
-        console.error("Error fetching ward details:", err);
+        toast.error("Error fetching ward details:", err);
       } finally {
         setLoading(false);
       }

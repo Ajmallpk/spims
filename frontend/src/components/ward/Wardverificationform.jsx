@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DocumentUploadField from "@/components/ward/Documentuploadfield";
 import wardapi from "@/service/wardurls";
+import toast from "react-hot-toast";
 
 
 const INITIAL_FIELDS = {
@@ -111,8 +112,23 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [panchayaths, setPanchayaths] = useState([]);
+
 
   // ── Handlers ────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const fetchPanchayaths = async () => {
+      try {
+        const res = await wardapi.getPanchayathDropdown();
+        setPanchayaths(res.data);
+      } catch (error) {
+        toast.error("Error fetching panchayaths:", error);
+      }
+    };
+
+    fetchPanchayaths();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -185,8 +201,17 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
       onSuccess();
 
     } catch (err) {
-      console.error("Submit verification error:", err);
-      setServerError("Submission failed. Please check your inputs and try again.");
+      toast.error("Submit verification error:", err);
+
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (typeof data === "object") {
+          setErrors(data);
+          return;
+        }
+      }
+
+      setServerError("Submission failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -287,9 +312,11 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
               >
                 <option value="">-- Select Panchayath --</option>
 
-                {/* Replace with dynamic data later */}
-                <option value="1">Meppadi Panchayath</option>
-                <option value="2">Kottayam Panchayath</option>
+                {panchayaths.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.username}
+                  </option>
+                ))}
               </select>
 
               {errors.panchayath_id && (

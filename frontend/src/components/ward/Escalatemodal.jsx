@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const MIN_CHARS = 10;
@@ -29,7 +30,7 @@ export default function EscalateModal({ complaintId, onClose, onSuccess }) {
       onSuccess("Complaint escalated successfully.");
       onClose();
     } catch (err) {
-      console.error("Escalate complaint error:", err);
+      toast.error("Escalate complaint error:", err);
     } finally {
       setIsSubmitting(false);
     }

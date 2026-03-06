@@ -72,9 +72,9 @@ export default function ComplaintHistoryTable({ complaints, isLoading }) {
                 </td>
               </tr>
             ) : (
-              complaints.map((complaint, idx) => (
+              complaints.map((complaint) => (
                 <tr
-                  key={complaint.id ?? idx}
+                  key={complaint.id}
                   className="hover:bg-blue-50/30 transition-colors duration-100 group"
                 >
                   {/* Title */}
