@@ -140,8 +140,7 @@ export default function WardList() {
       setFetchError("");
 
       try {
-        const { data } = await panchayathApi.wards({
-          status: "approved",
+        const { data } = await panchayathApi.listWard({
           page,
           ...(search.trim() && { search: search.trim() }),
         });
@@ -165,7 +164,8 @@ export default function WardList() {
           panchayathApi.handleAuthError(err);
           toast.error("[WardList] Unauthorized – JWT may be expired.");
         } else {
-          toast.error("[WardList] Fetch error:", err);
+          toast.error("[WardList] Fetch error:");
+          console.error(err)
         }
         setFetchError(
           err.response?.data?.detail ||

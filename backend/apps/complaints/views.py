@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintChatMessage,ComplaintChat,Notification
 from .serializers import ComplaintCreateSerializer,ComplaintDetailSerializer,ComplaintChatListSerializer,NotificationSerializer
 from rest_framework.generics import ListAPIView
-from ward.models import WardVerification
+from apps.ward.models import WardVerification
 from .serializers import ComplaintFeedSerializer,ComplaintCommentSerializer,ComplaintChatMessageSerializer,ComplaintResolutionSerializer
 from django.db.models import Count
 from .pagination import ComplaintFeedPagination

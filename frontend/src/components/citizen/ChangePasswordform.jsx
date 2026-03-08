@@ -1,194 +1,235 @@
-// citizen/components/ChangePasswordForm.jsx
+/**
+ * ChangePasswordForm.jsx
+ * Secure password change form with validation.
+ *
+ * Props:
+ *   token : string – Bearer auth token
+ */
+
 import { useState } from "react";
-import { Lock, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, ShieldCheck } from "lucide-react";
 
-function PasswordInput({ label, placeholder, value, onChange, error, showToggle }) {
-  const [show, setShow] = useState(false);
-  return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-semibold text-gray-600">{label}</label>
-      <div className="relative">
-        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
-          type={show ? "text" : "password"}
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={[
-            "w-full pl-9 pr-10 py-2.5 border rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none transition-all",
-            error
-              ? "border-red-300 bg-red-50 focus:border-red-400"
-              : "border-gray-200 bg-gray-50 focus:border-indigo-300 focus:bg-white",
-          ].join(" ")}
-        />
-        {showToggle && (
-          <button
-            type="button"
-            onClick={() => setShow((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
-      {error && (
-        <p className="text-xs text-red-500 flex items-center gap-1">
-          <span className="w-1 h-1 rounded-full bg-red-500 inline-block" />{error}
-        </p>
-      )}
-    </div>
+const EyeIcon = ({ open }) =>
+  open ? (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
   );
-}
 
-function PasswordStrength({ password }) {
-  if (!password) return null;
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
+const iCls = (err) =>
+  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all pr-10 ${
+    err
+      ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
+      : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+  }`;
 
-  const levels = [
-    { label: "Weak", color: "bg-red-400" },
-    { label: "Fair", color: "bg-yellow-400" },
-    { label: "Good", color: "bg-blue-400" },
-    { label: "Strong", color: "bg-emerald-500" },
-  ];
-  const level = levels[Math.max(0, score - 1)];
-
-  return (
-    <div className="space-y-1 mt-1">
-      <div className="flex gap-1">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className={[
-              "h-1 flex-1 rounded-full transition-all duration-300",
-              i < score ? level.color : "bg-gray-200",
-            ].join(" ")}
-          />
-        ))}
-      </div>
-      <p className={`text-[10px] font-semibold ${score <= 1 ? "text-red-500" : score === 2 ? "text-yellow-600" : score === 3 ? "text-blue-600" : "text-emerald-600"}`}>
-        {level.label} password
-      </p>
+const PasswordField = ({ label, name, value, onChange, error, show, onToggle, placeholder }) => (
+  <div className="space-y-1.5">
+    <label className="text-sm font-semibold text-gray-700">{label}</label>
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder || "••••••••"}
+        className={iCls(!!error)}
+        autoComplete="off"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <EyeIcon open={show} />
+      </button>
     </div>
-  );
-}
+    {error && <p className="text-xs text-red-500">{error}</p>}
+  </div>
+);
 
-export default function ChangePasswordForm() {
-  const [form, setForm] = useState({ current_password: "", new_password: "", confirm_password: "" });
+const ChangePasswordForm = ({ token }) => {
+  const [form, setForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [show, setShow] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState(null);
 
   const validate = () => {
     const e = {};
-    if (!form.current_password) e.current_password = "Current password is required.";
-    if (!form.new_password) {
-      e.new_password = "New password is required.";
-    } else if (form.new_password.length < 8) {
-      e.new_password = "Password must be at least 8 characters.";
-    }
-    if (!form.confirm_password) {
-      e.confirm_password = "Please confirm your new password.";
-    } else if (form.new_password !== form.confirm_password) {
-      e.confirm_password = "Passwords do not match.";
-    }
+    if (!form.currentPassword) e.currentPassword = "Current password is required";
+    if (!form.newPassword) e.newPassword = "New password is required";
+    else if (form.newPassword.length < 8)
+      e.newPassword = "Password must be at least 8 characters";
+    if (!form.confirmPassword) e.confirmPassword = "Please confirm your password";
+    else if (form.newPassword !== form.confirmPassword)
+      e.confirmPassword = "Passwords do not match";
     return e;
   };
 
-  const setField = (f, v) => {
-    setForm((p) => ({ ...p, [f]: v }));
-    if (errors[f]) setErrors((p) => ({ ...p, [f]: "" }));
-    setSuccess(false);
-    setApiError(null);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((p) => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors((p) => ({ ...p, [name]: null }));
+    if (success) setSuccess(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
-    setLoading(true);
+  const handleSubmit = async () => {
+    const ve = validate();
+    if (Object.keys(ve).length > 0) { setErrors(ve); return; }
+
+    setSubmitting(true);
     setApiError(null);
+
     try {
-      const token = localStorage.getItem("access");
       const res = await fetch("/api/citizen/change-password/", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: form.currentPassword,
+          new_password: form.newPassword,
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || data.message || "Failed to update password.");
+        throw new Error(data?.message || "Password change failed.");
       }
       setSuccess(true);
-      setForm({ current_password: "", new_password: "", confirm_password: "" });
+      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setErrors({});
     } catch (err) {
       setApiError(err.message);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  return (
-    <div>
-      <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <ShieldCheck className="w-4 h-4 text-indigo-400" />
-        Change Password
-      </h4>
+  const fields = [
+    { name: "currentPassword", label: "Current Password", placeholder: "Your current password" },
+    { name: "newPassword",     label: "New Password",     placeholder: "Min. 8 characters" },
+    { name: "confirmPassword", label: "Confirm Password", placeholder: "Repeat new password" },
+  ];
 
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <h3 className="text-sm font-bold text-gray-800">Change Password</h3>
+      </div>
+
+      {/* Success */}
+      {success && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-2 text-sm text-green-700 font-medium">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-green-500 flex-shrink-0">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Password updated successfully.
+        </div>
+      )}
+
+      {/* API error */}
       {apiError && (
-        <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mb-3">
-          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2 text-sm text-red-600">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+          </svg>
           {apiError}
         </div>
       )}
-      {success && (
-        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 mb-3">
-          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-          Password changed successfully!
+
+      {fields.map(({ name, label, placeholder }) => (
+        <PasswordField
+          key={name}
+          label={label}
+          name={name}
+          value={form[name]}
+          onChange={handleChange}
+          error={errors[name]}
+          show={show[name]}
+          onToggle={() => setShow((p) => ({ ...p, [name]: !p[name] }))}
+          placeholder={placeholder}
+        />
+      ))}
+
+      {/* Password strength hint */}
+      {form.newPassword && (
+        <div className="flex items-center gap-2">
+          {[1, 2, 3, 4].map((lvl) => {
+            const strength = Math.min(
+              4,
+              [/[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/, /.{8,}/].filter((r) =>
+                r.test(form.newPassword)
+              ).length
+            );
+            return (
+              <div
+                key={lvl}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  lvl <= strength
+                    ? strength <= 1
+                      ? "bg-red-400"
+                      : strength <= 2
+                      ? "bg-yellow-400"
+                      : strength <= 3
+                      ? "bg-teal-400"
+                      : "bg-green-500"
+                    : "bg-gray-200"
+                }`}
+              />
+            );
+          })}
+          <span className="text-xs text-gray-400 flex-shrink-0">
+            {(() => {
+              const s = [/[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/, /.{8,}/].filter((r) =>
+                r.test(form.newPassword)
+              ).length;
+              return ["", "Weak", "Fair", "Good", "Strong"][s] || "";
+            })()}
+          </span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        <PasswordInput
-          label="Current Password"
-          placeholder="Your existing password"
-          value={form.current_password}
-          onChange={(v) => setField("current_password", v)}
-          error={errors.current_password}
-          showToggle
-        />
-        <div>
-          <PasswordInput
-            label="New Password"
-            placeholder="At least 8 characters"
-            value={form.new_password}
-            onChange={(v) => setField("new_password", v)}
-            error={errors.new_password}
-            showToggle
-          />
-          <PasswordStrength password={form.new_password} />
-        </div>
-        <PasswordInput
-          label="Confirm New Password"
-          placeholder="Re-enter new password"
-          value={form.confirm_password}
-          onChange={(v) => setField("confirm_password", v)}
-          error={errors.confirm_password}
-          showToggle
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-60"
-        >
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" />Updating...</> : "Change Password"}
-        </button>
-      </form>
+      <button
+        onClick={handleSubmit}
+        disabled={submitting}
+        className="bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 text-white rounded-lg px-4 py-2 text-sm font-semibold transition-all flex items-center gap-2 shadow-sm"
+      >
+        {submitting ? (
+          <>
+            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Updating...
+          </>
+        ) : (
+          "Update Password"
+        )}
+      </button>
     </div>
   );
-}
+};
+
+export default ChangePasswordForm;

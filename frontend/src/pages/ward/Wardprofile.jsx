@@ -3,6 +3,7 @@ import WardInfoCard from "@/components/ward/Wardinfocard";
 import VerificationStatusCard from "@/components/ward/Verificationstatuscard";
 import VerificationProgress from "@/components/ward/Verificationprogress";
 import WardVerificationForm from "@/components/ward/Wardverificationform";
+import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 
 // ── Right panel states ────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ function PendingPanel() {
         </div>
         <div className="grid grid-cols-1 gap-2 w-full max-w-xs mt-1">
           {[
-            { label: "Documents submitted",  done: true  },
+            { label: "Documents submitted", done: true },
             { label: "Admin review in progress", done: false },
             { label: "Access granted on approval", done: false },
           ].map((item) => (
@@ -106,35 +107,34 @@ function ApprovedPanel() {
 export default function WardProfile() {
   const token = localStorage.getItem("access");
 
-  const [profile, setProfile]                         = useState(null);
-  const [verificationStatus, setVerificationStatus]   = useState(null);
-  const [isLoadingProfile, setIsLoadingProfile]       = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingVerification, setIsLoadingVerification] = useState(true);
-  const [successMessage, setSuccessMessage]           = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // ── Fetchers ─────────────────────────────────────────────────────────────────
 
   const fetchProfile = useCallback(async () => {
     try {
       setIsLoadingProfile(true);
-      const res = await fetch(`${API_BASE}/api/ward/profile/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setProfile(await res.json());
+
+      const res = await wardapi.profile();
+
+      setProfile(res.data);
     } catch (err) {
-      toast.error("Fetch ward profile error:", err);
+      toast.error("Failed to load ward profile");
+      console.error(err);
     } finally {
       setIsLoadingProfile(false);
     }
-  }, [token]);
+  }, []);
 
   const fetchVerificationStatus = useCallback(async () => {
     try {
       setIsLoadingVerification(true);
-      const res = await fetch(`${API_BASE}/api/ward/verification-status/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await wardapi.verificationStatus();
+      setVerificationStatus(res.data);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setVerificationStatus(await res.json());
     } catch (err) {
@@ -162,6 +162,11 @@ export default function WardProfile() {
     setSuccessMessage(
       "Verification documents submitted successfully! Your request is now under review."
     );
+
+    // Immediately update UI
+    setVerificationStatus({ status: "PENDING" });
+
+    // Then refresh from backend
     fetchVerificationStatus();
   };
 
@@ -172,9 +177,9 @@ export default function WardProfile() {
 
   // ── Derived state ─────────────────────────────────────────────────────────────
 
-  const isLoading   = isLoadingProfile || isLoadingVerification;
-  const status      = (verificationStatus?.status ?? "not_submitted").toLowerCase();
-  const showForm    = status === "not_submitted" || status === "rejected";
+  const isLoading = isLoadingProfile || isLoadingVerification;
+  const status = (verificationStatus?.status ?? "not_submitted").toLowerCase();
+  const showForm = status === "not_submitted" || status === "rejected";
   const showPending = status === "pending";
   const showApproved = status === "approved";
 

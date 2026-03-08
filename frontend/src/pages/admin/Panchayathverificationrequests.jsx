@@ -5,39 +5,9 @@ import PanchayathApprovalModal from "@/components/admin/Panchayathapprovalmodal"
 import { ClipboardCheck, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("access")}`,
-});
 
-// Toast notification component (self-contained, no external deps)
-const Toast = ({ message, type, onDismiss }) => {
-  useEffect(() => {
-    const timer = setTimeout(onDismiss, 4000);
-    return () => clearTimeout(timer);
-  }, [onDismiss]);
 
-  return (
-    <div
-      className={`fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold transition-all duration-300 ${type === "success"
-          ? "bg-emerald-600 text-white"
-          : "bg-red-600 text-white"
-        }`}
-    >
-      {type === "success" ? (
-        <CheckCircle className="w-4 h-4 flex-shrink-0" />
-      ) : (
-        <XCircle className="w-4 h-4 flex-shrink-0" />
-      )}
-      {message}
-      <button
-        onClick={onDismiss}
-        className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
-      >
-        ×
-      </button>
-    </div>
-  );
-};
+
 
 const PanchayathVerificationRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -52,7 +22,8 @@ const PanchayathVerificationRequests = () => {
       const { data } = await adminapi.panchayathVerificationList()
       setRequests(Array.isArray(data) ? data : data.results || []);
     } catch (err) {
-      toast.error("Error fetching panchayath verifications:", err);
+      toast.error("Error fetching panchayath verifications");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -68,7 +39,8 @@ const PanchayathVerificationRequests = () => {
       setSelectedRequest(data);
       setIsModalOpen(true);
     } catch (error) {
-      toast.error("Error fetching verification detail:", error);
+      toast.error("Error fetching verification detail");
+      console.error(error);
     }
   };
 
@@ -78,7 +50,7 @@ const PanchayathVerificationRequests = () => {
   };
 
   const handleActionSuccess = (message) => {
-    setToast({ message, type: "success" });
+    toast.success(message);
     fetchRequests();
   };
 
@@ -155,14 +127,8 @@ const PanchayathVerificationRequests = () => {
         />
       )}
 
-      {/* Toast */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onDismiss={() => setToast(null)}
-        />
-      )}
+      
+
     </div>
   );
 };

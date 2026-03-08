@@ -27,6 +27,8 @@ urlpatterns = [
     path('api/panchayath/',include('apps.panchayath.urls')),
     path('api/ward/',include('apps.ward.urls')),
     path("api/admin/", include("apps.adminpanel.urls")),
+    path("api/citizen/",include("apps.citizen.urls")),
+    path("api/complaints/",include("apps.complaints.urls"))
   
 ]
 

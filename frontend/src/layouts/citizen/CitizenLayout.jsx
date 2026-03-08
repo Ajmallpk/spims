@@ -1,20 +1,14 @@
-// citizen/layout/CitizenLayout.jsx
-import { Outlet } from "react-router-dom";
-import CitizenSidebar from "@/components/citizen/CitizenSidebar";
-import CitizenHeader from "@/components/citizen/CitizenHeader";
+import TopNavigation from "./TopNavigation";
 
-export default function CitizenLayout() {
+const CitizenLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <CitizenHeader />
-      <div className="flex flex-1 pt-16">
-        <CitizenSidebar />
-        <main className="flex-1 ml-64 min-h-[calc(100vh-4rem)] overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 py-6">
-            <Outlet />
-          </div>
-        </main>
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      <TopNavigation />
+      <main className="max-w-3xl mx-auto py-6 px-4">
+        {children}
+      </main>
     </div>
   );
-}
+};
+
+export default CitizenLayout;

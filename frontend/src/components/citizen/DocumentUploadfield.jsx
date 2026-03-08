@@ -1,161 +1,196 @@
-// citizen/components/DocumentUploadField.jsx
-import { useState, useRef, useCallback } from "react";
-import { UploadCloud, X, FileText, FileImage, AlertCircle, Eye } from "lucide-react";
+/**
+ * DocumentUploadField.jsx
+ * Drag-and-drop document upload field.
+ * Props:
+ *   label:       string   – field label
+ *   accept:      string   – mime types e.g. "image/*,.pdf"
+ *   value:       File | null
+ *   onChange:    (File) => void
+ *   error:       string | null
+ *   required:    boolean
+ *   hint:        string   – helper text
+ */
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "application/pdf"];
-const ACCEPTED_EXT = ".jpg,.jpeg,.png,.pdf";
+import { useRef, useState } from "react";
 
-function formatBytes(bytes) {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-}
+const formatFileSize = (bytes) => {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
-export default function DocumentUploadField({ label, hint, value, onChange, error, required = false }) {
-  const [dragOver, setDragOver] = useState(false);
-  const [sizeError, setSizeError] = useState(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+const getFileIcon = (file) => {
+  if (!file) return null;
+  const type = file.type;
+  if (type === "application/pdf") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-red-400">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <polyline points="10 9 9 9 8 9" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-teal-400">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
+  );
+};
+
+const DocumentUploadField = ({
+  label,
+  accept = "image/jpeg,image/png,application/pdf",
+  value,
+  onChange,
+  error,
+  required = false,
+  hint,
+}) => {
   const inputRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const [preview, setPreview] = useState(null);
 
-  const processFile = useCallback((file) => {
-    setSizeError(null);
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      setSizeError("Only JPG, PNG, and PDF files are accepted.");
-      return;
+  const handleFile = (file) => {
+    if (!file) return;
+    onChange(file);
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => setPreview(e.target.result);
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
     }
-    if (file.size > MAX_SIZE_BYTES) {
-      setSizeError(`File too large. Max 10MB (yours: ${formatBytes(file.size)}).`);
-      return;
-    }
-    const preview = URL.createObjectURL(file);
-    onChange({ file, preview, type: file.type, size: file.size, name: file.name });
-  }, [onChange]);
+  };
 
-  const handleDrop = useCallback((e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) processFile(file);
-  }, [processFile]);
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
 
-  const handleRemove = () => {
-    if (value?.preview) URL.revokeObjectURL(value.preview);
+  const handleRemove = (e) => {
+    e.stopPropagation();
     onChange(null);
-    setSizeError(null);
+    setPreview(null);
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const isPdf = value?.type === "application/pdf";
-  const isImage = value?.type?.startsWith("image/");
-  const fieldError = error || sizeError;
+  const hasFile = !!value;
 
   return (
     <div className="space-y-1.5">
       {/* Label */}
       <label className="text-sm font-semibold text-gray-700 flex items-center gap-1">
         {label}
-        {required && <span className="text-red-500">*</span>}
+        {required && <span className="text-red-500 text-xs">*</span>}
       </label>
-      {hint && <p className="text-xs text-gray-400 -mt-1">{hint}</p>}
 
-      {!value ? (
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
-          className={[
-            "flex flex-col items-center justify-center gap-2.5 px-4 py-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200",
-            fieldError && !sizeError
-              ? "border-red-300 bg-red-50"
-              : dragOver
-              ? "border-indigo-400 bg-indigo-50 scale-[1.01]"
-              : "border-gray-200 bg-gray-50 hover:border-indigo-300 hover:bg-indigo-50/40",
-          ].join(" ")}
-        >
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${dragOver ? "bg-indigo-200" : "bg-indigo-100"}`}>
-            <UploadCloud className={`w-5 h-5 transition-colors ${dragOver ? "text-indigo-700" : "text-indigo-400"}`} />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-700">
-              {dragOver ? "Drop file here" : "Drag & drop or click to upload"}
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">JPG, PNG or PDF — max 10MB</p>
-          </div>
-          <input ref={inputRef} type="file" accept={ACCEPTED_EXT} onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f); }} className="hidden" />
-        </div>
-      ) : (
-        <div className="rounded-xl overflow-hidden border border-gray-200 bg-white">
-          {/* Preview area */}
-          {isImage && (
-            <div className="relative bg-gray-900 group">
-              <img src={value.preview} alt="Document preview" className="w-full max-h-44 object-cover opacity-90" />
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(true)}
-                className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 rounded-lg text-xs font-medium text-gray-700">
-                  <Eye className="w-3.5 h-3.5" /> View Full
-                </div>
-              </button>
-            </div>
-          )}
-          {isPdf && (
-            <div className="flex items-center justify-center py-8 bg-gray-50">
-              <div className="flex flex-col items-center gap-2">
-                <FileText className="w-10 h-10 text-red-400" />
-                <p className="text-xs font-medium text-gray-600">PDF Document</p>
+      {/* Drop zone */}
+      <div
+        onClick={() => !hasFile && inputRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
+        className={`relative border-2 border-dashed rounded-xl transition-all duration-200 cursor-pointer
+          ${hasFile
+            ? "border-teal-300 bg-teal-50/50 cursor-default"
+            : dragging
+            ? "border-teal-400 bg-teal-50 scale-[1.01]"
+            : error
+            ? "border-red-300 bg-red-50/30 hover:border-red-400"
+            : "border-gray-200 bg-gray-50 hover:border-teal-300 hover:bg-teal-50/30"
+          }`}
+      >
+        {hasFile ? (
+          /* File selected state */
+          <div className="p-4 flex items-center gap-3">
+            {preview ? (
+              <img
+                src={preview}
+                alt="preview"
+                className="w-14 h-14 rounded-lg object-cover border border-teal-200 flex-shrink-0"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-lg bg-white border border-teal-200 flex items-center justify-center flex-shrink-0">
+                {getFileIcon(value)}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-800 truncate">{value.name}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{formatFileSize(value.size)}</p>
+              <div className="flex items-center gap-1 mt-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                <span className="text-xs text-teal-600 font-medium">Ready to upload</span>
               </div>
             </div>
-          )}
-
-          {/* File meta row */}
-          <div className="flex items-center gap-2 px-3 py-2.5 border-t border-gray-100">
-            {isImage ? (
-              <FileImage className="w-4 h-4 text-indigo-400 flex-shrink-0" />
-            ) : (
-              <FileText className="w-4 h-4 text-red-400 flex-shrink-0" />
-            )}
-            <span className="text-xs text-gray-700 font-medium truncate flex-1">{value.name}</span>
-            <span className="text-xs text-gray-400 flex-shrink-0">{formatBytes(value.size)}</span>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="ml-1 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center hover:bg-red-200 transition-colors flex-shrink-0"
-            >
-              <X className="w-2.5 h-2.5 text-red-500" />
-            </button>
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="text-xs text-teal-600 hover:text-teal-700 font-medium px-2.5 py-1 rounded-lg hover:bg-teal-100 transition-colors"
+              >
+                Replace
+              </button>
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="text-xs text-red-400 hover:text-red-600 font-medium px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                Remove
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          /* Empty state */
+          <div className="p-6 flex flex-col items-center justify-center text-center gap-2">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+              dragging ? "bg-teal-100" : "bg-white border border-gray-200"
+            }`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                className={`w-6 h-6 transition-colors ${dragging ? "text-teal-500" : "text-gray-400"}`}>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700">
+                {dragging ? "Drop to upload" : "Drag & drop or click to browse"}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {hint || "Supports JPG, PNG, PDF · Max 5MB"}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Error */}
-      {fieldError && (
-        <div className="flex items-center gap-1.5 text-xs text-red-500">
-          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-          {fieldError}
-        </div>
+      {error && (
+        <p className="text-xs text-red-500 flex items-center gap-1">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          {error}
+        </p>
       )}
 
-      {/* Full-size preview modal */}
-      {previewOpen && isImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-          onClick={() => setPreviewOpen(false)}
-        >
-          <div className="relative max-w-2xl w-full">
-            <img src={value.preview} alt="Full preview" className="w-full rounded-xl shadow-2xl" />
-            <button
-              onClick={() => setPreviewOpen(false)}
-              className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100"
-            >
-              <X className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
-        </div>
-      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={(e) => handleFile(e.target.files[0])}
+        className="hidden"
+      />
     </div>
   );
-}
+};
+
+export default DocumentUploadField;

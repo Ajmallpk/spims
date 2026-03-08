@@ -45,7 +45,7 @@ const wardapi = {
 
     submitWardVerification : (data) => {
         return axiosInstance.post(
-            "ward/submit-verification/",
+            "/ward/submit-verification/",
             data,
             {
                 headers: {
@@ -56,7 +56,8 @@ const wardapi = {
     },
 
     profile: () => axiosInstance.get("/ward/profile/"),
-    getPanchayathDropdown: () => { return axiosInstance.get("ward/panchayath-dropdown/"); }
+    getPanchayathDropdown: () => { return axiosInstance.get("ward/panchayath-dropdown/"); },
+    verificationStatus: () => axiosInstance.get("/ward/verification-status/"),
 };
 
 export default wardapi;

@@ -57,7 +57,7 @@ const PanchayathTable = ({ panchayaths, isLoading, onSuspend, onActivate }) => {
                   className="cursor-pointer hover:bg-gray-50 transition-colors duration-100 group">
                   <td className="px-5 py-4">
                     <span className="font-semibold text-gray-800 group-hover:text-gray-900">
-                      {p.panchayath_name || p.name || "—"}
+                      {p.panchayath_name}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-gray-500">{p.email || "—"}</td>

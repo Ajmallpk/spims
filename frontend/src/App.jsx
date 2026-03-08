@@ -29,6 +29,7 @@ import PanchayathDashboard from "@/pages/panjayath/PanchayathDashboard";
 import PanchayathProfile from "@/pages/panjayath/PanchayathProfile";
 import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests";
 import WardList from "@/pages/panjayath/WardList";
+import WardDetail from "@/pages/panjayath/WardDetail";
 
 
 /* ───────── WARD MODULE ───────── */
@@ -48,11 +49,10 @@ import ComplaintDetails from "@/pages/ward/ComplaintDetails";
 // citizen pages 
 
 import AuthPage from "@/pages/citizen/AuthPage"
-import CitizenLayout from "@/layouts/citizen/CitizenLayout";
-import CitizenProfile from "@/pages/citizen/CitizenProfile";
-import Home from "@/pages/citizen/Home";
-import CitizenVerification from "@/pages/citizen/CitizenVerification";
-import PostIssue from "./pages/citizen/PostIssue";
+import CitizenLayout from "@/layouts/citizen/CitizenLayout"
+import CitizenHome from "@/pages/citizen/Home"
+import CitizenProfile from "@/pages/citizen/Profile"
+import CitizenVerification from "@/pages/citizen/Verification"
 
 
 
@@ -62,14 +62,23 @@ export default function App() {
       <Toaster position="top-right" />
       <Routes>
 
+
+      // CITIZEN LOGIN (NO LAYOUT) //
         <Route path="/citizen/registration" element={<AuthPage />} />
+
+
 
       // PUBLIC ROUTES FOR AUTHORITY //
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Authentication />} />
 
+
+
       // ADMIN LOGIN (NO LAYOUT) //
         <Route path="/admin/login" element={<AdminLogin />} />
+
+
+
 
 
         {/* ───────── CITIZEN ROUTES ───────── */}
@@ -83,29 +92,32 @@ export default function App() {
           }
         >
 
-          <Route index element={<Home />} />
-          <Route path="home" element={<Home />} />
+          <Route index element={<CitizenHome />} />
 
-          <Route path="post-issue" element={<PostIssue />} />
-
-          <Route path="verification" element={<CitizenVerification />} />
-
-          <Route path="profile" element={<CitizenProfile />} />
-
-          {/* <Route path="messages" element={<Messages />} /> */}
-
-          {/* <Route path="notifications" element={<Notifications />} /> */}
+          <Route path="home" element={<CitizenHome />} />
 
           {/* <Route path="explore" element={<ExploreIssues />} /> */}
 
+          {/* <Route path="notifications" element={<Notifications />} /> */}
+
+          {/* <Route path="messages" element={<Messages />} /> */}
+
           {/* <Route path="insights" element={<Insights />} /> */}
+
+          <Route path="profile" element={<CitizenProfile />} />
+
+          <Route path="verification" element={<CitizenVerification />} />
 
         </Route>
 
+        {/* ───────── CITIZEN ROUTES ───────── */}
 
 
 
-      //PANCHAYATH ROUTES //
+
+
+
+        {/* ───────── PANCHAYATH ROUTES ───────── */}
 
         <Route
           path="/panchayath"
@@ -154,10 +166,24 @@ export default function App() {
             }
           />
 
+          <Route
+            path="ward/:id"
+            element={
+              <VerificationGuard>
+                <WardDetail />
+              </VerificationGuard>
+            }
+          />
+
         </Route>
 
+        {/* ───────── PANCHAYATH ROUTES ───────── */}
 
-      //ADMIN ROUTES//
+
+
+
+
+        {/* ───────── ADMIN ROUTES ───────── */}
 
         <Route
           path="/admin"
@@ -175,6 +201,9 @@ export default function App() {
           <Route path="profile" element={<AdminProfile />} />
           <Route path="panchayaths/:id" element={<PanchayathDetail />} />
         </Route>
+
+        {/* ───────── ADMIN ROUTES ───────── */}
+
 
 
 
@@ -199,6 +228,9 @@ export default function App() {
           <Route path="complaints" element={<ComplaintList />} />
           <Route path="complaints/:id" element={<ComplaintDetails />} />
         </Route>
+
+
+        {/* ───────── WARD ROUTES ───────── */}
 
       </Routes>
     </>

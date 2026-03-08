@@ -284,7 +284,7 @@ class PanchayathDashboardView(APIView):
             role=User.Role.WARD,
             status=User.Status.ACTIVE,
             is_verified=True,
-            wardverification__panchayath=user
+            ward_verification__panchayath=user
         ).count()
 
         total_wards = approved_wards + verification_stats["pending"] + verification_stats["rejected"]
@@ -336,7 +336,7 @@ class WardVerificationDetailView(APIView):
             )
         except WardVerification.DoesNotExist:
             return Response({"error": "Ward not found"}, status=404)
-        
+
         documents = []
 
         if ward.aadhaar_image:
@@ -345,10 +345,13 @@ class WardVerificationDetailView(APIView):
         if ward.selfie_image:
             documents.append(request.build_absolute_uri(ward.selfie_image.url))
 
+        if ward.supporting_document:
+            documents.append(request.build_absolute_uri(ward.supporting_document.url))
+
         return Response({
             "id": ward.id,
             "ward_name": ward.ward_name,
-            "username": ward.user.username,
+            "officer_name": ward.officer_full_name,
             "email": ward.official_email,
             "phone": ward.official_contact,
             "address": ward.office_address,
@@ -362,41 +365,41 @@ class WardVerificationDetailView(APIView):
 
 
 #new added 
-class WardVerificationDetailView(APIView):
-    permission_classes = [IsActivePanchayath]
+# class WardVerificationDetailView(APIView):
+#     permission_classes = [IsActivePanchayath]
 
-    def get(self, request, pk):
+#     def get(self, request, pk):
 
-        user = request.user
+#         user = request.user
 
-        try:
-            ward = WardVerification.objects.get(
-                pk=pk,
-                panchayath=user
-            )
-        except WardVerification.DoesNotExist:
-            return Response({"error": "Ward not found"}, status=404)
+#         try:
+#             ward = WardVerification.objects.get(
+#                 pk=pk,
+#                 panchayath=user
+#             )
+#         except WardVerification.DoesNotExist:
+#             return Response({"error": "Ward not found"}, status=404)
         
-        documents = []
+#         documents = []
 
-        if ward.aadhaar_image:
-            documents.append(request.build_absolute_uri(ward.aadhaar_image.url))
+#         if ward.aadhaar_image:
+#             documents.append(request.build_absolute_uri(ward.aadhaar_image.url))
 
-        if ward.selfie_image:
-            documents.append(request.build_absolute_uri(ward.selfie_image.url))
+#         if ward.selfie_image:
+#             documents.append(request.build_absolute_uri(ward.selfie_image.url))
 
-        return Response({
-            "id": ward.id,
-            "ward_name": ward.ward_name,
-            "username": ward.user.username,
-            "email": ward.user.email,
-            "phone": ward.phone,
-            "district": ward.district,
-            "status": ward.status,
-            "rejection_reason": ward.reject_reason,
-            "documents": documents,
-            "submitted_at": ward.submitted_at,
-        })
+#         return Response({
+#             "id": ward.id,
+#             "ward_name": ward.ward_name,
+#             "username": ward.user.username,
+#             "email": ward.user.email,
+#             "phone": ward.phone,
+#             "district": ward.district,
+#             "status": ward.status,
+#             "rejection_reason": ward.reject_reason,
+#             "documents": documents,
+#             "submitted_at": ward.submitted_at,
+#         })
 
 
 

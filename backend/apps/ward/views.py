@@ -216,6 +216,7 @@ class SubmitWardVerificationView(APIView):
         WardVerification.objects.create(
             user=user,
             panchayath=panchayath_user,
+            status="PENDING",
             **data
         )
 
@@ -235,7 +236,7 @@ class WardVerificationStatusView(APIView):
         
         return Response({
             "status":verification.status,
-            "reject_reason":verification.reject_reason,
+            "rejection_reason":verification.reject_reason,
             "submitted_at":verification.submitted_at,
             "reviewed_at":verification.reviewed_at,
         })
@@ -471,7 +472,7 @@ class RecentCitizenVerificationView(APIView):
 
 class PanchayathDropdownListView(APIView):
 
-    permission_classes = [IsActiveWard]
+    permission_classes = [IsWard]
 
     def get(self, request):
 

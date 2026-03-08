@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import panchayathApi from "@/api/panchayathApi";
-import { handleAuthError } from "@/service/panchayathurls";
+import panchayathApi from "@/service/panchayathurls";
+// import { handleAuthError } from "@/service/panchayathurls";
 import toast from "react-hot-toast";
 
 export default function WardDetail() {
@@ -18,7 +18,7 @@ export default function WardDetail() {
         const res = await panchayathApi.wardDetail(id);
         setWard(res.data);
       } catch (err) {
-        handleAuthError(err);
+        panchayathApi.handleAuthError(err);
         toast.error("Ward detail error:", err);
         setError("Failed to load ward details.");
       } finally {
@@ -44,9 +44,14 @@ export default function WardDetail() {
         <div>
           <button
             onClick={() => navigate(-1)}
-            className="text-sm text-blue-600 hover:underline mb-2"
+            className="flex items-center gap-2 w-fit px-4 py-2 mb-4 
+             text-sm font-medium text-blue-600 
+             bg-blue-100 rounded-lg 
+             hover:bg-blue-300 hover:text-blue-700 
+             transition-all duration-200"
           >
-            ← Back to Ward List
+            <span className="text-lg">←</span>
+            Back to Ward List
           </button>
 
           <h1 className="text-2xl font-black text-slate-900">
@@ -62,12 +67,44 @@ export default function WardDetail() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+          <DetailItem label="Ward Name" value={ward.ward_name} />
+          <DetailItem label="Officer Name" value={ward.officer_name} />
+
           <DetailItem label="Email" value={ward.email} />
-          <DetailItem label="Contact" value={ward.official_contact} />
+          <DetailItem label="Contact Number" value={ward.phone} />
+
+          <DetailItem label="Office Address" value={ward.address} />
           <DetailItem label="Status" value={ward.status} />
-          <DetailItem label="Joined Date" value={formatDate(ward.date_joined)} />
+
+          <DetailItem label="Submitted Date" value={formatDate(ward.submitted_at)} />
+
 
         </div>
+        {ward.documents?.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h2 className="text-lg font-bold text-slate-800 mb-4">
+              Verification Documents
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {ward.documents.map((doc, index) => (
+                <a
+                  key={index}
+                  href={doc}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border rounded-lg overflow-hidden hover:shadow-md"
+                >
+                  <img
+                    src={doc}
+                    alt="Document"
+                    className="w-full h-40 object-cover"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

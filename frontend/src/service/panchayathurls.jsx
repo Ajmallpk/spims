@@ -1,18 +1,3 @@
-// import axiosInstance from "@/api/axiosInstance";
-
-
-// const panchayathapi = {
-
-//   verifiationStatus:() => {return axiosInstance.get("/panchayath/verification-status/")},
-//   profile:()=> {return axiosInstance.get("/panchayath/profile/")},
-//   verifiationStatus:()=> {return axiosInstance.get("/panchayath/verification-status/")},
-//   submitVerification:()=> {return axiosInstance.post("/panchayath/submit-verification/",formData)},
-
-// };
-
-// export default panchayathapi;
-
-
 
 import axiosInstance from "@/api/axiosInstance";
 
@@ -25,7 +10,7 @@ const panchayathApi = {
   submitVerification: (formData) => {return axiosInstance.post("/panchayath/submit-verification/",formData,{headers: {"Content-Type": "multipart/form-data",},});},
   approveWard: (id) => {return axiosInstance.post(`/panchayath/approve-ward/${id}/`);},
   rejectWard: (id, reason) =>{return axiosInstance.post(`/panchayath/reject-ward/${id}/`, {reason: reason})},
-  listWard:()=> {return axiosInstance.get("/panchayath/wards/")},
+  listWard: (params) => axiosInstance.get("/panchayath/wards/", { params }),
   wardDetail: (id) =>{return axiosInstance.get(`/panchayath/ward/${id}/`)},
   handleAuthError:(err) => {
   if (err.response?.status === 401) {

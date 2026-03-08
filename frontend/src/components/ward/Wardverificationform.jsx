@@ -123,7 +123,8 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
         const res = await wardapi.getPanchayathDropdown();
         setPanchayaths(res.data);
       } catch (error) {
-        toast.error("Error fetching panchayaths:", error);
+        toast.error("Failed to load Panchayaths");
+        console.error(error);
       }
     };
 
@@ -195,13 +196,18 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
       if (files.supporting_document)
         fd.append("supporting_document", files.supporting_document);
 
-      await wardapi.submitVerification(fd);
+      await wardapi.submitWardVerification(fd);
+
+      toast.success("Verification submitted successfully");
 
       localStorage.setItem("verification_submitted", "true");
+
       onSuccess();
 
+      
     } catch (err) {
-      toast.error("Submit verification error:", err);
+      toast.error("Submit verification failed");
+      console.error(err);
 
       if (err.response && err.response.data) {
         const data = err.response.data;
@@ -314,7 +320,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
                 {panchayaths.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.username}
+                    {p.panchayath_name}
                   </option>
                 ))}
               </select>

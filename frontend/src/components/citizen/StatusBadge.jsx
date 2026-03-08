@@ -1,21 +1,46 @@
-// citizen/components/StatusBadge.jsx
+/**
+ * StatusBadge.jsx
+ * Reusable verification status badge for SPIMS.
+ * Props:
+ *   status: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED"
+ *   size:   "sm" | "md" (default "md")
+ */
 
 const STATUS_CONFIG = {
-  pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  in_progress: { label: 'In Progress', className: 'bg-blue-100 text-blue-700 border-blue-200' },
-  resolved: { label: 'Resolved', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  rejected: { label: 'Rejected', className: 'bg-red-100 text-red-700 border-red-200' },
+  NOT_SUBMITTED: {
+    label: "Not Submitted",
+    classes: "bg-gray-100 text-gray-600 border border-gray-200",
+    dot: "bg-gray-400",
+  },
+  PENDING: {
+    label: "Under Review",
+    classes: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+    dot: "bg-yellow-400 animate-pulse",
+  },
+  APPROVED: {
+    label: "Approved",
+    classes: "bg-green-50 text-green-700 border border-green-200",
+    dot: "bg-green-500",
+  },
+  REJECTED: {
+    label: "Rejected",
+    classes: "bg-red-50 text-red-600 border border-red-200",
+    dot: "bg-red-500",
+  },
 };
 
-export default function StatusBadge({ status }) {
-  const config = STATUS_CONFIG[status] || {
-    label: status || 'Unknown',
-    className: 'bg-gray-100 text-gray-600 border-gray-200',
-  };
+const StatusBadge = ({ status = "NOT_SUBMITTED", size = "md" }) => {
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.NOT_SUBMITTED;
+  const sizeClasses = size === "sm" ? "px-2.5 py-0.5 text-xs" : "px-3 py-1 text-xs font-medium";
+
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${config.className}`}>
-      <span className='w-1.5 h-1.5 rounded-full bg-current mr-1.5 opacity-70' />
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full ${sizeClasses} ${config.classes}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${config.dot}`} />
       {config.label}
     </span>
   );
-}
+};
+
+export default StatusBadge;

@@ -1,85 +1,118 @@
-// citizen/components/IssueCard.jsx
-import { MapPin, Clock } from 'lucide-react';
-import StatusBadge from '@/components/citizen/StatusBadge';
-import UpvoteButton from '@/components/citizen/UpvoteButton';
-import CommentSection from '@/components/citizen/CommentSection';
-import ResolvedRepost from '@/components/citizen/ResolvedRepost';
+import { useState } from "react";
+import Avatar from "@/components/ui/Avatar";
+import AuthorityResponse from "@/components/citizen/AuthorityResponse";
+import CommentSection from "@/components/citizen/CommentSection";
 
-function timeAgo(dateStr) {
-  if (!dateStr) return '';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return mins + 'm ago';
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return hrs + 'h ago';
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return days + 'd ago';
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-}
+const IssueCard = ({ issue }) => {
+  const [upvoted, setUpvoted] = useState(false);
+  const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
+  const [showComments, setShowComments] = useState(issue.authorityResponse ? true : false);
 
-export default function IssueCard({ issue }) {
-  const {
-    id, citizen_name, ward, created_at, title,
-    description, image, status, upvote_count,
-    user_upvoted, comments, resolution,
-  } = issue;
-
-  const initials = (citizen_name || 'C')
-    .split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  const handleUpvote = () => {
+    setUpvoted((prev) => !prev);
+    setUpvoteCount((prev) => (upvoted ? prev - 1 : prev + 1));
+  };
 
   return (
-    <article className='bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200'>
-      <div className='p-5'>
-        <div className='flex items-start justify-between gap-3 mb-3'>
-          <div className='flex items-center gap-3'>
-            <div className='w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm flex-shrink-0'>
-              {initials}
-            </div>
-            <div>
-              <p className='text-sm font-semibold text-gray-900 leading-tight'>
-                {citizen_name || 'Anonymous Citizen'}
-              </p>
-              <div className='flex items-center gap-2 mt-0.5 flex-wrap'>
-                {ward && (
-                  <span className='flex items-center gap-0.5 text-[11px] text-gray-500'>
-                    <MapPin className='w-3 h-3' />{ward}
-                  </span>
-                )}
-                <span className='flex items-center gap-0.5 text-[11px] text-gray-400'>
-                  <Clock className='w-3 h-3' />{timeAgo(created_at)}
-                </span>
-              </div>
+    <div className="bg-white rounded-2xl shadow-md p-5 space-y-4">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <Avatar alt={issue.citizenName} size="md" />
+          <div>
+            <p className="font-semibold text-gray-900 text-sm">{issue.citizenName}</p>
+            <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5 flex-wrap">
+              <span className="text-teal-600 font-medium">{issue.ward}</span>
+              <span>•</span>
+              <span>{issue.location}</span>
+              <span>•</span>
+              <span>{issue.timeAgo}</span>
             </div>
           </div>
-          <StatusBadge status={status} />
         </div>
-
-        <h2 className='text-base font-bold text-gray-900 mb-1.5 leading-snug'>{title}</h2>
-
-        {description && (
-          <p className='text-sm text-gray-600 leading-relaxed line-clamp-3 mb-3'>{description}</p>
-        )}
-
-        {image && (
-          <div className='rounded-xl overflow-hidden border border-gray-100 mb-4'>
-            <img src={image} alt={title} className='w-full max-h-64 object-cover' loading='lazy' />
-          </div>
-        )}
-
-        <div className='flex items-center gap-3 mt-1'>
-          <UpvoteButton issueId={id} initialCount={upvote_count || 0} initialUpvoted={user_upvoted || false} />
-          <span className='text-xs text-gray-400'>
-            {(comments || []).length} comment{(comments || []).length !== 1 ? 's' : ''}
-          </span>
-        </div>
-
-        {status === 'resolved' && resolution && (
-          <ResolvedRepost resolution={resolution} />
-        )}
-
-        <CommentSection issueId={id} initialComments={comments || []} />
+        <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <circle cx="5" cy="12" r="2" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="19" cy="12" r="2" />
+          </svg>
+        </button>
       </div>
-    </article>
+
+      {/* Description */}
+      <div className="space-y-2">
+        <p className="text-sm text-gray-700 leading-relaxed">{issue.description}</p>
+        {issue.category && (
+          <span className="inline-block bg-gray-100 text-gray-600 rounded-md px-2.5 py-1 text-xs font-medium">
+            {issue.category}
+          </span>
+        )}
+      </div>
+
+      {/* Image */}
+      {issue.image && (
+        <img
+          src={issue.image}
+          alt={issue.category}
+          className="rounded-xl w-full object-cover max-h-72"
+        />
+      )}
+
+      {/* Action bar */}
+      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+        <div className="flex items-center gap-1">
+          {/* Upvote */}
+          <button
+            onClick={handleUpvote}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
+              upvoted
+                ? "text-teal-600 bg-teal-50"
+                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" fill={upvoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+            </svg>
+            <span>{upvoteCount} Upvotes</span>
+          </button>
+
+          {/* Comments */}
+          <button
+            onClick={() => setShowComments((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>{issue.commentCount} Comments</span>
+          </button>
+        </div>
+
+        {/* Share */}
+        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+          <span>Share</span>
+        </button>
+      </div>
+
+      {/* Authority Response */}
+      {issue.authorityResponse && (
+        <AuthorityResponse response={issue.authorityResponse} />
+      )}
+
+      {/* Comments */}
+      {showComments && (
+        <CommentSection comments={issue.comments || []} issueId={issue.id} />
+      )}
+    </div>
   );
-}
+};
+
+export default IssueCard;
