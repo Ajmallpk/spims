@@ -374,6 +374,7 @@ class ApproveCitizenView(APIView):
         citizen.save()
 
         citizen.user.status = User.Status.ACTIVE
+        citizen.user.is_verified = True
         citizen.user.save()
         return Response({"message": "Citizen approved successfully"})
     

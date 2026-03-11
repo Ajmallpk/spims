@@ -8,12 +8,12 @@
  */
 
 import { useState } from "react";
+import citizenapi from "@/service/citizenurls";
 
 const iCls = (err) =>
-  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all ${
-    err
-      ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
-      : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all ${err
+    ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
+    : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
   }`;
 
 const ChangeEmailForm = ({ currentEmail, token }) => {
@@ -52,26 +52,15 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
     setApiError(null);
 
     try {
-      const res = await fetch("/api/citizen/change-email/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          new_email: form.newEmail,
-          password: form.password,
-        }),
+      await citizenapi.changeEmail({
+        new_email: form.newEmail,
+        password: form.password,
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message || "Email change failed.");
-      }
       setSuccess(true);
       setForm({ newEmail: "", password: "" });
       setErrors({});
     } catch (err) {
-      setApiError(err.message);
+      setApiError(err.response?.data?.message || "Failed to change email");
     } finally {
       setSubmitting(false);
     }
@@ -111,7 +100,7 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
           <div>
             <p className="text-sm text-teal-700 font-semibold">Verification email sent!</p>
             <p className="text-xs text-teal-600 mt-0.5">
-              Check your new inbox and click the verification link to complete the change.
+              Check your current email and click the verification link to confirm the change.
             </p>
           </div>
         </div>
@@ -185,7 +174,7 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
-        A verification email will be sent to your new address. Your email will only be updated after you verify it.
+        A verification email will be sent to your current email . Your email will only be updated after you verify it.
       </div>
 
       <button

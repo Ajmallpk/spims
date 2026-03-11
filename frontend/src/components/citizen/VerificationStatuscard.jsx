@@ -6,7 +6,7 @@
  *   loading: boolean
  */
 
-import StatusBadge from "@/components/citizen/StatusBadge";
+import StatusBadge from "@/components/citizen/Statusbadge";
 
 const STATUS_META = {
   NOT_SUBMITTED: {

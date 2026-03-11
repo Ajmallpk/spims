@@ -7,6 +7,7 @@
  */
 
 import { useState } from "react";
+import citizenapi from "@/service/citizenurls";
 
 const EyeIcon = ({ open }) =>
   open ? (
@@ -22,10 +23,9 @@ const EyeIcon = ({ open }) =>
   );
 
 const iCls = (err) =>
-  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all pr-10 ${
-    err
-      ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
-      : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all pr-10 ${err
+    ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
+    : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
   }`;
 
 const PasswordField = ({ label, name, value, onChange, error, show, onToggle, placeholder }) => (
@@ -96,21 +96,10 @@ const ChangePasswordForm = ({ token }) => {
     setApiError(null);
 
     try {
-      const res = await fetch("/api/citizen/change-password/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          current_password: form.currentPassword,
-          new_password: form.newPassword,
-        }),
+      await citizenapi.changePassword({
+        current_password: form.currentPassword,
+        new_password: form.newPassword,
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message || "Password change failed.");
-      }
       setSuccess(true);
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setErrors({});
@@ -123,7 +112,7 @@ const ChangePasswordForm = ({ token }) => {
 
   const fields = [
     { name: "currentPassword", label: "Current Password", placeholder: "Your current password" },
-    { name: "newPassword",     label: "New Password",     placeholder: "Min. 8 characters" },
+    { name: "newPassword", label: "New Password", placeholder: "Min. 8 characters" },
     { name: "confirmPassword", label: "Confirm Password", placeholder: "Repeat new password" },
   ];
 
@@ -186,17 +175,16 @@ const ChangePasswordForm = ({ token }) => {
             return (
               <div
                 key={lvl}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  lvl <= strength
+                className={`h-1 flex-1 rounded-full transition-colors ${lvl <= strength
                     ? strength <= 1
                       ? "bg-red-400"
                       : strength <= 2
-                      ? "bg-yellow-400"
-                      : strength <= 3
-                      ? "bg-teal-400"
-                      : "bg-green-500"
+                        ? "bg-yellow-400"
+                        : strength <= 3
+                          ? "bg-teal-400"
+                          : "bg-green-500"
                     : "bg-gray-200"
-                }`}
+                  }`}
               />
             );
           })}

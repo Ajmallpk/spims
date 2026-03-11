@@ -13,6 +13,7 @@ import CitizenInfoCard from "@/components/citizen/Citizeninfocard";
 import VerificationStatusCard from "@/components/citizen/Verificationstatuscard";
 import VerificationProgress from "@/components/citizen/Verificationprogress";
 import CitizenVerificationForm from "@/components/citizen/Citizenverificationform";
+import citizenapi from "@/service/citizenurls";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -48,12 +49,13 @@ const Verification = () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const [profileData, statusData] = await Promise.all([
-        fetchWithAuth("/api/citizen/profile/", token),
-        fetchWithAuth("/api/citizen/verification-status/", token),
+      const [profileRes, statusRes] = await Promise.all([
+        citizenapi.getProfile(),
+        citizenapi.getVerificationStatus(),
       ]);
-      setProfile(profileData);
-      setVerificationStatus(statusData);
+
+      setProfile(profileRes.data);
+      setVerificationStatus(statusRes.data);
     } catch (err) {
       setFetchError(err.message);
     } finally {
@@ -68,8 +70,8 @@ const Verification = () => {
   const handleSubmitSuccess = async () => {
     // Re-fetch verification status after successful submission
     try {
-      const statusData = await fetchWithAuth("/api/citizen/verification-status/", token);
-      setVerificationStatus(statusData);
+      const statusRes = await citizenapi.getVerificationStatus();
+      setVerificationStatus(statusRes.data);
     } catch {
       // silent — the form already shows success state
     }

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import CitizenVerificationTable from "@/components/ward/Citizenverificationtable";
 import CitizenApprovalModal from "@/components/ward/Citizenapprovalmodal";
 import toast from "react-hot-toast";
+import wardapi from "@/service/wardurls";
+import citizenapi from "@/service/citizenurls";
 
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -18,14 +20,12 @@ export default function CitizenVerificationRequests() {
   const fetchVerifications = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`${API_BASE}/api/ward/citizen-verifications/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const res = await wardapi.getverificationList()
+      const data = res.data;
       setRequests(Array.isArray(data) ? data : (data.results ?? []));
     } catch (err) {
-      toast.error("Failed to fetch citizen verifications:", err);
+      toast.error("Failed to fetch citizen verifications");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }

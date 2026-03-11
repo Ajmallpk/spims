@@ -10,7 +10,7 @@
  *   token        : string
  */
 
-import ProfileAvatarUploader from "@/components/citizen/ProfileAvatarUploader";
+import ProfileAvatarUploader from "@/components/citizen/Profileavataruploader";
 
 const ProfileHeader = ({ profile, loading, onAvatarUpload, onEditClick, token }) => {
   const isVerified = profile?.verificationStatus === "APPROVED";
@@ -37,7 +37,7 @@ const ProfileHeader = ({ profile, loading, onAvatarUpload, onEditClick, token })
             <div className="w-20 h-20 rounded-full bg-gray-200 border-4 border-white shadow-md animate-pulse flex-shrink-0" />
           ) : (
             <ProfileAvatarUploader
-              avatarUrl={profile?.avatarUrl}
+              avatarUrl={profile?.profile_image}
               fullName={profile?.fullName}
               onUpload={onAvatarUpload}
               token={token}

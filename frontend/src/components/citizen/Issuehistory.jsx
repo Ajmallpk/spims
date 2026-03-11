@@ -8,7 +8,7 @@
  */
 
 import { useState } from "react";
-import StatusBadge from "@/components/citizen/StatusBadge";
+import StatusBadge from "@/components/citizen/Statusbadge";
 
 const PAGE_SIZE = 5;
 const FILTERS = ["ALL", "PENDING", "OPEN", "RESOLVED", "ESCALATED", "CLOSED"];

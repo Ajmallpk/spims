@@ -1,16 +1,24 @@
 import { useState } from "react";
 import Avatar from "@/components/ui/Avatar";
-import AuthorityResponse from "@/components/citizen/AuthorityResponse";
-import CommentSection from "@/components/citizen/CommentSection";
+import AuthorityResponse from "@/components/citizen/Authorityresponse";
+import CommentSection from "@/components/citizen/Commentsection";
+import complaintapi from "@/service/complaintsurls";
 
 const IssueCard = ({ issue }) => {
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
   const [showComments, setShowComments] = useState(issue.authorityResponse ? true : false);
 
-  const handleUpvote = () => {
-    setUpvoted((prev) => !prev);
-    setUpvoteCount((prev) => (upvoted ? prev - 1 : prev + 1));
+  const handleUpvote = async () => {
+    try {
+      await complaintapi.toggleUpvote(issue.id);
+
+      setUpvoted((prev) => !prev);
+      setUpvoteCount((prev) => (upvoted ? prev - 1 : prev + 1));
+
+    } catch (error) {
+      console.error("Upvote failed:", error);
+    }
   };
 
   return (
@@ -64,11 +72,10 @@ const IssueCard = ({ issue }) => {
           {/* Upvote */}
           <button
             onClick={handleUpvote}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${
-              upvoted
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${upvoted
                 ? "text-teal-600 bg-teal-50"
                 : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            }`}
+              }`}
           >
             <svg viewBox="0 0 24 24" fill={upvoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
               <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />

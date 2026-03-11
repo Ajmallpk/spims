@@ -58,6 +58,7 @@ const wardapi = {
     profile: () => axiosInstance.get("/ward/profile/"),
     getPanchayathDropdown: () => { return axiosInstance.get("ward/panchayath-dropdown/"); },
     verificationStatus: () => axiosInstance.get("/ward/verification-status/"),
+    getverificationList:()=> axiosInstance.get("/ward/citizen-verifications/"),
 };
 
 export default wardapi;

@@ -53,6 +53,7 @@ import CitizenLayout from "@/layouts/citizen/CitizenLayout"
 import CitizenHome from "@/pages/citizen/Home"
 import CitizenProfile from "@/pages/citizen/Profile"
 import CitizenVerification from "@/pages/citizen/Verification"
+import Messages from "./pages/citizen/Messages";
 
 
 
@@ -100,7 +101,7 @@ export default function App() {
 
           {/* <Route path="notifications" element={<Notifications />} /> */}
 
-          {/* <Route path="messages" element={<Messages />} /> */}
+          <Route path="messages" element={<Messages />} />
 
           {/* <Route path="insights" element={<Insights />} /> */}
 

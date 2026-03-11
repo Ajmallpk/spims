@@ -1,17 +1,31 @@
-import { useState } from "react";
-
-const WARDS = Array.from({ length: 20 }, (_, i) => `Ward ${String(i + 1).padStart(2, "0")}`);
+import { useState, useEffect } from "react";
+import citizenapi from "@/service/citizenurls";
 
 const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
+  const [wards, setWards] = useState([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
+    category: "",
     ward: "",
     location: "",
     image: null,
   });
   const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      try {
+        const res = await citizenapi.getWards();
+        setWards(res.data);
+      } catch (error) {
+        console.error("Failed to load wards", error);
+      }
+    };
+
+    fetchWards();
+  }, []);
 
   if (!isOpen) return null;
 
@@ -29,15 +43,25 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
   };
 
   const handleSubmit = async () => {
-    if (!form.title || !form.description || !form.ward) return;
+    if (!form.title || !form.description || !form.category || !form.ward) return;
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 800));
     onSubmit?.(form);
     setSubmitting(false);
     onClose();
-    setForm({ title: "", description: "", ward: "", location: "", image: null });
+    setForm({
+      title: "",
+      description: "",
+      category: "",
+      ward: "",
+      location: "",
+      image: null
+    });
     setPreview(null);
   };
+
+
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -82,6 +106,26 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-teal-300 transition-all resize-none"
             />
           </div>
+          {/* Category */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block">
+              Category *
+            </label>
+
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-teal-300 transition-all bg-white"
+            >
+              <option value="">Select category</option>
+              <option value="ROAD">Road Issue</option>
+              <option value="WATER">Water Issue</option>
+              <option value="ELECTRICITY">Electricity</option>
+              <option value="WASTE">Waste Management</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
 
           {/* Ward + Location */}
           <div className="grid grid-cols-2 gap-3">
@@ -94,8 +138,10 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-teal-300 transition-all bg-white"
               >
                 <option value="">Select ward</option>
-                {WARDS.map((w) => (
-                  <option key={w} value={w}>{w}</option>
+                {wards.map((ward) => (
+                  <option key={ward.id} value={ward.id}>
+                    {ward.name}
+                  </option>
                 ))}
               </select>
             </div>

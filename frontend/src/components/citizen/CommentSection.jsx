@@ -1,20 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Avatar from "@/components/ui/Avatar";
+import complaintapi from "@/service/complaintsurls";
 
 const CommentSection = ({ comments = [], issueId }) => {
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState(comments);
 
-  const handlePost = () => {
-    if (!commentText.trim()) return;
-    const newComment = {
-      id: Date.now(),
-      authorName: "You",
-      text: commentText.trim(),
-      timeAgo: "Just now",
+
+  useEffect(() => {
+    const loadComments = async () => {
+      try {
+        const res = await complaintapi.getComments(issueId);
+
+        const formatted = res.data.map((c) => ({
+          id: c.id,
+          authorName: c.user_name,
+          text: c.comment,
+          timeAgo: "just now",
+        }));
+
+        setLocalComments(formatted);
+
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+      }
     };
-    setLocalComments((prev) => [...prev, newComment]);
-    setCommentText("");
+
+    loadComments();
+  }, [issueId]);
+
+  const handlePost = async () => {
+    if (!commentText.trim()) return;
+
+    try {
+      const res = await complaintapi.createComment(issueId, {
+        comment: commentText,
+      });
+
+      const newComment = {
+        id: res.data.id,
+        authorName: "You",
+        text: res.data.comment,
+        timeAgo: "Just now",
+      };
+
+      setLocalComments((prev) => [...prev, newComment]);
+      setCommentText("");
+
+    } catch (error) {
+      console.error("Comment failed:", error);
+    }
   };
 
   const handleKeyDown = (e) => {

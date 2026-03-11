@@ -18,6 +18,7 @@ User = get_user_model()
 
 
 class CitizenSignupRequestView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
@@ -40,6 +41,7 @@ class CitizenSignupRequestView(APIView):
         
         
 class AuthoritySignupRequestView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         role = request.data.get("role")
 
@@ -66,7 +68,7 @@ class AuthoritySignupRequestView(APIView):
     
     
 class VerifyOTPView(APIView):
-
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get("email")
         otp = request.data.get("otp")
@@ -98,6 +100,7 @@ class VerifyOTPView(APIView):
 
 
 class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get("email")
         success, result = resend_otp(email, purpose="signup")
@@ -117,6 +120,7 @@ class ResendOTPView(APIView):
     
 
 class EmailLoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
     serializer_class = EmailTokenObtainPairSerializer    
     
     

@@ -9,6 +9,7 @@
  */
 
 import { useRef, useState } from "react";
+import citizenapi from "@/service/citizenurls";
 
 const getInitials = (name = "") =>
   name
@@ -47,15 +48,8 @@ const ProfileAvatarUploader = ({ avatarUrl, fullName, onUpload, token }) => {
       const formData = new FormData();
       formData.append("avatar", file);
 
-      const res = await fetch("/api/citizen/upload-avatar/", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-
-      const data = await res.json();
+      const res = await citizenapi.uploadAvatar(formData);
+      const data = res.data;
       onUpload?.(data.avatarUrl ?? data.avatar_url ?? preview);
     } catch (err) {
       setError("Upload failed. Please try again.");
@@ -92,11 +86,10 @@ const ProfileAvatarUploader = ({ avatarUrl, fullName, onUpload, token }) => {
 
         {/* Hover / uploading overlay */}
         <div
-          className={`absolute inset-0 flex flex-col items-center justify-center gap-1 transition-opacity duration-200 ${
-            uploading
+          className={`absolute inset-0 flex flex-col items-center justify-center gap-1 transition-opacity duration-200 ${uploading
               ? "bg-black/50 opacity-100"
               : "bg-black/40 opacity-0 group-hover:opacity-100"
-          }`}
+            }`}
         >
           {uploading ? (
             <svg

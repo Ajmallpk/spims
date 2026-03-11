@@ -12,8 +12,8 @@
  */
 
 import ChatHeader from "@/components/citizen/Chatheader";
-import ChatMessages from "@/components/citizen/ChatMessages";
-import ChatInput from "@/components/citizen/ChatInput";
+import ChatMessages from "@/components/citizen/Chatmessages";
+import ChatInput from "@/components/citizen/Chatinput";
 
 const NothingSelected = () => (
   <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">

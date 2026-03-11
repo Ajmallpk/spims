@@ -15,10 +15,9 @@ import { useState, useEffect } from "react";
 const WARDS = Array.from({ length: 20 }, (_, i) => `Ward ${String(i + 1).padStart(2, "0")}`);
 
 const iCls = (err) =>
-  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all ${
-    err
-      ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
-      : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+  `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all ${err
+    ? "border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-200"
+    : "border-gray-200 bg-gray-50 focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
   }`;
 
 const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) => {
@@ -80,18 +79,25 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
 
     try {
       const res = await fetch("/api/citizen/profile/update/", {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          full_name: form.fullName,
+          phone: form.phone,
+          house_number: form.houseNumber,
+          street_name: form.streetName,
+          address: form.address,
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.message || "Update failed.");
       }
-      const updated = await res.json();
+      const response = await res.json();
+      const updated = response.data;
       onUpdateSuccess?.(updated);
       setSuccess(true);
       setTimeout(onClose, 800);

@@ -10,7 +10,7 @@
  */
 
 import { useState } from "react";
-import ConversationItem from "@/components/citizen/ConversationItem";
+import ConversationItem from "@/components/citizen/Conversationitem";
 
 const SkeletonItem = () => (
   <div className="flex items-start gap-3 p-4 border-b border-gray-50 animate-pulse">

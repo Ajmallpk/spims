@@ -424,3 +424,27 @@ class MarkNotificationReadView(APIView):
         notification.save()
 
         return Response({"message": "Notification marked as read"})
+    
+    
+    
+
+class CitizenMyComplaintsView(ListAPIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = ComplaintFeedSerializer
+
+    def get_queryset(self):
+
+        user = self.request.user
+
+        if user.role != "CITIZEN":
+            return Complaint.objects.none()
+
+        return Complaint.objects.filter(
+            citizen=user
+        ).select_related(
+            "ward"
+        ).annotate(
+            upvotes_count=Count("upvotes"),
+            comments_count=Count("comments")
+        ).order_by("-created_at")

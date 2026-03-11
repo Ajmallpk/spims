@@ -1,5 +1,10 @@
-import { useState } from "react";
-import Avatar from "../ui/Avatar";
+import { useState, useEffect } from "react";
+import Avatar from "@/components/ui/Avatar";
+import { useNavigate, useLocation } from "react-router-dom";
+import citizenapi from "@/service/citizenurls";
+
+
+
 
 const navItems = [
   {
@@ -64,7 +69,37 @@ const navItems = [
 ];
 
 const TopNavigation = () => {
-  const [active, setActive] = useState("home");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [verificationStatus, setVerificationStatus] = useState("NOT_VERIFIED");
+
+
+  useEffect(() => {
+
+    const fetchVerificationStatus = async () => {
+      try {
+
+        const res = await citizenapi.getVerificationStatus();
+
+        if (!res.data.submitted) {
+          setVerificationStatus("NOT_VERIFIED");
+        }
+        else if (res.data.status === "PENDING") {
+          setVerificationStatus("PENDING");
+        }
+        else if (res.data.status === "APPROVED") {
+          setVerificationStatus("APPROVED");
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch verification status", error);
+      }
+
+    };
+
+    fetchVerificationStatus();
+
+  }, []);
 
   return (
     <div className="sticky top-0 z-40 pt-4 pb-2 bg-gray-100">
@@ -115,12 +150,13 @@ const TopNavigation = () => {
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActive(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  active === item.id
-                    ? "bg-teal-500 text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
+                onClick={() => {
+                  navigate(item.id === "home" ? "/citizen" : `/citizen/${item.id}`);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${location.pathname === (item.id === "home" ? "/citizen" : `/citizen/${item.id}`)
+                  ? "bg-teal-500 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -129,11 +165,20 @@ const TopNavigation = () => {
           </div>
 
           {/* Verified badge */}
-          <div className="flex items-center gap-1.5 bg-teal-50 text-teal-700 rounded-full px-3 py-1.5 text-xs font-medium border border-teal-100">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-teal-500">
+          <div
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border
+  ${verificationStatus === "APPROVED"
+                ? "bg-teal-50 text-teal-700 border-teal-100"
+                : "bg-red-50 text-red-700 border-red-100"
+              }`}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Verified Citizen
+
+            {verificationStatus === "APPROVED"
+              ? "Verified Citizen"
+              : "Not Verified"}
           </div>
         </div>
       </div>

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import CitizenLayout from "@/layouts/citizen/Citizenlayout";
+// import CitizenLayout from "@/layouts/citizen/Citizenlayout";
 import IssueCard from "@/components/citizen/Issuecard";
 import PostIssueButton from "@/components/citizen/Postissuebutton";
 import CreateIssueModal from "@/components/citizen/Createissuemodal";
 import VerificationRequiredModal from "@/components/citizen/Verificationrequiredmodal";
-import complaintApi from "@/service/complaintsurls";
+import complaintapi from "@/service/complaintsurls";
+import citizenapi from "@/service/citizenurls";
 
 // Verification status constants
 const VERIFICATION_STATUS = {
@@ -80,23 +81,99 @@ const MOCK_ISSUES = [
   },
 ];
 
+const formatTimeAgo = (dateString) => {
+
+  const now = new Date();
+  const past = new Date(dateString);
+
+  const seconds = Math.floor((now - past) / 1000);
+
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const days = Math.floor(seconds / 86400);
+
+  if (seconds < 60) return "Just now";
+  if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+
+  return past.toLocaleDateString();
+};
+
 const Home = () => {
+
+  const handleLogout = () => {
+    localStorage.removeItem("spims_token");
+    localStorage.removeItem("refresh_token");
+
+    window.location.href = "/citizen/registration";
+  };
+
+
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateIssueOpen, setIsCreateIssueOpen] = useState(false);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
   const [pendingMessage, setPendingMessage] = useState(false);
-  const [citizenVerificationStatus, setCitizenVerificationStatus] = useState(
-    VERIFICATION_STATUS.APPROVED
-  );
+  const [citizenVerificationStatus, setCitizenVerificationStatus] =
+    useState(VERIFICATION_STATUS.NOT_VERIFIED);
+
+
+
+
+  const loadFeed = async () => {
+    try {
+      const res = await complaintapi.getComplaintFeed();
+
+      const formattedIssues = (res.data.results || []).map((issue) => ({
+        id: issue.id,
+        citizenName: issue.citizen_name,
+        ward: issue.ward_name,
+        location: issue.location,
+        timeAgo: formatTimeAgo(issue.created_at),
+        description: issue.description,
+        category: issue.category,
+        image: issue.image,
+        upvotes: issue.upvotes_count,
+        commentCount: issue.comments_count,
+        authorityResponse: issue.resolution || null,
+        comments: []
+      }));
+
+      setIssues(formattedIssues);
+
+    } catch (err) {
+      console.error("Failed to load complaints", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Simulate fetch
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIssues(MOCK_ISSUES);
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
+
+    const fetchVerificationStatus = async () => {
+      try {
+        const res = await citizenapi.getVerificationStatus();
+
+        if (!res.data.submitted) {
+          setCitizenVerificationStatus(VERIFICATION_STATUS.NOT_VERIFIED);
+        }
+        else if (res.data.status === "PENDING") {
+          setCitizenVerificationStatus(VERIFICATION_STATUS.PENDING);
+        }
+        else if (res.data.status === "APPROVED") {
+          setCitizenVerificationStatus(VERIFICATION_STATUS.APPROVED);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch verification status", error);
+      }
+    };
+
+    fetchVerificationStatus();
+    loadFeed();
+
   }, []);
 
   const handlePostIssueClick = () => {
@@ -110,23 +187,51 @@ const Home = () => {
     }
   };
 
-  const handleIssueSubmit = (formData) => {
-    const newIssue = {
-      id: Date.now(),
-      citizenName: "You",
-      ward: formData.ward,
-      location: formData.location || "Your location",
-      timeAgo: "Just now",
-      description: formData.description,
-      category: formData.title,
-      image: formData.image ? URL.createObjectURL(formData.image) : null,
-      upvotes: 0,
-      commentCount: 0,
-      authorityResponse: null,
-      comments: [],
-    };
-    setIssues((prev) => [newIssue, ...prev]);
+  // const handleIssueSubmit = (formData) => {
+  //   const newIssue = {
+  //     id: Date.now(),
+  //     citizenName: "You",
+  //     ward: formData.ward,
+  //     location: formData.location || "Your location",
+  //     timeAgo: "Just now",
+  //     description: formData.description,
+  //     category: formData.title,
+  //     image: formData.image ? URL.createObjectURL(formData.image) : null,
+  //     upvotes: 0,
+  //     commentCount: 0,
+  //     authorityResponse: null,
+  //     comments: [],
+  //   };
+  //   setIssues((prev) => [newIssue, ...prev]);
+  // };
+
+  const handleIssueSubmit = async (formData) => {
+    try {
+
+      const data = new FormData();
+
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("ward", formData.ward);
+      data.append("location", formData.location);
+      data.append("category", formData.category);
+
+      if (formData.image) {
+        data.append("image_proof", formData.image);
+      }
+
+      await complaintapi.createComplaint(data);
+
+      setIsCreateIssueOpen(false);
+
+      await loadFeed();   // refresh feed automatically
+
+    } catch (error) {
+      console.error("Failed to create complaint", error);
+    }
   };
+
+
 
   const handleVerifyRedirect = () => {
     // In real app: navigate("/citizen/verification")
@@ -134,7 +239,7 @@ const Home = () => {
   };
 
   return (
-    <CitizenLayout>
+    <>
       {/* Pending verification toast */}
       {pendingMessage && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl px-5 py-3 text-sm shadow-lg font-medium">
@@ -144,7 +249,14 @@ const Home = () => {
 
       {/* Post Issue Button */}
       <PostIssueButton onClick={handlePostIssueClick} />
+      <button
+        onClick={handleLogout}
+        className="fixed bottom-6 right-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl shadow-lg text-sm font-semibold z-50"
+      >
+        Logout
+      </button>
 
+      {/* Feed */}
       {/* Feed */}
       {loading ? (
         <div className="space-y-4">
@@ -165,6 +277,15 @@ const Home = () => {
             </div>
           ))}
         </div>
+      ) : issues.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-md p-10 text-center text-gray-500">
+          <p className="text-sm font-medium">
+            No issues reported in your ward yet.
+          </p>
+          <p className="text-xs mt-1">
+            Be the first citizen to report a problem.
+          </p>
+        </div>
       ) : (
         <div className="space-y-5">
           {issues.map((issue) => (
@@ -184,7 +305,7 @@ const Home = () => {
         onClose={() => setIsVerificationModalOpen(false)}
         onVerify={handleVerifyRedirect}
       />
-    </CitizenLayout>
+    </>
   );
 };
 

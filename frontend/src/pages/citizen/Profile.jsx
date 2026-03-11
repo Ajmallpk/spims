@@ -5,7 +5,6 @@
  *
  * Replace getAuthToken() with your own auth utility.
  */
-
 import { useState, useEffect, useCallback } from "react";
 import ProfileHeader from "@/components/citizen/Profileheader";
 import ProfileInfoCard from "@/components/citizen/Profileinfocard";
@@ -13,6 +12,10 @@ import ProfileStats from "@/components/citizen/Profilestats";
 import SecuritySettings from "@/components/citizen/Securitysettings";
 import IssueHistory from "@/components/citizen/Issuehistory";
 import EditProfileModal from "@/components/citizen/Editprofilemodal";
+import citizenapi from "@/service/citizenurls";
+import complaintapi from "@/service/complaintsurls";
+import VerificationStatusCard from "@/components/citizen/Verificationstatuscard";
+import VerificationProgress from "@/components/citizen/Verificationprogress";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 const getAuthToken = () => localStorage.getItem("spims_token") || "";
@@ -37,33 +40,48 @@ const Profile = () => {
 
   const [profile, setProfile] = useState(null);
   const [issues, setIssues] = useState([]);
+  const [verificationStatus, setVerificationStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+
+
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
+
     try {
-      const [profileData, issueData] = await Promise.all([
-        fetchWithAuth("/api/citizen/profile/", token),
-        fetchWithAuth("/api/citizen/issues/my/", token),
+
+      const [profileRes, complaintsRes, verificationRes] = await Promise.all([
+        citizenapi.getProfile(),
+        complaintapi.getMyComplaints(),
+        citizenapi.getVerificationStatus()
       ]);
-      setProfile(profileData);
-      setIssues(issueData?.results ?? issueData ?? []);
+
+      setProfile(profileRes.data);
+      setVerificationStatus(verificationRes.data);
+
+      const complaints = complaintsRes.data?.results ?? complaintsRes.data ?? [];
+      setIssues(complaints);
+
     } catch (err) {
       setFetchError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [token]);
+
+  }, []);
+
+
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const handleAvatarUpload = (newUrl) => {
-    setProfile((prev) => ({ ...prev, avatarUrl: newUrl }));
+    setProfile((prev) => ({ ...prev, profile_image: newUrl }));
   };
 
   const handleProfileUpdate = (updated) => {
@@ -141,6 +159,14 @@ const Profile = () => {
           token={token}
         />
         <ProfileInfoCard profile={profile} loading={loading} />
+        <VerificationStatusCard
+          verificationStatus={verificationStatus}
+          loading={loading}
+        />
+
+        <VerificationProgress
+          status={verificationStatus?.status || "NOT_SUBMITTED"}
+        />
         <ProfileStats issues={issues} loading={loading} />
         <SecuritySettings profile={profile} token={token} />
         <IssueHistory issues={issues} loading={loading} />
