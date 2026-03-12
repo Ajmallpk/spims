@@ -47,6 +47,10 @@ const citizenapi = {
     return axiosInstance.post("citizen/change-email/", data);
   },
 
+  verifyEmailChange: (token) => {
+    return axiosInstance.get(`/citizen/change-email/verify/${token}/`);
+  },
+
 
 
 };

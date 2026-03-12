@@ -12,4 +12,7 @@ urlpatterns = [
     path("reject-citizen/<int:pk>",views.RejectCitizenView.as_view()),
     path("recent-citizen-verifications/",views.RecentCitizenVerificationView.as_view()),
     path("panchayath-dropdown/", views.PanchayathDropdownListView.as_view()),
+    path("change-password/", views.WardChangePasswordView.as_view()),
+    path("change-email/", views.WardChangeEmailRequestView.as_view()),
+    path("change-email/verify/<str:token>/", views.WardChangeEmailVerifyView.as_view()),
 ]

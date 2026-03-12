@@ -46,6 +46,7 @@ const CitizenVerificationForm = ({
   verificationStatus,
   onSubmitSuccess,
   token,
+  allowWardChange
 }) => {
   const status = verificationStatus?.status ?? "NOT_SUBMITTED";
   const readOnly = isReadOnly(status);
@@ -153,7 +154,7 @@ const CitizenVerificationForm = ({
 };
 
 // Approved state
-if (status === "APPROVED") {
+if (status === "APPROVED" && !allowWardChange) {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center text-center gap-4 min-h-64">
       <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center">

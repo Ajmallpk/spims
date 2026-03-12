@@ -11,9 +11,11 @@
  */
 
 import ProfileAvatarUploader from "@/components/citizen/Profileavataruploader";
+import { useNavigate } from "react-router-dom";
 
 const ProfileHeader = ({ profile, loading, onAvatarUpload, onEditClick, token }) => {
-  const isVerified = profile?.verificationStatus === "APPROVED";
+  const navigate = useNavigate();
+  const isVerified = profile?.is_verified;
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -38,7 +40,7 @@ const ProfileHeader = ({ profile, loading, onAvatarUpload, onEditClick, token })
           ) : (
             <ProfileAvatarUploader
               avatarUrl={profile?.profile_image}
-              fullName={profile?.fullName}
+              fullName={profile?.username}
               onUpload={onAvatarUpload}
               token={token}
             />
@@ -75,22 +77,40 @@ const ProfileHeader = ({ profile, loading, onAvatarUpload, onEditClick, token })
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-xl font-semibold text-gray-900 leading-tight">
-                {profile?.fullName || "Citizen"}
+                {profile?.username || "Citizen"}
               </h1>
+
+              {profile?.full_name && (
+                <p className="text-sm text-gray-500 mt-1">
+                  {profile.full_name}
+                </p>
+              )}
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 {/* Ward */}
-                <span className="text-sm text-gray-500 flex items-center gap-1">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="w-3.5 h-3.5 text-teal-400"
-                  >
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                  </svg>
-                  {profile?.wardName || "Ward Unassigned"}
-                </span>
+                <div className="flex flex-col mt-1">
+                  <span className="text-sm text-gray-500 flex items-center gap-1">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="w-3.5 h-3.5 text-teal-400"
+                    >
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+
+                    {profile?.ward_name || "Ward Unassigned"}
+                  </span>
+
+                  {profile?.ward_name && (
+                    <button
+                      onClick={() => navigate("/citizen/verification?changeWard=true")}
+                      className="text-xs text-orange-600 hover:text-orange-700 font-semibold mt-1"
+                    >
+                      Change Ward
+                    </button>
+                  )}
+                </div>
 
                 {/* Verification badge */}
                 {isVerified ? (

@@ -16,4 +16,6 @@ urlpatterns = [
     path("ward/<int:pk>/", views.WardVerificationDetailView.as_view()),
     path("approve-ward/<int:pk>/", views.ApproveWardView.as_view()),
     path("reject-ward/<int:pk>/", views.RejectWardView.as_view()),
+    
+    
 ]

@@ -11,6 +11,8 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.permissions import AllowAny
+from apps.ward.models import WardVerification
+import re
 
 User = get_user_model()
 
@@ -40,7 +42,32 @@ class UpdateCitizenProfileView(APIView):
 
     def patch(self, request):
 
-        profile = CitizenProfile.objects.get(user=request.user)
+        user = request.user
+        profile = CitizenProfile.objects.get(user=user)
+
+        username = request.data.get("username")
+        if username and username != user.username:
+
+            if len(username) < 3:
+                return Response(
+                    {"error": "Username must be at least 3 characters"},
+                    status=400
+                )
+
+            if not re.match(r'^[A-Za-z0-9_]+$', username):
+                return Response(
+                    {"error": "Username can only contain letters, numbers and underscore"},
+                    status=400
+                )
+
+            if User.objects.filter(username=username).exists():
+                return Response(
+                    {"error": "Username already taken"},
+                    status=400
+                )
+
+            user.username = username
+            user.save()
 
         serializer = CitizenProfileSerializer(
             profile,
@@ -74,11 +101,25 @@ class CitizenVerificationSubmitView(APIView):
                 status=403
             )
 
-        if CitizenVerification.objects.filter(user=user).exists():
-            return Response(
-                {"error": "Verification already submitted"},
-                status=400
-            )
+        # if CitizenVerification.objects.filter(user=user).exists():
+        #     return Response(
+        #         {"error": "Verification already submitted"},
+        #         status=400
+        #     )
+        existing = CitizenVerification.objects.filter(user=user).first()
+
+        if existing:
+
+            if existing.status == "PENDING":
+                return Response(
+                    {"error": "Verification already under review"},
+                    status=400
+                )
+
+            existing.delete()
+
+            user.is_verified = False
+            user.save()
 
         serializer = CitizenVerificationSerializer(data=request.data)
 
@@ -158,12 +199,14 @@ class WardListView(APIView):
 
     def get(self, request):
 
-        wards = User.objects.filter(role="WARD", is_active=True)
+        wards = WardVerification.objects.filter(
+            status="APPROVED"
+        ).select_related("user")
 
         data = [
             {
-                "id": ward.id,
-                "name": ward.username
+                "id": ward.user.id,          # ward user id
+                "name": ward.ward_name      # real ward name
             }
             for ward in wards
         ]
@@ -245,12 +288,17 @@ class ChangeEmailRequestView(APIView):
         user = request.user
         new_email = request.data.get("new_email")
         password = request.data.get("password")
+        
+        if not new_email or not password:
+            return Response({"message": "Email and password required"}, status=400)
 
         if not user.check_password(password):
             return Response({"message": "Password incorrect"}, status=400)
 
         if User.objects.filter(email=new_email).exists():
             return Response({"message": "Email already exists"}, status=400)
+        
+        
 
         token = str(uuid.uuid4())
 
@@ -263,11 +311,23 @@ class ChangeEmailRequestView(APIView):
             timeout=600  # 10 minutes
         )
 
-        verify_link = f"http://localhost:8000/api/citizen/change-email/verify/{token}/"
+        verify_link = f"http://localhost:5173/email-change-confirm/{token}"
 
         send_mail(
             subject="Confirm your email change",
-            message=f"Click the link to confirm your email change:\n{verify_link}",
+            message=f"""
+                        Hello,
+
+                        You requested to change your email address.
+
+                        Click the link below to confirm the change:
+
+                        {verify_link}
+
+                        If you did not request this, please ignore this email.
+
+                        SPIMS Security Team
+                        """,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[user.email],
         )
@@ -298,6 +358,9 @@ class ChangeEmailVerifyView(APIView):
         cache.delete(f"change_email_{token}")
 
         return Response(
-            {"message": "Email updated successfully"},
+            {
+                "message": "Email updated successfully",
+                "email": user.email
+            },
             status=200
         )

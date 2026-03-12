@@ -5,6 +5,8 @@ import VerificationProgress from "@/components/ward/Verificationprogress";
 import WardVerificationForm from "@/components/ward/Wardverificationform";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
+import WardSecuritySettings from "@/components/ward/WardSecuritySettings";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // ── Right panel states ────────────────────────────────────────────────────────
 
@@ -112,8 +114,33 @@ export default function WardProfile() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingVerification, setIsLoadingVerification] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [changedEmail, setChangedEmail] = useState("");
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // ── Fetchers ─────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (location.state?.emailChanged) {
+      setChangedEmail(location.state.newEmail);
+      setShowEmailModal(true);
+
+      // clear router state properly
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+
+    if (location.state?.emailCancelled) {
+      setShowCancelModal(true);
+
+      // clear router state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
+
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -133,16 +160,18 @@ export default function WardProfile() {
   const fetchVerificationStatus = useCallback(async () => {
     try {
       setIsLoadingVerification(true);
+
       const res = await wardapi.verificationStatus();
+
       setVerificationStatus(res.data);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setVerificationStatus(await res.json());
+
     } catch (err) {
-      toast.error("Fetch verification status error:", err);
+      toast.error("Fetch verification status error");
+      console.error(err);
     } finally {
       setIsLoadingVerification(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchProfile();
@@ -186,6 +215,7 @@ export default function WardProfile() {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
+
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -268,6 +298,9 @@ export default function WardProfile() {
           {!isLoadingVerification && status !== "not_submitted" && (
             <VerificationProgress status={status} />
           )}
+          {profile && (
+            <WardSecuritySettings profile={profile} />
+          )}
         </div>
 
         {/* ── Right column (2/3) ── */}
@@ -310,6 +343,76 @@ export default function WardProfile() {
         </div>
 
       </div>
+
+
+
+
+
+      {showEmailModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+
+          <div className="bg-white rounded-xl p-6 w-[420px] shadow-xl text-center">
+
+            <div className="flex justify-center mb-3">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl font-bold">
+                ✓
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Email Updated Successfully
+            </h2>
+
+            <p className="text-gray-600 text-sm mb-4">
+              Your email has been successfully changed.
+            </p>
+
+            <p className="text-sm font-medium text-gray-800 mb-6">
+              New Email: <span className="text-teal-600">{changedEmail}</span>
+            </p>
+
+            <button
+              onClick={() => setShowEmailModal(false)}
+              className="bg-teal-500 text-white px-5 py-2 rounded-lg hover:bg-teal-600"
+            >
+              Continue
+            </button>
+
+          </div>
+
+        </div>
+      )}
+      {showCancelModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+
+          <div className="bg-white rounded-xl p-6 w-[420px] shadow-xl text-center">
+
+            <div className="flex justify-center mb-3">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl font-bold">
+                !
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Email Change Cancelled
+            </h2>
+
+            <p className="text-gray-600 text-sm mb-6">
+              You cancelled the email change request.
+              Your email address remains unchanged.
+            </p>
+
+            <button
+              onClick={() => setShowCancelModal(false)}
+              className="bg-gray-700 text-white px-5 py-2 rounded-lg hover:bg-gray-800"
+            >
+              Continue
+            </button>
+
+          </div>
+
+        </div>
+      )}
     </div>
   );
 }

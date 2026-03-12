@@ -74,6 +74,13 @@ class CitizenProfile(models.Model):
         related_name="citizen_profile"
     )
 
+    full_name = models.CharField(max_length=255, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    ward_name = models.CharField(max_length=50, blank=True)
+    house_number = models.CharField(max_length=20, blank=True)
+    street_name = models.CharField(max_length=100, blank=True)
+    address = models.TextField(blank=True)
+
     profile_image = models.ImageField(
         upload_to="citizen/profile/",
         null=True,
@@ -83,6 +90,3 @@ class CitizenProfile(models.Model):
     bio = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.user.email

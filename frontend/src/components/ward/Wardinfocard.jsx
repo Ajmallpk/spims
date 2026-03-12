@@ -61,8 +61,10 @@ export default function WardInfoCard({ profile, isLoading }) {
 
   if (!profile) return null;
 
-  const name = profile.ward_name ?? profile.name ?? "Ward Officer";
-  const initials = name
+  const username = profile.username ?? "Ward Officer";
+  const wardName = profile.ward_name ?? "Ward Not Assigned";
+
+  const initials = username
     .split(" ")
     .slice(0, 2)
     .map((n) => n[0])
@@ -81,8 +83,17 @@ export default function WardInfoCard({ profile, isLoading }) {
             {initials}
           </div>
           <div className="min-w-0">
-            <h2 className="text-base font-bold text-gray-900 truncate">{name}</h2>
-            <p className="text-xs text-gray-500 truncate mt-0.5">{profile.email ?? "—"}</p>
+            <h2 className="text-base font-bold text-gray-900 truncate">
+              {username}
+            </h2>
+
+            <p className="text-xs text-gray-500 truncate mt-0.5">
+              {wardName}
+            </p>
+
+            <p className="text-xs text-gray-400 truncate">
+              {profile.email ?? "—"}
+            </p>
             <span className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
               Ward Officer
@@ -94,12 +105,12 @@ export default function WardInfoCard({ profile, isLoading }) {
 
         {/* Info rows */}
         <div className="space-y-4">
-          <InfoRow icon="🏘️" label="Ward Name"       value={profile.ward_name} />
-          <InfoRow icon="🏛️" label="Panchayath"      value={profile.panchayath_name} />
-          <InfoRow icon="✉️" label="Email"           value={profile.email} />
-          <InfoRow icon="📱" label="Phone"           value={profile.phone ?? profile.mobile} />
-          <InfoRow icon="📍" label="Address"         value={profile.address} />
-          <InfoRow icon="📅" label="Registered On"   value={formatDate(profile.created_at ?? profile.registered_at)} />
+          <InfoRow icon="🏘️" label="Ward Name" value={profile.ward_name} />
+          <InfoRow icon="🏛️" label="Panchayath" value={profile.panchayath_name} />
+          <InfoRow icon="✉️" label="Email" value={profile.email} />
+          <InfoRow icon="📱" label="Phone" value={profile.phone ?? profile.mobile} />
+          <InfoRow icon="📍" label="Address" value={profile.address} />
+          <InfoRow icon="📅" label="Registered On" value={formatDate(profile.created_at ?? profile.registered_at)} />
         </div>
       </div>
     </div>

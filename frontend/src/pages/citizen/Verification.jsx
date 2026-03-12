@@ -14,6 +14,7 @@ import VerificationStatusCard from "@/components/citizen/Verificationstatuscard"
 import VerificationProgress from "@/components/citizen/Verificationprogress";
 import CitizenVerificationForm from "@/components/citizen/Citizenverificationform";
 import citizenapi from "@/service/citizenurls";
+import { useSearchParams } from "react-router-dom";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -44,6 +45,8 @@ const Verification = () => {
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [params] = useSearchParams();
+  const allowWardChange = params.get("changeWard") === "true";
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -166,6 +169,7 @@ const Verification = () => {
               verificationStatus={verificationStatus}
               onSubmitSuccess={handleSubmitSuccess}
               token={token}
+              allowWardChange={allowWardChange}
             />
           </div>
         </div>

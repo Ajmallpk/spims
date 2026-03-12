@@ -7,7 +7,7 @@
  *   token        : string – Bearer auth token
  */
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import citizenapi from "@/service/citizenurls";
 
 const iCls = (err) =>
@@ -23,6 +23,16 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState(null);
+
+  useEffect(() => {
+  if (success) {
+    const timer = setTimeout(() => {
+      setSuccess(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }
+}, [success]);
 
   const validate = () => {
     const e = {};
@@ -60,7 +70,11 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
       setForm({ newEmail: "", password: "" });
       setErrors({});
     } catch (err) {
-      setApiError(err.response?.data?.message || "Failed to change email");
+      setApiError(
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to change email"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -100,7 +114,7 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
           <div>
             <p className="text-sm text-teal-700 font-semibold">Verification email sent!</p>
             <p className="text-xs text-teal-600 mt-0.5">
-              Check your current email and click the verification link to confirm the change.
+              Check your email inbox and click the verification link to confirm the change.
             </p>
           </div>
         </div>

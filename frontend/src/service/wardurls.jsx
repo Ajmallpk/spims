@@ -19,6 +19,7 @@
 
 
 import axiosInstance from "@/api/axiosInstance";
+import axios from "axios";
 
 const wardapi = {
     dashboard: () => axiosInstance.get("/ward/dashboard/"),
@@ -43,7 +44,7 @@ const wardapi = {
     rejectCitizen: (id, reason) =>
         axiosInstance.post(`/ward/reject-citizen/${id}/`, { reason }),
 
-    submitWardVerification : (data) => {
+    submitWardVerification: (data) => {
         return axiosInstance.post(
             "/ward/submit-verification/",
             data,
@@ -58,7 +59,21 @@ const wardapi = {
     profile: () => axiosInstance.get("/ward/profile/"),
     getPanchayathDropdown: () => { return axiosInstance.get("ward/panchayath-dropdown/"); },
     verificationStatus: () => axiosInstance.get("/ward/verification-status/"),
-    getverificationList:()=> axiosInstance.get("/ward/citizen-verifications/"),
+    getverificationList: () => axiosInstance.get("/ward/citizen-verifications/"),
+    changePassword: (data) => {
+        return axiosInstance.post("/ward/change-password/", data);
+    },
+
+    changeEmail: (data) => {
+        return axiosInstance.post("/ward/change-email/", data);
+    },
+
+    verifyEmailChange: (token) => {
+        return axiosInstance.get(`/ward/change-email/verify/${token}/`);
+    },
+    verifyEmailChange: (token) => {
+        return axios.get(`http://127.0.0.1:8000/api/ward/change-email/verify/${token}/`);
+    },
 };
 
 export default wardapi;

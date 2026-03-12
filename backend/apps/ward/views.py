@@ -12,10 +12,55 @@ from apps.complaints.models import Complaint
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from apps.panchayath.models import PanchayathVerification
+from apps.citizen.models import CitizenProfile,CitizenVerification
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.conf import settings
+
+import uuid
 # Create your views here.
 
 
 User = get_user_model()
+
+
+# class WardProfile(APIView):
+#     permission_classes = [IsWard]
+
+#     def get(self, request):
+#         user = request.user
+#         verification = WardVerification.objects.filter(user=user).first()
+
+#         if not verification:
+#             return Response({
+#                 "id": user.id,
+#                 "email": user.email,
+#                 "status": user.status,
+#                 "verification_status": "NOT_SUBMITTED"
+#             })
+
+#         return Response({
+#             "id": user.id,
+#             "email": user.email,
+#             "status": user.status,
+#             "verification_status": verification.status,
+
+#             "officer_full_name": verification.officer_full_name,
+#             "official_email": verification.official_email,
+#             "official_contact": verification.official_contact,
+
+#             "ward_name": verification.ward_name,
+#             "panchayath_name": verification.panchayath.username,
+#             "office_address": verification.office_address,
+
+#             "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
+#             "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
+#             "supporting_document": verification.supporting_document.url if verification.supporting_document else None,
+#         })
+
 
 
 class WardProfile(APIView):
@@ -28,6 +73,7 @@ class WardProfile(APIView):
         if not verification:
             return Response({
                 "id": user.id,
+                "username": user.username,
                 "email": user.email,
                 "status": user.status,
                 "verification_status": "NOT_SUBMITTED"
@@ -35,6 +81,7 @@ class WardProfile(APIView):
 
         return Response({
             "id": user.id,
+            "username": user.username,
             "email": user.email,
             "status": user.status,
             "verification_status": verification.status,
@@ -357,6 +404,29 @@ class CitizenVerificationDetailView(APIView):
         
 
         
+# class ApproveCitizenView(APIView):
+#     permission_classes = [IsActiveWard]
+
+#     def post(self, request, pk):
+#         try:
+#             citizen = CitizenVerification.objects.get(
+#                 pk=pk,
+#                 ward=request.user
+#             )
+#         except CitizenVerification.DoesNotExist:
+#             return Response({"error": "Citizen not found"}, status=404)
+
+#         citizen.status = "APPROVED"
+#         citizen.reviewed_at = timezone.now()
+#         citizen.save()
+
+#         citizen.user.status = User.Status.ACTIVE
+#         citizen.user.is_verified = True
+#         citizen.user.save()
+#         return Response({"message": "Citizen approved successfully"})
+
+
+
 class ApproveCitizenView(APIView):
     permission_classes = [IsActiveWard]
 
@@ -369,13 +439,31 @@ class ApproveCitizenView(APIView):
         except CitizenVerification.DoesNotExist:
             return Response({"error": "Citizen not found"}, status=404)
 
+        
         citizen.status = "APPROVED"
         citizen.reviewed_at = timezone.now()
         citizen.save()
 
+        
         citizen.user.status = User.Status.ACTIVE
         citizen.user.is_verified = True
         citizen.user.save()
+
+        
+        profile, created = CitizenProfile.objects.get_or_create(user=citizen.user)
+
+        profile.full_name = citizen.full_name
+        profile.phone = citizen.phone
+        profile.house_number = citizen.house_number
+        profile.street_name = citizen.street_name
+        profile.address = f"House {citizen.house_number}, {citizen.street_name}"
+        ward_verification = WardVerification.objects.filter(user=request.user).first()
+
+        if ward_verification:
+            profile.ward_name = ward_verification.ward_name   
+
+        profile.save()
+
         return Response({"message": "Citizen approved successfully"})
     
     
@@ -493,4 +581,116 @@ class PanchayathDropdownListView(APIView):
             })
 
         return Response(data)        
+    
+    
+    
+class WardChangePasswordView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        user = request.user
+
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+
+        if not current_password or not new_password:
+            return Response(
+                {"message": "Both passwords are required"},
+                status=400
+            )
+
+        if not user.check_password(current_password):
+            return Response(
+                {"message": "Current password is incorrect"},
+                status=400
+            )
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {"message": "Password changed successfully"},
+            status=200
+        )
         
+        
+        
+class WardChangeEmailRequestView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        user = request.user
+        new_email = request.data.get("new_email")
+        password = request.data.get("password")
+
+        if not new_email or not password:
+            return Response({"message": "Email and password required"}, status=400)
+
+        if not user.check_password(password):
+            return Response({"message": "Password incorrect"}, status=400)
+
+        if User.objects.filter(email=new_email).exists():
+            return Response({"message": "Email already exists"}, status=400)
+
+        token = str(uuid.uuid4())
+
+        cache.set(
+            f"ward_change_email_{token}",
+            {
+                "user_id": user.id,
+                "new_email": new_email
+            },
+            timeout=600
+        )
+
+        verify_link = f"http://localhost:5173/ward/email-change-confirm/{token}"
+
+        send_mail(
+            subject="Confirm your email change",
+                    message=f"""
+        You requested to change your email.
+
+        Click below to confirm:
+
+        {verify_link}
+
+        SPIMS Security
+        """,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
+
+        return Response(
+            {"message": "Verification email sent"},
+            status=200
+        )
+        
+        
+class WardChangeEmailVerifyView(APIView):
+
+    permission_classes = [AllowAny]
+
+    def get(self, request, token):
+
+        data = cache.get(f"ward_change_email_{token}")
+
+        if not data:
+            return Response(
+                {"message": "Invalid or expired token"},
+                status=400
+            )
+
+        user = User.objects.get(id=data["user_id"])
+        user.email = data["new_email"]
+        user.save()
+
+        cache.delete(f"ward_change_email_{token}")
+
+        return Response({
+            "message": "Email updated successfully",
+            "email": user.email
+        })

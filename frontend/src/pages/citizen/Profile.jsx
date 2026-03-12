@@ -44,6 +44,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [emailModal, setEmailModal] = useState(null);
 
 
 
@@ -77,7 +78,16 @@ const Profile = () => {
 
 
   useEffect(() => {
+
     loadData();
+
+    const emailData = localStorage.getItem("emailChanged");
+
+    if (emailData) {
+      setEmailModal(JSON.parse(emailData));
+      localStorage.removeItem("emailChanged");
+    }
+
   }, [loadData]);
 
   const handleAvatarUpload = (newUrl) => {
@@ -179,6 +189,38 @@ const Profile = () => {
         onUpdateSuccess={handleProfileUpdate}
         token={token}
       />
+
+
+      {emailModal && (
+
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm text-center">
+
+            <h2 className="text-lg font-bold text-green-600 mb-3">
+              Email Updated Successfully
+            </h2>
+
+            <p className="text-gray-600 mb-2">
+              Your new email address is
+            </p>
+
+            <p className="font-semibold text-gray-800 mb-4">
+              {emailModal.email}
+            </p>
+
+            <button
+              onClick={() => setEmailModal(null)}
+              className="bg-teal-500 text-white px-4 py-2 rounded-lg"
+            >
+              OK
+            </button>
+
+          </div>
+
+        </div>
+
+      )}
     </div>
   );
 };

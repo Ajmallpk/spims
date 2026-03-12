@@ -41,6 +41,7 @@ import CitizenList from "@/pages/ward/CitizenList";
 import CitizenDetails from "@/pages/ward/CitizenDetails";
 import ComplaintList from "@/pages/ward/ComplaintList";
 import ComplaintDetails from "@/pages/ward/ComplaintDetails";
+import WardEmailChangeConfirm from "./components/ward/WardEmailChangeConfirm";
 
 
 
@@ -54,6 +55,7 @@ import CitizenHome from "@/pages/citizen/Home"
 import CitizenProfile from "@/pages/citizen/Profile"
 import CitizenVerification from "@/pages/citizen/Verification"
 import Messages from "./pages/citizen/Messages";
+import EmailChangeConfirm from "./components/citizen/EmailChangeConfirm";
 
 
 
@@ -79,7 +81,9 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
 
 
+      <Route path="/email-change-confirm/:token" element={<EmailChangeConfirm />} />
 
+      <Route path="/ward/email-change-confirm/:token" element={<WardEmailChangeConfirm />} />
 
 
         {/* ───────── CITIZEN ROUTES ───────── */}
@@ -108,6 +112,7 @@ export default function App() {
           <Route path="profile" element={<CitizenProfile />} />
 
           <Route path="verification" element={<CitizenVerification />} />
+
 
         </Route>
 

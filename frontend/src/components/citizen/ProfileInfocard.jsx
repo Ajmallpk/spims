@@ -43,18 +43,18 @@ const Icon = ({ d, d2 }) => (
 );
 
 const ProfileInfoCard = ({ profile, loading }) => {
-  const joinedDate = profile?.joinedDate
-    ? new Date(profile.joinedDate).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+  const joinedDate = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
     : null;
 
   const rows = [
     {
       label: "Full Name",
-      value: profile?.fullName,
+      value: profile?.full_name,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -83,7 +83,7 @@ const ProfileInfoCard = ({ profile, loading }) => {
     },
     {
       label: "Ward",
-      value: profile?.wardName,
+      value: profile?.ward_name,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -93,7 +93,7 @@ const ProfileInfoCard = ({ profile, loading }) => {
     },
     {
       label: "House Number",
-      value: profile?.houseNumber,
+      value: profile?.house_number,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
           <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
@@ -103,7 +103,7 @@ const ProfileInfoCard = ({ profile, loading }) => {
     },
     {
       label: "Street Name",
-      value: profile?.streetName,
+      value: profile?.street_name,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
           <line x1="3" y1="12" x2="21" y2="12" />
@@ -112,15 +112,15 @@ const ProfileInfoCard = ({ profile, loading }) => {
         </svg>
       ),
     },
-    {
-      label: "Full Address",
-      value: profile?.address,
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-        </svg>
-      ),
-    },
+    // {
+    //   label: "Full Address",
+    //   value: profile?.address,
+    //   icon: (
+    //     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-teal-500">
+    //       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+    //     </svg>
+    //   ),
+    // },
     {
       label: "Joined Date",
       value: joinedDate,
@@ -151,8 +151,8 @@ const ProfileInfoCard = ({ profile, loading }) => {
         {loading
           ? Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
           : rows.map((row) => (
-              <InfoRow key={row.label} icon={row.icon} label={row.label} value={row.value} />
-            ))}
+            <InfoRow key={row.label} icon={row.icon} label={row.label} value={row.value} />
+          ))}
       </div>
     </div>
   );

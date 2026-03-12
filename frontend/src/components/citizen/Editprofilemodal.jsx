@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect } from "react";
+import citizenapi from "@/service/citizenurls";
 
 const WARDS = Array.from({ length: 20 }, (_, i) => `Ward ${String(i + 1).padStart(2, "0")}`);
 
@@ -22,12 +23,13 @@ const iCls = (err) =>
 
 const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) => {
   const [form, setForm] = useState({
+    username: "",
     fullName: "",
     phone: "",
     wardName: "",
     houseNumber: "",
     streetName: "",
-    address: "",
+    // address: "",
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -37,12 +39,13 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
   useEffect(() => {
     if (profile && isOpen) {
       setForm({
-        fullName: profile.fullName || "",
+        username: profile.username || "",
+        fullName: profile.full_name || "",
         phone: profile.phone || "",
-        wardName: profile.wardName || "",
-        houseNumber: profile.houseNumber || "",
-        streetName: profile.streetName || "",
-        address: profile.address || "",
+        wardName: profile.ward_name || "",
+        houseNumber: profile.house_number || "",
+        streetName: profile.street_name || "",
+        // address: profile.address || "",
       });
       setErrors({});
       setApiError(null);
@@ -54,13 +57,13 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
 
   const validate = () => {
     const e = {};
-    if (!form.fullName.trim()) e.fullName = "Full name is required";
-    if (!form.phone.trim()) e.phone = "Phone is required";
-    else if (!/^\d{10}$/.test(form.phone)) e.phone = "Must be exactly 10 digits";
-    if (!form.wardName) e.wardName = "Please select a ward";
-    if (!form.houseNumber.trim()) e.houseNumber = "House number is required";
-    if (!form.streetName.trim()) e.streetName = "Street name is required";
-    if (!form.address.trim()) e.address = "Address is required";
+
+    if (form.username && form.username.length < 3)
+      e.username = "Username must be at least 3 characters";
+
+    if (form.phone && !/^\d{10}$/.test(form.phone))
+      e.phone = "Must be exactly 10 digits";
+
     return e;
   };
 
@@ -78,26 +81,31 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
     setApiError(null);
 
     try {
-      const res = await fetch("/api/citizen/profile/update/", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          full_name: form.fullName,
-          phone: form.phone,
-          house_number: form.houseNumber,
-          street_name: form.streetName,
-          address: form.address,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message || "Update failed.");
+      const payload = {};
+
+      if (form.username !== profile.username)
+        payload.username = form.username;
+
+      if (form.fullName !== profile.full_name)
+        payload.full_name = form.fullName;
+
+      if (form.phone !== profile.phone)
+        payload.phone = form.phone;
+
+      if (form.houseNumber !== profile.house_number)
+        payload.house_number = form.houseNumber;
+
+      if (form.streetName !== profile.street_name)
+        payload.street_name = form.streetName;
+
+      if (Object.keys(payload).length === 0) {
+        setApiError("No changes made");
+        setSubmitting(false);
+        return;
       }
-      const response = await res.json();
-      const updated = response.data;
+
+      const response = await citizenapi.updateProfile(payload);
+      const updated = response.data.data;
       onUpdateSuccess?.(updated);
       setSuccess(true);
       setTimeout(onClose, 800);
@@ -154,6 +162,25 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
             </div>
           )}
 
+          {/* Username */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-gray-700">
+              Username <span className="text-red-500 text-xs">*</span>
+            </label>
+
+            <input
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              placeholder="Enter username"
+              className={iCls(errors.username)}
+            />
+
+            {errors.username && (
+              <p className="text-xs text-red-500">{errors.username}</p>
+            )}
+          </div>
+
           {/* Full Name */}
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-gray-700">Full Name <span className="text-red-500 text-xs">*</span></label>
@@ -172,14 +199,14 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
           </div>
 
           {/* Ward */}
-          <div className="space-y-1.5">
+          {/* <div className="space-y-1.5">
             <label className="text-sm font-semibold text-gray-700">Ward <span className="text-red-500 text-xs">*</span></label>
             <select name="wardName" value={form.wardName} onChange={handleChange} className={iCls(errors.wardName)}>
               <option value="">Select your ward</option>
               {WARDS.map((w) => <option key={w}>{w}</option>)}
             </select>
             {errors.wardName && <p className="text-xs text-red-500">{errors.wardName}</p>}
-          </div>
+          </div> */}
 
           {/* House + Street (half width) */}
           <div className="grid grid-cols-2 gap-4">
@@ -196,11 +223,11 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
           </div>
 
           {/* Address */}
-          <div className="space-y-1.5">
+          {/* <div className="space-y-1.5">
             <label className="text-sm font-semibold text-gray-700">Full Address <span className="text-red-500 text-xs">*</span></label>
             <textarea name="address" value={form.address} onChange={handleChange} rows={2} placeholder="House, street, landmark, city…" className={`${iCls(errors.address)} resize-none`} />
             {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
-          </div>
+          </div> */}
         </div>
 
         {/* Sticky footer */}
