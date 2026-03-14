@@ -3,7 +3,7 @@ import { Bell, ShieldCheck, Menu } from "lucide-react";
 
 const routeTitleMap = {
   "/admin/dashboard": "Dashboard",
-  "/admin/panchayath-verification": "Panchayath Verification Requests",
+  "/admin/panchayath-verifications": "Panchayath Verification Requests",
   "/admin/panchayaths": "Panchayath List",
   "/admin/wards": "Ward List",
   "/admin/profile": "Profile",

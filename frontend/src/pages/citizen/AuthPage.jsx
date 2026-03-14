@@ -127,6 +127,14 @@ function LoginForm() {
         onChange={(e) => setPassword(e.target.value)}
         rightSlot={<EyeToggle show={show} onToggle={() => setShow(p => !p)} />}
       />
+      <div className="text-right mb-3">
+        <a
+          href="/citizen/forgot-password"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          Forgot Password?
+        </a>
+      </div>
 
       {error && (
         <p className="text-red-500 text-sm mb-2">{error}</p>

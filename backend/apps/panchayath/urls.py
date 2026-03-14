@@ -17,5 +17,7 @@ urlpatterns = [
     path("approve-ward/<int:pk>/", views.ApproveWardView.as_view()),
     path("reject-ward/<int:pk>/", views.RejectWardView.as_view()),
     
-    
+    path("change-password/", views.PanchayathChangePasswordView.as_view()),
+    path("request-email-change/", views.PanchayathRequestEmailChangeView.as_view()),
+    path("confirm-email-change/<str:token>/", views.PanchayathConfirmEmailChangeView.as_view()),
 ]

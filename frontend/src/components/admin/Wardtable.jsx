@@ -4,7 +4,7 @@ const formatNumber = (n) => (n !== undefined && n !== null ? n.toLocaleString() 
 
 const SkeletonRow = () => (
   <tr className="animate-pulse">
-    {Array.from({ length: 5 }).map((_, i) => (
+    {Array.from({ length: 8 }).map((_, i) => (
       <td key={i} className="px-5 py-4">
         <div className="h-4 bg-gray-200 rounded" style={{ width: `${55 + (i % 3) * 15}%` }} />
       </td>
@@ -27,7 +27,15 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="border-b border-gray-100">
-              {["Ward Name", "Total Users", "Total Complaints", "Pending", "Action"].map((col) => (
+              {[
+                "Ward Name",
+                "Panchayath",
+                "Officer",
+                "Total Users",
+                "Total Complaints",
+                "Pending",
+                "Action"
+              ].map((col) => (
                 <th
                   key={col}
                   className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap"
@@ -55,23 +63,50 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
             ) : (
               wards.map((ward) => (
                 <tr key={ward.id} className="hover:bg-gray-50 transition-colors duration-100 group">
+
                   <td className="px-5 py-4">
                     <span className="font-semibold text-gray-800 group-hover:text-gray-900">
-                      {ward.ward_name || ward.name || "—"}
+                      {ward.ward_name || "—"}
                     </span>
                   </td>
-                  <td className="px-5 py-4 text-gray-600 font-medium">{formatNumber(ward.total_users)}</td>
-                  <td className="px-5 py-4 text-gray-600 font-medium">{formatNumber(ward.total_complaints)}</td>
+
+                  <td className="px-5 py-4 text-gray-600 font-medium">
+                    {ward.panchayath_name || "—"}
+                  </td>
+
+                  <td className="px-5 py-4 text-gray-600 font-medium">
+                    {ward.officer_name || "—"}
+                  </td>
+
+                  <td className="px-5 py-4 text-gray-600 font-medium">
+                    {formatNumber(ward.total_users)}
+                  </td>
+
+                  <td className="px-5 py-4 text-gray-600 font-medium">
+                    {formatNumber(ward.total_complaints)}
+                  </td>
+
                   <td className="px-5 py-4">
                     <span
                       className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${ward.pending_complaints > 0
-                          ? "bg-orange-100 text-orange-700"
-                          : "bg-gray-100 text-gray-500"
+                        ? "bg-orange-100 text-orange-700"
+                        : "bg-gray-100 text-gray-500"
                         }`}
                     >
                       {formatNumber(ward.pending_complaints)}
                     </span>
                   </td>
+                  <td className="px-5 py-4">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${ward.status === "ACTIVE"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                        }`}
+                    >
+                      {ward.status}
+                    </span>
+                  </td>
+
                   <td className="px-5 py-4 flex gap-2">
                     {/* View Button */}
                     <button

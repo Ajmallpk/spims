@@ -36,7 +36,7 @@ const wardapi = {
         }),
 
     getCitizenDetails: (id) =>
-        axiosInstance.get(`/ward/citizen/${id}/details/`),
+        axiosInstance.get(`/ward/citizen/${id}/full-details/`),
 
     approveCitizen: (id) =>
         axiosInstance.post(`/ward/approve-citizen/${id}/`),
@@ -74,6 +74,10 @@ const wardapi = {
     verifyEmailChange: (token) => {
         return axios.get(`http://127.0.0.1:8000/api/ward/change-email/verify/${token}/`);
     },
+    getComplaintDetail: (id) => {
+        return axiosInstance.get(`/complaints/${id}/`);
+    }
+
 };
 
 export default wardapi;

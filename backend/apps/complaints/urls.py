@@ -16,4 +16,5 @@ urlpatterns = [
     path("notifications/",views.CitizenNotificationListView.as_view()),
     path("notifications/<int:notification_id>/read/",views.MarkNotificationReadView.as_view()),
     path("my/", views.CitizenMyComplaintsView.as_view()),
+    
 ]

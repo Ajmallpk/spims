@@ -15,4 +15,6 @@ urlpatterns = [
     path("change-password/", views.WardChangePasswordView.as_view()),
     path("change-email/", views.WardChangeEmailRequestView.as_view()),
     path("change-email/verify/<str:token>/", views.WardChangeEmailVerifyView.as_view()),
+    path("citizen/<int:pk>/full-details/", views.CitizenFullDetailView.as_view()),
+    
 ]

@@ -5,6 +5,7 @@ import CitizenInfoCard from "@/components/ward/Citizeninfocard";
 import ComplaintHistoryTable from "@/components/ward/Complainthistorytable";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
+import VerificationDetailsModal from "@/components/ward/VerificationDetailsModal";
 
 
 export default function CitizenDetails() {
@@ -14,6 +15,7 @@ export default function CitizenDetails() {
   const [citizenData, setCitizenData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -21,19 +23,30 @@ export default function CitizenDetails() {
   }, [id]);
 
   const fetchCitizenDetails = async () => {
+
     try {
+
       setIsLoading(true);
       setNotFound(false);
+
       const res = await wardapi.getCitizenDetails(id);
-      setCitizen(res.data);
-      if (res.status === 404) { setNotFound(true); return; }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setCitizenData(data);
+      console.log("Citizen Full API Response:", res.data);
+      setCitizenData(res.data);
+
     } catch (err) {
-      toast.error("Failed to fetch citizen details:", err);
+
+      if (err.response?.status === 404) {
+        setNotFound(true);
+        return;
+      }
+
+      console.error(err);
+      toast.error("Failed to fetch citizen details");
+
     } finally {
+
       setIsLoading(false);
+
     }
   };
 
@@ -59,9 +72,10 @@ export default function CitizenDetails() {
     );
   }
 
-  const stats = citizenData?.stats ?? citizenData;
-  const citizen = citizenData?.citizen ?? citizenData;
-  const complaints = citizenData?.complaints ?? [];
+  const stats = citizenData?.stats;
+  const citizen = citizenData?.citizen;
+  const complaints = citizenData?.complaints || [];
+  const verification = citizenData?.verification;
 
   return (
     <div className="space-y-6">
@@ -114,6 +128,12 @@ export default function CitizenDetails() {
           </svg>
           Refresh
         </button>
+        <button
+          onClick={() => setShowVerification(true)}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+        >
+          View Verification Details
+        </button>
       </div>
 
       {/* Stats Grid */}
@@ -151,6 +171,14 @@ export default function CitizenDetails() {
           <ComplaintHistoryTable complaints={complaints} isLoading={isLoading} />
         </div>
       </div>
+      {/* Verification Modal */}
+      {showVerification && (
+        <VerificationDetailsModal
+          verification={verification}
+          citizen={citizen}
+          onClose={() => setShowVerification(false)}
+        />
+      )}
     </div>
   );
 }

@@ -340,11 +340,20 @@ class ComplaintDetailView(APIView):
         try:
             complaint = Complaint.objects.select_related(
                 "citizen",
-                "ward"
+                "ward",
+                "panchayath"
             ).prefetch_related(
                 "comments",
                 "upvotes"
             ).get(id=complaint_id)
+
+            user = request.user
+
+            if user not in [complaint.citizen, complaint.ward, complaint.panchayath]:
+                return Response(
+                    {"error": "You are not allowed to view this complaint"},
+                    status=403
+                )
 
         except Complaint.DoesNotExist:
             return Response(

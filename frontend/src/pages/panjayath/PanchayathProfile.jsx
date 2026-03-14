@@ -1,15 +1,3 @@
-// pages/PanchayathProfile.jsx
-// SPIMS – Smart Panchayath Issue Management System
-// Panchayath Profile & Verification page.
-//
-// API calls:
-//   GET  /api/panchayath/profile/              → profile data
-//   GET  /api/panchayath/verification-status/  → { status, rejection_reason, ... }
-//
-// Conditionally renders:
-//   NOT_SUBMITTED / REJECTED → VerificationForm
-//   PENDING                  → Pending message
-//   APPROVED                 → Verified success banner
 
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
@@ -18,6 +6,8 @@ import VerificationStatusCard from "@/components/panjayath/Verificationstatuscar
 import VerificationForm from "@/components/panjayath/Verificationform";
 import panchayathapi from "@/service/panchayathurls"
 import toast from "react-hot-toast";
+import PanchayathSecuritySettings from "@/components/panjayath/PanchayathSecuritySettings";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
@@ -156,16 +146,41 @@ function PageError({ message, onRetry }) {
 export default function PanchayathProfile() {
   const [profile, setProfile] = useState(null);
   const [verificationStatus, setVerificationStatus] = useState(null);
-
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
-
   const [profileError, setProfileError] = useState("");
   const [statusError, setStatusError] = useState("");
-
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [changedEmail, setChangedEmail] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // ── Fetch profile ─────────────────────────────────────────────────────────
+  
+  useEffect(() => {
+
+    if (!location.state) return;
+
+    if (location.state.emailChanged) {
+
+      setChangedEmail(location.state.newEmail);
+      setShowEmailModal(true);
+
+    }
+
+    if (location.state.emailCancelled) {
+
+      setShowCancelModal(true);
+
+    }
+
+    navigate(location.pathname, { replace: true });
+
+  }, [location, navigate]);
+
+
   const fetchProfile = useCallback(async () => {
     setIsLoadingProfile(true);
     setProfileError("");
@@ -206,7 +221,7 @@ export default function PanchayathProfile() {
       );
     } catch (err) {
       if (err.response?.status === 401) {
-        handleAuthError(err);
+        panchayathapi.handleAuthError(err);
         toast.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
       } else {
         toast.error("[PanchayathProfile] Verification status fetch error:", err);
@@ -302,6 +317,11 @@ export default function PanchayathProfile() {
               isLoading={isLoadingProfile}
             />
 
+            {/* Security Settings */}
+            {profile && (
+              <PanchayathSecuritySettings profile={profile} />
+            )}
+
             {/* Verification Status */}
             {!statusError && (
               <VerificationStatusCard
@@ -309,6 +329,7 @@ export default function PanchayathProfile() {
                 isLoading={isLoadingStatus}
               />
             )}
+
 
             {/* Status fetch error (non-critical) */}
             {statusError && !isLoadingStatus && (
@@ -366,6 +387,73 @@ export default function PanchayathProfile() {
       {/* ── Success toast ── */}
       {showSuccessToast && (
         <SubmissionSuccessToast onDismiss={() => setShowSuccessToast(false)} />
+      )}
+      {/* EMAIL SUCCESS MODAL */}
+      {showEmailModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+
+          <div className="bg-white rounded-xl p-6 w-[420px] shadow-xl text-center">
+
+            <div className="flex justify-center mb-3">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl font-bold">
+                ✓
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Email Updated Successfully
+            </h2>
+
+            <p className="text-gray-600 text-sm mb-4">
+              Your email has been successfully changed.
+            </p>
+
+            <p className="text-sm font-medium text-gray-800 mb-6">
+              New Email:
+              <span className="text-teal-600">{changedEmail}</span>
+            </p>
+
+            <button
+              onClick={() => setShowEmailModal(false)}
+              className="bg-teal-500 text-white px-5 py-2 rounded-lg hover:bg-teal-600"
+            >
+              Continue
+            </button>
+
+          </div>
+        </div>
+      )}
+
+      {/* EMAIL CANCEL MODAL */}
+      {showCancelModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+
+          <div className="bg-white rounded-xl p-6 w-[420px] shadow-xl text-center">
+
+            <div className="flex justify-center mb-3">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl font-bold">
+                !
+              </div>
+            </div>
+
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Email Change Cancelled
+            </h2>
+
+            <p className="text-gray-600 text-sm mb-6">
+              You cancelled the email change request.
+              Your email address remains unchanged.
+            </p>
+
+            <button
+              onClick={() => setShowCancelModal(false)}
+              className="bg-gray-700 text-white px-5 py-2 rounded-lg hover:bg-gray-800"
+            >
+              Continue
+            </button>
+
+          </div>
+        </div>
       )}
     </div>
   );

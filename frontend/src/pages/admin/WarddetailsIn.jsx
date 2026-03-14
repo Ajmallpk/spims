@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import DetailStatCard from "@/components/admin/Detailstatcard";
+import { adminapi } from "@/service/adminurls";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -66,11 +67,15 @@ const WardDetails = () => {
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const { data: res } = await axios.get(
-          `/api/admin/ward/${id}/details/`,
-          { headers: getAuthHeaders() }
-        );
-        setData(res);
+        const { data: res } = await adminapi.wardDetail(id);
+
+        setData({
+          ...res,
+          total_users: res.statistics?.total_citizens,
+          total_complaints: res.statistics?.total_complaints,
+          pending_complaints: res.statistics?.pending_complaints,
+          resolved_complaints: res.statistics?.resolved_complaints,
+        });
       } catch (err) {
         toast.error("Error fetching ward details:", err);
       } finally {
@@ -81,7 +86,7 @@ const WardDetails = () => {
     if (id) fetchDetails();
   }, [id]);
 
-  const authority = data?.ward_authority || data?.authority || {};
+  const authority = data || {};
   const complaints = data?.complaints || [];
 
   const statCards = [

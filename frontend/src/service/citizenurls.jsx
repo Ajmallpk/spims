@@ -51,6 +51,18 @@ const citizenapi = {
     return axiosInstance.get(`/citizen/change-email/verify/${token}/`);
   },
 
+  forgotPassword: (data) => {
+    return axiosInstance.post("auth/forgot-password/", data);
+  },
+
+  verifyResetOtp: (data) => {
+    return axiosInstance.post("auth/verify-reset-otp/", data);
+  },
+
+  resetPassword: (data) => {
+    return axiosInstance.post("auth/reset-password/", data);
+  },
+
 
 
 };

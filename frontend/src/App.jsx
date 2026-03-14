@@ -18,6 +18,7 @@ import PanchayathList from "@/pages/admin/PanchayathList"
 import AdminWardList from "@/pages/admin/AdminWardlist"
 import AdminProfile from "@/pages/admin/AdminProfile"
 import PanchayathDetail from "./pages/admin/PanchayathDetail"
+import WardDetailsPage from "./pages/admin/Warddetailsout";
 
 
 
@@ -30,6 +31,7 @@ import PanchayathProfile from "@/pages/panjayath/PanchayathProfile";
 import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests";
 import WardList from "@/pages/panjayath/WardList";
 import WardDetail from "@/pages/panjayath/WardDetail";
+import PanchayathEmailChangeConfirm from "./components/panjayath/PanchayathEmailChangeConfirm";
 
 
 /* ───────── WARD MODULE ───────── */
@@ -40,8 +42,9 @@ import CitizenVerificationRequests from "@/pages/ward/CitizenVerificationRequest
 import CitizenList from "@/pages/ward/CitizenList";
 import CitizenDetails from "@/pages/ward/CitizenDetails";
 import ComplaintList from "@/pages/ward/ComplaintList";
-import ComplaintDetails from "@/pages/ward/ComplaintDetails";
+import ComplaintViewer from "./components/ward/ComplaintViewer";
 import WardEmailChangeConfirm from "./components/ward/WardEmailChangeConfirm";
+// import ComplaintDetails from "./pages/ward/Complaintdetails";
 
 
 
@@ -56,6 +59,9 @@ import CitizenProfile from "@/pages/citizen/Profile"
 import CitizenVerification from "@/pages/citizen/Verification"
 import Messages from "./pages/citizen/Messages";
 import EmailChangeConfirm from "./components/citizen/EmailChangeConfirm";
+import ForgotPassword from "@/pages/citizen/ForgotPassword"
+import VerifyResetOTP from "@/pages/citizen/VerifyResetOTP"
+import ResetPassword from "@/pages/citizen/ResetPassword"
 
 
 
@@ -69,6 +75,12 @@ export default function App() {
       // CITIZEN LOGIN (NO LAYOUT) //
         <Route path="/citizen/registration" element={<AuthPage />} />
 
+        <Route path="/citizen/forgot-password" element={<ForgotPassword />} />
+
+        <Route path="/citizen/verify-reset-otp" element={<VerifyResetOTP />} />
+
+        <Route path="/citizen/reset-password" element={<ResetPassword />} />
+
 
 
       // PUBLIC ROUTES FOR AUTHORITY //
@@ -81,9 +93,14 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
 
 
-      <Route path="/email-change-confirm/:token" element={<EmailChangeConfirm />} />
+        <Route path="/email-change-confirm/:token" element={<EmailChangeConfirm />} />
 
-      <Route path="/ward/email-change-confirm/:token" element={<WardEmailChangeConfirm />} />
+        <Route path="/ward/email-change-confirm/:token" element={<WardEmailChangeConfirm />} />
+
+        <Route
+          path="/panchayath/email-change-confirm/:token"
+          element={<PanchayathEmailChangeConfirm />}
+        />
 
 
         {/* ───────── CITIZEN ROUTES ───────── */}
@@ -206,6 +223,7 @@ export default function App() {
           <Route path="wards" element={<AdminWardList />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="panchayaths/:id" element={<PanchayathDetail />} />
+          <Route path="wards/:id" element={<WardDetailsPage />} />
         </Route>
 
         {/* ───────── ADMIN ROUTES ───────── */}
@@ -232,7 +250,11 @@ export default function App() {
 
           {/* Complaint module (UI ready, backend next week) */}
           <Route path="complaints" element={<ComplaintList />} />
-          <Route path="complaints/:id" element={<ComplaintDetails />} />
+          {/* <Route path="complaints/:id" element={<ComplaintDetails />} /> */}
+          <Route
+            path="complaint-view/:id"
+            element={<ComplaintViewer />}
+          />
         </Route>
 
 

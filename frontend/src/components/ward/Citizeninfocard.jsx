@@ -59,10 +59,10 @@ export default function CitizenInfoCard({ citizen }) {
           <InfoRow label="Phone" value={citizen.phone ?? citizen.mobile} />
           <InfoRow label="Joined Date" value={formatDate(citizen.joined_at ?? citizen.created_at)} />
           <div className="sm:col-span-2">
-            <InfoRow label="Address" value={citizen.address} />
+            {/* <InfoRow label="Address" value={citizen.address} /> */}
           </div>
-          <InfoRow label="Verification ID" value={citizen.verification_id ?? citizen.id_proof_number} />
-          <InfoRow label="Ward" value={citizen.ward_name ?? citizen.ward} />
+          {/* <InfoRow label="Verification ID" value={citizen.verification_id ?? citizen.id_proof_number} /> */}
+          {/* <InfoRow label="Ward" value={citizen.ward_name ?? citizen.ward} /> */}
         </div>
       </div>
     </div>

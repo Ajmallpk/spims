@@ -19,4 +19,5 @@ export const adminapi = {
     profile:()=>{return axiosInstance.get("admin/profile/")},
     getVerificationDetail: (id) => {return axiosInstance.get(`/admin/panchayath-verifications/${id}/`);},
     getPanchayathDetail: (id) => {return axiosInstance.get(`/admin/panchayath/${id}/`);},
+    wardDetail: (id) => axiosInstance.get(`/admin/wards/${id}/`)
 }

@@ -1,5 +1,5 @@
 import StatusBadge from "@/components/ward/StatusBadge";
-
+import { useNavigate } from "react-router-dom";
 function formatDate(dateStr) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -22,6 +22,7 @@ function SkeletonRow() {
 }
 
 export default function ComplaintHistoryTable({ complaints, isLoading }) {
+  const navigate = useNavigate();
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
       {/* Section Header */}
@@ -44,9 +45,8 @@ export default function ComplaintHistoryTable({ complaints, isLoading }) {
               {["Complaint Title", "Category", "Status", "Created Date", ""].map((col, i) => (
                 <th
                   key={i}
-                  className={`px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider ${
-                    i === 4 ? "text-right" : "text-left"
-                  }`}
+                  className={`px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider ${i === 4 ? "text-right" : "text-left"
+                    }`}
                 >
                   {col}
                 </th>
@@ -75,7 +75,8 @@ export default function ComplaintHistoryTable({ complaints, isLoading }) {
               complaints.map((complaint) => (
                 <tr
                   key={complaint.id}
-                  className="hover:bg-blue-50/30 transition-colors duration-100 group"
+                  onClick={() => navigate(`/ward/complaints/${complaint.id}`)}
+                  className="cursor-pointer hover:bg-blue-50/30 transition-colors duration-100 group"
                 >
                   {/* Title */}
                   <td className="px-5 py-4">

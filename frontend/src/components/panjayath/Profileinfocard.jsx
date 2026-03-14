@@ -44,9 +44,8 @@ function InfoRow({ icon, label, value, mono = false }) {
           {label}
         </p>
         <p
-          className={`text-sm font-semibold text-slate-800 break-words ${
-            mono ? "font-mono text-xs bg-slate-50 px-2 py-1 rounded-lg inline-block" : ""
-          }`}
+          className={`text-sm font-semibold text-slate-800 break-words ${mono ? "font-mono text-xs bg-slate-50 px-2 py-1 rounded-lg inline-block" : ""
+            }`}
         >
           {value || <span className="text-slate-400 font-normal italic">Not provided</span>}
         </p>
@@ -89,8 +88,13 @@ export default function ProfileInfoCard({ profile, isLoading }) {
           ) : (
             <>
               <h3 className="text-base font-black text-slate-900 leading-tight truncate">
-                {profile?.panchayath_name || profile?.name || "Panchayath"}
+                @{profile?.username}
               </h3>
+
+              <h5 className="text-base font-green text-slate-900 leading-tight truncate">
+                {profile?.panchayath_name || "Panchayath"}
+              </h5>
+
               <p className="text-xs text-slate-400 font-medium mt-0.5">
                 Panchayath Authority Account
               </p>

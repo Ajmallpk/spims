@@ -4,6 +4,7 @@ import StatsGrid from "@/components/admin/Statsgrid";
 import VerificationAlertSection from "@/components/admin/Verificationalertsection";
 import CriticalAlertSection from "@/components/admin/Criticalalertsection";
 import toast from "react-hot-toast";
+import ComplaintStatusChart from "@/components/admin/ComplaintStatusChart";
 
 
 const AdminDashboard = () => {
@@ -71,6 +72,7 @@ const AdminDashboard = () => {
 
       {/* Stats Grid */}
       <StatsGrid stats={stats} isLoading={loadingStats} />
+      <ComplaintStatusChart data={stats?.complaint_status_chart} />
 
       {/* Bottom Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
