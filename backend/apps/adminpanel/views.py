@@ -30,7 +30,11 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-
+from django.core.cache import cache
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.hashers import check_password
 
 
 
@@ -569,24 +573,66 @@ class AdminPanchayathDetailView(APIView):
 
         verification = PanchayathVerification.objects.filter(user=user).last()
 
+        wards = WardVerification.objects.filter(
+            panchayath=user,
+            status="APPROVED"
+        ).select_related("user")
+
+        total_wards = wards.count()
+
+        ward_users = wards.values_list("user_id", flat=True)
+
+        total_complaints = Complaint.objects.filter(
+            ward_id__in=ward_users
+        ).count()
+
+        pending_complaints = Complaint.objects.filter(
+            ward_id__in=ward_users,
+            status="PENDING"
+        ).count()
+
+        resolved_complaints = Complaint.objects.filter(
+            ward_id__in=ward_users,
+            status="RESOLVED"
+        ).count()
+
+        total_citizens = CitizenVerification.objects.filter(
+            ward_id__in=ward_users,
+            status="APPROVED"
+        ).count()
+
+        ward_list = []
+
+        for ward in wards:
+            ward_list.append({
+                "id": ward.id,
+                "ward_name": ward.ward_name,
+                "officer_name": ward.officer_full_name,
+                "email": ward.official_email
+            })
+
         return Response({
             "id": user.id,
-            "username": user.username,
+            "panchayath_name": verification.panchayath_name if verification else user.username,
             "email": user.email,
             "status": user.status,
-            "is_verified": user.is_verified,
             "date_joined": user.date_joined,
 
-            "verification": {
-                "panchayath_name": verification.panchayath_name if verification else None,
-                "district": verification.district if verification else None,
+            "total_wards": total_wards,
+            "total_complaints": total_complaints,
+            "pending_complaints": pending_complaints,
+            "resolved_complaints": resolved_complaints,
+            "total_citizens": total_citizens,
+
+            "authority": {
+                "name": verification.panchayath_name if verification else user.username,
+                "email": user.email,
                 "phone": verification.phone if verification else None,
-                "aadhaar_image": request.build_absolute_uri(verification.aadhaar_image.url) if verification and verification.aadhaar_image else None,
-                "selfie_image": request.build_absolute_uri(verification.selfie_image.url) if verification and verification.selfie_image else None,
-                "submitted_at": verification.submitted_at if verification else None,
-                "reviewed_at": verification.reviewed_at if verification else None,
-                "reject_reason": verification.reject_reason if verification else None,
-            }
+                "office_address": verification.district if verification else None,
+                "joined_date": user.date_joined
+            },
+
+            "wards": ward_list
         })
         
         
@@ -677,3 +723,94 @@ class AdminWardDetailView(APIView):
                 "resolved_complaints": resolved_complaints
             }
         })
+
+
+
+class RequestAdminEmailChange(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request):
+
+        new_email = request.data.get("new_email")
+
+        if not new_email:
+            return Response({"error": "New email is required"}, status=400)
+
+        if User.objects.filter(email=new_email).exists():
+            return Response({"error": "Email already exists"}, status=400)
+
+        user = request.user
+
+        otp = str(random.randint(100000, 999999))
+        print(otp)
+        cache.set(
+            f"admin_email_change_{user.id}",
+            {
+                "otp": otp,
+                "new_email": new_email
+            },
+            timeout=300   
+        )
+
+        send_mail(
+            "SPIMS Email Change OTP",
+            f"Your OTP is {otp}",
+            settings.EMAIL_HOST_USER,
+            [user.email],
+        )
+
+        return Response({"message": "OTP sent to your current email"})
+    
+    
+    
+    
+class VerifyAdminEmailChange(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request):
+
+        otp = request.data.get("otp")
+
+        if not otp:
+            return Response({"error": "OTP is required"}, status=400)
+
+        user = request.user
+
+        cache_data = cache.get(f"admin_email_change_{user.id}")
+
+        if not cache_data:
+            return Response({"error": "OTP expired or not found"}, status=400)
+
+        if cache_data["otp"] != otp:
+            return Response({"error": "Invalid OTP"}, status=400)
+        user.email = cache_data["new_email"]
+        user.save()
+        cache.delete(f"admin_email_change_{user.id}")
+
+        return Response({"message": "Email updated successfully"})
+    
+    
+    
+
+
+
+class AdminChangePasswordView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request):
+
+        user = request.user
+
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+
+        if not current_password or not new_password:
+            return Response({"error": "Both passwords are required"}, status=400)
+
+        if not user.check_password(current_password):
+            return Response({"error": "Current password is incorrect"}, status=400)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"message": "Password changed successfully"})

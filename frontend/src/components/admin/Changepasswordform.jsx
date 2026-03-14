@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import { adminapi } from "@/service/adminurls";
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
 });
@@ -22,11 +23,10 @@ const PasswordField = ({ label, id, value, onChange, show, onToggle, error, plac
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || label}
-        className={`w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-150 ${
-          error
+        className={`w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-150 ${error
             ? "border-red-400 focus:ring-red-200"
             : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
-        }`}
+          }`}
       />
       <button
         type="button"
@@ -104,15 +104,11 @@ const ChangePasswordForm = () => {
     }
     setIsSubmitting(true);
     try {
-      await axios.post(
-        "/api/admin/change-password/",
-        {
-          current_password: form.current_password,
-          new_password: form.new_password,
-          confirm_password: form.confirm_password,
-        },
-        { headers: getAuthHeaders() }
-      );
+      await adminapi.changePassword({
+        current_password: form.current_password,
+        new_password: form.new_password,
+        confirm_password: form.confirm_password,
+      });
       setSuccessMsg("Password changed successfully.");
       setForm({ current_password: "", new_password: "", confirm_password: "" });
       setErrors({});

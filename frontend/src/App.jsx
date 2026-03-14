@@ -19,7 +19,7 @@ import AdminWardList from "@/pages/admin/AdminWardlist"
 import AdminProfile from "@/pages/admin/AdminProfile"
 import PanchayathDetail from "./pages/admin/PanchayathDetail"
 import WardDetailsPage from "./pages/admin/Warddetailsout";
-
+import PanchayathDetails from "./pages/admin/Panchayathdetails";
 
 
 
@@ -32,6 +32,7 @@ import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests
 import WardList from "@/pages/panjayath/WardList";
 import WardDetail from "@/pages/panjayath/WardDetail";
 import PanchayathEmailChangeConfirm from "./components/panjayath/PanchayathEmailChangeConfirm";
+
 
 
 /* ───────── WARD MODULE ───────── */
@@ -49,9 +50,7 @@ import WardEmailChangeConfirm from "./components/ward/WardEmailChangeConfirm";
 
 
 
-
 // citizen pages 
-
 import AuthPage from "@/pages/citizen/AuthPage"
 import CitizenLayout from "@/layouts/citizen/CitizenLayout"
 import CitizenHome from "@/pages/citizen/Home"
@@ -222,7 +221,7 @@ export default function App() {
           <Route path="panchayaths" element={<PanchayathList />} />
           <Route path="wards" element={<AdminWardList />} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="panchayaths/:id" element={<PanchayathDetail />} />
+          <Route path="panchayaths/:id" element={<PanchayathDetails />} />
           <Route path="wards/:id" element={<WardDetailsPage />} />
         </Route>
 

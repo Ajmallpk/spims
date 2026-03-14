@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import PanchayathStatsGrid from "@/components/admin/Panchayathstatsgrid";
 import WardTable from "@/components/admin/Wardtable";
+import { adminapi } from "@/service/adminurls";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -49,11 +50,8 @@ const PanchayathDetails = () => {
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const { data: res } = await axios.get(
-          `/api/admin/panchayath/${id}/details/`,
-          { headers: getAuthHeaders() }
-        );
-        setData(res);
+        const res = await adminapi.getPanchayathDetail(id);
+        setData(res.data);
       } catch (err) {
         toast.error("Error fetching panchayath details:", err);
       } finally {

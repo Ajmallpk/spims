@@ -22,4 +22,9 @@ urlpatterns = [
     path("profile/", views.AdminProfileView.as_view()),
     path("panchayath/<int:user_id>/", views.AdminPanchayathDetailView.as_view()),
     path("wards/<int:pk>/", views.AdminWardDetailView.as_view(), name="admin-ward-detail"),
+    path("request-email-change/", views.RequestAdminEmailChange.as_view()),
+    path("verify-email-change/", views.VerifyAdminEmailChange.as_view()),
+    path("change-password/", views.AdminChangePasswordView.as_view()),
 ]
+
+
