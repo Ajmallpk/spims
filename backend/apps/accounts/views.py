@@ -7,8 +7,17 @@ from .auth_serializers import EmailTokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from rest_framework.permissions import AllowAny
+import logging
+logger = logging.getLogger(__name__)
 from .otp_utils import (generate_otp,verify_otp,get_cache_key,resend_otp,store_signup_data,
                        store_otp,RESEND_LIMIT,clear_otp,get_signup_data,delete_signup_data,send_otp_email)
+
+
+
+
+
+logger = logging.getLogger(__name__)
+
 
 
 User = get_user_model()
@@ -28,12 +37,14 @@ class CitizenSignupRequestView(APIView):
                     {"error": "User with this email already exists"},
                     status=400
                 )
-                
+            
+            logger.info(f"Signup OTP requested for {email}")
             otp = generate_otp()
+            username = serializer.validated_data["username"]
 
             store_signup_data(email, serializer.validated_data, role="CITIZEN")
             store_otp(email, otp, purpose="signup")
-            send_otp_email(email, otp)
+            send_otp_email(email, otp, username)
             return Response({"message": "OTP sent to email"}, status=200)
         return Response(serializer.errors, status=400)
         
@@ -56,11 +67,12 @@ class AuthoritySignupRequestView(APIView):
                     {"error": "User with this email already exists"},
                     status=400
                 )
-            otp = generate_otp()    
+            otp = generate_otp()
+            username = serializer.validated_data["username"]
 
             store_signup_data(email, serializer.validated_data, role=role)
             store_otp(email, otp, purpose="signup")
-            send_otp_email(email, otp)
+            send_otp_email(email, otp, username)
             return Response({"message": "OTP sent to email"}, status=200)
         return Response(serializer.errors, status=400)
     
@@ -82,6 +94,7 @@ class VerifyOTPView(APIView):
             return Response({"error": "Signup expired"}, status=400)
 
         role = signup_data["role"]
+        logger.info(f"User account created for {email} with role {role}")
         user = User.objects.create_user(
             username=signup_data["username"],  
             email=signup_data["email"],
@@ -108,7 +121,10 @@ class ResendOTPView(APIView):
         if not success:
             return Response({"error": result}, status=400)
 
-        send_otp_email(email, result["otp"])
+        signup_data = get_signup_data(email)
+        username = signup_data["username"] if signup_data else "User"
+
+        send_otp_email(email, result["otp"], username)
 
         return Response({
             "message": "OTP resent successfully",
@@ -137,11 +153,13 @@ class ForgotPasswordView(APIView):
         try:
             User.objects.get(email=email)
         except User.DoesNotExist:
+            logger.warning(f"Password reset attempted for non-existing email: {email}")
             return Response({"error": "User not found"}, status=400)
 
         otp = generate_otp()
         store_otp(email, otp, purpose="reset")
-        send_otp_email(email, otp)
+        user = User.objects.get(email=email)
+        send_otp_email(email, otp, user.username)
         return Response({"message": "Reset OTP sent"}, status=200)
 
 

@@ -2,6 +2,7 @@ import random
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 
 OTP_EXPIRY = 300
 MAX_ATTEMPTS = 5
@@ -86,10 +87,39 @@ def delete_signup_data(email):
     cache.delete(get_signup_key(email))
     
     
-def send_otp_email(email, otp):
+def send_otp_email(email, otp, username):
+    subject = "SPIMS Account Verification OTP"
+
+    generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    message = f"""
+Dear {username},
+
+Welcome to SPIMS (Smart Panchayath Issue Management System).
+
+Your One-Time Password (OTP) for verifying your account is:
+
+========================
+        {otp}
+========================
+
+This OTP will expire in 5 minutes.
+
+Generated at: {generated_time}
+System: SPIMS Security
+
+Security Notice:
+• Never share your OTP with anyone.
+• SPIMS team will never ask for your OTP.
+• If you did not request this verification, please ignore this email.
+
+Best Regards,
+SPIMS Security Team
+"""
+
     send_mail(
-        "SPIMS OTP Verification",
-        f"Your OTP is {otp}. It expires in 5 minutes.",
+        subject,
+        message,
         settings.EMAIL_HOST_USER,
         [email],
         fail_silently=False,

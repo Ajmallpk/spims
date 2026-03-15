@@ -27,9 +27,13 @@ from rest_framework.response import Response
 from apps.citizen.models import CitizenVerification, CitizenProfile
 from apps.complaints.models import Complaint
 from .permissions import IsActiveWard
-
+from django.utils import timezone
 import uuid
-# Create your views here.
+import logging
+
+
+
+logger = logging.getLogger(__name__)
 
 
 User = get_user_model()
@@ -127,7 +131,7 @@ class SubmitWardVerificationView(APIView):
             verification.reject_reason = None
             verification.reviewed_at = None
             verification.save()
-
+            logger.info(f"Ward {user.id} resubmitted verification to Panchayath {panchayath_user.id}")
             return Response({"message": "Verification resubmitted successfully"})
         WardVerification.objects.create(
             user=user,
@@ -135,7 +139,7 @@ class SubmitWardVerificationView(APIView):
             status="PENDING",
             **data
         )
-
+        logger.info(f"Ward {user.id} submitted verification request to Panchayath {panchayath_user.id}")
         return Response({"message": "Verification submitted successfully"})
     
 
@@ -286,7 +290,7 @@ class ApproveCitizenView(APIView):
             profile.ward_name = ward_verification.ward_name   
 
         profile.save()
-
+        logger.info(f"Ward {request.user.id} approved citizen {citizen.user.id}")
         return Response({"message": "Citizen approved successfully"})
     
     
@@ -316,6 +320,7 @@ class RejectCitizenView(APIView):
         citizen.save()
         citizen.user.status = User.Status.SUSPENDED
         citizen.user.save()
+        logger.warning(f"Ward {request.user.id} rejected citizen {citizen.user.id}")
         return Response({"message": "Citizen rejected successfully"})
     
 
@@ -432,7 +437,7 @@ class WardChangePasswordView(APIView):
 
         user.set_password(new_password)
         user.save()
-
+        logger.warning(f"Ward {user.id} changed password")
         return Response(
             {"message": "Password changed successfully"},
             status=200
@@ -460,7 +465,7 @@ class WardChangeEmailRequestView(APIView):
             return Response({"message": "Email already exists"}, status=400)
 
         token = str(uuid.uuid4())
-
+        logger.info(f"Ward {user.id} requested email change")
         cache.set(
             f"ward_change_email_{token}",
             {
@@ -472,16 +477,28 @@ class WardChangeEmailRequestView(APIView):
 
         verify_link = f"http://localhost:5173/ward/email-change-confirm/{token}"
 
-        send_mail(
-            subject="Confirm your email change",
-                    message=f"""
-        You requested to change your email.
+        generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        Click below to confirm:
+        send_mail(
+            subject="SPIMS Ward Email Change Confirmation",
+            message=f"""
+        Hello {user.username},
+
+        You requested to change the email address for your SPIMS Ward account.
+
+        To confirm this request, please click the link below:
 
         {verify_link}
 
-        SPIMS Security
+        This verification link will expire in 10 minutes.
+
+        Generated at: {generated_time}
+        System: SPIMS Security
+
+        If you did not request this change, please ignore this email.
+
+        Regards,
+        SPIMS Security Team
         """,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[user.email],
@@ -510,7 +527,7 @@ class WardChangeEmailVerifyView(APIView):
         user = User.objects.get(id=data["user_id"])
         user.email = data["new_email"]
         user.save()
-
+        logger.info(f"Ward {user.id} changed email successfully")
         cache.delete(f"ward_change_email_{token}")
 
         return Response({

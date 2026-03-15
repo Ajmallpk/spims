@@ -13,7 +13,6 @@ from .serializers import AdminLoginSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import PageNumberPagination
 from apps.ward.models import WardVerification
-from django.db.models import Q
 from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -35,7 +34,12 @@ import random
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
+from django.utils import timezone
+import logging
 
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -198,7 +202,8 @@ class ApprovePanchayathView(APIView):
             v.user.status = User.Status.ACTIVE
             v.user.is_verified = True
             v.user.save()
-
+            
+        logger.info(f"Admin {request.user.id} approved Panchayath verification {v.id}")
         return Response({"message": "Approved successfully"})
 
 
@@ -231,7 +236,7 @@ class RejectPanchayathView(APIView):
             v.user.status = User.Status.SUSPENDED
             v.user.is_verified = False
             v.user.save()
-
+        logger.warning(f"Admin {request.user.id} rejected Panchayath verification {v.id}")
         return Response({"message": "Rejected successfully"})
     
     
@@ -328,6 +333,7 @@ class SuspendPanchayathView(APIView):
                 status=User.Status.SUSPENDED,
                 is_verified=False
             )
+        logger.warning(f"Admin {request.user.id} suspended Panchayath {user.id}")
         return Response({"message": "Panchayath and its wards suspended"})
     
     
@@ -344,6 +350,7 @@ class ActivatePanchayathView(APIView):
         user.status = User.Status.ACTIVE
         user.is_verified = True
         user.save(update_fields=["status", "is_verified"])
+        logger.info(f"Admin {request.user.id} activated Panchayath {user.id}")
         return Response({"message":"Panchayath activated"})
 
 
@@ -538,6 +545,7 @@ class SuspendWardView(APIView):
         user.status = User.Status.SUSPENDED
         user.is_verified = False
         user.save()
+        logger.warning(f"Admin {request.user.id} suspended Ward {user.id}")
         return Response({"message": "Ward suspended successfully"})
 
 
@@ -558,6 +566,7 @@ class ActivateWardView(APIView):
         user.status = User.Status.ACTIVE
         user.is_verified = True
         user.save()
+        logger.info(f"Admin {request.user.id} activated Ward {user.id}")
         return Response({"message": "Ward activated successfully"})
     
     
@@ -742,7 +751,7 @@ class RequestAdminEmailChange(APIView):
         user = request.user
 
         otp = str(random.randint(100000, 999999))
-        print(otp)
+        logger.info(f"Admin {user.id} requested email change")
         cache.set(
             f"admin_email_change_{user.id}",
             {
@@ -752,9 +761,29 @@ class RequestAdminEmailChange(APIView):
             timeout=300   
         )
 
+        generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+
         send_mail(
-            "SPIMS Email Change OTP",
-            f"Your OTP is {otp}",
+            "SPIMS Admin Email Change Verification",
+            f"""
+        Hello {user.username},
+
+        You requested to change your admin email.
+
+        Your OTP for confirming this change is:
+
+        ====================
+        {otp}
+        ====================
+
+        Generated at: {generated_time}
+        Valid for: 5 minutes
+
+        If you did not request this change, please ignore this email.
+
+        Regards,
+        SPIMS Security Team
+        """,
             settings.EMAIL_HOST_USER,
             [user.email],
         )
@@ -784,6 +813,7 @@ class VerifyAdminEmailChange(APIView):
         if cache_data["otp"] != otp:
             return Response({"error": "Invalid OTP"}, status=400)
         user.email = cache_data["new_email"]
+        logger.info(f"Admin {user.id} changed email successfully")
         user.save()
         cache.delete(f"admin_email_change_{user.id}")
 
@@ -812,5 +842,5 @@ class AdminChangePasswordView(APIView):
 
         user.set_password(new_password)
         user.save()
-
+        logger.warning(f"Admin {user.id} changed password")
         return Response({"message": "Password changed successfully"})

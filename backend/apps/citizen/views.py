@@ -13,6 +13,13 @@ from django.conf import settings
 from rest_framework.permissions import AllowAny
 from apps.ward.models import WardVerification
 import re
+from django.utils import timezone
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
 
 User = get_user_model()
 
@@ -77,7 +84,8 @@ class UpdateCitizenProfileView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-
+            
+            logger.info(f"Citizen {user.id} updated profile")
             return Response({
                 "message": "Profile updated successfully",
                 "data": serializer.data
@@ -126,7 +134,7 @@ class CitizenVerificationSubmitView(APIView):
         if serializer.is_valid():
 
             serializer.save(user=user)
-
+            logger.info(f"Citizen {user.id} submitted verification request")
             return Response(
                 {"message": "Verification submitted successfully"},
                 status=201
@@ -182,7 +190,7 @@ class UploadAvatarView(APIView):
 
         profile.profile_image = avatar
         profile.save()
-
+        logger.info(f"Citizen {request.user.id} updated profile avatar")
         return Response({
             "message": "Avatar uploaded successfully",
             "avatar_url": request.build_absolute_uri(profile.profile_image.url)
@@ -205,8 +213,8 @@ class WardListView(APIView):
 
         data = [
             {
-                "id": ward.user.id,          # ward user id
-                "name": ward.ward_name      # real ward name
+                "id": ward.user.id,          
+                "name": ward.ward_name      
             }
             for ward in wards
         ]
@@ -238,6 +246,7 @@ class ChangePasswordView(APIView):
             )
         user.set_password(new_password)
         user.save()
+        logger.warning(f"Citizen {user.id} changed password")
         return Response(
             {"message": "Password changed successfully"},
             status=200
@@ -301,33 +310,41 @@ class ChangeEmailRequestView(APIView):
         
 
         token = str(uuid.uuid4())
-
+        logger.info(f"Citizen {user.id} requested email change")
         cache.set(
             f"change_email_{token}",
             {
                 "user_id": user.id,
                 "new_email": new_email
             },
-            timeout=600  # 10 minutes
+            timeout=600  
         )
 
         verify_link = f"http://localhost:5173/email-change-confirm/{token}"
 
+        generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+
         send_mail(
-            subject="Confirm your email change",
+            subject="SPIMS Email Change Confirmation",
             message=f"""
-                        Hello,
+        Hello {user.username},
 
-                        You requested to change your email address.
+        You requested to change the email address for your SPIMS account.
 
-                        Click the link below to confirm the change:
+        To confirm this request, please click the link below:
 
-                        {verify_link}
+        {verify_link}
 
-                        If you did not request this, please ignore this email.
+        This link will expire in 10 minutes.
 
-                        SPIMS Security Team
-                        """,
+        Generated at: {generated_time}
+        System: SPIMS Security
+
+        If you did not request this change, please ignore this email or contact support immediately.
+
+        Regards,
+        SPIMS Security Team
+        """,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[user.email],
         )
@@ -354,7 +371,7 @@ class ChangeEmailVerifyView(APIView):
         user = User.objects.get(id=data["user_id"])
         user.email = data["new_email"]
         user.save()
-
+        logger.info(f"Citizen {user.id} changed email successfully")
         cache.delete(f"change_email_{token}")
 
         return Response(

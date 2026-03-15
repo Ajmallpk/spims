@@ -19,8 +19,10 @@ from django.core.signing import TimestampSigner
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.signing import BadSignature
+from django.utils import timezone
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 
 
@@ -84,14 +86,14 @@ class SubmitPanchayathVerificationView(APIView):
             verification.reject_reason = None
             verification.reviewed_at = None
             verification.save()
-
+            logger.info(f"Panchayath {user.id} resubmitted verification")
             return Response({"message": "Verification resubmitted"})
 
         PanchayathVerification.objects.create(
             user=user,
             **serializer.validated_data
         )
-
+        logger.info(f"Panchayath {user.id} submitted verification request")
         return Response({"message": "Verification submitted"})
 
 
@@ -221,6 +223,8 @@ class ApproveWardView(APIView):
                 ward.user.status = User.Status.ACTIVE
                 ward.user.is_verified = True
                 ward.user.save()
+                
+                logger.info(f"Panchayath {user.id} approved ward {ward.id}")
 
         except WardVerification.DoesNotExist:
             return Response({"error": "Ward not found"}, status=404)
@@ -264,7 +268,7 @@ class RejectWardView(APIView):
                 ward.user.status = User.Status.SUSPENDED
                 ward.user.is_verified = False
                 ward.user.save()
-
+                logger.warning(f"Panchayath {user.id} rejected ward {ward.id}")
         except WardVerification.DoesNotExist:
             return Response({"error": "Ward not found"}, status=404)
 
@@ -341,7 +345,7 @@ class PanchayathChangePasswordView(APIView):
 
         user.set_password(new_password)
         user.save()
-
+        logger.warning(f"Panchayath {user.id} changed password")
         return Response({"message": "Password changed successfully"})
     
     
@@ -366,13 +370,35 @@ class PanchayathRequestEmailChangeView(APIView):
 
         token = signer.sign(f"{user.id}:{new_email}")
 
+        logger.info(f"Panchayath {user.id} requested email change")
+        
         link = f"http://localhost:5173/panchayath/email-change-confirm/{token}"
 
+        generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+
         send_mail(
-            "Confirm Email Change",
-            f"Click this link to confirm email change: {link}",
-            settings.EMAIL_HOST_USER,
-            [user.email],   
+            subject="SPIMS Panchayath Email Change Confirmation",
+            message=f"""
+        Hello {user.username},
+
+        You requested to change the email address for your SPIMS Panchayath account.
+
+        To confirm this request, please click the link below:
+
+        {link}
+
+        This link will expire in 1 hour.
+
+        Generated at: {generated_time}
+        System: SPIMS Security
+
+        If you did not request this change, please ignore this email.
+
+        Regards,
+        SPIMS Security Team
+        """,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
         )
 
         return Response({"message": "Verification email sent to your current email"})
@@ -391,7 +417,7 @@ class PanchayathConfirmEmailChangeView(APIView):
             user = User.objects.get(id=user_id)
             user.email = new_email
             user.save()
-
+            logger.info(f"Panchayath {user.id} changed email successfully")
             return Response({
                 "message": "Email updated successfully",
                 "email": new_email
