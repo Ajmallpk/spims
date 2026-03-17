@@ -110,7 +110,13 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
       setSuccess(true);
       setTimeout(onClose, 800);
     } catch (err) {
-      setApiError(err.message);
+      setApiError(
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        Object.values(err.response?.data || {})[0] ||
+        "Profile update failed"
+      );
     } finally {
       setSubmitting(false);
     }

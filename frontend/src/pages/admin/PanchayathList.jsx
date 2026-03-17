@@ -6,6 +6,7 @@ import PanchayathTable from "@/components/admin/Panchayathtable";
 import Pagination from "@/components/admin/Pagination";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -40,7 +41,8 @@ const PanchayathList = () => {
         setTotalPages(data.total_pages || Math.ceil((data.count || 0) / 10) || 1);
       }
     } catch (err) {
-      toast.error("Error fetching panchayaths:", err);
+      // toast.error("Error fetching panchayaths:", err);
+      handleApiError(err, "Failed to fetch panchayaths");
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,8 @@ const PanchayathList = () => {
       setActionModal({ open: false, type: null, id: null });
       fetchPanchayaths(currentPage, searchQuery);
     } catch (err) {
-      toast.error("Action failed:", err);
+      // toast.error("Action failed:", err);
+      handleApiError(err, "Action failed:");
     }
   };
 

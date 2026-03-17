@@ -26,44 +26,17 @@ function DetailRow({ label, value }) {
 
 export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
 
-
+  const [previewImage, setPreviewImage] = useState(null);
   const [showReject, setShowReject] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectError, setRejectError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
-  const isPending = (citizen?.status ?? "pending").toLowerCase() === "pending";
+  const isPending =
+    (citizen?.status ?? "pending").toLowerCase() === "pending";
 
-  const handleApprove = async () => {
-    try {
-      setIsSubmitting(true);
-      await wardapi.approveCitizen(citizen.id);
-      onSuccess("Citizen verification approved successfully.");
-      onClose();
-    } catch (err) {
-      toast.error("Approve citizen error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handleRejectSubmit = async () => {
-    if (rejectReason.trim().length < 10) {
-      setRejectError("Reason must be at least 10 characters.");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      await wardapi.rejectCitizen(citizen.id, rejectReason.trim());
-      onSuccess("Citizen verification rejected.");
-      onClose();
-    } catch (err) {
-      toast.error("Reject citizen error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleRejectReasonChange = (val) => {
     setRejectReason(val);
@@ -71,6 +44,37 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
   };
 
   if (!citizen) return null;
+
+
+  const handleConfirm = async () => {
+    if (!confirmAction) return;
+
+    if (confirmAction === "reject" && rejectReason.trim().length < 10) {
+      setRejectError("Reason must be at least 10 characters.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      if (confirmAction === "approve") {
+        await wardapi.approveCitizen(citizen?.id)
+        onSuccess("Citizen verification approved successfully.");
+      }
+
+      if (confirmAction === "reject") {
+        await wardapi.rejectCitizen(citizen?.id, rejectReason)
+        onSuccess("Citizen verification rejected.");
+      }
+
+      onClose();
+    } catch (err) {
+      toast.error("Action failed");
+    } finally {
+      setIsSubmitting(false);
+      setConfirmAction(null);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-6">
@@ -99,30 +103,52 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
           {/* Citizen Avatar + Status */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-              {(citizen.full_name ?? citizen.name ?? "?")[0].toUpperCase()}
+              {(citizen?.citizen?.full_name?.[0] ?? "?")}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-base font-bold text-gray-900 truncate">
-                {citizen.full_name ?? citizen.name ?? "—"}
+                {citizen?.citizen?.full_name ?? "—"}
               </p>
-              <p className="text-xs text-gray-500 truncate mt-0.5">{citizen.email ?? "—"}</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{citizen?.citizen?.email ?? "—"}</p>
             </div>
-            <StatusBadge status={citizen.status} />
+            <StatusBadge status={citizen?.verification?.status} />
           </div>
+          {/* Aadhaar Image */}
+          {citizen?.verification?.aadhaar_image && (
+            <img
+              src={citizen?.verification?.aadhaar_image}
+              alt="aadhaar"
+              onClick={() => setPreviewImage(citizen?.verification?.aadhaar_image)}
+              className="w-full max-h-60 object-contain rounded-xl border cursor-pointer hover:scale-[1.02] transition"
+            />
+          )}
+
+          {/* Selfie Image */}
+          {citizen?.verification?.selfie_image && (
+            <img
+              src={citizen?.verification?.selfie_image}
+              alt="selfie"
+              onClick={() => setPreviewImage(citizen?.verification?.selfie_image)}
+              className="w-full max-h-60 object-contain rounded-xl border cursor-pointer hover:scale-[1.02] transition"
+            />
+          )}
 
           {/* Detail Grid */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <DetailRow label="Full Name" value={citizen.full_name ?? citizen.name} />
-            <DetailRow label="Email" value={citizen.email} />
-            <DetailRow label="Phone" value={citizen.phone ?? citizen.mobile} />
-            <DetailRow label="Submitted Date" value={formatDate(citizen.submitted_at ?? citizen.created_at)} />
+            <DetailRow label="Full Name" value={citizen?.citizen?.full_name} />
+            <DetailRow label="Email" value={citizen?.citizen?.email} />
+            <DetailRow label="Phone" value={citizen?.citizen?.phone} />
+            <DetailRow label="Submitted Date" value={formatDate(citizen?.verification?.submitted_at)} />
             <div className="col-span-2">
-              <DetailRow label="Address" value={citizen.address} />
+              <DetailRow
+                label="Address"
+                value={`${citizen?.citizen?.house_number ?? ""}, ${citizen?.citizen?.street_name ?? ""}`}
+              />
             </div>
           </div>
 
           {/* ID Proof */}
-          {citizen.id_proof && (
+          {/* {citizen.id_proof && (
             <div className="space-y-1.5">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">ID Proof</span>
               <a
@@ -137,7 +163,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
                 View ID Proof Document
               </a>
             </div>
-          )}
+          )} */}
 
           {/* Reject Reason Section */}
           {showReject && (
@@ -164,7 +190,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
                   Reject
                 </button>
                 <button
-                  onClick={handleApprove}
+                  onClick={() => setConfirmAction("approve")}
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
@@ -196,7 +222,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
                   Cancel
                 </button>
                 <button
-                  onClick={handleRejectSubmit}
+                  onClick={() => setConfirmAction("reject")}
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
@@ -222,6 +248,70 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
           </div>
         )}
       </div>
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[999] bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-2 right-2 bg-white rounded-full p-2 shadow"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={previewImage}
+              alt="preview"
+              className="w-full max-h-[80vh] object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+      {confirmAction && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+
+            <h3 className="text-lg font-bold text-gray-900">
+              Confirm {confirmAction === "approve" ? "Approval" : "Rejection"}
+            </h3>
+
+            <p className="text-sm text-gray-500">
+              Are you sure you want to {confirmAction} this citizen verification?
+            </p>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="flex-1 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirm}
+                disabled={isSubmitting}
+                className={`flex-1 px-4 py-2 rounded-xl text-white text-sm font-semibold ${confirmAction === "approve"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-red-600 hover:bg-red-700"
+                  }`}
+              >
+                {isSubmitting
+                  ? "Processing..."
+                  : confirmAction === "approve"
+                    ? "Approve"
+                    : "Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

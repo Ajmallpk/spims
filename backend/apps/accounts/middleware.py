@@ -12,8 +12,11 @@ class BlockSuspendedUserMiddleware:
         if user.is_authenticated:
             if hasattr(user,"status") and user.status == "SUSPENDED":
                 return JsonResponse(
-                    {"error":"your account has been suspended"},
-                    status = 403
+                    {
+                        "error": "ACCOUNT_SUSPENDED",
+                        "message": "Your account has been suspended by the administrator."
+                    },
+                    status=403
                 )
         return self.get_response(request)
         

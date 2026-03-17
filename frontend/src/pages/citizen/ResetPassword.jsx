@@ -2,11 +2,11 @@ import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export default function ResetPassword(){
+export default function ResetPassword() {
 
-  const [newPassword,setNewPassword] = useState("");
-  const [confirmPassword,setConfirmPassword] = useState("");
-  const [error,setError] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,9 +29,14 @@ export default function ResetPassword(){
 
     } catch (err) {
 
-      setError(
-        err.response?.data?.error || "Reset failed"
-      );
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        Object.values(err.response?.data || {})[0] ||
+        "Reset failed";
+
+      setError(message);
 
     }
 
@@ -51,7 +56,7 @@ export default function ResetPassword(){
           type="password"
           placeholder="New Password"
           value={newPassword}
-          onChange={(e)=>setNewPassword(e.target.value)}
+          onChange={(e) => setNewPassword(e.target.value)}
           className="w-full border p-3 rounded mb-3"
         />
 
@@ -59,7 +64,7 @@ export default function ResetPassword(){
           type="password"
           placeholder="Confirm Password"
           value={confirmPassword}
-          onChange={(e)=>setConfirmPassword(e.target.value)}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full border p-3 rounded mb-3"
         />
 

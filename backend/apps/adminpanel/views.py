@@ -844,3 +844,177 @@ class AdminChangePasswordView(APIView):
         user.save()
         logger.warning(f"Admin {user.id} changed password")
         return Response({"message": "Password changed successfully"})
+    
+    
+    
+    
+class AdminCitizenListView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+        ward_name_filter = request.GET.get("ward")
+        panchayath_name_filter = request.GET.get("panchayath")
+        search = request.GET.get("search")
+
+        citizens = User.objects.filter(
+            role=User.Role.CITIZEN,
+            is_verified=True,
+            status=User.Status.ACTIVE
+        ).select_related("citizen_verification")
+
+        if search:
+            citizens = citizens.filter(
+                Q(username__icontains=search) |
+                Q(email__icontains=search)
+            )
+
+        data = []
+
+        for user in citizens:
+
+            verification = getattr(user, "citizen_verification", None)
+            if not verification or verification.status != "APPROVED":
+                continue
+
+            ward_name = None
+            panchayath_name = None
+
+            ward_verification = WardVerification.objects.filter(
+                user=verification.ward
+            ).select_related("panchayath").first()
+
+            if ward_verification:
+                ward_name = ward_verification.ward_name
+                panchayath_verification = PanchayathVerification.objects.filter(
+                    user=ward_verification.panchayath
+                ).first()
+
+                if panchayath_verification:
+                    panchayath_name = panchayath_verification.panchayath_name
+                    
+                
+            
+            if ward_name_filter:
+                if not ward_name or ward_name_filter.lower() not in ward_name.lower():
+                    continue
+
+            if panchayath_name_filter:
+                if not panchayath_name or panchayath_name_filter.lower() not in panchayath_name.lower():
+                    continue
+
+            data.append({
+                "id": user.id,
+                "name": user.username,
+                "email": user.email,
+                "status": user.status,
+                "is_verified": user.is_verified,
+
+                "ward": ward_name,
+                "panchayath": panchayath_name,
+
+                "submitted_at": verification.submitted_at,
+            })
+
+        return Response(data)
+    
+    
+    
+class AdminCitizenDetailView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request, user_id):
+
+        try:
+            user = User.objects.get(id=user_id, role=User.Role.CITIZEN)
+        except User.DoesNotExist:
+            return Response({"error": "Citizen not found"}, status=404)
+
+        verification = getattr(user, "citizen_verification", None)
+
+        if not verification or verification.status != "APPROVED":
+            return Response({"error": "Citizen not verified"}, status=400)
+
+        ward_name = None
+        panchayath_name = None
+
+        ward_verification = WardVerification.objects.filter(
+            user=verification.ward
+        ).select_related("panchayath").first()
+
+        if ward_verification:
+            ward_name = ward_verification.ward_name
+
+            panchayath_verification = PanchayathVerification.objects.filter(
+                user=ward_verification.panchayath
+            ).first()
+
+            if panchayath_verification:
+                panchayath_name = panchayath_verification.panchayath_name
+
+        return Response({
+            "id": user.id,
+            "name": user.username,
+            "email": user.email,
+            "status": user.status,
+
+            "full_name": verification.full_name,
+            "phone": verification.phone,
+            "house_number": verification.house_number,
+            "street_name": verification.street_name,
+
+            "ward": ward_name,
+            "panchayath": panchayath_name,
+
+            "aadhaar_image": request.build_absolute_uri(verification.aadhaar_image.url),
+            "selfie_image": request.build_absolute_uri(verification.selfie_image.url),
+
+            "submitted_at": verification.submitted_at,
+        })
+    
+    
+    
+
+class SuspendCitizenView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request, user_id):
+
+        try:
+            user = User.objects.get(id=user_id, role=User.Role.CITIZEN)
+        except User.DoesNotExist:
+            return Response({"error": "Citizen not found"}, status=404)
+
+        if user.status == User.Status.SUSPENDED:
+            return Response({"error": "Citizen already suspended"}, status=400)
+
+        user.status = User.Status.SUSPENDED
+        user.is_verified = False
+        user.save()
+
+        logger.warning(f"Admin {request.user.id} suspended Citizen {user.id}")
+
+        return Response({"message": "Citizen suspended successfully"})
+    
+    
+    
+
+class ActivateCitizenView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request, user_id):
+
+        try:
+            user = User.objects.get(id=user_id, role=User.Role.CITIZEN)
+        except User.DoesNotExist:
+            return Response({"error": "Citizen not found"}, status=404)
+
+        if user.status == User.Status.ACTIVE:
+            return Response({"error": "Citizen already active"}, status=400)
+
+        user.status = User.Status.ACTIVE
+        user.is_verified = True
+        user.save()
+
+        logger.info(f"Admin {request.user.id} activated Citizen {user.id}")
+
+        return Response({"message": "Citizen activated successfully"})

@@ -150,8 +150,8 @@ export default function WardProfile() {
 
       setProfile(res.data);
     } catch (err) {
-      toast.error("Failed to load ward profile");
-      console.error(err);
+      // interceptor will show toast
+      
     } finally {
       setIsLoadingProfile(false);
     }
@@ -166,8 +166,7 @@ export default function WardProfile() {
       setVerificationStatus(res.data);
 
     } catch (err) {
-      toast.error("Fetch verification status error");
-      console.error(err);
+      // interceptor will show toast
     } finally {
       setIsLoadingVerification(false);
     }

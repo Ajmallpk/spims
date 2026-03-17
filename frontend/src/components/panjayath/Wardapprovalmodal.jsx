@@ -12,6 +12,7 @@ import panchayathApi from "@/service/panchayathurls";
 import RejectReasonSection from "@/components/panjayath/Rejectreasonsection";
 import StatusBadge from "@/components/panjayath/StatusBadge";
 import toast from "react-hot-toast";
+import ConfirmModal from "@/components/common/ConfirmModal";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -127,6 +128,8 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
   const [rejectError, setRejectError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmType, setConfirmType] = useState(null);
 
   const modalRef = useRef(null);
 
@@ -163,26 +166,12 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
   }
 
   // ── Approve ────────────────────────────────────────────────────────────────
-  const handleApprove = async () => {
+  const handleApprove = () => {
     if (isSubmitting) return;
+
     setApiError("");
-    setIsSubmitting(true);
-    try {
-      await panchayathApi.approveWard(ward.id);
-      onSuccess("approved");
-      onClose();
-    } catch (err) {
-      if (err.response?.status === 401) {
-        toast.error("Unauthorized: JWT may be expired.");
-      }
-      setApiError(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Failed to approve ward. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    setConfirmType("approve");
+    setConfirmOpen(true);
   };
 
   // ── Reject ─────────────────────────────────────────────────────────────────
@@ -192,12 +181,14 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
     setApiError("");
   };
 
-  const handleRejectSubmit = async () => {
+  const handleRejectSubmit = () => {
     if (isSubmitting) return;
+
     if (rejectReason.trim().length < 10) {
       setRejectError("Rejection reason must be at least 10 characters.");
       return;
     }
+
     if (rejectReason.length > 500) {
       setRejectError("Rejection reason must not exceed 500 characters.");
       return;
@@ -205,29 +196,48 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
 
     setRejectError("");
     setApiError("");
-    setIsSubmitting(true);
 
-    try {
-      await panchayathApi.rejectWard(ward.id, rejectReason.trim());
-      onSuccess("rejected");
-      onClose();
-    } catch (err) {
-      if (err.response?.status === 401) {
-        toast.error("Unauthorized: JWT may be expired.");
-      }
-      setApiError(
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Failed to reject ward. Please try again."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    setConfirmType("reject");
+    setConfirmOpen(true);
   };
 
   const documents = (wardDetail?.documents || []).filter(Boolean);
   const isPending = (ward.status || "").toUpperCase() === "PENDING";
 
+  const handleConfirmAction = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setApiError("");
+
+    try {
+      if (confirmType === "approve") {
+        await panchayathApi.approveWard(ward.id);
+        onSuccess("approved");
+      }
+
+      if (confirmType === "reject") {
+        await panchayathApi.rejectWard(ward.id, rejectReason.trim());
+        onSuccess("rejected");
+      }
+
+      setConfirmOpen(false);
+      onClose();
+
+    } catch (err) {
+      if (err.response?.status === 401) {
+        toast.error("Unauthorized: JWT may be expired.");
+      }
+
+      setApiError(
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Action failed. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -495,6 +505,22 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
           </div>
         )}
       </div>
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title={
+          confirmType === "approve"
+            ? "Approve Ward"
+            : "Reject Ward"
+        }
+        message={
+          confirmType === "approve"
+            ? "Are you sure you want to approve this ward?"
+            : "Are you sure you want to reject this ward?"
+        }
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmOpen(false)}
+        isLoading={isSubmitting}
+      />
     </div>
   );
 }

@@ -2,10 +2,10 @@ import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function VerifyResetOTP(){
+export default function VerifyResetOTP() {
 
-  const [otp,setOtp] = useState("");
-  const [error,setError] = useState("");
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -21,15 +21,20 @@ export default function VerifyResetOTP(){
         otp
       });
 
-      navigate("/citizen/reset-password",{
-        state:{email}
+      navigate("/citizen/reset-password", {
+        state: { email }
       });
 
     } catch (err) {
 
-      setError(
-        err.response?.data?.error || "Invalid OTP"
-      );
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        Object.values(err.response?.data || {})[0] ||
+        "Invalid OTP";
+
+      setError(message);
 
     }
 
@@ -48,7 +53,7 @@ export default function VerifyResetOTP(){
           type="text"
           placeholder="6 digit OTP"
           value={otp}
-          onChange={(e)=>setOtp(e.target.value)}
+          onChange={(e) => setOtp(e.target.value)}
           className="w-full border p-3 rounded mb-3"
         />
 

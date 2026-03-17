@@ -24,7 +24,7 @@ export default function CitizenVerificationRequests() {
       const data = res.data;
       setRequests(Array.isArray(data) ? data : (data.results ?? []));
     } catch (err) {
-      toast.error("Failed to fetch citizen verifications");
+      // interceptor will show toast
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -42,9 +42,20 @@ export default function CitizenVerificationRequests() {
     return () => clearTimeout(timer);
   }, [successMessage]);
 
-  const handleView = (citizen) => {
-    setSelectedCitizen(citizen);
-    setIsModalOpen(true);
+  const handleView = async (citizen) => {
+    try {
+      setIsLoading(true);
+
+      const res = await wardapi.getCitizenDetails(citizen.id);
+
+      setSelectedCitizen(res.data); 
+      setIsModalOpen(true);
+
+    } catch (err) {
+      toast.error("Failed to load citizen details");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleModalClose = () => {

@@ -41,7 +41,7 @@ export default function CitizenDetails() {
       }
 
       console.error(err);
-      toast.error("Failed to fetch citizen details");
+      // interceptor will show toast
 
     } finally {
 

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import DetailStatCard from "@/components/admin/Detailstatcard";
 import { adminapi } from "@/service/adminurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -77,7 +78,8 @@ const WardDetails = () => {
           resolved_complaints: res.statistics?.resolved_complaints,
         });
       } catch (err) {
-        toast.error("Error fetching ward details:", err);
+        // toast.error("Error fetching ward details:", err);
+        handleApiError(err, "Failed to fetch ward details");
       } finally {
         setLoading(false);
       }

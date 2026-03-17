@@ -321,7 +321,7 @@ class ChangeEmailRequestView(APIView):
         )
 
         verify_link = f"http://localhost:5173/email-change-confirm/{token}"
-
+        
         generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
         send_mail(

@@ -5,6 +5,7 @@ import PanchayathApprovalModal from "@/components/admin/Panchayathapprovalmodal"
 import { ClipboardCheck, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 
 
@@ -22,7 +23,8 @@ const PanchayathVerificationRequests = () => {
       const { data } = await adminapi.panchayathVerificationList()
       setRequests(Array.isArray(data) ? data : data.results || []);
     } catch (err) {
-      toast.error("Error fetching panchayath verifications");
+      // toast.error("Error fetching panchayath verifications");
+      handleApiError(err, "Error fetching panchayath verifications");
       console.error(err);
     } finally {
       setLoading(false);
@@ -39,7 +41,8 @@ const PanchayathVerificationRequests = () => {
       setSelectedRequest(data);
       setIsModalOpen(true);
     } catch (error) {
-      toast.error("Error fetching verification detail");
+      // toast.error("Error fetching verification detail");
+      handleApiError(err, "Error fetching verification detail");
       console.error(error);
     }
   };

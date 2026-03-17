@@ -7,6 +7,7 @@ import WardTable from "@/components/admin/Wardtable";
 import Pagination from "@/components/admin/Pagination";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -50,7 +51,8 @@ const WardList = () => {
           );
         }
       } catch (err) {
-        toast.error("Error fetching wards:", err);
+        // toast.error("Error fetching wards:", err);
+        handleApiError(err, "Error fetching wards:");
       } finally {
         setLoading(false);
       }
@@ -98,7 +100,8 @@ const WardList = () => {
       setActionModal({ open: false, type: null, id: null });
       fetchWards(currentPage, searchQuery, selectedPanchayath);
     } catch (err) {
-      toast.error("Ward action failed:", err);
+      // toast.error("Ward action failed:", err);
+      handleApiError(err, "Ward action failed:");
     }
   };
 

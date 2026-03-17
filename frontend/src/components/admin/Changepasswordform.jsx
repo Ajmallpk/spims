@@ -3,6 +3,7 @@ import axios from "axios";
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { adminapi } from "@/service/adminurls";
+import { handleApiError } from "@/utils/handleApiError";
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
 });
@@ -113,7 +114,8 @@ const ChangePasswordForm = () => {
       setForm({ current_password: "", new_password: "", confirm_password: "" });
       setErrors({});
     } catch (err) {
-      toast.error("Error changing password:", err);
+      // toast.error("Error changing password:", err);
+      handleApiError(err, "Error changing password");
       const msg =
         err.response?.data?.detail ||
         err.response?.data?.message ||

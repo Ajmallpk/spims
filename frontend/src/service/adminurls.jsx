@@ -23,4 +23,14 @@ export const adminapi = {
     requestEmailChange: (email) => axiosInstance.post("/admin/request-email-change/", { new_email: email }),
     verifyEmailChange: (otp) => axiosInstance.post("/admin/verify-email-change/", { otp }),
     changePassword: (data) => axiosInstance.post("/admin/change-password/", data),
+    getCitizens: (filters) =>
+        axiosInstance.get("/admin/citizens/", { params: filters }),
+
+    suspendCitizen: (id) =>
+        axiosInstance.post(`/admin/citizen/suspend/${id}/`),
+
+    activateCitizen: (id) =>
+        axiosInstance.post(`/admin/citizen/activate/${id}/`),
+    citizenDetail: (id) =>
+        axiosInstance.get(`/admin/citizen/${id}/`),
 }

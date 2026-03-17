@@ -123,8 +123,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
         const res = await wardapi.getPanchayathDropdown();
         setPanchayaths(res.data);
       } catch (error) {
-        toast.error("Failed to load Panchayaths");
-        console.error(error);
+        // interceptor will show toast
       }
     };
 
@@ -206,7 +205,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
       
     } catch (err) {
-      toast.error("Submit verification failed");
+      // interceptor will show toast
       console.error(err);
 
       if (err.response && err.response.data) {

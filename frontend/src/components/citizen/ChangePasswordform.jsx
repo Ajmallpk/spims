@@ -104,7 +104,13 @@ const ChangePasswordForm = ({ token }) => {
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setErrors({});
     } catch (err) {
-      setApiError(err.message);
+      setApiError(
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        Object.values(err.response?.data || {})[0] ||
+        "Password change failed"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -176,14 +182,14 @@ const ChangePasswordForm = ({ token }) => {
               <div
                 key={lvl}
                 className={`h-1 flex-1 rounded-full transition-colors ${lvl <= strength
-                    ? strength <= 1
-                      ? "bg-red-400"
-                      : strength <= 2
-                        ? "bg-yellow-400"
-                        : strength <= 3
-                          ? "bg-teal-400"
-                          : "bg-green-500"
-                    : "bg-gray-200"
+                  ? strength <= 1
+                    ? "bg-red-400"
+                    : strength <= 2
+                      ? "bg-yellow-400"
+                      : strength <= 3
+                        ? "bg-teal-400"
+                        : "bg-green-500"
+                  : "bg-gray-200"
                   }`}
               />
             );

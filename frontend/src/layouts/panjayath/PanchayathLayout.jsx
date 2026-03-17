@@ -24,7 +24,9 @@ export default function PanchayathLayout() {
 
   // ── Read auth state from localStorage ────────────────────────────────────
   const role = localStorage.getItem("role");
-  const [isVerified, setIsVerified] = useState(false);
+  // const [isVerified, setIsVerified] = useState(false);
+  const storedVerified = localStorage.getItem("is_verified") === "true"
+  const [isVerified, setIsVerified] = useState(storedVerified)
   const [verificationSubmitted, setVerificationSubmitted] = useState(false);
 
   // ── Modal state ───────────────────────────────────────────────────────────
@@ -70,7 +72,7 @@ export default function PanchayathLayout() {
 
   // ── Auto-show modal on mount if not verified ──────────────────────────────
   useEffect(() => {
-    if (role === "PANCHAYATH" && !isVerified) {
+    if (role === "PANCHAYATH" && isVerified === false) {
       if (verificationSubmitted) {
         setShowPendingModal(true);
       } else {
@@ -82,16 +84,27 @@ export default function PanchayathLayout() {
     }
   }, [isVerified, verificationSubmitted, role]);
 
-  useEffect(() => {
-  if (
-    role === "PANCHAYATH" &&
-    isVerified &&
-    location.pathname === "/panchayath"
-  ) {
-    navigate("/panchayath/dashboard", { replace: true });
-  }
-}, [isVerified, role, location.pathname, navigate]);
-  // Do not render layout until role is confirmed (avoids flash)
+    useEffect(() => {
+    if (
+      role === "PANCHAYATH" &&
+      isVerified &&
+      location.pathname === "/panchayath"
+    ) {
+      navigate("/panchayath/dashboard", { replace: true });
+    }
+  }, [isVerified, role, location.pathname, navigate]);
+  // useEffect(() => {
+  //   if (role !== "PANCHAYATH") return;
+
+  //   const justLoggedIn = localStorage.getItem("just_logged_in") === "true";
+
+  //   if (isVerified && justLoggedIn) {
+  //     localStorage.removeItem("just_logged_in"); // important
+  //     navigate("/panchayath/dashboard", { replace: true });
+  //   }
+
+  // }, [isVerified, role, navigate]);
+ 
   if (!role || role !== "PANCHAYATH") return null;
 
   return (

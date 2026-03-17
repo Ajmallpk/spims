@@ -25,6 +25,10 @@ urlpatterns = [
     path("request-email-change/", views.RequestAdminEmailChange.as_view()),
     path("verify-email-change/", views.VerifyAdminEmailChange.as_view()),
     path("change-password/", views.AdminChangePasswordView.as_view()),
+    path("citizens/", views.AdminCitizenListView.as_view()),
+    path("citizen/suspend/<int:user_id>/", views.SuspendCitizenView.as_view()),
+    path("citizen/activate/<int:user_id>/", views.ActivateCitizenView.as_view()),
+    path("citizen/<int:user_id>/", views.AdminCitizenDetailView.as_view()),
 ]
 
 

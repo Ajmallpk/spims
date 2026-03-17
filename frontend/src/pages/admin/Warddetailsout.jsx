@@ -16,6 +16,7 @@ import WardStatsGrid from "@/components/admin/Wardstatsgrid";
 import WardMemberTable from "@/components/admin/Wardmembertable";
 import StatusBadge from "@/components/admin/Statusbadge";
 import { adminapi } from "@/service/adminurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -74,7 +75,8 @@ const WardDetailsPage = () => {
           resolved_complaints: res.statistics?.resolved_complaints,
         });
       } catch (err) {
-        toast.error("Error fetching ward details:", err);
+        // toast.error("Error fetching ward details:", err);
+        handleApiError(err, "Failed to fetch ward details");
       } finally {
         setLoading(false);
       }

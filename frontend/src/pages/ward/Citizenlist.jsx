@@ -29,7 +29,7 @@ export default function CitizenList() {
       setTotalPages(Math.ceil((data.count ?? 0) / 10) || 1);
 
     } catch (err) {
-      toast.error("Failed to fetch citizens:", err);
+      // interceptor will show toast
     } finally {
       setIsLoading(false);
     }

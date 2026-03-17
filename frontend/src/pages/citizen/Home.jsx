@@ -103,8 +103,8 @@ const formatTimeAgo = (dateString) => {
 const Home = () => {
 
   const handleLogout = () => {
-    localStorage.removeItem("spims_token");
-    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
 
     window.location.href = "/citizen/registration";
   };
@@ -227,7 +227,7 @@ const Home = () => {
       await loadFeed();   // refresh feed automatically
 
     } catch (error) {
-      console.error("Failed to create complaint", error);
+      console.error(error);
     }
   };
 

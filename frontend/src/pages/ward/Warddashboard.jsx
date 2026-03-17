@@ -25,7 +25,7 @@ export default function WardDashboard() {
       const res = await wardapi.dashboard();
       setStats(res.data);
     } catch (err) {
-      toast.error("Failed to fetch dashboard stats:", err);
+      // interceptor will show toast
     } finally {
       setIsLoadingStats(false);
     }
@@ -37,7 +37,7 @@ export default function WardDashboard() {
       const res = await wardapi.recentVerifications();
       setVerifications(res.data ?? []);
     } catch (err) {
-      toast.error("Failed to fetch recent verifications:", err);
+      // interceptor will show toast
     } finally {
       setIsLoadingVerifications(false);
     }

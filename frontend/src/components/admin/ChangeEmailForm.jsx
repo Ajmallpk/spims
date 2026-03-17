@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import toast from "react-hot-toast";
 import { adminapi } from "@/service/adminurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const ChangeEmailForm = () => {
 
@@ -20,7 +21,9 @@ const ChangeEmailForm = () => {
 
     } catch (err) {
 
-      toast.error(err.response?.data?.error || "Failed to send OTP");
+      // toast.error(err.response?.data?.error || "Failed to send OTP");
+      handleApiError(err, "Failed to send OTP");
+      
 
     }
   };
@@ -38,7 +41,8 @@ const ChangeEmailForm = () => {
 
     } catch (err) {
 
-      toast.error(err.response?.data?.error || "Invalid OTP");
+      // toast.error(err.response?.data?.error || "Invalid OTP");
+      handleApiError(err, "Invalid OTP");
 
     }
   };

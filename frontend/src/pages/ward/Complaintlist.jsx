@@ -43,7 +43,7 @@ export default function ComplaintList() {
         setTotalPages(Math.ceil((data.count ?? 0) / pageSize) || 1);
       }
     } catch (err) {
-      toast.error("Failed to fetch complaints:", err);
+       // interceptor will show toast
     } finally {
       setIsLoading(false);
     }

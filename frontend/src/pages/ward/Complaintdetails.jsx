@@ -46,7 +46,7 @@ export default function ComplaintDetails() {
       const data = await res.json();
       setComplaintData(data);
     } catch (err) {
-      toast.error("Fetch complaint details error:", err);
+      // interceptor will show toast
     } finally {
       setIsLoading(false);
     }

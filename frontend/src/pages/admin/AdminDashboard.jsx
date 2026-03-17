@@ -5,6 +5,7 @@ import VerificationAlertSection from "@/components/admin/Verificationalertsectio
 import CriticalAlertSection from "@/components/admin/Criticalalertsection";
 import toast from "react-hot-toast";
 import ComplaintStatusChart from "@/components/admin/ComplaintStatusChart";
+import { handleApiError } from "@/utils/handleApiError";
 
 
 const AdminDashboard = () => {
@@ -22,7 +23,7 @@ const AdminDashboard = () => {
         const { data } = await adminapi.dashboard()
         setStats(data);
       } catch (err) {
-        toast.error("Error fetching dashboard stats:", err);
+        handleApiError(err, "Failed to load dashboard stats");
       } finally {
         setLoadingStats(false);
       }

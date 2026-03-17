@@ -245,11 +245,12 @@ class CitizenVerificationDetailView(APIView):
             "street_name": citizen.street_name,
             "status": citizen.status,
             "reject_reason": citizen.reject_reason,
-            "aadhaar_image": citizen.aadhaar_image.url if citizen.aadhaar_image else None,
-            "selfie_image": citizen.selfie_image.url if citizen.selfie_image else None,
+
+            "aadhaar_image": request.build_absolute_uri(citizen.aadhaar_image.url) if citizen.aadhaar_image else None,
+            "selfie_image": request.build_absolute_uri(citizen.selfie_image.url) if citizen.selfie_image else None,
+
             "submitted_at": citizen.submitted_at,
         })
-        
         
 
 
@@ -570,6 +571,7 @@ class CitizenFullDetailView(APIView):
         ).order_by("-created_at")
 
         data = {
+            "id": verification.id,
             "citizen": {
                 "id": citizen_user.id,
                 "full_name": verification.full_name,
@@ -584,8 +586,8 @@ class CitizenFullDetailView(APIView):
 
             "verification": {
                 "status": verification.status,
-                "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
-                "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
+                "aadhaar_image": request.build_absolute_uri(verification.aadhaar_image.url) if verification.aadhaar_image else None,
+                "selfie_image": request.build_absolute_uri(verification.selfie_image.url) if verification.selfie_image else None,
                 "submitted_at": verification.submitted_at,
                 "reviewed_at": verification.reviewed_at,
                 "reject_reason": verification.reject_reason,

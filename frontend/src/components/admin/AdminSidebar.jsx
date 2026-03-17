@@ -6,6 +6,7 @@ import {
   MapPin,
   UserCircle,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 
 const navItems = [
@@ -28,6 +29,11 @@ const navItems = [
     label: "Ward List",
     path: "/admin/wards",
     icon: MapPin,
+  },
+  {
+    label: "Citizen List",
+    path: "/admin/citizens",
+    icon: Users,
   },
   {
     label: "Profile",
@@ -106,11 +112,11 @@ const AdminSidebar = () => {
             <button onClick={handleLogout} className="text-xs font-semibold text-gray-200 truncate ">
               Logout
             </button>
-            <button   className="text-xs text-gray-500 truncate"></button>
+            <button className="text-xs text-gray-500 truncate"></button>
           </div>
         </div>
       </div>
-      
+
     </aside>
   );
 };

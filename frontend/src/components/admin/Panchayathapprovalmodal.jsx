@@ -35,6 +35,8 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
   const [reasonError, setReasonError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
+
 
 
 
@@ -59,35 +61,45 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
   }, [request?.id]);
 
   const handleApprove = async () => {
+
+
+
     setIsSubmitting(true);
+
     try {
       await adminapi.approvePanchayath(request.id)
       onSuccess("Panchayath approved successfully.");
       onClose();
     } catch (err) {
-      toast.error("Error approving panchayath:", err);
+      toast.error("Error approving Panchayath");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleRejectSubmit = async () => {
+
+
+
     if (rejectReason.trim().length < 10) {
       setReasonError("Reason must be at least 10 characters.");
       return;
     }
+
     setReasonError(null);
     setIsSubmitting(true);
+
     try {
       await adminapi.rejectPanchayath(request.id, rejectReason.trim())
       onSuccess("Panchayath registration rejected.");
       onClose();
     } catch (err) {
-      toast.error("Error rejecting panchayath:", err);
+      toast.error("Error rejecting Panchayath");
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   if (!request) return null;
 
@@ -209,7 +221,7 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
                   Reject
                 </button>
                 <button
-                  onClick={handleApprove}
+                  onClick={() => setConfirmAction("approve")}
                   disabled={isSubmitting}
                   className="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors duration-150 disabled:opacity-60 flex items-center gap-2"
                 >
@@ -240,7 +252,7 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
                   Back
                 </button>
                 <button
-                  onClick={handleRejectSubmit}
+                  onClick={() => setConfirmAction("reject")}
                   disabled={isSubmitting}
                   className="px-5 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-150 disabled:opacity-60 flex items-center gap-2"
                 >
@@ -272,6 +284,55 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
             onClick={(e) => e.stopPropagation()}
             className="w-auto h-auto max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-transform duration-200 scale-100 hover:scale-105"
           />
+        </div>
+      )}
+      {confirmAction && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
+
+          <div className="bg-white p-6 rounded-xl w-[320px] text-center space-y-4">
+
+            <h2 className="font-bold text-lg">
+              Confirm {confirmAction}
+            </h2>
+
+            <p className="text-sm text-gray-600">
+              Are you sure you want to {confirmAction} this request?
+            </p>
+
+            <div className="flex justify-center gap-3">
+
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="px-4 py-2 bg-gray-200 rounded-lg"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+
+                  const action = confirmAction;
+                  setConfirmAction(null);
+
+                  if (action === "approve") {
+                    await handleApprove();
+                  } else {
+                    await handleRejectSubmit();
+                  }
+
+                }}
+                className={`px-4 py-2 text-white rounded-lg ${confirmAction === "approve"
+                    ? "bg-emerald-600"
+                    : "bg-red-600"
+                  }`}
+              >
+                Confirm
+              </button>
+
+            </div>
+
+          </div>
+
         </div>
       )}
     </div>

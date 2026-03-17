@@ -14,6 +14,7 @@ import {
 import PanchayathStatsGrid from "@/components/admin/Panchayathstatsgrid";
 import WardTable from "@/components/admin/Wardtable";
 import { adminapi } from "@/service/adminurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -53,7 +54,8 @@ const PanchayathDetails = () => {
         const res = await adminapi.getPanchayathDetail(id);
         setData(res.data);
       } catch (err) {
-        toast.error("Error fetching panchayath details:", err);
+        // toast.error("Error fetching panchayath details:", err);
+        handleApiError(err, "Failed to fetch panchayath details");
       } finally {
         setLoading(false);
       }

@@ -31,7 +31,7 @@ export default function ResolveModal({ complaintId, onClose, onSuccess }) {
       onSuccess("Complaint marked as resolved successfully.");
       onClose();
     } catch (err) {
-      toast.error("Resolve complaint error:", err);
+      // interceptor will show toast
     } finally {
       setIsSubmitting(false);
     }

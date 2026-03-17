@@ -6,6 +6,10 @@ import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import CitizenProtectedRoute from "./routes/CitizenProtectedRouters";
 import AdminProtectedRoute from "./routes/AdminProtectedRoute";
+import SuspendedModal from "@/components/common/SuspendedModal";
+import { useEffect } from "react";
+import { useSuspension } from "@/context/SuspensionContext";
+
 
 
 
@@ -20,6 +24,8 @@ import AdminProfile from "@/pages/admin/AdminProfile"
 import PanchayathDetail from "./pages/admin/PanchayathDetail"
 import WardDetailsPage from "./pages/admin/Warddetailsout";
 import PanchayathDetails from "./pages/admin/Panchayathdetails";
+import AdminCitizenList  from "@/pages/admin/CitizenList";
+import AdminCitizenDetail from "@/pages/admin/CitizenDetail";
 
 
 
@@ -65,9 +71,17 @@ import ResetPassword from "@/pages/citizen/ResetPassword"
 
 
 export default function App() {
+
+  const { setIsSuspended } = useSuspension();
+
+  // useEffect(() => {
+  //   registerSuspensionSetter(setIsSuspended);
+  // }, [setIsSuspended]);
+
   return (
     <>
       <Toaster position="top-right" />
+      <SuspendedModal />
       <Routes>
 
 
@@ -223,6 +237,8 @@ export default function App() {
           <Route path="profile" element={<AdminProfile />} />
           <Route path="panchayaths/:id" element={<PanchayathDetails />} />
           <Route path="wards/:id" element={<WardDetailsPage />} />
+          <Route path="citizens" element={<AdminCitizenList  />} />
+          <Route path="citizens/:id" element={<AdminCitizenDetail />} />
         </Route>
 
         {/* ───────── ADMIN ROUTES ───────── */}

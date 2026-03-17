@@ -34,6 +34,8 @@ import {
   Loader2,
   ArrowLeft,
 } from "lucide-react"
+import toast from "react-hot-toast"
+import { triggerSuspension } from "@/utils/suspensionHandler";
 
 
 
@@ -193,29 +195,29 @@ export function AuthForm() {
       localStorage.setItem("refresh", response.data.refresh)
       localStorage.setItem("role", response.data.role)
       localStorage.setItem("status", response.data.status)
-      localStorage.setItem("is_verified", response.data.is_verified)
+      // localStorage.setItem("is_verified", response.data.is_verified)
+      localStorage.setItem("is_verified", String(response.data.is_verified))
 
       // Check if ACTIVE
       const role = response.data.role
       const isVerified = String(response.data.is_verified)
 
-      if (response.data.status === "SUSPENDED") {
-        alert("Your account is suspended.")
-        return
-      }
-
       if (role === "WARD") {
         if (isVerified === "true") {
-          navigate("/ward")
+          // navigate("/ward")
+          navigate("/ward/dashboard", { replace: true }) 
         } else {
-          navigate("/ward/profile")
+          // navigate("/ward/profile")
+          navigate("/ward/profile", { replace: true })
         }
 
       } else if (role === "PANCHAYATH") {
         if (isVerified === "true") {
-          navigate("/panchayath")
+          // navigate("/panchayath")
+          navigate("/panchayath/dashboard", { replace: true }) 
         } else {
-          navigate("/panchayath/profile")
+          // navigate("/panchayath/profile")
+          navigate("/panchayath/profile", { replace: true })
         }
 
       } else {
@@ -224,10 +226,22 @@ export function AuthForm() {
 
 
     } catch (error) {
-      console.log(error)
-      setErrors({
-        password: error.response?.data?.detail || "Invalid email or password"
-      })
+      const data = error.response?.data
+
+      if (
+        data?.error === "ACCOUNT_SUSPENDED" ||
+        data?.message?.includes("suspended")
+      ) {
+        triggerSuspension()
+        return
+      }
+
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
+        "Invalid email or password"
+
+      toast.error(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -256,7 +270,14 @@ export function AuthForm() {
       setOtpSent(true)
 
     } catch (error) {
-      alert(error.response?.data.error || "signup failed")
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
+        error.response?.data?.email?.[0] ||
+        "Signup failed"
+
+      toast.error(message)
+
     } finally {
       setIsSubmitting(false)
     }
@@ -308,7 +329,12 @@ export function AuthForm() {
 
       setOtpVerified(true)
     } catch (error) {
-      alert(error.response?.data?.error || "Invalid OTP")
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
+        "Invalid OTP"
+
+      toast.error(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -329,7 +355,12 @@ export function AuthForm() {
       setCanResend(false)
 
     } catch (error) {
-      alert(error.response?.data?.error || "Resend Failed")
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
+        "Resend failed"
+
+      toast.error(message)
     } finally {
       setIsResending(false)
     }
