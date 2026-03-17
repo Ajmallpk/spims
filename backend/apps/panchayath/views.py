@@ -53,7 +53,6 @@ class PanchayathProfileView(APIView):
 
 
 
-User = get_user_model()
 
 
 
@@ -99,6 +98,8 @@ class SubmitPanchayathVerificationView(APIView):
 
 
 
+
+
 class PanchayathDashboardView(APIView):
     permission_classes = [IsActivePanchayath]
 
@@ -131,6 +132,8 @@ class PanchayathDashboardView(APIView):
         
         
 
+
+
 class PanchayathWardListView(APIView):
     permission_classes = [IsActivePanchayath]
 
@@ -149,6 +152,8 @@ class PanchayathWardListView(APIView):
         serializer = WardVerificationSerializer(paginated_queryset, many=True)
 
         return paginator.get_paginated_response(serializer.data)
+
+
 
 
 
@@ -232,6 +237,8 @@ class ApproveWardView(APIView):
         return Response({"message": "Ward approved successfully"})
     
      
+    
+    
     
 class RejectWardView(APIView):
     permission_classes = [IsActivePanchayath]
@@ -331,6 +338,7 @@ class PanchayathWardVerificationListView(APIView):
     
 
 
+
 class PanchayathChangePasswordView(APIView):
     permission_classes = [IsPanchayath]
 
@@ -349,6 +357,7 @@ class PanchayathChangePasswordView(APIView):
         return Response({"message": "Password changed successfully"})
     
     
+
 
 
 signer = TimestampSigner()
@@ -403,6 +412,8 @@ class PanchayathRequestEmailChangeView(APIView):
 
         return Response({"message": "Verification email sent to your current email"})
     
+
+
 
 
 class PanchayathConfirmEmailChangeView(APIView):

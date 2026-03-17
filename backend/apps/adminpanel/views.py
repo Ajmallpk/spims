@@ -307,6 +307,7 @@ class AdminPanchayathListView(APIView):
 
 
 
+
 class SuspendPanchayathView(APIView):
     permission_classes = [IsSuperAdmin]
     
@@ -335,6 +336,7 @@ class SuspendPanchayathView(APIView):
             )
         logger.warning(f"Admin {request.user.id} suspended Panchayath {user.id}")
         return Response({"message": "Panchayath and its wards suspended"})
+    
     
     
     
@@ -530,6 +532,9 @@ class AdminWardListView(APIView):
         return Response(data)
 
 
+
+
+
 class SuspendWardView(APIView):
     permission_classes = [IsSuperAdmin]
 
@@ -551,6 +556,7 @@ class SuspendWardView(APIView):
 
 
 
+
 class ActivateWardView(APIView):
     permission_classes = [IsSuperAdmin]
 
@@ -568,6 +574,9 @@ class ActivateWardView(APIView):
         user.save()
         logger.info(f"Admin {request.user.id} activated Ward {user.id}")
         return Response({"message": "Ward activated successfully"})
+    
+    
+    
     
     
     
@@ -646,6 +655,9 @@ class AdminPanchayathDetailView(APIView):
         
         
         
+      
+      
+      
         
 class AdminWardDetailView(APIView):
     permission_classes = [IsSuperAdmin]
@@ -735,6 +747,8 @@ class AdminWardDetailView(APIView):
 
 
 
+
+
 class RequestAdminEmailChange(APIView):
     permission_classes = [IsSuperAdmin]
 
@@ -793,6 +807,7 @@ class RequestAdminEmailChange(APIView):
     
     
     
+    
 class VerifyAdminEmailChange(APIView):
     permission_classes = [IsSuperAdmin]
 
@@ -844,6 +859,7 @@ class AdminChangePasswordView(APIView):
         user.save()
         logger.warning(f"Admin {user.id} changed password")
         return Response({"message": "Password changed successfully"})
+    
     
     
     
@@ -919,6 +935,8 @@ class AdminCitizenListView(APIView):
     
     
     
+    
+    
 class AdminCitizenDetailView(APIView):
     permission_classes = [IsSuperAdmin]
 
@@ -970,6 +988,7 @@ class AdminCitizenDetailView(APIView):
 
             "submitted_at": verification.submitted_at,
         })
+    
     
     
     

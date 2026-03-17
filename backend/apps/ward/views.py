@@ -80,6 +80,8 @@ class WardProfile(APIView):
         
     
     
+    
+    
 class SubmitWardVerificationView(APIView):
     permission_classes = [IsWard]
     parser_classes = [MultiPartParser, FormParser]
@@ -143,6 +145,9 @@ class SubmitWardVerificationView(APIView):
         return Response({"message": "Verification submitted successfully"})
     
 
+
+
+
 class WardVerificationStatusView(APIView):
     permission_classes = [IsWard]
     
@@ -165,8 +170,7 @@ class WardVerificationStatusView(APIView):
         
         
 
-
-        
+ 
         
 class WardDashboardView(APIView):
     permission_classes = [IsActiveWard]
@@ -182,7 +186,7 @@ class WardDashboardView(APIView):
             resolved=Count("id", filter=Q(status="RESOLVED")),
         )
 
-        # Citizen Verification Stats
+        
         citizen_stats = CitizenVerification.objects.filter(
             ward=user,
             status="PENDING"
@@ -197,6 +201,8 @@ class WardDashboardView(APIView):
             "resolved_complaints": complaint_stats["resolved"],
             "pending_citizen_verifications": citizen_stats,
         })
+
+
 
 
 class CitizenVerificationListView(APIView):
@@ -295,6 +301,7 @@ class ApproveCitizenView(APIView):
         return Response({"message": "Citizen approved successfully"})
     
     
+
     
 class RejectCitizenView(APIView):
     permission_classes = [IsActiveWard]
@@ -367,6 +374,7 @@ class ApprovedCitizenListView(APIView):
     
     
 
+
 class RecentCitizenVerificationView(APIView):
     permission_classes = [IsActiveWard]
 
@@ -386,6 +394,8 @@ class RecentCitizenVerificationView(APIView):
             })
 
         return Response(data)
+    
+    
     
 
 class PanchayathDropdownListView(APIView):
@@ -410,6 +420,8 @@ class PanchayathDropdownListView(APIView):
             })
 
         return Response(data)        
+    
+    
     
     
     
@@ -511,6 +523,8 @@ class WardChangeEmailRequestView(APIView):
         )
         
         
+        
+        
 class WardChangeEmailVerifyView(APIView):
 
     permission_classes = [AllowAny]
@@ -599,6 +613,8 @@ class CitizenFullDetailView(APIView):
         }
 
         return Response(data)
+    
+    
     
     
     

@@ -17,6 +17,31 @@ const MapIcon = ({ size = 14 }) => <svg width={size} height={size} viewBox="0 0 
 const FileIcon = ({ size = 14 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>;
 const CheckIcon = ({ size = 12, color = "#94a3b8" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>;
 
+function validatePassword(password) {
+  const errors = [];
+
+  if (password.length < 8) {
+    errors.push("Minimum 8 characters required");
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push("At least one uppercase letter required");
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push("At least one lowercase letter required");
+  }
+
+  if (!/[0-9]/.test(password)) {
+    errors.push("At least one number required");
+  }
+
+  if (!/[!@#$%^&*]/.test(password)) {
+    errors.push("At least one special character required");
+  }
+
+  return errors;
+}
 
 function InputField({
   label,
@@ -212,11 +237,17 @@ function CitizenSignUpForm({ onSuccess }) {
       return;
     }
 
+    const passwordErrors = validatePassword(password);
+
+    if (passwordErrors.length > 0) {
+      setError(passwordErrors[0]); 
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     try {
       await citizenapi.register({
         username,
@@ -326,6 +357,16 @@ function CitizenSignUpForm({ onSuccess }) {
             onChange={(e) => setConfirmPassword(e.target.value)}
             rightSlot={<EyeToggle show={showC} onToggle={() => setShowC(p => !p)} />}
           />
+          {password && (
+            <ul className="text-xs mt-1 space-y-1">
+              {validatePassword(password).map((err, i) => (
+                <li key={i} className="text-red-500">• {err}</li>
+              ))}
+              {validatePassword(password).length === 0 && (
+                <li className="text-green-600">✔ Strong password</li>
+              )}
+            </ul>
+          )}
         </>
       )}
 

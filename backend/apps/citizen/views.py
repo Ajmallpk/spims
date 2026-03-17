@@ -43,6 +43,8 @@ class CitizenProfileView(APIView):
     
 
 
+
+
 class UpdateCitizenProfileView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -95,6 +97,8 @@ class UpdateCitizenProfileView(APIView):
     
     
     
+    
+    
 class CitizenVerificationSubmitView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -144,16 +148,16 @@ class CitizenVerificationSubmitView(APIView):
     
     
     
+    
+    
 class CitizenVerificationStatusView(APIView):
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
         user = request.user
 
         try:
-
             verification = CitizenVerification.objects.get(user=user)
 
             return Response({
@@ -168,6 +172,8 @@ class CitizenVerificationStatusView(APIView):
                 "submitted": False,
                 "status": None
             })
+            
+            
             
             
             
@@ -218,7 +224,6 @@ class WardListView(APIView):
             }
             for ward in wards
         ]
-
         return Response(data)
     
     
@@ -251,6 +256,8 @@ class ChangePasswordView(APIView):
             {"message": "Password changed successfully"},
             status=200
         )
+        
+        
         
         
         
@@ -356,6 +363,7 @@ class ChangeEmailRequestView(APIView):
         
         
         
+
 
 class ChangeEmailVerifyView(APIView):
 
