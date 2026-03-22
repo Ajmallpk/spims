@@ -16,5 +16,7 @@ urlpatterns = [
     path("change-email/", views.WardChangeEmailRequestView.as_view()),
     path("change-email/verify/<str:token>/", views.WardChangeEmailVerifyView.as_view()),
     path("citizen/<int:pk>/full-details/", views.CitizenFullDetailView.as_view()),
-    
+    path("complaints/", views.WardComplaintListView.as_view()),
+    # path("complaint/<int:complaint_id>/resolve/", views.ResolveComplaintView.as_view()),
+    path("complaint/<int:complaint_id>/escalate/", views.EscalateComplaintView.as_view()),
 ]

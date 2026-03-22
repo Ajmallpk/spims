@@ -1,14 +1,4 @@
-// components/Pagination.jsx
-// SPIMS – Smart Panchayath Issue Management System
-// Pagination controls: Previous / page indicators / Next.
-// Handles edge cases: first page, last page, single page.
-//
-// Props:
-//   currentPage   {number}   - 1-based current page number
-//   totalPages    {number}   - Total number of pages
-//   onPageChange  {Function} - Called with new page number
-//   isLoading     {boolean}  - Disable controls during fetch
-//   totalCount    {number}   - (optional) total record count for display
+
 
 export default function Pagination({
   currentPage,

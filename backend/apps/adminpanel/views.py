@@ -518,7 +518,8 @@ class AdminWardListView(APIView):
             ).count()
 
             data.append({
-                "id": ward.id,
+                "id": ward.user.id,
+                "verification_id": ward.id,
                 "ward_name": ward.ward_name,
                 "officer_name": ward.officer_full_name,
                 "email": ward.official_email,
@@ -666,7 +667,7 @@ class AdminWardDetailView(APIView):
 
         ward = get_object_or_404(
             WardVerification.objects.select_related("user", "panchayath"),
-            id=pk
+            user__id=pk
         )
 
         ward_user = ward.user
@@ -873,9 +874,7 @@ class AdminCitizenListView(APIView):
         search = request.GET.get("search")
 
         citizens = User.objects.filter(
-            role=User.Role.CITIZEN,
-            is_verified=True,
-            status=User.Status.ACTIVE
+             role=User.Role.CITIZEN
         ).select_related("citizen_verification")
 
         if search:

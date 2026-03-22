@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.conf import settings
+
 
 User = get_user_model()
 
@@ -73,6 +75,11 @@ class Complaint(models.Model):
         choices=STATUS_CHOICES,
         default="PENDING"
     )
+    
+    
+    escalation_reason = models.TextField(null=True, blank=True)
+    
+    reassign_note = models.TextField(null=True, blank=True)
 
     chat_closed = models.BooleanField(default=False)
 
@@ -274,3 +281,29 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user}"
+    
+    
+    
+    
+    
+class ComplaintHistory(models.Model):
+    complaint = models.ForeignKey(
+        Complaint,
+        on_delete=models.CASCADE,
+        related_name="history"
+    )
+    
+    action = models.CharField(max_length=50)
+    
+    performed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null = True
+    )
+    
+    note = models.TextField(null=True,blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.action}-{self.complaint.id}"

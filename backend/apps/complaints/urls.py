@@ -16,5 +16,8 @@ urlpatterns = [
     path("notifications/",views.CitizenNotificationListView.as_view()),
     path("notifications/<int:notification_id>/read/",views.MarkNotificationReadView.as_view()),
     path("my/", views.CitizenMyComplaintsView.as_view()),
-    
+    path("<int:complaint_id>/status/", views.UpdateComplaintStatusView.as_view()),
+    path("complaint/<int:complaint_id>/timeline/", views.ComplaintTimelineView.as_view()),
+    path("<int:complaint_id>/update/", views.UpdateComplaintView.as_view()),
+    path("<int:complaint_id>/delete/", views.DeleteComplaintView.as_view()),
 ]

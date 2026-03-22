@@ -4,31 +4,25 @@ from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.response import Response 
 from django.contrib.auth import get_user_model
 from django.db.models import Q,Count
-from django.utils import timezone
 from .permissions import IsWard,IsActiveWard
 from .models import WardVerification
 from apps.citizen.models import CitizenVerification
 from apps.complaints.models import Complaint  
 from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404
 from apps.panchayath.models import PanchayathVerification
 from apps.citizen.models import CitizenProfile,CitizenVerification
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from apps.citizen.models import CitizenVerification, CitizenProfile
 from apps.complaints.models import Complaint
 from .permissions import IsActiveWard
 from django.utils import timezone
+from .serialzers import EscalateComplaintSerializer
 import uuid
+
 import logging
 
 
@@ -663,3 +657,122 @@ class ComplaintDetailView(APIView):
         }
 
         return Response(data)
+    
+    
+    
+class WardComplaintPagination(PageNumberPagination):
+    page_size = 10
+    
+    
+    
+class WardComplaintListView(APIView):
+    permission_classes = [IsActiveWard]
+    
+    def get(self,request):
+        user = request.user 
+        
+        status_filter = request.GET.get("status")
+        search = request.GET.get("search")
+        
+        
+        complaints = Complaint.objects.filter(
+            ward = user 
+        ).select_related("citizen").order_by("-created_at")
+        
+        if status_filter:
+            complaints = complaints.filter(status=status_filter) 
+            
+        if search:
+            complaints = complaints.filter(
+                Q(title__icontains=search)|
+                Q(description__icontains=search) |
+                Q(citizen__username__icontains=search)
+                
+            )  
+            
+        paginatior = WardComplaintPagination()
+        paginated_qs = paginatior.paginate_queryset(complaints,request) 
+        
+        
+        data = []
+        
+        for c in paginated_qs:
+            data.append({
+                "id":c.id,
+                "title":c.title,
+                "description":c.description,
+                "category":c.category,
+                "status":c.status,
+                "created_at":c.created_at,
+                
+                "citizen_name":c.citizen.username,
+                "location":c.location,
+                
+                "image":c.image_proof.url if c.image_proof else None,
+            })
+            
+        return paginatior.get_paginated_response(data)
+    
+    
+    
+    
+# class ResolveComplaintView(APIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self,request,complaint_id):
+#         user = request.user
+        
+#         try:
+#             complaint = Complaint.objects.get(id=complaint_id)
+#         except Complaint.DoesNotExist:
+#             return Response({"error":"Complaint not found"},status=404)
+        
+#         if user.role != "WARD" or complaint.ward != user:
+#             return Response({"error":"Permission denied"},status=403)
+        
+#         if complaint.status == "PENDING":
+#             complaint.status = "IN_PROGRESS"
+#             complaint.save()
+            
+#         serializer = ResolveComplaintSerializer(
+#             complaint,
+#             data = request.data,
+#             partial = True,
+#             context={"request": request}
+#         )
+        
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"message":"Complaint resolved successfully"})
+        
+#         return Response(serializer.errors,status=400)
+    
+    
+    
+class EscalateComplaintView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request,complaint_id):
+        user = request.user 
+        
+        try:
+            complaint = Complaint.objects.get(id=complaint_id)
+        except Complaint.DoesNotExist:
+            return Response({"error":"Complaint Not Found"},status=404)
+        
+        if user.role != "WARD" or complaint.ward != user:
+            return Response({"error":"Permission denied"},status=403)
+        
+        serializer = EscalateComplaintSerializer(
+            complaint,
+            data = request.data,
+            partial = True,
+            context={"request": request}
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message":"Complaint Escalated succesfully"})
+        
+        return Response(serializer.errors,status=400)
+        

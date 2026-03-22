@@ -20,4 +20,7 @@ urlpatterns = [
     path("change-password/", views.PanchayathChangePasswordView.as_view()),
     path("request-email-change/", views.PanchayathRequestEmailChangeView.as_view()),
     path("confirm-email-change/<str:token>/", views.PanchayathConfirmEmailChangeView.as_view()),
+    path("panchayath/complaints/", views.PanchayathComplaintListView.as_view()),
+    # path("panchayath/complaint/<int:complaint_id>/resolve/", views.PanchayathResolveView.as_view()),
+    path("panchayath/complaint/<int:complaint_id>/reassign/", views.ReassignComplaintView.as_view()),
 ]

@@ -131,7 +131,7 @@ const CitizenList = () => {
                   key={c.id}
                   className="border-b cursor-pointer hover:bg-gray-50"
                   onClick={() => navigate(`/admin/citizens/${c.id}`)}
-                >   
+                >
 
                   <td className="px-4 py-3">{c.name}</td>
 
@@ -156,14 +156,20 @@ const CitizenList = () => {
 
                     {c.status === "ACTIVE" ? (
                       <button
-                        onClick={() => handleSuspend(c.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSuspend(c.id);
+                        }}
                         className="text-red-600 hover:underline text-sm"
                       >
                         Suspend
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleActivate(c.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();   
+                          handleActivate(c.id);
+                        }}
                         className="text-green-600 hover:underline text-sm"
                       >
                         Activate

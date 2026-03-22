@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification
+from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification,ComplaintHistory
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -191,3 +192,81 @@ class NotificationSerializer(serializers.ModelSerializer):
             "is_read",
             "created_at",
         ]
+        
+        
+
+
+class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Complaint
+        fields = ["status"]
+
+    def validate_status(self, value):
+        allowed_status = dict(Complaint.STATUS_CHOICES).keys()
+
+        if value not in allowed_status:
+            raise serializers.ValidationError("Invalid status")
+
+        return value
+
+    def update(self, instance, validated_data):
+        request = self.context["request"]
+        user = request.user
+        new_status = validated_data.get("status")
+
+        
+        if user.role == "WARD":
+            if instance.ward != user:
+                raise serializers.ValidationError("Not your complaint")
+
+        elif user.role == "PANCHAYATH":
+            if instance.panchayath != user:
+                raise serializers.ValidationError("Not your complaint")
+
+        else:
+            raise serializers.ValidationError("Not allowed")
+
+        
+        if new_status == "ESCALATED" and user.role != "WARD":
+            raise serializers.ValidationError("Only ward can escalate")
+
+        old_status = instance.status
+
+        
+        instance.status = new_status
+
+        if new_status == "RESOLVED":
+            instance.resolved_at = timezone.now()
+
+        instance.save()
+
+        
+        ComplaintHistory.objects.create(
+            complaint=instance,
+            action="STATUS_CHANGED",
+            performed_by=user,
+            note=f"{old_status} → {new_status}"
+        )
+
+        return instance
+    
+    
+class ComplaintUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complaint
+        fields = [
+            "titile",
+            "description",
+            "category",
+            "location",
+            "image_proof",
+            "video_proof",
+        ]
+        
+    def validate(self,data):
+        if self.instance.satatus == "RESOLVED":
+            raise serializers.ValidationError("Cannot edit resolved complaint")
+        return data
+    
+

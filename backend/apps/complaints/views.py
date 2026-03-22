@@ -5,13 +5,21 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintChatMessage,ComplaintChat,Notification
-from .serializers import ComplaintCreateSerializer,ComplaintDetailSerializer,ComplaintChatListSerializer,NotificationSerializer
+from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintChatMessage,ComplaintChat,Notification,ComplaintHistory
+from .serializers import ComplaintCreateSerializer,ComplaintDetailSerializer,ComplaintChatListSerializer,NotificationSerializer,UpdateComplaintStatusSerializer
 from rest_framework.generics import ListAPIView
 from apps.ward.models import WardVerification
-from .serializers import ComplaintFeedSerializer,ComplaintCommentSerializer,ComplaintChatMessageSerializer,ComplaintResolutionSerializer
+from .serializers import ComplaintFeedSerializer,ComplaintCommentSerializer,ComplaintChatMessageSerializer,ComplaintResolutionSerializer,ComplaintUpdateSerializer
 from django.db.models import Count
 from .pagination import ComplaintFeedPagination
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
+
+
+
 
 class CitizenCreateComplaintView(APIView):
 
@@ -41,11 +49,19 @@ class CitizenCreateComplaintView(APIView):
 
             panchayath = ward_verification.panchayath
 
-            serializer.save(
+            complaint = serializer.save(
                 citizen=user,
                 ward=ward,
                 panchayath=panchayath
             )
+            
+            ComplaintHistory.objects.create(
+                complaint=complaint,
+                action="CREATED",
+                performed_by=user,
+                note="Complaint created"
+            )
+            
             return Response(
                 {"message": "Complaint created successfully"},
                 status=status.HTTP_201_CREATED
@@ -457,3 +473,120 @@ class CitizenMyComplaintsView(ListAPIView):
             upvotes_count=Count("upvotes"),
             comments_count=Count("comments")
         ).order_by("-created_at")
+        
+   
+   
+
+class UpdateComplaintStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, complaint_id):
+
+        complaint = get_object_or_404(Complaint, id=complaint_id)
+        
+        old_status = complaint.status
+
+        serializer = UpdateComplaintStatusSerializer(
+            complaint,
+            data=request.data,
+            partial=True,
+            context={"request": request}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        ComplaintHistory.objects.create(
+            complaint=complaint,
+            action="STATUS_UPDATED",
+            performed_by=request.user,
+            note=f"{old_status} → {complaint.status}"
+        )
+
+        return Response({
+            "message": f"Status updated to {serializer.data['status']}"
+            
+        })
+
+
+
+class ComplaintTimelineView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self,request,complaint_id):
+        try:
+            complaint = Complaint.objects.get(id=complaint_id)
+        except Complaint.DoesNotExist:
+            return Response({"error":"Not found"},status=404)
+        
+        history = complaint.history.all().order_by("-created_at")
+        
+        data = [
+            {
+                "action":h.action,
+                "user":h.performed_by.email if h.performed_by else None,
+                "note":h.note,
+                "time":h.created_at,
+            }
+            for h in history
+        ]    
+        
+        return Response(data)
+
+
+
+class UpdateComplaintView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    
+    def patch(self,request,complaint_id):
+        complaint = get_object_or_404(Complaint,id=complaint_id)
+        
+        if request.user != complaint.citizen:
+            return Response({"error":"Permission denied"},status=403)
+        
+        
+        serializer = ComplaintUpdateSerializer(
+            complaint,
+            data = request.data,
+            partial = True
+        )
+        
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            
+            ComplaintHistory.objects.create(
+                complaint = complaint,
+                action = "UPDATED",
+                performed_by = request.user,
+                note = "Complaint updated"
+            )
+            
+            return Response({"message":"Complaint updated"})
+        
+        return Response(serializer.errors,status=400)
+    
+    
+    
+    
+
+
+class DeleteComplaintView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self,request,complaint_id):
+        complaint = get_object_or_404(Complaint,id=complaint_id)
+        
+        if request.user != complaint.citizen:
+            return Response({"error":"Permission denied"},status=403)
+        
+        if complaint.status != "PENDING":
+            return Response(
+                {"error":"Cannot delete after processing started"},
+                status=400
+            )
+            
+        complaint.delete()
+        return Response({"message":"Deleted successfully"})

@@ -10,7 +10,7 @@ from apps.ward.models import WardVerification
 from django.utils import timezone
 from django.db.models import Count, Q
 from django.db import transaction
-from .serializers import PanchayathVerificationSerializer,WardVerificationSerializer
+from .serializers import PanchayathVerificationSerializer,WardVerificationSerializer,ReassignComplaintSerializer
 from rest_framework.response import Response
 from .pagination import StandardResultsSetPagination
 from .serializers import WardVerificationSerializer
@@ -20,6 +20,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.core.signing import BadSignature
 from django.utils import timezone
+from rest_framework.permissions import IsAuthenticated
+from apps.complaints.models import Complaint
+from rest_framework.pagination import PageNumberPagination
 import logging
 
 logger = logging.getLogger(__name__)
@@ -436,3 +439,101 @@ class PanchayathConfirmEmailChangeView(APIView):
 
         except BadSignature:
             return Response({"error": "Invalid or expired token"}, status=400)
+        
+        
+        
+class PanchayathComplaintPagination(PageNumberPagination):
+    page_size = 10
+        
+        
+class PanchayathComplaintListView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self,request):
+        user = request.user
+        
+        if user.role != "PANCHAYATH":
+            return Response({"error":"Permission denied"},status=403)
+        
+        complaints = Complaint.objects.filter(
+            panchayath=user,
+            status = "ESCALATED",
+        ).order_by("-created_at")
+        
+        data = [
+            {
+                "id":c.id,
+                "title":c.title,
+                "status":c.status,
+                "category":c.category,
+                "created_at":c.created_at,
+            }
+            for c in complaints
+        ]
+        
+        return Response(data)
+    
+    
+
+# class PanchayathResolveView(APIView):
+#     permission_classes = [IsAuthenticated]
+    
+#     def post(self,request,complaint_id):
+#         user = request.user 
+        
+#         try:
+#             complaint = Complaint.objects.get(id=complaint_id)
+#         except Complaint.DoesNotExist:
+#             return Response({"error":"Not found"},status=404)
+        
+#         if user.role != "PANCHAYATH" or complaint.panchayath != user:
+#             return Response({"error":"permission denied"},status=403)
+        
+#         if complaint.status == "PENDIGN":
+#             complaint.status = "IN_PROGRESS"
+#             complaint.save()
+            
+#         serializer = PanchayathResoveSerializer(
+#             complaint,
+#             data = request.data,
+#             partial = True,
+#             context={"request": request}
+#         )
+        
+        
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"Message":"Complaint Resolved by panchayath"})
+        
+        
+#         return Response(serializer.errors,status=400)
+    
+    
+    
+class ReassignComplaintView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self,request,complaint_id):
+        user = request.user
+        
+        try:
+            complaint = Complaint.objects.get(id=complaint_id)
+        except Complaint.DoesNotExist:
+            return Response({"error":"Not found"},status=404)
+        
+        if user.role != "PANCHAYATH" or complaint.panchayath != user:
+            return Response({"error":"Permission denied"},status=403)
+        
+        serializer = ReassignComplaintSerializer(
+            complaint,
+            data = request.data,
+            partial = True,
+            context={"request": request},
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message":"Reassigned to ward"})
+            
+        return Response(serializer.errors,status=400)
+        
