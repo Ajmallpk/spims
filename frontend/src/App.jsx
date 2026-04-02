@@ -51,7 +51,7 @@ import CitizenDetails from "@/pages/ward/CitizenDetails";
 import ComplaintList from "@/pages/ward/ComplaintList";
 import ComplaintViewer from "./components/ward/ComplaintViewer";
 import WardEmailChangeConfirm from "./components/ward/WardEmailChangeConfirm";
-// import ComplaintDetails from "./pages/ward/Complaintdetails";
+import ComplaintDetails from "./pages/ward/Complaintdetails";
 
 
 
@@ -265,7 +265,7 @@ export default function App() {
 
           {/* Complaint module (UI ready, backend next week) */}
           <Route path="complaints" element={<ComplaintList />} />
-          {/* <Route path="complaints/:id" element={<ComplaintDetails />} /> */}
+          <Route path="complaints/:id" element={<ComplaintDetails />} />
           <Route
             path="complaint-view/:id"
             element={<ComplaintViewer />}

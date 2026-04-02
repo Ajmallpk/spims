@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from apps.complaints.models import Complaint,ComplaintHistory
 from apps.complaints.utils import can_change_status
+from apps.complaints.models import Notification
 
 
 # class ResolveComplaintSerializer(serializers.ModelSerializer):
@@ -69,6 +70,14 @@ class EscalateComplaintSerializer(serializers.ModelSerializer):
             performed_by=self.context["request"].user,
             note=instance.escalation_reason
         )
+        
+        if instance.panchayath:
+            Notification.objects.create(
+                user=instance.panchayath,
+                complaint = instance,
+                message = "A complaint has been escalated to you ",
+                notification_type = "ESCALATION"
+            )
         return instance
     
     

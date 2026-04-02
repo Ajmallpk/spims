@@ -4,6 +4,7 @@ import ComplaintTable from "@/components/ward/Complainttable";
 import ComplaintFilter from "@/components/ward/Complaintfilter";
 import SearchBar from "@/components/ward/Searchbar";
 import Pagination from "@/components/panjayath/Pagination";
+import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -22,32 +23,27 @@ export default function ComplaintList() {
   const fetchComplaints = useCallback(async (page, search, category) => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams({ page: String(page) });
-      if (search) params.set("search", search);
-      if (category) params.set("category", category);
 
-      const res = await fetch(`${API_BASE}/api/ward/complaints/?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await wardapi.getComplaints({
+        page,
+        ...(search && { search }),
+        ...(category && { category }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
 
-      if (Array.isArray(data)) {
-        setComplaints(data);
-        setTotalPages(1);
-        setTotalCount(data.length);
-      } else {
-        setComplaints(data.results ?? []);
-        setTotalCount(data.count ?? 0);
-        const pageSize = data.results?.length || 10;
-        setTotalPages(Math.ceil((data.count ?? 0) / pageSize) || 1);
-      }
+      const data = res.data;
+
+      setComplaints(data.results ?? []);
+      setTotalCount(data.count ?? 0);
+
+      const pageSize = data.results?.length || 10;
+      setTotalPages(Math.ceil((data.count ?? 0) / pageSize) || 1);
+
     } catch (err) {
-       // interceptor will show toast
+      console.error("ERROR:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchComplaints(currentPage, searchQuery, selectedCategory);

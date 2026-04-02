@@ -1,10 +1,10 @@
 const CATEGORIES = [
   { value: "", label: "All Categories" },
-  { value: "water", label: "Water" },
-  { value: "road", label: "Road" },
-  { value: "electricity", label: "Electricity" },
-  { value: "sanitation", label: "Sanitation" },
-  { value: "other", label: "Other" },
+  { value: "WATER", label: "Water" },
+  { value: "ROAD", label: "Road" },
+  { value: "ELECTRICITY", label: "Electricity" },
+  { value: "WASTE", label: "Waste Management" },
+  { value: "OTHER", label: "Other" },
 ];
 
 export default function ComplaintFilter({ value, onChange }) {

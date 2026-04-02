@@ -307,3 +307,45 @@ class ComplaintHistory(models.Model):
     
     def __str__(self):
         return f"{self.action}-{self.complaint.id}"
+    
+    
+
+class ComplaintMedia(models.Model):
+    complaint = models.ForeignKey(
+        Complaint,
+        on_delete=models.CASCADE,
+        related_name="media"
+    )
+    
+    file = models.FileField(upload_to="complaints/media/")
+    
+    file_type  = models.CharField(
+        max_length= 10,
+        choices=[
+            ("IMAGE","Image"),
+            ("VIDEO","Video")
+        ]
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    
+class ResolutionMedia(models.Model):
+    resolution = models.ForeignKey(
+        ComplaintResolution,
+        on_delete=models.CASCADE,
+        related_name="media"
+    ) 
+    
+    file = models.FileField(upload_to="complaint/resolution_media/")
+    
+    file_type = models.CharField(
+        max_length=10,
+        choices=[
+            ("IMAGE","Image"),
+            ("VIDEO","Video")
+        ]
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    

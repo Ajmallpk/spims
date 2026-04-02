@@ -9,10 +9,15 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
     category: "",
     ward: "",
     location: "",
-    image: null,
+    media: [],
   });
-  const [preview, setPreview] = useState(null);
+
   const [submitting, setSubmitting] = useState(false);
+  const [startX, setStartX] = useState(0)
+  const [endX, setEndX] = useState(0)
+  const [previews, setPreviews] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
 
   useEffect(() => {
     const fetchWards = async () => {
@@ -35,10 +40,20 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
   };
 
   const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setForm((prev) => ({ ...prev, image: file }));
-      setPreview(URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
+
+    if (files.length > 0) {
+      setForm((prev) => ({
+        ...prev,
+        media: [...prev.media, ...files],
+      }));
+
+      const previewUrls = files.map((file) =>
+        URL.createObjectURL(file)
+      );
+
+      setPreviews((prev) => [...prev, ...previewUrls]);
+      setCurrentIndex(0);
     }
   };
 
@@ -46,20 +61,68 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
     if (!form.title || !form.description || !form.category || !form.ward) return;
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 800));
-    onSubmit?.(form);
+    // onSubmit?.(form);
+    // setSubmitting(false);
+    // onClose();
+
+    await onSubmit?.(form);
     setSubmitting(false);
-    onClose();
     setForm({
       title: "",
       description: "",
       category: "",
       ward: "",
       location: "",
-      image: null
+      media: [],
     });
-    setPreview(null);
+
+    setPreviews([]);
+    setCurrentIndex(0);
+
   };
 
+
+
+  const handleTouchStart = (e) => {
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setEndX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    const distance = startX - endX;
+
+    // swipe left
+    if (distance > 50 && currentIndex < previews.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+
+    // swipe right
+    if (distance < -50 && currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
+
+
+
+
+  const handleMouseDown = (e) => {
+    setStartX(e.clientX);
+  };
+
+  const handleMouseUp = (e) => {
+    const distance = startX - e.clientX;
+
+    if (distance > 50 && currentIndex < previews.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+
+    if (distance < -50 && currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+  };
 
 
 
@@ -162,8 +225,39 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
           <div>
             <label className="text-xs font-medium text-gray-600 mb-1 block">Attach Photo</label>
             <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-4 cursor-pointer hover:border-teal-300 transition-colors">
-              {preview ? (
-                <img src={preview} alt="Preview" className="rounded-lg max-h-40 object-cover w-full" />
+              {previews.length > 0 ? (
+                <div
+                  className="relative cursor-grab active:cursor-grabbing"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onMouseDown={handleMouseDown}
+                  onMouseUp={handleMouseUp}
+                >
+                  {form.media[currentIndex]?.type.startsWith("image") ? (
+                    <img
+                      src={previews[currentIndex]}
+                      className="rounded-lg max-h-40 object-cover w-full transition-all duration-300"
+                    />
+                  ) : (
+                    <video
+                      src={previews[currentIndex]}
+                      controls
+                      className="rounded-lg max-h-40 w-full transition-all duration-300"
+                    />
+                  )}
+
+                  {/* DOTS */}
+                  <div className="flex justify-center mt-2 gap-1">
+                    {previews.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-2 w-2 rounded-full ${i === currentIndex ? "bg-teal-500" : "bg-gray-300"
+                          }`}
+                      />
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-gray-300 mb-2">
@@ -174,7 +268,13 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
                   <span className="text-xs text-gray-400">Click to upload an image</span>
                 </>
               )}
-              <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
+              <input
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={handleImage}
+                className="hidden"
+              />
             </label>
           </div>
         </div>

@@ -74,9 +74,24 @@ const wardapi = {
     verifyEmailChange: (token) => {
         return axios.get(`http://127.0.0.1:8000/api/ward/change-email/verify/${token}/`);
     },
+    // getComplaintDetail: (id) => {
+    //     return axiosInstance.get(`/complaints/${id}/`);
+    // },
+
     getComplaintDetail: (id) => {
-        return axiosInstance.get(`/complaints/${id}/`);
-    }
+        return axiosInstance.get(`/ward/complaint/${id}/details/`);
+    },
+
+    getComplaints: (params) => {
+        return axiosInstance.get("/ward/complaints/", { params });
+    },
+
+    escalateComplaint: (complaintId, data) => {
+        return axiosInstance.post(
+            `/ward/complaint/${complaintId}/escalate/`,
+            data
+        );
+    },
 
 };
 

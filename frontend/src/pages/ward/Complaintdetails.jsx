@@ -6,6 +6,7 @@ import ComplaintActionPanel from "@/components/ward/Complaintactionpanel";
 import ResolveModal from "@/components/ward/Resolvemodal";
 import EscalateModal from "@/components/ward/Escalatemodal";
 import ChatPanel from "@/pages/ward/Chatpanel";
+import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -38,15 +39,14 @@ export default function ComplaintDetails() {
     try {
       setIsLoading(true);
       setNotFound(false);
-      const res = await fetch(`${API_BASE}/api/ward/complaint/${id}/details/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.status === 404) { setNotFound(true); return; }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setComplaintData(data);
+
+      const res = await wardapi.getComplaintDetail(id);
+      setComplaintData(res.data);
+
     } catch (err) {
-      // interceptor will show toast
+      if (err.response?.status === 404) {
+        setNotFound(true);
+      }
     } finally {
       setIsLoading(false);
     }

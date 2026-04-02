@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Avatar from "@/components/ui/Avatar";
 import AuthorityResponse from "@/components/citizen/Authorityresponse";
 import CommentSection from "@/components/citizen/Commentsection";
@@ -8,23 +8,70 @@ const IssueCard = ({ issue }) => {
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
   const [showComments, setShowComments] = useState(issue.authorityResponse ? true : false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [startX, setStartX] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
+  const startXRef = useRef(0);
+  const isDragging = useRef(false);
+  const [previewIndex, setPreviewIndex] = useState(null);
 
   const handleUpvote = async () => {
     try {
-      await complaintapi.toggleUpvote(issue.id);
+      const res = await complaintapi.toggleUpvote(issue.id);
 
-      setUpvoted((prev) => !prev);
-      setUpvoteCount((prev) => (upvoted ? prev - 1 : prev + 1));
+      if (res.data.message === "Complaint upvoted") {
+        setUpvoted(true);
+        setUpvoteCount((prev) => prev + 1);
+      } else {
+        setUpvoted(false);
+        setUpvoteCount((prev) => prev - 1);
+      }
 
     } catch (error) {
       console.error("Upvote failed:", error);
     }
   };
 
+  const handleStart = (clientX) => {
+    startXRef.current = clientX;
+    isDragging.current = true;
+  };
+
+  const handleEnd = (clientX) => {
+    if (!isDragging.current) return;
+
+    const distance = startXRef.current - clientX;
+
+    if (distance > 50 && currentIndex < issue.media.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+
+    if (distance < -50 && currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    }
+
+    isDragging.current = false;
+  };
+
+
+
+  const handleDelete = async () => {
+    try {
+      await complaintapi.deleteComplaint(issue.id);
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEdit = () => {
+    console.log("Edit clicked");
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md p-5 space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between relative">
         <div className="flex items-start gap-3">
           <Avatar alt={issue.citizenName} size="md" />
           <div>
@@ -38,13 +85,34 @@ const IssueCard = ({ issue }) => {
             </div>
           </div>
         </div>
-        <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors">
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+        >
           <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
             <circle cx="5" cy="12" r="2" />
             <circle cx="12" cy="12" r="2" />
             <circle cx="19" cy="12" r="2" />
           </svg>
         </button>
+
+        {showMenu && (
+          <div className="absolute right-5 top-10 bg-white shadow-lg rounded-xl p-2 z-50">
+            <button
+              onClick={handleEdit}
+              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+            >
+              Edit
+            </button>
+
+            <button
+              onClick={handleDelete}
+              className="block w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-gray-100"
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Description */}
@@ -58,12 +126,78 @@ const IssueCard = ({ issue }) => {
       </div>
 
       {/* Image */}
-      {issue.image && (
-        <img
-          src={issue.image}
-          alt={issue.category}
-          className="rounded-xl w-full object-cover max-h-72"
-        />
+      {issue.media?.length > 0 && (
+        <div className="relative overflow-hidden rounded-xl">
+
+          {/* SLIDER */}
+          <div
+            className="flex transition-transform duration-300 ease-in-out"
+            style={{
+              transform: `translateX(-${currentIndex * 100}%)`,
+            }}
+          >
+            {issue.media.map((media, index) => {
+              const BASE_URL = "http://127.0.0.1:8000";
+
+              const url = media.file.startsWith("http")
+                ? media.file
+                : `${BASE_URL}${media.file}`;
+
+              return (
+                <div key={media.id || index} className="min-w-full">
+                  {media.file_type === "IMAGE" && (
+                    <img
+                      src={url}
+                      onClick={() => setPreviewIndex(index)}
+                      className="w-full max-h-72 object-cover cursor-pointer"
+                    />
+                  )}
+
+                  {media.file_type === "VIDEO" && (
+                    <video
+                      controls
+                      onClick={() => setPreviewIndex(index)}
+                      className="w-full max-h-72 cursor-pointer"
+                    >
+                      <source src={url} />
+                    </video>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* LEFT BUTTON */}
+          {currentIndex > 0 && (
+            <button
+              onClick={() => setCurrentIndex((prev) => prev - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow"
+            >
+              ‹
+            </button>
+          )}
+
+          {/* RIGHT BUTTON */}
+          {currentIndex < issue.media.length - 1 && (
+            <button
+              onClick={() => setCurrentIndex((prev) => prev + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow"
+            >
+              ›
+            </button>
+          )}
+
+          {/* DOTS */}
+          <div className="flex justify-center mt-2 gap-1">
+            {issue.media.map((_, i) => (
+              <div
+                key={i}
+                className={`h-2 w-2 rounded-full ${i === currentIndex ? "bg-teal-500" : "bg-gray-300"
+                  }`}
+              />
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Action bar */}
@@ -73,8 +207,8 @@ const IssueCard = ({ issue }) => {
           <button
             onClick={handleUpvote}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-colors ${upvoted
-                ? "text-teal-600 bg-teal-50"
-                : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              ? "text-teal-600 bg-teal-50"
+              : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
               }`}
           >
             <svg viewBox="0 0 24 24" fill={upvoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
@@ -117,6 +251,72 @@ const IssueCard = ({ issue }) => {
       {/* Comments */}
       {showComments && (
         <CommentSection comments={issue.comments || []} issueId={issue.id} />
+      )}
+
+      {previewIndex !== null && (
+        <div
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
+          onClick={() => setPreviewIndex(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* MEDIA */}
+            {(() => {
+              const media = issue.media[previewIndex];
+              const BASE_URL = "http://127.0.0.1:8000";
+
+              const url = media.file.startsWith("http")
+                ? media.file
+                : `${BASE_URL}${media.file}`;
+
+              return media.file_type === "IMAGE" ? (
+                <img
+                  src={url}
+                  className="w-full max-h-[80vh] object-contain rounded-lg"
+                />
+              ) : (
+                <video
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full max-h-[80vh] rounded-lg bg-black"
+                >
+                  <source src={url} />
+                </video>
+              );
+            })()}
+
+            {/* LEFT */}
+            {previewIndex > 0 && (
+              <button
+                onClick={() => setPreviewIndex((prev) => prev - 1)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 p-3 rounded-full"
+              >
+                ◀
+              </button>
+            )}
+
+            {/* RIGHT */}
+            {previewIndex < issue.media.length - 1 && (
+              <button
+                onClick={() => setPreviewIndex((prev) => prev + 1)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 p-3 rounded-full"
+              >
+                ▶
+              </button>
+            )}
+
+            {/* CLOSE */}
+            <button
+              onClick={() => setPreviewIndex(null)}
+              className="absolute top-3 right-3 text-white text-2xl"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -133,10 +133,18 @@ const Home = () => {
         timeAgo: formatTimeAgo(issue.created_at),
         description: issue.description,
         category: issue.category,
-        image: issue.image,
+        media: issue.media || [],
         upvotes: issue.upvotes_count,
         commentCount: issue.comments_count,
-        authorityResponse: issue.resolution || null,
+
+        authorityResponse: issue.resolution ? {
+          authorityName: issue.resolution.authority_name,
+          message: issue.resolution.message,
+          proofImage: issue.resolution.proof_image,
+          timeAgo: formatTimeAgo(issue.resolution.created_at),
+        }
+          : null,
+
         comments: []
       }));
 
@@ -216,8 +224,10 @@ const Home = () => {
       data.append("location", formData.location);
       data.append("category", formData.category);
 
-      if (formData.image) {
-        data.append("image_proof", formData.image);
+      if (formData.media?.length) {
+        formData.media.forEach((file) => {
+          data.append("media_files", file);
+        });
       }
 
       await complaintapi.createComplaint(data);

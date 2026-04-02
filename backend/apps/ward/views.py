@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q,Count
 from .permissions import IsWard,IsActiveWard
-from .models import WardVerification
+from .models import WardVerification,EscalationMedia
 from apps.citizen.models import CitizenVerification
 from apps.complaints.models import Complaint  
 from rest_framework.pagination import PageNumberPagination
@@ -22,7 +22,7 @@ from .permissions import IsActiveWard
 from django.utils import timezone
 from .serialzers import EscalateComplaintSerializer
 import uuid
-
+import mimetypes
 import logging
 
 
@@ -612,12 +612,114 @@ class CitizenFullDetailView(APIView):
     
     
     
-class ComplaintDetailView(APIView):
+# class ComplaintDetailView(APIView):
 
-    permission_classes = [IsAuthenticated]
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, complaint_id):
+
+#         try:
+#             complaint = Complaint.objects.select_related(
+#                 "citizen",
+#                 "ward",
+#                 "panchayath"
+#             ).prefetch_related(
+#                 "comments",
+#                 "upvotes"
+#             ).get(id=complaint_id)
+
+#         except Complaint.DoesNotExist:
+#             return Response(
+#                 {"error": "Complaint not found"},
+#                 status=404
+#             )
+
+#         data = {
+#             "id": complaint.id,
+#             "title": complaint.title,
+#             "description": complaint.description,
+#             "category": complaint.category,
+#             "status": complaint.status,
+#             "created_at": complaint.created_at,
+
+#             "citizen": {
+#                 "name": complaint.citizen.username,
+#                 "email": complaint.citizen.email,
+#             },
+
+#             "ward": complaint.ward.username if complaint.ward else None,
+#             "panchayath": complaint.panchayath.username if complaint.panchayath else None,
+
+#             "media": complaint.media.url if complaint.media else None,
+
+#             "upvotes": complaint.upvotes.count(),
+#             "comments": complaint.comments.count(),
+#         }
+
+#         return Response(data)
+
+
+
+# class ComplaintDetailView(APIView):
+#     permission_classes = [IsActiveWard]
+
+#     def get(self, request, complaint_id):
+#         try:
+#             complaint = Complaint.objects.select_related(
+#                 "citizen",
+#                 "ward",
+#                 "panchayath"
+#             ).prefetch_related(
+#                 "comments",
+#                 "upvotes"
+#             ).get(
+#                 id=complaint_id,
+#                 ward=request.user   
+#             )
+
+#         except Complaint.DoesNotExist:
+#             return Response({"error": "Complaint not found"}, status=404)
+        
+        
+#         "profile = getattr(complaint.citizen, "citizen_profile", None),
+
+
+#         return Response({
+#             "id": complaint.id,
+#             "title": complaint.title,
+#             "description": complaint.description,
+#             "category": complaint.category,
+#             "status": complaint.status,
+#             "created_at": complaint.created_at,
+            
+#             "citizen": {
+#                 "id": complaint.citizen.id,
+#                 "full_name": complaint.citizen.username,
+#                 "email": complaint.citizen.email,
+#                 "phone": profile.phone if profile else None,
+#                 "ward_name": profile.ward_name if profile else None,
+#             },
+
+#             "location": complaint.location,
+
+#             "media": [
+#                 {
+#                     "file": request.build_absolute_uri(m.file.url),
+#                     "type": m.file_type
+#                 } for m in complaint.media.all()
+#             ],
+
+#             "upvotes": complaint.upvotes.count(),
+#             "comments": complaint.comments.count(),
+#         })
+    
+    
+    
+    
+class ComplaintDetailView(APIView):
+    permission_classes = [IsActiveWard]
 
     def get(self, request, complaint_id):
-
         try:
             complaint = Complaint.objects.select_related(
                 "citizen",
@@ -625,16 +727,20 @@ class ComplaintDetailView(APIView):
                 "panchayath"
             ).prefetch_related(
                 "comments",
-                "upvotes"
-            ).get(id=complaint_id)
-
-        except Complaint.DoesNotExist:
-            return Response(
-                {"error": "Complaint not found"},
-                status=404
+                "upvotes",
+                "media"   
+            ).get(
+                id=complaint_id,
+                ward=request.user   
             )
 
-        data = {
+        except Complaint.DoesNotExist:
+            return Response({"error": "Complaint not found"}, status=404)
+
+        
+        profile = getattr(complaint.citizen, "citizen_profile", None)
+
+        return Response({
             "id": complaint.id,
             "title": complaint.title,
             "description": complaint.description,
@@ -643,22 +749,27 @@ class ComplaintDetailView(APIView):
             "created_at": complaint.created_at,
 
             "citizen": {
-                "name": complaint.citizen.username,
+                "id": complaint.citizen.id,
+                "full_name": complaint.citizen.username,
                 "email": complaint.citizen.email,
+                "phone": profile.phone if profile else None,
+                "ward_name": profile.ward_name if profile else None,
             },
 
-            "ward": complaint.ward.username if complaint.ward else None,
-            "panchayath": complaint.panchayath.username if complaint.panchayath else None,
+            "location": complaint.location,
 
-            "media": complaint.media.url if complaint.media else None,
+            "media": [
+                {
+                    "file": request.build_absolute_uri(m.file.url),
+                    "type": m.file_type
+                } for m in complaint.media.all()
+            ],
 
             "upvotes": complaint.upvotes.count(),
             "comments": complaint.comments.count(),
-        }
-
-        return Response(data)
+        })
     
-    
+   
     
 class WardComplaintPagination(PageNumberPagination):
     page_size = 10
@@ -670,17 +781,31 @@ class WardComplaintListView(APIView):
     
     def get(self,request):
         user = request.user 
+        print("Logged in ward ID:", request.user.id)
         
         status_filter = request.GET.get("status")
         search = request.GET.get("search")
+        category = request.GET.get("category")
+        
+        citizens = CitizenVerification.objects.filter(
+            ward=request.user,
+            status="APPROVED"
+        )
         
         
         complaints = Complaint.objects.filter(
             ward = user 
         ).select_related("citizen").order_by("-created_at")
         
+        print("Total complaints found:", complaints.count())
+        for c in complaints:
+            print("Complaint ID:", c.id, "Ward ID:", c.ward.id)
+        
         if status_filter:
             complaints = complaints.filter(status=status_filter) 
+            
+        if category:
+            complaints = complaints.filter(category=category)
             
         if search:
             complaints = complaints.filter(
@@ -772,6 +897,23 @@ class EscalateComplaintView(APIView):
         
         if serializer.is_valid():
             serializer.save()
+            
+            files = request.FILES.getlist("media_files")
+
+            for file in files:
+                file_type = "IMAGE"
+                mime_type, _ = mimetypes.guess_type(file.name)
+
+                if mime_type and mime_type.startswith("video"):
+                    file_type = "VIDEO"
+
+                EscalationMedia.objects.create(
+                    complaint=complaint,
+                    file=file,
+                    file_type=file_type
+                )
+                
+            
             return Response({"message":"Complaint Escalated succesfully"})
         
         return Response(serializer.errors,status=400)

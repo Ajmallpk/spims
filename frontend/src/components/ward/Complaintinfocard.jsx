@@ -1,15 +1,23 @@
 import StatusBadge from "@/components/ward/StatusBadge";
+import { useState } from "react";
 
 function formatDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 }
 
-const CATEGORY_ICONS = { water: "Water", road: "Road", electricity: "Electricity", sanitation: "Sanitation", other: "Other" };
+const CATEGORY_ICONS = {
+  water: "Water",
+  road: "Road",
+  electricity: "Electricity",
+  waste: "Waste Management",
+  other: "Other"
+};
 
 export default function ComplaintInfoCard({ complaint }) {
   if (!complaint) return null;
   const catKey = (complaint.category ?? "other").toLowerCase();
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
@@ -35,14 +43,58 @@ export default function ComplaintInfoCard({ complaint }) {
             <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{complaint.description}</p>
           </div>
         )}
-        {complaint.image && (
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Attached Image</p>
-            <a href={complaint.image} target="_blank" rel="noopener noreferrer"
-              className="block rounded-xl overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
-              <img src={complaint.image} alt="Complaint proof" className="w-full max-h-56 object-cover"
-                onError={(e) => { e.target.style.display = "none"; }} />
-            </a>
+        {complaint.media?.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase">
+              Attachments
+            </p>
+
+            <div className="relative">
+              {/* MEDIA DISPLAY */}
+              {complaint.media[currentIndex].type === "IMAGE" ? (
+                <img
+                  src={complaint.media[currentIndex].file}
+                  className="w-full max-h-64 object-cover rounded-xl"
+                />
+              ) : (
+                <video
+                  src={complaint.media[currentIndex].file}
+                  controls
+                  className="w-full max-h-64 rounded-xl"
+                />
+              )}
+
+              {/* LEFT BUTTON */}
+              {currentIndex > 0 && (
+                <button
+                  onClick={() => setCurrentIndex((prev) => prev - 1)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-2 py-1 rounded"
+                >
+                  ←
+                </button>
+              )}
+
+              {/* RIGHT BUTTON */}
+              {currentIndex < complaint.media.length - 1 && (
+                <button
+                  onClick={() => setCurrentIndex((prev) => prev + 1)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-2 py-1 rounded"
+                >
+                  →
+                </button>
+              )}
+            </div>
+
+            {/* DOT INDICATOR */}
+            <div className="flex justify-center gap-1 mt-2">
+              {complaint.media.map((_, i) => (
+                <div
+                  key={i} 
+                  className={`h-2 w-2 rounded-full ${i === currentIndex ? "bg-blue-500" : "bg-gray-300"
+                    }`}
+                />
+              ))}
+            </div>
           </div>
         )}
         {complaint.resolution_description && (

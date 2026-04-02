@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification,ComplaintHistory
+from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification,ComplaintHistory,ComplaintMedia
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -25,7 +25,11 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid ward selected")
         return value
     
-    
+
+class ComplaintMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ComplaintMedia
+        fields = ["id","file","file_type"]
     
     
 class ComplaintFeedSerializer(serializers.ModelSerializer):
@@ -35,6 +39,7 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
 
     upvotes_count = serializers.IntegerField(read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
+    media = ComplaintMediaSerializer(many=True, read_only=True)
 
     class Meta:
         model = Complaint
@@ -52,6 +57,7 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "upvotes_count",
             "comments_count",
             "created_at",
+            "media"
         ]
 
     
@@ -100,6 +106,10 @@ class ComplaintResolutionSerializer(serializers.ModelSerializer):
         ]
         
         
+        
+
+        
+        
 
 
 class ComplaintDetailSerializer(serializers.ModelSerializer):
@@ -111,6 +121,7 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
 
     resolution = ComplaintResolutionSerializer(read_only=True)
+    media = ComplaintMediaSerializer(many=True, read_only=True)
 
     class Meta:
         model = Complaint
@@ -129,6 +140,7 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
             "upvotes_count",
             "comments_count",
             "resolution",
+            "media",
         ]
 
     def get_upvotes_count(self, obj):
@@ -252,11 +264,12 @@ class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
         return instance
     
     
+    
 class ComplaintUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
         fields = [
-            "titile",
+            "title",
             "description",
             "category",
             "location",
@@ -264,9 +277,9 @@ class ComplaintUpdateSerializer(serializers.ModelSerializer):
             "video_proof",
         ]
         
-    def validate(self,data):
-        if self.instance.satatus == "RESOLVED":
-            raise serializers.ValidationError("Cannot edit resolved complaint")
+    def validate(self, data):
+        if self.instance.status in ["RESOLVED", "ESCALATED"]:
+            raise serializers.ValidationError("Cannot edit this complaint")
         return data
     
 

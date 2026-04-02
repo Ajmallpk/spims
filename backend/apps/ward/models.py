@@ -55,6 +55,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from apps.complaints.models import Complaint
 
 User = get_user_model()
 
@@ -118,3 +119,22 @@ class WardVerification(models.Model):
 
     def __str__(self):
         return f"{self.ward_name} - {self.status}"
+    
+    
+    
+class EscalationMedia(models.Model):
+    complaint = models.ForeignKey(
+        Complaint,
+        on_delete=models.CASCADE,
+        related_name="escalation_media"
+    )
+
+    file = models.FileField(upload_to="complaints/escalation_media/")
+
+    file_type = models.CharField(
+        max_length=10,
+        choices=[
+            ("IMAGE", "Image"),
+            ("VIDEO", "Video")
+        ]
+    )

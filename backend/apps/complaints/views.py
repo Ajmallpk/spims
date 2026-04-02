@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintChatMessage,ComplaintChat,Notification,ComplaintHistory
+from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintChatMessage,ComplaintChat,Notification,ComplaintHistory,ComplaintMedia,ResolutionMedia
 from .serializers import ComplaintCreateSerializer,ComplaintDetailSerializer,ComplaintChatListSerializer,NotificationSerializer,UpdateComplaintStatusSerializer
 from rest_framework.generics import ListAPIView
 from apps.ward.models import WardVerification
@@ -14,6 +14,8 @@ from django.db.models import Count
 from .pagination import ComplaintFeedPagination
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from apps.citizen.models import CitizenVerification
+import mimetypes
 
 
 User = get_user_model()
@@ -31,7 +33,12 @@ class CitizenCreateComplaintView(APIView):
                 {"error": "Only citizens can create complaints"},
                 status=403
             )
-        if not user.is_verified:
+        verification = CitizenVerification.objects.filter(
+            user=user,
+            status="APPROVED"
+        ).exists()
+
+        if not verification:
             return Response(
                 {"error": "You must complete verification before posting complaints"},
                 status=403
@@ -54,6 +61,28 @@ class CitizenCreateComplaintView(APIView):
                 ward=ward,
                 panchayath=panchayath
             )
+            
+            
+            files = request.FILES.getlist("media_files")
+            
+            
+            for file in files:
+                file_type = "IMAGE"
+                
+            
+                mime_type, _ = mimetypes.guess_type(file.name)
+
+                if mime_type and mime_type.startswith("video"):
+                    file_type = "VIDEO"
+                else:
+                    file_type = "IMAGE"
+
+                ComplaintMedia.objects.create(
+                    complaint=complaint,
+                    file=file,
+                    file_type=file_type
+                )
+            
             
             ComplaintHistory.objects.create(
                 complaint=complaint,
@@ -327,6 +356,24 @@ class ComplaintResolutionCreateView(APIView):
                 complaint=complaint,
                 authority=user
             )
+            
+            files = request.FILES.getlist("media_files")
+            
+            for file in files:
+                file_type = "IMAGE"
+                
+                mime_type, _ = mimetypes.guess_type(file.name)
+                
+                
+                if mime_type and mime_type.startswith("video"):
+                    file_type = "VIDEO"
+                    
+
+                ResolutionMedia.objects.create(
+                    resolution = resolution,
+                    file = file ,
+                    file_type = file_type
+                )
 
             complaint.status = "RESOLVED"
             complaint.save()
@@ -588,5 +635,15 @@ class DeleteComplaintView(APIView):
                 status=400
             )
             
+        ComplaintHistory.objects.create(
+            complaint=complaint,
+            action = "DELETED",
+            performed_by = request.user,
+            note = "Complaint deleted",
+        )
+            
         complaint.delete()
         return Response({"message":"Deleted successfully"})
+    
+    
+    

@@ -16,7 +16,7 @@ const CommentSection = ({ comments = [], issueId }) => {
           id: c.id,
           authorName: c.user_name,
           text: c.comment,
-          timeAgo: "just now",
+          timeAgo: c.created_at,
         }));
 
         setLocalComments(formatted);
@@ -59,6 +59,25 @@ const CommentSection = ({ comments = [], issueId }) => {
     }
   };
 
+
+
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const past = new Date(dateString);
+
+    const seconds = Math.floor((now - past) / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const days = Math.floor(seconds / 86400);
+
+    if (seconds < 60) return "Just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hr ago`;
+    if (days < 7) return `${days} days ago`;
+
+    return past.toLocaleDateString();
+  };
+
   return (
     <div className="space-y-3 pt-1">
       {/* Comment list */}
@@ -68,7 +87,9 @@ const CommentSection = ({ comments = [], issueId }) => {
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-800">{comment.authorName}</span>
-              <span className="text-xs text-gray-400">{comment.timeAgo}</span>
+              <span className="text-xs text-gray-400">
+                {formatTimeAgo(comment.timeAgo)}
+              </span>
             </div>
             <p className="text-sm text-gray-600 mt-0.5">{comment.text}</p>
           </div>

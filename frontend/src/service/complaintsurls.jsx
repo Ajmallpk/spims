@@ -153,6 +153,28 @@ const complaintapi = {
     return axiosInstance.post(`/complaints/notifications/${notificationId}/read/`);
   },
 
+
+  updateComplaint: (id, data) => {
+    return axiosInstance.patch(`/complaints/${id}/update/`, data);
+  },
+
+  deleteComplaint: (id) => {
+    return axiosInstance.delete(`/complaints/${id}/delete/`);
+  },
+
+  // Resolve complaint
+  resolveComplaint: (complaintId, formData) => {
+    return axiosInstance.post(
+      `/complaints/${complaintId}/resolve/`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
+
 };
 
 export default complaintapi;
