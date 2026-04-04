@@ -19,8 +19,9 @@ export default function ComplaintList() {
   const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
 
-  const fetchComplaints = useCallback(async (page, search, category) => {
+  const fetchComplaints = useCallback(async (page, search, category, status) => {
     try {
       setIsLoading(true);
 
@@ -28,6 +29,7 @@ export default function ComplaintList() {
         page,
         ...(search && { search }),
         ...(category && { category }),
+        ...(status && { status }),
       });
 
       const data = res.data;
@@ -46,8 +48,8 @@ export default function ComplaintList() {
   }, []);
 
   useEffect(() => {
-    fetchComplaints(currentPage, searchQuery, selectedCategory);
-  }, [currentPage, searchQuery, selectedCategory, fetchComplaints]);
+    fetchComplaints(currentPage, searchQuery, selectedCategory, selectedStatus);
+  }, [currentPage, searchQuery, selectedCategory, selectedStatus, fetchComplaints]);
 
   const handleSearch = (q) => { setSearchQuery(q); setCurrentPage(1); };
   const handleCategory = (c) => { setSelectedCategory(c); setCurrentPage(1); };
@@ -61,6 +63,12 @@ export default function ComplaintList() {
     return acc;
   }, {});
 
+
+  const handleStatus = (status) => {
+    setSelectedStatus(status);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -72,7 +80,7 @@ export default function ComplaintList() {
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button onClick={() => fetchComplaints(currentPage, searchQuery, selectedCategory)}
+          <button onClick={() => fetchComplaints(currentPage, searchQuery, selectedCategory, selectedStatus)}
             disabled={isLoading}
             className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50">
             <svg className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,14 +109,42 @@ export default function ComplaintList() {
       )}
 
       {/* Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full">
+
         <SearchBar value={searchQuery} onChange={handleSearch} />
+
         <ComplaintFilter value={selectedCategory} onChange={handleCategory} />
-        {(searchQuery || selectedCategory) && !isLoading && (
-          <p className="text-xs text-gray-500 whitespace-nowrap">
-            {complaints.length} result{complaints.length !== 1 ? "s" : ""}
-          </p>
-        )}
+
+        {/* 🔥 STATUS TOGGLE BUTTONS */}
+        <div className="flex gap-2 flex-wrap">
+
+          {[
+            { label: "All", value: "" },
+            { label: "Pending", value: "pending" },
+            { label: "In Progress", value: "in_progress" },
+            { label: "Resolved", value: "resolved" },
+            { label: "Escalated", value: "escalated" },
+          ].map((btn) => {
+            const isActive = selectedStatus === btn.value;
+
+            return (
+              <button
+                key={btn.value}
+                onClick={() => handleStatus(btn.value)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition
+          ${isActive
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }
+        `}
+              >
+                {btn.label}
+              </button>
+            );
+          })}
+
+        </div>
+
       </div>
 
       {/* Table */}

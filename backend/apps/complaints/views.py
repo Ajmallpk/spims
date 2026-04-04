@@ -543,6 +543,15 @@ class UpdateComplaintStatusView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
+        new_status = serializer.data.get("status")
+
+        Notification.objects.create(
+            user=complaint.citizen,
+            complaint=complaint,
+            message=f"Your complaint status updated to {new_status}",
+            notification_type="RESOLUTION"  # or create new type "STATUS"
+        )
+        
         ComplaintHistory.objects.create(
             complaint=complaint,
             action="STATUS_UPDATED",

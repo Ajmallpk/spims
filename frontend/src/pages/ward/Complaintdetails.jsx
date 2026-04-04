@@ -7,7 +7,9 @@ import ResolveModal from "@/components/ward/Resolvemodal";
 import EscalateModal from "@/components/ward/Escalatemodal";
 import ChatPanel from "@/pages/ward/Chatpanel";
 import wardapi from "@/service/wardurls";
+import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
+import ComplaintTimeline from "@/components/ward/ComplaintTimeline";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -41,6 +43,7 @@ export default function ComplaintDetails() {
       setNotFound(false);
 
       const res = await wardapi.getComplaintDetail(id);
+      console.log("API RESPONSE 👉", res.data);
       setComplaintData(res.data);
 
     } catch (err) {
@@ -57,11 +60,28 @@ export default function ComplaintDetails() {
     fetchDetails();
   };
 
+
+  const handleStartWork = async () => {
+    try {
+      await complaintapi.updateComplaintStatus(id, {
+        status: "IN_PROGRESS"
+      });
+
+      toast.success("Marked as In Progress");
+
+      fetchDetails(); // refresh UI
+    } catch (err) {
+      toast.error("Failed to update status");
+    }
+  };
+
   // Normalize data shape
-  const complaint = complaintData?.complaint ?? complaintData;
-  const citizen = complaintData?.citizen ?? complaint?.citizen ?? null;
+  const complaint = complaintData;
+  const citizen = complaintData?.citizen ?? null;
   const isChatClosed = complaintData?.chat_closed ?? complaint?.chat_closed ?? false;
   const status = complaint?.status ?? "";
+  console.log("COMPLAINT 👉", complaint);
+  console.log("STATUS 👉", status);
 
   if (!isLoading && notFound) {
     return (
@@ -142,6 +162,8 @@ export default function ComplaintDetails() {
             <ComplaintInfoCard complaint={complaint} />
           )}
 
+          {!isLoading && <ComplaintTimeline complaintId={id} />}
+
           {/* Chat Panel */}
           {chatOpen && (
             <ChatPanel complaintId={id} isChatClosed={isChatClosed} />
@@ -163,6 +185,7 @@ export default function ComplaintDetails() {
               chatOpen={chatOpen}
               onResolve={() => setShowResolveModal(true)}
               onEscalate={() => setShowEscalateModal(true)}
+              onStartWork={handleStartWork}
               onToggleChat={() => setChatOpen((v) => !v)}
             />
           )}

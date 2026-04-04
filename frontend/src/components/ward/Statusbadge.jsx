@@ -4,15 +4,20 @@ const STATUS_STYLES = {
     dot: "bg-amber-400",
     label: "Pending",
   },
-  approved: {
+  in_progress: {
+    container: "bg-blue-50 text-blue-700 border border-blue-200",
+    dot: "bg-blue-500",
+    label: "In Progress",
+  },
+  resolved: {
     container: "bg-green-50 text-green-700 border border-green-200",
     dot: "bg-green-500",
-    label: "Approved",
+    label: "Resolved",
   },
-  rejected: {
+  escalated: {
     container: "bg-red-50 text-red-700 border border-red-200",
     dot: "bg-red-500",
-    label: "Rejected",
+    label: "Escalated",
   },
 };
 

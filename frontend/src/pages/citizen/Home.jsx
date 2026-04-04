@@ -134,6 +134,7 @@ const Home = () => {
         description: issue.description,
         category: issue.category,
         media: issue.media || [],
+        status: issue.status,
         upvotes: issue.upvotes_count,
         commentCount: issue.comments_count,
 

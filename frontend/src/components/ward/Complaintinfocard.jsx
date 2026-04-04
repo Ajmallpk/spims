@@ -18,6 +18,7 @@ export default function ComplaintInfoCard({ complaint }) {
   if (!complaint) return null;
   const catKey = (complaint.category ?? "other").toLowerCase();
   const [currentIndex, setCurrentIndex] = useState(0);
+  console.log("CARD STATUS 👉", complaint?.status);
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">

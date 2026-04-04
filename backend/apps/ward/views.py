@@ -802,7 +802,7 @@ class WardComplaintListView(APIView):
             print("Complaint ID:", c.id, "Ward ID:", c.ward.id)
         
         if status_filter:
-            complaints = complaints.filter(status=status_filter) 
+            complaints = complaints.filter(status__iexact=status_filter)
             
         if category:
             complaints = complaints.filter(category=category)

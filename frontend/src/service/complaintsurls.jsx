@@ -175,6 +175,12 @@ const complaintapi = {
     );
   },
 
+  getTimeline: (id) => axiosInstance.get(`/complaints/complaint/${id}/timeline/`),
+
+  updateComplaintStatus: (id, data) => {
+    return axiosInstance.patch(`/complaints/${id}/status/`, data);
+  },
+
 };
 
 export default complaintapi;

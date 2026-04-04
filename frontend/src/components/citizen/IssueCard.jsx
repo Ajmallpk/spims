@@ -3,7 +3,7 @@ import Avatar from "@/components/ui/Avatar";
 import AuthorityResponse from "@/components/citizen/Authorityresponse";
 import CommentSection from "@/components/citizen/Commentsection";
 import complaintapi from "@/service/complaintsurls";
-
+import StatusBadge from "../../components/ward/Statusbadge";
 const IssueCard = ({ issue }) => {
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
@@ -76,6 +76,9 @@ const IssueCard = ({ issue }) => {
           <Avatar alt={issue.citizenName} size="md" />
           <div>
             <p className="font-semibold text-gray-900 text-sm">{issue.citizenName}</p>
+            <div className="mt-1">
+              <StatusBadge status={issue.status} />
+            </div>
             <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5 flex-wrap">
               <span className="text-teal-600 font-medium">{issue.ward}</span>
               <span>•</span>
@@ -84,6 +87,7 @@ const IssueCard = ({ issue }) => {
               <span>{issue.timeAgo}</span>
             </div>
           </div>
+
         </div>
         <button
           onClick={() => setShowMenu(!showMenu)}
