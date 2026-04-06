@@ -110,7 +110,10 @@ class CitizenComplaintFeedView(ListAPIView):
 
     queryset = Complaint.objects.select_related(
         "citizen",
-        "ward"
+        "ward",
+        "resolution",
+    ).prefetch_related(
+        "resolution__media"
     ).annotate(
         upvotes_count=Count("upvotes"),
         comments_count=Count("comments")

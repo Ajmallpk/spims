@@ -20,4 +20,7 @@ urlpatterns = [
     # path("complaint/<int:complaint_id>/resolve/", views.ResolveComplaintView.as_view()),
     path("complaint/<int:complaint_id>/escalate/", views.EscalateComplaintView.as_view()),
     path("complaint/<int:complaint_id>/details/", views.ComplaintDetailView.as_view()),
+    path("reassigned-complaints/", views.WardReassignedComplaintListView.as_view()),
+    path("reassigned-complaints/<int:complaint_id>/", views.WardReassignedComplaintDetailView.as_view()),
+    path("resolve-complaint/<int:complaint_id>/", views.WardResolveComplaintView.as_view()),
 ]

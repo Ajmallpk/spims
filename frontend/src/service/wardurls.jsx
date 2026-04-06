@@ -93,6 +93,28 @@ const wardapi = {
         );
     },
 
+
+
+    getReassignedComplaints: (params) => {
+        return axiosInstance.get("/ward/reassigned-complaints/", { params });
+    },
+
+    getReassignedComplaintDetail: (id) => {
+        return axiosInstance.get(`/ward/reassigned-complaints/${id}/`);
+    },
+
+    resolveReassignedComplaint: (id, formData) => {
+        return axiosInstance.post(
+            `/ward/resolve-complaint/${id}/`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            }
+        );
+    },
+
 };
 
 export default wardapi;

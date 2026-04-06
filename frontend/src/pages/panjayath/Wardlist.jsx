@@ -1,10 +1,4 @@
-// pages/WardList.jsx
-// SPIMS – Smart Panchayath Issue Management System
-// Ward List page — shows only approved wards under this Panchayath.
-//
-// API: GET /api/panchayath/wards/?status=approved&page={n}&search={q}
-// Auth: Authorization: Bearer {access}
-// Supports: pagination, debounced search, error + empty states
+
 
 import { useState, useEffect, useCallback } from "react";
 import WardSearchBar from "@/components/panjayath/Wardsearchbar";

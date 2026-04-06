@@ -17,7 +17,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from apps.citizen.models import CitizenVerification, CitizenProfile
-from apps.complaints.models import Complaint
+from apps.complaints.models import Complaint,ComplaintHistory,ResolutionMedia,ComplaintResolution
 from .permissions import IsActiveWard
 from django.utils import timezone
 from .serialzers import EscalateComplaintSerializer
@@ -898,6 +898,9 @@ class EscalateComplaintView(APIView):
         if serializer.is_valid():
             serializer.save()
             
+            complaint.is_reassigned = True   
+            complaint.save()
+            
             files = request.FILES.getlist("media_files")
 
             for file in files:
@@ -917,4 +920,225 @@ class EscalateComplaintView(APIView):
             return Response({"message":"Complaint Escalated succesfully"})
         
         return Response(serializer.errors,status=400)
+    
+    
+    
+# class WardReassignedComplaintListView(APIView):
+#     permission_classes = [IsActiveWard]
+
+#     def get(self, request):
+#         complaints = Complaint.objects.filter(
+#             ward=request.user,
+#             status="PENDING"   
+#         ).select_related("citizen").order_by("-created_at")
+
+#         data = []
+
+#         for c in complaints:
+#             data.append({
+#                 "id": c.id,
+#                 "title": c.title,
+#                 "category": c.category,
+#                 "status": c.status,
+#                 "created_at": c.created_at,
+#                 "location": c.location,
+#                 "citizen_name": c.citizen.username,
+#             })
+
+#         return Response(data)
+    
+    
+    
+    
+class WardReassignedComplaintListView(APIView):
+    permission_classes = [IsActiveWard]
+
+    def get(self, request):
+
+        
+        status_filter = request.GET.get("status")   
+        search = request.GET.get("search")          
+        category = request.GET.get("category")      
+
+        
+        complaints = Complaint.objects.filter(
+            ward=request.user,
+            is_reassigned=True
+        ).select_related("citizen")
+
+        
+        if status_filter == "pending":
+            complaints = complaints.filter(status="PENDING")
+
+        elif status_filter == "resolved":
+            complaints = complaints.filter(status="RESOLVED")
+
+        elif status_filter == "all":
+            complaints = complaints.filter(status__in=["PENDING", "RESOLVED"])
+
+        
+        if category:
+            complaints = complaints.filter(category=category)
+
+        
+        if search:
+            complaints = complaints.filter(
+                Q(citizen__username__icontains=search) |
+                Q(citizen__email__icontains=search)
+            )
+
+        
+        complaints = complaints.order_by("-created_at")
+
+        
+        data = []
+        for c in complaints:
+            data.append({
+                "id": c.id,
+                "title": c.title,
+                "category": c.category,
+                "status": c.status,
+                "citizen_name": c.citizen.username,
+                "citizen_email": c.citizen.email,
+                "created_at": c.created_at,
+                "location": c.location,
+            })
+
+        return Response(data)
+    
+    
+    
+    
+class WardResolveComplaintView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, complaint_id):
+
+        try:
+            complaint = Complaint.objects.get(id=complaint_id)
+        except Complaint.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        if request.user.role != "WARD" or complaint.ward != request.user:
+            return Response({"error": "Permission denied"}, status=403)
+
+        if hasattr(complaint, "resolution"):
+            return Response({"error": "Already resolved"}, status=400)
+
+        
+        message = request.data.get("resolution_description")
+
+        if not message or len(message.strip()) < 5:
+            return Response(
+                {"error": "Resolution message is required (min 5 characters)"},
+                status=400
+            )
+
+        
+        resolution = ComplaintResolution.objects.create(
+            complaint=complaint,
+            authority=request.user,
+            message=message
+        )
+
+        
+        files = request.FILES.getlist("media_files")
+
+        for file in files:
+            file_type = "IMAGE"
+            mime_type, _ = mimetypes.guess_type(file.name)
+
+            if mime_type and mime_type.startswith("video"):
+                file_type = "VIDEO"
+
+            ResolutionMedia.objects.create(
+                resolution=resolution,
+                file=file,
+                file_type=file_type
+            )
+
+        
+        complaint.status = "RESOLVED"
+        complaint.resolved_at = timezone.now()
+        complaint.save()
+
+        
+        ComplaintHistory.objects.create(
+            complaint=complaint,
+            action="RESOLVED",
+            performed_by=request.user,
+            note=message
+        )
+
+        return Response({"message": "Resolved successfully"})
+    
+    
+    
+class WardReassignedComplaintDetailView(APIView):
+    permission_classes = [IsActiveWard]
+
+    def get(self, request, complaint_id):
+
+        try:
+            complaint = Complaint.objects.select_related(
+                "citizen", "ward"
+            ).prefetch_related(
+                "media", "history"
+            ).get(
+                id=complaint_id,
+                ward=request.user
+            )
+
+        except Complaint.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        profile = getattr(complaint.citizen, "citizen_profile", None)
+
+        
+        timeline = []
+        history = complaint.history.all().order_by("-created_at")
+
+        for h in history:
+            timeline.append({
+                "event": h.action,
+                "actor": h.performed_by.username if h.performed_by else None,
+                "date": h.created_at,
+                "type": "reassigned" if h.action == "REASSIGNED" else "update"
+            })
+
+        return Response({
+            "id": complaint.id,
+            "title": complaint.title,
+            "description": complaint.description,
+            "category": complaint.category,
+            "status": complaint.status,
+            "created_at": complaint.created_at,
+            "location": complaint.location,
+
+            "reassign_note": complaint.reassign_note,
+            "reassigned_at": complaint.updated_at,
+
+            "citizen": {
+                "name": complaint.citizen.username,
+                "email": complaint.citizen.email,
+                "phone": profile.phone if profile else None,
+            },
+
+            "ward": {
+                "name": request.user.username
+            },
+
+            
+            "reassign_media": [],
+
+            
+            "media": [
+                {
+                    "file": request.build_absolute_uri(m.file.url),
+                    "type": m.file_type
+                } for m in complaint.media.all()
+            ],
+
+            "timeline": timeline
+        })
         

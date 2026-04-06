@@ -24,6 +24,8 @@ from rest_framework.permissions import IsAuthenticated
 from apps.complaints.models import Complaint
 from rest_framework.pagination import PageNumberPagination
 import logging
+from rest_framework.parsers import MultiPartParser, FormParser
+from apps.complaints.models import ComplaintResolution, ResolutionMedia
 
 logger = logging.getLogger(__name__)
 
@@ -449,24 +451,27 @@ class PanchayathComplaintPagination(PageNumberPagination):
 class PanchayathComplaintListView(APIView):
     permission_classes = [IsAuthenticated]
     
-    def get(self,request):
+    def get(self, request):
         user = request.user
         
         if user.role != "PANCHAYATH":
-            return Response({"error":"Permission denied"},status=403)
+            return Response({"error": "Permission denied"}, status=403)
         
-        complaints = Complaint.objects.filter(
+        complaints = Complaint.objects.select_related("citizen", "ward").filter(
             panchayath=user,
-            status = "ESCALATED",
+            status="ESCALATED",
         ).order_by("-created_at")
         
         data = [
             {
-                "id":c.id,
-                "title":c.title,
-                "status":c.status,
-                "category":c.category,
-                "created_at":c.created_at,
+                "id": c.id,
+                "title": c.title,
+                "status": c.status,
+                "category": c.category,
+                "created_at": c.created_at,
+                "citizen_name": c.citizen.username,   
+                "ward_id": c.ward.id,
+                "ward_name": c.ward.username,         
             }
             for c in complaints
         ]
@@ -512,28 +517,197 @@ class PanchayathComplaintListView(APIView):
     
 class ReassignComplaintView(APIView):
     permission_classes = [IsAuthenticated]
-    
-    def post(self,request,complaint_id):
+
+    def post(self, request, complaint_id):
         user = request.user
-        
+
         try:
             complaint = Complaint.objects.get(id=complaint_id)
         except Complaint.DoesNotExist:
-            return Response({"error":"Not found"},status=404)
-        
+            return Response({"error": "Not found"}, status=404)
+
         if user.role != "PANCHAYATH" or complaint.panchayath != user:
-            return Response({"error":"Permission denied"},status=403)
-        
+            return Response({"error": "Permission denied"}, status=403)
+
         serializer = ReassignComplaintSerializer(
             complaint,
-            data = request.data,
-            partial = True,
+            data=request.data,
+            partial=True,
             context={"request": request},
         )
-        
+
         if serializer.is_valid():
             serializer.save()
-            return Response({"message":"Reassigned to ward"})
-            
-        return Response(serializer.errors,status=400)
+            return Response({
+                "message": "Complaint reassigned to ward",
+                "status": "PENDING"
+            })
+
+        return Response(serializer.errors, status=400)
+    
+    
+    
+class PanchayathComplaintDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+
+    def get(self, request, complaint_id):
+        user = request.user 
+
+        if user.role != "PANCHAYATH":
+            return Response({"error": "Permission denied"}, status=403)
+
+        try:
+            complaint = Complaint.objects.select_related("citizen", "ward").get(
+                id=complaint_id,
+                panchayath=user
+            )
+        except Complaint.DoesNotExist:
+            return Response({"error": "Complaint not found"}, status=404)
+
         
+        media = [
+            {
+                "type": m.file_type.lower(),
+                "url": request.build_absolute_uri(m.file.url),
+                "caption": "Complaint Media"
+            }
+            for m in complaint.media.all()
+        ]
+
+        
+        timeline = [
+            {
+                "date": h.created_at,
+                "event": h.action,
+                "actor": h.performed_by.username if h.performed_by else "System",
+                "type": "update"
+            }
+            for h in complaint.history.all().order_by("created_at")
+        ]
+        
+        
+        
+
+        return Response({
+            "id": complaint.id,
+            "title": complaint.title,
+            "description": complaint.description,
+            "category": complaint.category,
+            "status": complaint.status,
+            "location": complaint.location,
+            "created_at": complaint.created_at,
+
+            
+            "media": media,
+
+            
+            "timeline": timeline,
+
+            
+            "citizen": {
+                "id": complaint.citizen.id,
+                "name": complaint.citizen.username,
+                "email": complaint.citizen.email,
+                "phone": getattr(complaint.citizen, "phone", "Not Available"),
+            },
+
+            
+            "ward": {
+                "id": complaint.ward.id,
+                "name": complaint.ward.username,
+                "officer": complaint.ward.username,
+                "officerPhone": getattr(complaint.ward, "phone", "Not Available"),
+                "officerEmail": complaint.ward.email,
+            }
+        })
+        
+        
+    def post(self, request, complaint_id):
+        user = request.user
+
+        if user.role != "PANCHAYATH":
+            return Response({"error": "Permission denied"}, status=403)
+
+        try:
+            complaint = Complaint.objects.get(
+                id=complaint_id,
+                panchayath=user
+            )
+        except Complaint.DoesNotExist:
+            return Response({"error": "Complaint not found"}, status=404)
+
+        action = request.data.get("action")
+
+        if action == "START_WORK":
+
+            if complaint.status != "ESCALATED":
+                return Response({"error": "Invalid state"}, status=400)
+
+            complaint.status = "IN_PROGRESS"
+            complaint.save()
+
+            return Response({"message": "Complaint moved to IN_PROGRESS"})
+
+        return Response({"error": "Invalid action"}, status=400)
+    
+    
+    
+    
+    
+
+
+class PanchayathResolveView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, complaint_id):
+        user = request.user
+
+        try:
+            complaint = Complaint.objects.get(id=complaint_id, panchayath=user)
+        except Complaint.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        if user.role != "PANCHAYATH":
+            return Response({"error": "Permission denied"}, status=403)
+
+       
+        if complaint.status != "IN_PROGRESS":
+            return Response({"error": "Invalid state"}, status=400)
+
+        message = request.data.get("message")
+
+        if not message or len(message.strip()) < 5:
+            return Response({"error": "Message required"}, status=400)
+
+        
+        resolution = ComplaintResolution.objects.create(
+            complaint=complaint,
+            authority=user,
+            message=message
+        )
+
+        # ✅ handle media
+        files = request.FILES.getlist("media_files")
+
+        for file in files:
+            file_type = "IMAGE"
+
+            import mimetypes
+            mime_type, _ = mimetypes.guess_type(file.name)
+
+            if mime_type and mime_type.startswith("video"):
+                file_type = "VIDEO"
+
+            ResolutionMedia.objects.create(
+                resolution=resolution,
+                file=file,
+                file_type=file_type
+            )
+
+        
+        complaint.status = "RESOLVED"
+        complaint.save()
+
+        return Response({"message": "Resolved successfully"})

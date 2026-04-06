@@ -33,6 +33,38 @@ const panchayathApi = {
     return axiosInstance.post(`/panchayath/confirm-email-change/${token}/`)
   },
 
+
+  getEscalatedComplaints: (params) => {
+    return axiosInstance.get("/panchayath/complaints/", { params });
+  },
+
+  getComplaintDetail: (id) => {
+    return axiosInstance.get(`/panchayath/complaints/${id}/`)
+  },
+
+  startWork: (id) =>
+    axiosInstance.post(`/panchayath/complaints/${id}/`, {
+      action: "START_WORK"
+    }),
+
+
+  resolveComplaint: (id, formData) => {
+    return axiosInstance.post(
+      `/panchayath/complaints/${id}/resolve/`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+  },
+
+  reassignComplaint: (id, data) => {
+    return axiosInstance.post(
+      `/panchayath/complaints/${id}/reassign/`,
+      data
+    );
+  },
+
 };
 
 

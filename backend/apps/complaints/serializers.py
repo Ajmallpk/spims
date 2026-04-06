@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification,ComplaintHistory,ComplaintMedia
+from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification,ComplaintHistory,ComplaintMedia,ResolutionMedia
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -30,6 +30,32 @@ class ComplaintMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ComplaintMedia
         fields = ["id","file","file_type"]
+        
+        
+        
+        
+class ResolutionMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResolutionMedia
+        fields = ["id", "file", "file_type"]
+        
+
+class ComplaintResolutionSerializer(serializers.ModelSerializer):
+
+    authority_name = serializers.CharField(source="authority.username", read_only=True)
+    media = ResolutionMediaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ComplaintResolution
+        fields = [
+            "id",
+            "authority_name",
+            "message",
+            "proof_image",
+            "proof_video",
+            "created_at",
+            "media",
+        ]
     
     
 class ComplaintFeedSerializer(serializers.ModelSerializer):
@@ -40,6 +66,7 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
     upvotes_count = serializers.IntegerField(read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
     media = ComplaintMediaSerializer(many=True, read_only=True)
+    resolution = ComplaintResolutionSerializer(read_only=True)
 
     class Meta:
         model = Complaint
@@ -57,7 +84,8 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "upvotes_count",
             "comments_count",
             "created_at",
-            "media"
+            "media",
+            "resolution",
         ]
 
     
@@ -90,20 +118,7 @@ class ComplaintChatMessageSerializer(serializers.ModelSerializer):
         ]
         
         
-class ComplaintResolutionSerializer(serializers.ModelSerializer):
 
-    authority_name = serializers.CharField(source="authority.username", read_only=True)
-
-    class Meta:
-        model = ComplaintResolution
-        fields = [
-            "id",
-            "authority_name",
-            "message",
-            "proof_image",
-            "proof_video",
-            "created_at",
-        ]
         
         
         

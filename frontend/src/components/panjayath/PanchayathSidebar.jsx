@@ -63,6 +63,19 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    id: "escalated-complaints",
+    label: "Escalated Complaints",
+    path: "/panchayath/escalated-complaints",
+    locked: true,
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+        <path strokeLinecap="round" strokeLinejoin="round"
+          d="M12 9v3m0 3h.01M5 19h14a2 2 0 0 0 1.732-3L13.732 4a2 2 0 0 0-3.464 0L3.268 16A2 2 0 0 0 5 19Z"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export default function PanchayathSidebar({
@@ -135,11 +148,10 @@ export default function PanchayathSidebar({
         {/* ── Verification Status Banner ── */}
         {!isVerified && (
           <div
-            className={`mx-3 mt-3 px-3 py-2.5 rounded-xl text-xs font-semibold flex items-start gap-2 ${
-              verificationSubmitted
+            className={`mx-3 mt-3 px-3 py-2.5 rounded-xl text-xs font-semibold flex items-start gap-2 ${verificationSubmitted
                 ? "bg-blue-50 text-blue-700 border border-blue-200"
                 : "bg-amber-50 text-amber-700 border border-amber-200"
-            }`}
+              }`}
           >
             <svg
               viewBox="0 0 24 24"
@@ -209,10 +221,9 @@ export default function PanchayathSidebar({
                 to={item.path}
                 onClick={() => onClose()}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${isActive
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`
                 }
               >

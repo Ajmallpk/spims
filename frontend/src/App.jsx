@@ -24,7 +24,7 @@ import AdminProfile from "@/pages/admin/AdminProfile"
 import PanchayathDetail from "./pages/admin/PanchayathDetail"
 import WardDetailsPage from "./pages/admin/Warddetailsout";
 import PanchayathDetails from "./pages/admin/Panchayathdetails";
-import AdminCitizenList  from "@/pages/admin/CitizenList";
+import AdminCitizenList from "@/pages/admin/CitizenList";
 import AdminCitizenDetail from "@/pages/admin/CitizenDetail";
 
 
@@ -38,7 +38,8 @@ import WardVerificationRequests from "@/pages/panjayath/WardVerificationRequests
 import WardList from "@/pages/panjayath/WardList";
 import WardDetail from "@/pages/panjayath/WardDetail";
 import PanchayathEmailChangeConfirm from "./components/panjayath/PanchayathEmailChangeConfirm";
-
+import EscalatedComplaints from "./pages/panjayath/EscalatedComplaints";
+import PanchayathComplaintDetail from "./pages/panjayath/PanchayathComplaintDetail";
 
 
 /* ───────── WARD MODULE ───────── */
@@ -52,6 +53,8 @@ import ComplaintList from "@/pages/ward/ComplaintList";
 import ComplaintViewer from "./components/ward/ComplaintViewer";
 import WardEmailChangeConfirm from "./components/ward/WardEmailChangeConfirm";
 import ComplaintDetails from "./pages/ward/Complaintdetails";
+import ReassignedComplaints from "@/pages/ward/ReassignedComplaints";
+import ReassignedComplaintDetail from "@/pages/ward/ReassignedComplaintDetail";
 
 
 
@@ -211,6 +214,24 @@ export default function App() {
             }
           />
 
+          <Route
+            path="escalated-complaints"
+            element={
+              <VerificationGuard>
+                <EscalatedComplaints />
+              </VerificationGuard>
+            }
+          />
+
+          <Route
+            path="complaints/:id"
+            element={
+              <VerificationGuard>
+                <PanchayathComplaintDetail />
+              </VerificationGuard>
+            }
+          />
+
         </Route>
 
         {/* ───────── PANCHAYATH ROUTES ───────── */}
@@ -237,7 +258,7 @@ export default function App() {
           <Route path="profile" element={<AdminProfile />} />
           <Route path="panchayaths/:id" element={<PanchayathDetails />} />
           <Route path="wards/:id" element={<WardDetailsPage />} />
-          <Route path="citizens" element={<AdminCitizenList  />} />
+          <Route path="citizens" element={<AdminCitizenList />} />
           <Route path="citizens/:id" element={<AdminCitizenDetail />} />
         </Route>
 
@@ -270,6 +291,10 @@ export default function App() {
             path="complaint-view/:id"
             element={<ComplaintViewer />}
           />
+          
+          <Route path="reassigned-complaints" element={<ReassignedComplaints />} />
+          <Route path="reassigned-complaints/:id" element={<ReassignedComplaintDetail />} />
+
         </Route>
 
 

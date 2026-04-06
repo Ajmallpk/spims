@@ -1,13 +1,24 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Avatar from "@/components/ui/Avatar";
 import AuthorityResponse from "@/components/citizen/Authorityresponse";
 import CommentSection from "@/components/citizen/Commentsection";
 import complaintapi from "@/service/complaintsurls";
 import StatusBadge from "../../components/ward/Statusbadge";
 const IssueCard = ({ issue }) => {
+  console.log(issue);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
-  const [showComments, setShowComments] = useState(issue.authorityResponse ? true : false);
+  const [showComments, setShowComments] = useState(false);
+  const [showResponse, setShowResponse] = useState(
+    issue.status === "RESOLVED"
+  );
+
+  useEffect(() => {
+    if (issue.authorityResponse) {
+      setShowComments(true);
+    }
+  }, [issue.authorityResponse]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startX, setStartX] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
@@ -249,7 +260,18 @@ const IssueCard = ({ issue }) => {
 
       {/* Authority Response */}
       {issue.authorityResponse && (
-        <AuthorityResponse response={issue.authorityResponse} />
+        <>
+          <button
+            onClick={() => setShowResponse(!showResponse)}
+            className="text-sm text-green-600 font-medium"
+          >
+            {showResponse ? "Hide Response" : "View Official Response"}
+          </button>
+
+          {showResponse && (
+            <AuthorityResponse response={issue.authorityResponse} />
+          )}
+        </>
       )}
 
       {/* Comments */}

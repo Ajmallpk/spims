@@ -18,6 +18,12 @@ const NAV_ITEMS = [
   { label: "Citizen Verifications", path: "/ward/citizen-verifications", icon: UserCheck, protected: true },
   { label: "Citizen List", path: "/ward/citizens", icon: Users, protected: true },
   { label: "All Complaints", path: "/ward/complaints", icon: MessageSquareWarning, protected: true },
+  {
+    label: "Reassigned Complaints",
+    path: "/ward/reassigned-complaints",
+    icon: MessageSquareWarning,
+    protected: true
+  },
   { label: "Profile", path: "/ward/profile", icon: UserCircle, protected: false },
 ];
 
@@ -75,10 +81,10 @@ export default function WardSidebar({
                 const isActive = location.pathname.startsWith(item.path);
 
                 return `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${locked
-                    ? "text-gray-400 cursor-pointer hover:bg-gray-50"
-                    : isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "text-gray-400 cursor-pointer hover:bg-gray-50"
+                  : isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`;
               }}
             >
