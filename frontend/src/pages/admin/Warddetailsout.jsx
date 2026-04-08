@@ -73,6 +73,7 @@ const WardDetailsPage = () => {
           total_complaints: res.statistics?.total_complaints,
           pending_complaints: res.statistics?.pending_complaints,
           resolved_complaints: res.statistics?.resolved_complaints,
+          escalated_complaints: res.statistics?.escalated_complaints || 0,
         });
       } catch (err) {
         // toast.error("Error fetching ward details:", err);
@@ -154,7 +155,7 @@ const WardDetailsPage = () => {
             />
             <AuthorityDetailRow icon={Mail} label="Email" value={authority.email} />
             <AuthorityDetailRow icon={Phone} label="Phone" value={authority.phone} />
-            <AuthorityDetailRow
+            {/* <AuthorityDetailRow
               icon={MapPin}
               label="Address"
               value={authority.address || authority.office_address}
@@ -163,7 +164,7 @@ const WardDetailsPage = () => {
               icon={Calendar}
               label="Joined Date"
               value={formatDate(authority.joined_date || authority.created_at)}
-            />
+            /> */}
           </div>
         )}
       </div>

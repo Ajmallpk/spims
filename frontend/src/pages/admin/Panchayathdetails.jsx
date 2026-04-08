@@ -142,11 +142,11 @@ const PanchayathDetails = () => {
               label="Joined Date"
               value={formatDate(authority.joined_date || authority.created_at)}
             />
-            <AuthorityDetailRow
+            {/* <AuthorityDetailRow
               icon={Building2}
               label="License Number"
               value={authority.license_number}
-            />
+            /> */}
           </div>
         )}
       </div>

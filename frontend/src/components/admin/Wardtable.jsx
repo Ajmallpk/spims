@@ -34,6 +34,7 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
                 "Total Users",
                 "Total Complaints",
                 "Pending",
+                "Status",   
                 "Action"
               ].map((col) => (
                 <th
@@ -99,8 +100,8 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
                   <td className="px-5 py-4">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${ward.status === "ACTIVE"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
                         }`}
                     >
                       {ward.status}

@@ -552,7 +552,7 @@ class UpdateComplaintStatusView(APIView):
             user=complaint.citizen,
             complaint=complaint,
             message=f"Your complaint status updated to {new_status}",
-            notification_type="RESOLUTION"  # or create new type "STATUS"
+            notification_type="RESOLUTION" 
         )
         
         ComplaintHistory.objects.create(
@@ -614,6 +614,27 @@ class UpdateComplaintView(APIView):
         
         if serializer.is_valid():
             serializer.save()
+            
+            files = request.FILES.getlist("media_files")
+
+            if files:
+                
+                complaint.media.all().delete()
+
+
+                for file in files:
+                    file_type = "IMAGE"
+
+                    mime_type, _ = mimetypes.guess_type(file.name)
+
+                    if mime_type and mime_type.startswith("video"):
+                        file_type = "VIDEO"
+
+                    ComplaintMedia.objects.create(
+                        complaint=complaint,
+                        file=file,
+                        file_type=file_type
+                    )
             
             
             ComplaintHistory.objects.create(

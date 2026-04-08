@@ -81,6 +81,7 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "status",
             "citizen_name",
             "ward_name",
+            "ward",
             "upvotes_count",
             "comments_count",
             "created_at",
@@ -294,7 +295,7 @@ class ComplaintUpdateSerializer(serializers.ModelSerializer):
         
     def validate(self, data):
         if self.instance.status in ["RESOLVED", "ESCALATED"]:
-            raise serializers.ValidationError("Cannot edit this complaint")
+            raise serializers.ValidationError("Cannot edit this complaint in the status of 'RESOLVE' or 'ESCALATED' ")
         return data
     
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import citizenapi from "@/service/citizenurls";
 
-const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
+const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [wards, setWards] = useState([]);
   const [form, setForm] = useState({
     title: "",
@@ -17,6 +17,21 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit }) => {
   const [endX, setEndX] = useState(0)
   const [previews, setPreviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setForm({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        category: initialData.category || "",
+        ward: initialData.ward || "",
+        location: initialData.location || "",
+        media: [],
+      });
+    }
+  }, [isOpen, initialData]);
 
 
   useEffect(() => {

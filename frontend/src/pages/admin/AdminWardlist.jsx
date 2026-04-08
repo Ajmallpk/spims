@@ -30,16 +30,12 @@ const WardList = () => {
     async (page = 1, search = "", panchayath = "") => {
       setLoading(true);
       try {
-        const params = { status: "approved", page };
-        if (search) params.search = search;
-        if (panchayath) params.panchayath = panchayath;
-
-        const { data } = await adminapi.getWards(
-          "approved",
+        const { data } = await adminapi.getWards({
+          status: "approved",
           page,
           search,
-          panchayath
-        )
+          panchayath,
+        });
 
         if (Array.isArray(data)) {
           setWards(data);
@@ -70,7 +66,8 @@ const WardList = () => {
   }, []);
 
   const handlePanchayathChange = useCallback((id) => {
-    setSelectedPanchayath(id);
+    setSelectedPanchayath(id ? String(id) : "")
+    console.log("SELECTED:", selectedPanchayath);
     setCurrentPage(1);
   }, []);
 
@@ -139,14 +136,14 @@ const WardList = () => {
 
       {/* Filters Row */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <SearchBar
+        {/* <SearchBar
           onSearch={handleSearch}
           placeholder="Search wards…"
         />
         <PanchayathFilter
           value={selectedPanchayath}
           onChange={handlePanchayathChange}
-        />
+        /> */}
       </div>
 
       {/* Summary Pills */}
@@ -210,8 +207,8 @@ const WardList = () => {
               <button
                 onClick={handleConfirmAction}
                 className={`px-4 py-2 text-sm font-semibold rounded-lg text-white ${actionModal.type === "suspend"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-emerald-600 hover:bg-emerald-700"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-emerald-600 hover:bg-emerald-700"
                   }`}
               >
                 Confirm

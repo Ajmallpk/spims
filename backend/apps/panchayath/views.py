@@ -289,7 +289,7 @@ class RejectWardView(APIView):
 
 
 
-#new added 
+
 
 
 class PanchayathVerificationStatusView(APIView):
@@ -688,7 +688,7 @@ class PanchayathResolveView(APIView):
             message=message
         )
 
-        # ✅ handle media
+        
         files = request.FILES.getlist("media_files")
 
         for file in files:

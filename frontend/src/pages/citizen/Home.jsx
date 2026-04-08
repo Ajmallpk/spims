@@ -129,8 +129,10 @@ const Home = () => {
 
       const formattedIssues = (res.data.results || []).map((issue) => ({
         id: issue.id,
+        title: issue.title, 
         citizenName: issue.citizen_name,
-        ward: issue.ward_name,
+        ward: issue.ward,   
+        wardName: issue.ward_name,
         location: issue.location,
         timeAgo: formatTimeAgo(issue.created_at),
         description: issue.description,

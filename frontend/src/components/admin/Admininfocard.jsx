@@ -107,7 +107,7 @@ const AdminInfoCard = ({ profile, isLoading }) => {
       {/* Details */}
       <div className="px-6 py-2">
         <InfoRow icon={Mail} label="Email Address" value={profile?.email} />
-        <InfoRow icon={Phone} label="Phone Number" value={profile?.phone} />
+        {/* <InfoRow icon={Phone} label="Phone Number" value={profile?.phone} /> */}
         <InfoRow icon={ShieldCheck} label="Role">
           <RoleBadge role={profile?.role || "ADMIN"} />
         </InfoRow>

@@ -86,14 +86,14 @@ const SecuritySettingsCard = ({ profile }) => {
             <h2 className="text-sm font-bold text-gray-800">
               Security Overview
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            {/* <p className="text-xs text-gray-400 mt-0.5">
               Active security features on your account
-            </p>
+            </p> */}
           </div>
         </div>
 
         <div>
-          <SecurityFeatureRow
+          {/* <SecurityFeatureRow
             icon={Key}
             label="JWT Authentication"
             description="Secure token-based authentication is active for all API requests."
@@ -110,7 +110,7 @@ const SecuritySettingsCard = ({ profile }) => {
             label="Account Verification"
             description="Your account identity has been verified by the system."
             enabled={isVerified}
-          />
+          /> */}
         </div>
 
         {/* Security note */}

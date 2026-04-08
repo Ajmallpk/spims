@@ -4,6 +4,7 @@ import AuthorityResponse from "@/components/citizen/Authorityresponse";
 import CommentSection from "@/components/citizen/Commentsection";
 import complaintapi from "@/service/complaintsurls";
 import StatusBadge from "../../components/ward/Statusbadge";
+import CreateIssueModal from "@/components/citizen/Createissuemodal";
 const IssueCard = ({ issue }) => {
   console.log(issue);
   const [upvoted, setUpvoted] = useState(false);
@@ -25,6 +26,7 @@ const IssueCard = ({ issue }) => {
   const startXRef = useRef(0);
   const isDragging = useRef(false);
   const [previewIndex, setPreviewIndex] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const handleUpvote = async () => {
     try {
@@ -76,7 +78,7 @@ const IssueCard = ({ issue }) => {
   };
 
   const handleEdit = () => {
-    console.log("Edit clicked");
+    setIsEditOpen(true);
   };
 
   return (
@@ -91,7 +93,7 @@ const IssueCard = ({ issue }) => {
               <StatusBadge status={issue.status} />
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5 flex-wrap">
-              <span className="text-teal-600 font-medium">{issue.ward}</span>
+              <span className="text-teal-600 font-medium">{issue.wardName}</span>
               <span>•</span>
               <span>{issue.location}</span>
               <span>•</span>
@@ -156,7 +158,7 @@ const IssueCard = ({ issue }) => {
 
               const url = media.file.startsWith("http")
                 ? media.file
-                : `${BASE_URL}${media.file}`;
+                : `${BASE_URL}${media.file}?t=${Date.now()}`;
 
               return (
                 <div key={media.id || index} className="min-w-full">
@@ -295,7 +297,7 @@ const IssueCard = ({ issue }) => {
 
               const url = media.file.startsWith("http")
                 ? media.file
-                : `${BASE_URL}${media.file}`;
+                : `${BASE_URL}${media.file}?t=${Date.now()}`;
 
               return media.file_type === "IMAGE" ? (
                 <img
@@ -344,6 +346,44 @@ const IssueCard = ({ issue }) => {
           </div>
         </div>
       )}
+
+      <CreateIssueModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSubmit={async (formData) => {
+          try {
+            const data = new FormData();
+
+            data.append("title", formData.title);
+            data.append("description", formData.description);
+            data.append("category", formData.category);
+            data.append("location", formData.location);
+
+
+            if (formData.media?.length) {
+              formData.media.forEach((file) => {
+                data.append("media_files", file);
+              });
+            }
+
+            await complaintapi.updateComplaint(issue.id, data);
+
+            setIsEditOpen(false);
+            window.location.reload();
+
+          } catch (err) {
+            console.error("Edit failed:", err.response?.data || err);
+          }
+        }}
+
+        initialData={{
+          title: issue.title,
+          description: issue.description,
+          category: issue.category,
+          ward: issue.ward,
+          location: issue.location,
+        }}
+      />
     </div>
   );
 };

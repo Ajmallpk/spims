@@ -13,7 +13,11 @@ export const adminapi = {
     getPanchayaths: (filters) => { return axiosInstance.get("/admin/panchayaths/", { params: filters }) },
     suspendPanchayath: (id) => { return axiosInstance.post(`/admin/panchayath/suspend/${id}/`) },
     activatePanchayath: (id) => { return axiosInstance.post(`/admin/panchayath/activate/${id}/`) },
-    getWards: (status, page, search, panchayath) => { return axiosInstance.get("admin/wards/", { params: { status, page, search, panchayath }, }) },
+    getWards: (filters) => {
+        return axiosInstance.get("/admin/wards/", {
+            params: filters
+        })
+    },
     suspendWard: (id) => { return axiosInstance.post(`/admin/ward/suspend/${id}/`) },
     activateWard: (id) => { return axiosInstance.post(`/admin/ward/activate/${id}/`) },
     profile: () => { return axiosInstance.get("admin/profile/") },

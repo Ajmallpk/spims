@@ -496,6 +496,13 @@ class AdminWardListView(APIView):
         wards = WardVerification.objects.filter(
             status="APPROVED"
         ).select_related("user", "panchayath")
+        
+        
+        panchayath_id = request.GET.get("panchayath")
+        
+        
+        if panchayath_id:
+            wards = wards.filter(panchayath_id=panchayath_id)
 
         data = []
 
@@ -620,14 +627,39 @@ class AdminPanchayathDetailView(APIView):
             status="APPROVED"
         ).count()
 
+        
+
         ward_list = []
 
         for ward in wards:
+            ward_user = ward.user
+
+            total_users = CitizenVerification.objects.filter(
+                ward=ward_user,
+                status="APPROVED"
+            ).count()
+
+            total_complaints = Complaint.objects.filter(
+                ward=ward_user
+            ).count()
+
+            pending_complaints = Complaint.objects.filter(
+                ward=ward_user,
+                status="PENDING"
+            ).count()
+
             ward_list.append({
-                "id": ward.id,
+                "id": ward_user.id,   
                 "ward_name": ward.ward_name,
                 "officer_name": ward.officer_full_name,
-                "email": ward.official_email
+                "email": ward.official_email,
+                "panchayath_name": user.username,
+
+                "total_users": total_users,
+                "total_complaints": total_complaints,
+                "pending_complaints": pending_complaints,
+
+                "status": ward_user.status
             })
 
         return Response({
@@ -691,6 +723,11 @@ class AdminWardDetailView(APIView):
             status="RESOLVED"
         ).count()
         
+        escalated_complaints = Complaint.objects.filter(
+            ward=ward_user,
+            status="ESCALATED"
+        ).count()
+        
         
         citizens = CitizenVerification.objects.filter(
             ward=ward_user,
@@ -742,7 +779,8 @@ class AdminWardDetailView(APIView):
                 "total_citizens": total_citizens,
                 "total_complaints": total_complaints,
                 "pending_complaints": pending_complaints,
-                "resolved_complaints": resolved_complaints
+                "resolved_complaints": resolved_complaints,
+                "escalated_complaints": escalated_complaints
             }
         })
 

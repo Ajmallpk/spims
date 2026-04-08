@@ -16,6 +16,8 @@ const PanchayathFilter = ({ value, onChange }) => {
   const [panchayaths, setPanchayaths] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  console.log("PANCHAYATH LIST:", panchayaths);
+
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -42,7 +44,10 @@ const PanchayathFilter = ({ value, onChange }) => {
       />
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const val = e.target.value;
+          onChange(e.target.value);
+        }}
         disabled={loading}
         className="w-full appearance-none pl-9 pr-9 py-2.5 text-sm rounded-lg border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
       >
