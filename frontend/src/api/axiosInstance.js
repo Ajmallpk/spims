@@ -152,26 +152,29 @@ import "nprogress/nprogress.css";
 import { triggerSuspension } from "@/utils/suspensionHandler";
 
 const axiosInstance = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/",
+  baseURL: "http://localhost:8000/api/",
+  withCredentials: true,
+  xsrfCookieName: "csrftoken",        
+  xsrfHeaderName: "X-CSRFToken",
 });
 
 axiosInstance.interceptors.request.use((config) => {
   NProgress.start();
 
-  const token = localStorage.getItem("access");
+  // const token = localStorage.getItem("access");
 
-  const isAuthRoute =
-    config.url.includes("auth/login") ||
-    config.url.includes("auth/signup") ||
-    config.url.includes("auth/verify-otp") ||
-    config.url.includes("auth/resend-otp") ||
-    config.url.includes("auth/forgot-password") ||
-    config.url.includes("auth/verify-reset-otp") ||
-    config.url.includes("auth/reset-password");
+  // const isAuthRoute =
+  //   config.url.includes("auth/login") ||
+  //   config.url.includes("auth/signup") ||
+  //   config.url.includes("auth/verify-otp") ||
+  //   config.url.includes("auth/resend-otp") ||
+  //   config.url.includes("auth/forgot-password") ||
+  //   config.url.includes("auth/verify-reset-otp") ||
+  //   config.url.includes("auth/reset-password");
 
-  if (token && !isAuthRoute) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  // if (token && !isAuthRoute) {
+  //   config.headers.Authorization = `Bearer ${token}`;
+  // }
 
   return config;
 });
@@ -192,8 +195,8 @@ axiosInstance.interceptors.response.use(
     ) {
       console.log("ACCOUNT SUSPENDED DETECTED");
 
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
+      // localStorage.removeItem("access");
+      // localStorage.removeItem("refresh");
 
       triggerSuspension();
 
@@ -220,44 +223,44 @@ axiosInstance.interceptors.response.use(
     }
 
     // TOKEN REFRESH
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // if (error.response?.status === 401 && !originalRequest._retry) {
 
-      originalRequest._retry = true;
+    //   originalRequest._retry = true;
 
-      const refresh = localStorage.getItem("refresh");
+    //   const refresh = localStorage.getItem("refresh");
 
-      if (!refresh) {
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
+    //   if (!refresh) {
+    //     localStorage.removeItem("access");
+    //     localStorage.removeItem("refresh");
+    //     window.location.href = "/login";
+    //     return Promise.reject(error);
+    //   }
 
-      try {
+    //   try {
 
-        const response = await axios.post(
-          "http://127.0.0.1:8000/api/auth/token/refresh/",
-          { refresh }
-        );
+    //     const response = await axios.post(
+    //       "http://127.0.0.1:8000/api/auth/token/refresh/",
+    //       { refresh }
+    //     );
 
-        const newAccess = response.data.access;
+    //     const newAccess = response.data.access;
 
-        localStorage.setItem("access", newAccess);
+    //     localStorage.setItem("access", newAccess);
 
-        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+    //     originalRequest.headers.Authorization = `Bearer ${newAccess}`;
 
-        return axiosInstance(originalRequest);
+    //     return axiosInstance(originalRequest);
 
-      } catch (refreshError) {
+    //   } catch (refreshError) {
 
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
+    //     localStorage.removeItem("access");
+    //     localStorage.removeItem("refresh");
 
-        window.location.href = "/login";
+    //     window.location.href = "/login";
 
-        return Promise.reject(refreshError);
-      }
-    }
+    //     return Promise.reject(refreshError);
+    //   }
+    // }
 
     // OTHER ERRORS
     if (error.response) {

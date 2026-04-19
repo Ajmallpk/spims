@@ -102,11 +102,27 @@ const formatTimeAgo = (dateString) => {
 
 const Home = () => {
 
-  const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
+  // const handleLogout = () => {
+  //   localStorage.removeItem("access");
+  //   localStorage.removeItem("refresh");
 
-    window.location.href = "/citizen/registration";
+  //   window.location.href = "/citizen/registration";
+  // };
+
+
+  const handleLogout = async () => {
+    try {
+      await citizenapi.logout();  
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      
+      localStorage.removeItem("role");
+      localStorage.removeItem("status");
+      localStorage.removeItem("is_verified");
+
+      window.location.href = "/citizen/registration";
+    }
   };
 
 
@@ -129,9 +145,9 @@ const Home = () => {
 
       const formattedIssues = (res.data.results || []).map((issue) => ({
         id: issue.id,
-        title: issue.title, 
+        title: issue.title,
         citizenName: issue.citizen_name,
-        ward: issue.ward,   
+        ward: issue.ward,
         wardName: issue.ward_name,
         location: issue.location,
         timeAgo: formatTimeAgo(issue.created_at),
@@ -148,180 +164,180 @@ const Home = () => {
           timeAgo: formatTimeAgo(issue.resolution.created_at),
           media: issue.resolution.media || []   // 🔥 IMPORTANT
         } : null,
-          
 
-  comments: []
+
+        comments: []
       }));
 
-setIssues(formattedIssues);
+      setIssues(formattedIssues);
 
     } catch (err) {
-  console.error("Failed to load complaints", err);
-} finally {
-  setLoading(false);
-}
+      console.error("Failed to load complaints", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-// Simulate fetch
-useEffect(() => {
+  // Simulate fetch
+  useEffect(() => {
 
-  const fetchVerificationStatus = async () => {
+    const fetchVerificationStatus = async () => {
+      try {
+        const res = await citizenapi.getVerificationStatus();
+
+        if (!res.data.submitted) {
+          setCitizenVerificationStatus(VERIFICATION_STATUS.NOT_VERIFIED);
+        }
+        else if (res.data.status === "PENDING") {
+          setCitizenVerificationStatus(VERIFICATION_STATUS.PENDING);
+        }
+        else if (res.data.status === "APPROVED") {
+          setCitizenVerificationStatus(VERIFICATION_STATUS.APPROVED);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch verification status", error);
+      }
+    };
+
+    fetchVerificationStatus();
+    loadFeed();
+
+  }, []);
+
+  const handlePostIssueClick = () => {
+    if (citizenVerificationStatus === VERIFICATION_STATUS.NOT_VERIFIED) {
+      setIsVerificationModalOpen(true);
+    } else if (citizenVerificationStatus === VERIFICATION_STATUS.PENDING) {
+      setPendingMessage(true);
+      setTimeout(() => setPendingMessage(false), 3000);
+    } else {
+      setIsCreateIssueOpen(true);
+    }
+  };
+
+  // const handleIssueSubmit = (formData) => {
+  //   const newIssue = {
+  //     id: Date.now(),
+  //     citizenName: "You",
+  //     ward: formData.ward,
+  //     location: formData.location || "Your location",
+  //     timeAgo: "Just now",
+  //     description: formData.description,
+  //     category: formData.title,
+  //     image: formData.image ? URL.createObjectURL(formData.image) : null,
+  //     upvotes: 0,
+  //     commentCount: 0,
+  //     authorityResponse: null,
+  //     comments: [],
+  //   };
+  //   setIssues((prev) => [newIssue, ...prev]);
+  // };
+
+  const handleIssueSubmit = async (formData) => {
     try {
-      const res = await citizenapi.getVerificationStatus();
 
-      if (!res.data.submitted) {
-        setCitizenVerificationStatus(VERIFICATION_STATUS.NOT_VERIFIED);
+      const data = new FormData();
+
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("ward", formData.ward);
+      data.append("location", formData.location);
+      data.append("category", formData.category);
+
+      if (formData.media?.length) {
+        formData.media.forEach((file) => {
+          data.append("media_files", file);
+        });
       }
-      else if (res.data.status === "PENDING") {
-        setCitizenVerificationStatus(VERIFICATION_STATUS.PENDING);
-      }
-      else if (res.data.status === "APPROVED") {
-        setCitizenVerificationStatus(VERIFICATION_STATUS.APPROVED);
-      }
+
+      await complaintapi.createComplaint(data);
+
+      setIsCreateIssueOpen(false);
+
+      await loadFeed();   // refresh feed automatically
 
     } catch (error) {
-      console.error("Failed to fetch verification status", error);
+      console.error(error);
     }
   };
 
-  fetchVerificationStatus();
-  loadFeed();
-
-}, []);
-
-const handlePostIssueClick = () => {
-  if (citizenVerificationStatus === VERIFICATION_STATUS.NOT_VERIFIED) {
-    setIsVerificationModalOpen(true);
-  } else if (citizenVerificationStatus === VERIFICATION_STATUS.PENDING) {
-    setPendingMessage(true);
-    setTimeout(() => setPendingMessage(false), 3000);
-  } else {
-    setIsCreateIssueOpen(true);
-  }
-};
-
-// const handleIssueSubmit = (formData) => {
-//   const newIssue = {
-//     id: Date.now(),
-//     citizenName: "You",
-//     ward: formData.ward,
-//     location: formData.location || "Your location",
-//     timeAgo: "Just now",
-//     description: formData.description,
-//     category: formData.title,
-//     image: formData.image ? URL.createObjectURL(formData.image) : null,
-//     upvotes: 0,
-//     commentCount: 0,
-//     authorityResponse: null,
-//     comments: [],
-//   };
-//   setIssues((prev) => [newIssue, ...prev]);
-// };
-
-const handleIssueSubmit = async (formData) => {
-  try {
-
-    const data = new FormData();
-
-    data.append("title", formData.title);
-    data.append("description", formData.description);
-    data.append("ward", formData.ward);
-    data.append("location", formData.location);
-    data.append("category", formData.category);
-
-    if (formData.media?.length) {
-      formData.media.forEach((file) => {
-        data.append("media_files", file);
-      });
-    }
-
-    await complaintapi.createComplaint(data);
-
-    setIsCreateIssueOpen(false);
-
-    await loadFeed();   // refresh feed automatically
-
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 
+  const handleVerifyRedirect = () => {
+    // In real app: navigate("/citizen/verification")
+    window.location.href = "/citizen/verification";
+  };
 
-const handleVerifyRedirect = () => {
-  // In real app: navigate("/citizen/verification")
-  window.location.href = "/citizen/verification";
-};
+  return (
+    <>
+      {/* Pending verification toast */}
+      {pendingMessage && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl px-5 py-3 text-sm shadow-lg font-medium">
+          ⏳ Your verification is under review. Please wait for approval.
+        </div>
+      )}
 
-return (
-  <>
-    {/* Pending verification toast */}
-    {pendingMessage && (
-      <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl px-5 py-3 text-sm shadow-lg font-medium">
-        ⏳ Your verification is under review. Please wait for approval.
-      </div>
-    )}
+      {/* Post Issue Button */}
+      <PostIssueButton onClick={handlePostIssueClick} />
+      <button
+        onClick={handleLogout}
+        className="fixed bottom-6 right-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl shadow-lg text-sm font-semibold z-50"
+      >
+        Logout
+      </button>
 
-    {/* Post Issue Button */}
-    <PostIssueButton onClick={handlePostIssueClick} />
-    <button
-      onClick={handleLogout}
-      className="fixed bottom-6 right-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl shadow-lg text-sm font-semibold z-50"
-    >
-      Logout
-    </button>
-
-    {/* Feed */}
-    {/* Feed */}
-    {loading ? (
-      <div className="space-y-4">
-        {[1, 2, 3].map((n) => (
-          <div key={n} className="bg-white rounded-2xl shadow-md p-5 animate-pulse">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 bg-gray-200 rounded-full" />
-              <div className="space-y-1.5">
-                <div className="h-3 w-32 bg-gray-200 rounded" />
-                <div className="h-2.5 w-48 bg-gray-100 rounded" />
+      {/* Feed */}
+      {/* Feed */}
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="bg-white rounded-2xl shadow-md p-5 animate-pulse">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 bg-gray-200 rounded-full" />
+                <div className="space-y-1.5">
+                  <div className="h-3 w-32 bg-gray-200 rounded" />
+                  <div className="h-2.5 w-48 bg-gray-100 rounded" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-100 rounded w-full" />
+                <div className="h-3 bg-gray-100 rounded w-5/6" />
+                <div className="h-3 bg-gray-100 rounded w-4/6" />
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="h-3 bg-gray-100 rounded w-full" />
-              <div className="h-3 bg-gray-100 rounded w-5/6" />
-              <div className="h-3 bg-gray-100 rounded w-4/6" />
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : issues.length === 0 ? (
-      <div className="bg-white rounded-2xl shadow-md p-10 text-center text-gray-500">
-        <p className="text-sm font-medium">
-          No issues reported in your ward yet.
-        </p>
-        <p className="text-xs mt-1">
-          Be the first citizen to report a problem.
-        </p>
-      </div>
-    ) : (
-      <div className="space-y-5">
-        {issues.map((issue) => (
-          <IssueCard key={issue.id} issue={issue} />
-        ))}
-      </div>
-    )}
+          ))}
+        </div>
+      ) : issues.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-md p-10 text-center text-gray-500">
+          <p className="text-sm font-medium">
+            No issues reported in your ward yet.
+          </p>
+          <p className="text-xs mt-1">
+            Be the first citizen to report a problem.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {issues.map((issue) => (
+            <IssueCard key={issue.id} issue={issue} />
+          ))}
+        </div>
+      )}
 
-    {/* Modals */}
-    <CreateIssueModal
-      isOpen={isCreateIssueOpen}
-      onClose={() => setIsCreateIssueOpen(false)}
-      onSubmit={handleIssueSubmit}
-    />
-    <VerificationRequiredModal
-      isOpen={isVerificationModalOpen}
-      onClose={() => setIsVerificationModalOpen(false)}
-      onVerify={handleVerifyRedirect}
-    />
-  </>
-);
+      {/* Modals */}
+      <CreateIssueModal
+        isOpen={isCreateIssueOpen}
+        onClose={() => setIsCreateIssueOpen(false)}
+        onSubmit={handleIssueSubmit}
+      />
+      <VerificationRequiredModal
+        isOpen={isVerificationModalOpen}
+        onClose={() => setIsVerificationModalOpen(false)}
+        onVerify={handleVerifyRedirect}
+      />
+    </>
+  );
 };
 
 export default Home;

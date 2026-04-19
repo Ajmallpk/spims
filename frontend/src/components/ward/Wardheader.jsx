@@ -21,10 +21,24 @@ export default function WardHeader() {
       location.pathname.startsWith(path)
     )?.[1] ?? "Ward Portal";
 
-  const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    navigate("/login", { replace: true });
+  // const handleLogout = () => {
+  //   localStorage.removeItem("access");
+  //   localStorage.removeItem("refresh");
+  //   navigate("/login", { replace: true });
+  // };
+
+
+
+
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("auth/logout/");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      localStorage.clear();
+      navigate("/login", { replace: true });
+    }
   };
 
   useEffect(() => {

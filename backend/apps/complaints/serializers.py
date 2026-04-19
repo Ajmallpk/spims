@@ -121,12 +121,6 @@ class ComplaintChatMessageSerializer(serializers.ModelSerializer):
         
 
         
-        
-        
-
-        
-        
-
 
 class ComplaintDetailSerializer(serializers.ModelSerializer):
 

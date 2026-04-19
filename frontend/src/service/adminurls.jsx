@@ -2,7 +2,13 @@ import axiosInstance from "@/api/axiosInstance";
 
 
 export const adminapi = {
-    login: (email, password) => { return axiosInstance.post("/admin/login/", { email: email.trim().toLowerCase(), password }); },
+    login: (email, password) => {
+        return axiosInstance.post("auth/login/authority/", {
+            email: email.trim().toLowerCase(),
+            password,
+            role: "ADMIN"
+        });
+    },
     dashboard: () => { return axiosInstance.get("/admin/dashboard/") },
     recentVerification: () => { return axiosInstance.get("/admin/recent-verifications/") },
     criticalAlert: () => { return axiosInstance.get("/admin/critical-alerts/") },
@@ -37,4 +43,5 @@ export const adminapi = {
         axiosInstance.post(`/admin/citizen/activate/${id}/`),
     citizenDetail: (id) =>
         axiosInstance.get(`/admin/citizen/${id}/`),
+    me: () => axiosInstance.get("/admin/auth/me/"),
 }

@@ -27,6 +27,8 @@ export const verifyResetOtp = (data) =>{
 export const resetPassword = (data) =>{
   return axiosInstance.post("auth/reset-password/", data)
 }
+
+
   
   
 

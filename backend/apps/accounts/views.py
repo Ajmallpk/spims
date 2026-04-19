@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 from .otp_utils import (generate_otp,verify_otp,get_cache_key,resend_otp,store_signup_data,
                        store_otp,RESEND_LIMIT,clear_otp,get_signup_data,delete_signup_data,send_otp_email)
 
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+
+
 
 
 
@@ -135,9 +140,77 @@ class ResendOTPView(APIView):
     
     
 
+
+
 class EmailLoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
-    serializer_class = EmailTokenObtainPairSerializer    
+    serializer_class = EmailTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.user
+
+        refresh = RefreshToken.for_user(user)
+        access = str(refresh.access_token)
+
+        response = Response({
+            "message": "Login successful",
+            "role": serializer.validated_data.get("role"),
+            "status": serializer.validated_data.get("status"),
+            "is_superuser": serializer.validated_data.get("is_superuser"),
+            "is_verified": serializer.validated_data.get("is_verified"),
+        })
+
+        
+        response.set_cookie(
+            key="access_token",
+            value=access,
+            httponly=True,
+            secure=False,  
+            samesite="Lax"
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh),
+            httponly=True,
+            secure=False,
+            samesite="Lax"
+        )
+
+        return response 
+    
+    
+    
+    
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.COOKIES.get("refresh_token")
+
+            if not refresh_token:
+                return Response({"error": "No refresh token"}, status=400)
+
+            token = RefreshToken(refresh_token)
+            token.blacklist() 
+
+            response = Response({"message": "Logged out successfully"})
+
+            response.delete_cookie("access_token")
+            response.delete_cookie("refresh_token")
+
+            return response
+
+        except Exception:
+            return Response({"error": "Invalid token"}, status=400)  
     
     
     
@@ -209,10 +282,34 @@ class ResetPasswordView(APIView):
     
     
     
+
+
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class SetCSRFTokenView(APIView):
+    permission_classes = [AllowAny]
     
+    def get(self, request):
+        return Response({"message": "CSRF cookie set"})   
     
 
 
+
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+        "id": request.user.id,
+        "email": request.user.email,
+        "role": "ADMIN" if request.user.is_superuser else request.user.role,
+    })
     
     
     

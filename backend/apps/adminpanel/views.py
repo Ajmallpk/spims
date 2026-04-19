@@ -36,7 +36,9 @@ from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 import logging
-
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -47,8 +49,37 @@ User = get_user_model()
 
 
 
+
+
+from rest_framework.response import Response
+
 class AdminLoginView(TokenObtainPairView):
     serializer_class = AdminLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        access = response.data.get("access")
+        refresh = response.data.get("refresh")
+
+        
+        response.set_cookie(
+            key="access_token",
+            value=access,
+            httponly=True,
+            secure=False,
+            samesite="None"
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh,
+            httponly=True,
+            secure=False,
+            samesite="None"
+        )
+
+        return response
     
 
 class AdminProfileView(APIView):
@@ -1074,3 +1105,18 @@ class ActivateCitizenView(APIView):
         logger.info(f"Admin {request.user.id} activated Citizen {user.id}")
 
         return Response({"message": "Citizen activated successfully"})
+    
+    
+    
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "role": "ADMIN" if request.user.is_superuser else "USER",
+            "username": request.user.username
+        })
+        
+        
+        
+        

@@ -6,13 +6,13 @@ import AdminHeader from "@/components/admin/Adminheader";
 const AdminLayout = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("access");
+  // useEffect(() => {
+  //   const token = localStorage.getItem("access");
 
-    if (!token) {
-      navigate("/admin/login", { replace: true });
-    }
-  }, [navigate]);
+  //   if (!token) {
+  //     navigate("/admin/login", { replace: true });
+  //   }
+  // }, []);
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden font-sans">

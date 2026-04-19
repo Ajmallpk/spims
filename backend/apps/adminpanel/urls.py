@@ -29,6 +29,7 @@ urlpatterns = [
     path("citizen/suspend/<int:user_id>/", views.SuspendCitizenView.as_view()),
     path("citizen/activate/<int:user_id>/", views.ActivateCitizenView.as_view()),
     path("citizen/<int:user_id>/", views.AdminCitizenDetailView.as_view()),
+    path("auth/me/", views.MeView.as_view()),
 ]
 
 

@@ -10,7 +10,11 @@ class AdminLoginSerializer(TokenObtainPairSerializer):
     username_field = User.EMAIL_FIELD
 
     def validate(self, attrs):
+        
+        attrs["username"] = attrs.get("email")
+
         data = super().validate(attrs)
+
         user = self.user
 
         if not user.is_superuser:

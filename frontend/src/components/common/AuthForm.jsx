@@ -191,8 +191,6 @@ export function AuthForm() {
       })
 
       // Save tokens
-      localStorage.setItem("access", response.data.access)
-      localStorage.setItem("refresh", response.data.refresh)
       localStorage.setItem("role", response.data.role)
       localStorage.setItem("status", response.data.status)
       // localStorage.setItem("is_verified", response.data.is_verified)

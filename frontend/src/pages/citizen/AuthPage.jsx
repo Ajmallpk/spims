@@ -116,10 +116,10 @@ function LoginForm() {
       const response = await citizenapi.login({
         email,
         password,
+        role: "CITIZEN"
       });
 
-      localStorage.setItem("access", response.data.access);
-      localStorage.setItem("refresh", response.data.refresh);
+      
 
       window.location.href = "/citizen/home";
 

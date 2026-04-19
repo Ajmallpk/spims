@@ -8,6 +8,7 @@
 //   - Profile is always accessible regardless of verification status.
 
 import { NavLink, useNavigate } from "react-router-dom";
+import axiosInstance from "@/api/axiosInstance";
 
 // ─── Nav menu config ───────────────────────────────────────────────────────
 const NAV_ITEMS = [
@@ -149,8 +150,8 @@ export default function PanchayathSidebar({
         {!isVerified && (
           <div
             className={`mx-3 mt-3 px-3 py-2.5 rounded-xl text-xs font-semibold flex items-start gap-2 ${verificationSubmitted
-                ? "bg-blue-50 text-blue-700 border border-blue-200"
-                : "bg-amber-50 text-amber-700 border border-amber-200"
+              ? "bg-blue-50 text-blue-700 border border-blue-200"
+              : "bg-amber-50 text-amber-700 border border-amber-200"
               }`}
           >
             <svg
@@ -246,9 +247,19 @@ export default function PanchayathSidebar({
         {/* ── Footer / Logout ── */}
         <div className="px-3 pb-5 pt-3 border-t border-slate-100">
           <button
-            onClick={() => {
-              localStorage.clear();
-              navigate("/login");
+            // onClick={() => {
+            //   localStorage.clear();
+            //   navigate("/login");
+            // }}
+            onClick={async () => {
+              try {
+                await axiosInstance.post("auth/logout/"); 
+              } catch (error) {
+                console.error("Logout failed", error);
+              } finally {
+                localStorage.clear(); 
+                navigate("/login");
+              }
             }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors duration-150"
           >

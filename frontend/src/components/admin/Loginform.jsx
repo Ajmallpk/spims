@@ -40,14 +40,13 @@ const LoginForm = () => {
       }
 
       // Store tokens and session data
-      localStorage.setItem("access", data.access);
-      localStorage.setItem("refresh", data.refresh);
+      
       localStorage.setItem("role", data.role);
       localStorage.setItem("status", data.status);
 
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      toast.error("Login error:", err);
+      toast.error(err.response?.data?.detail || "Login failed");
 
       const status = err.response?.status;
       const detail =

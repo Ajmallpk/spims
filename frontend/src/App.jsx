@@ -9,6 +9,7 @@ import AdminProtectedRoute from "./routes/AdminProtectedRoute";
 import SuspendedModal from "@/components/common/SuspendedModal";
 import { useEffect } from "react";
 import { useSuspension } from "@/context/SuspensionContext";
+import axiosInstance from "@/api/axiosInstance";
 
 
 
@@ -80,6 +81,11 @@ export default function App() {
   // useEffect(() => {
   //   registerSuspensionSetter(setIsSuspended);
   // }, [setIsSuspended]);
+
+
+  useEffect(() => {
+    axiosInstance.get("auth/csrf/");
+  }, []);
 
   return (
     <>
@@ -291,7 +297,7 @@ export default function App() {
             path="complaint-view/:id"
             element={<ComplaintViewer />}
           />
-          
+
           <Route path="reassigned-complaints" element={<ReassignedComplaints />} />
           <Route path="reassigned-complaints/:id" element={<ReassignedComplaintDetail />} />
 

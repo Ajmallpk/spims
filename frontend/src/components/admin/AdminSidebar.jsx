@@ -47,9 +47,16 @@ const AdminSidebar = () => {
 
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("auth/logout/");
+    } catch (err) {
+      console.log("Logout error", err);
+    }
+
+    localStorage.removeItem("role");
+    localStorage.removeItem("status");
+
     navigate("/admin/login");
   };
 
