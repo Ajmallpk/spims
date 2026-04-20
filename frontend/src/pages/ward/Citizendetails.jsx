@@ -31,7 +31,7 @@ export default function CitizenDetails() {
 
       const res = await wardapi.getCitizenDetails(id);
       console.log("Citizen Full API Response:", res.data);
-      setCitizenData(res.data);
+      setCitizenData(res.data.data);
 
     } catch (err) {
 

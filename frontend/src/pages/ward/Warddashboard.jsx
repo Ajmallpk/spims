@@ -23,7 +23,7 @@ export default function WardDashboard() {
     try {
       setIsLoadingStats(true);
       const res = await wardapi.dashboard();
-      setStats(res.data);
+      setStats(res.data.data);
     } catch (err) {
       // interceptor will show toast
     } finally {
@@ -35,7 +35,7 @@ export default function WardDashboard() {
     try {
       setIsLoadingVerifications(true);
       const res = await wardapi.recentVerifications();
-      setVerifications(res.data ?? []);
+      setVerifications(res.data.data ?? []);
     } catch (err) {
       // interceptor will show toast
     } finally {

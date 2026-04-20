@@ -28,7 +28,7 @@ export default function WardLayout() {
     const syncVerification = async () => {
       try {
         const res = await axiosInstance.get("/ward/profile/");
-        const status = res.data.verification_status;
+        const status = res.data.data.verification_status;
 
         const isApproved = status === "APPROVED";
 

@@ -2,10 +2,10 @@ import DetailStatCard from "@/components/ward/DetailStatCard";
 
 export default function CitizenStatsGrid({ stats, isLoading }) {
   const cards = [
-    { label: "Total Complaints", value: stats?.total_complaints, color: "blue", icon: "📋" },
-    { label: "Pending Complaints", value: stats?.pending_complaints, color: "amber", icon: "⏳" },
-    { label: "Resolved Complaints", value: stats?.resolved_complaints, color: "green", icon: "✅" },
-    { label: "Escalated Complaints", value: stats?.escalated_complaints, color: "purple", icon: "🔺" },
+    { label: "Total Complaints", value: stats?.total, color: "blue", icon: "📋" },
+    { label: "Pending Complaints", value: stats?.pending, color: "amber", icon: "⏳" },
+    { label: "Resolved Complaints", value: stats?.resolved, color: "green", icon: "✅" },
+    { label: "Escalated Complaints", value: stats?.escalated, color: "purple", icon: "🔺" },
   ];
 
   if (isLoading) {

@@ -163,7 +163,7 @@ export default function WardProfile() {
 
       const res = await wardapi.verificationStatus();
 
-      setVerificationStatus(res.data);
+      setVerificationStatus(res.data.data);
 
     } catch (err) {
       // interceptor will show toast

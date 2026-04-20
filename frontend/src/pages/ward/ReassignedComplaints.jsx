@@ -311,10 +311,15 @@ export default function ReassignedComplaints() {
           category: category,
         });
         // Support both paginated { results: [] } and plain array responses
-        const data = Array.isArray(response.data)
-          ? response.data
-          : response.data.results ?? [];
-        setComplaints(data);
+        const raw = response.data?.data;
+
+        const complaintsArray = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.data)
+            ? raw.data
+            : [];
+
+        setComplaints(complaintsArray);
       } catch (err) {
         setError(
           err?.response?.data?.detail ??

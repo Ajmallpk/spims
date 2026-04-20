@@ -34,7 +34,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
   const [confirmAction, setConfirmAction] = useState(null);
 
   const isPending =
-    (citizen?.status ?? "pending").toLowerCase() === "pending";
+    (citizen?.status || "").toLowerCase() === "pending";
 
 
 
@@ -58,16 +58,22 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
       setIsSubmitting(true);
 
       if (confirmAction === "approve") {
-        await wardapi.approveCitizen(citizen?.id)
-        onSuccess("Citizen verification approved successfully.");
+        await wardapi.approveCitizen(citizen?.id);
       }
 
       if (confirmAction === "reject") {
-        await wardapi.rejectCitizen(citizen?.id, rejectReason)
-        onSuccess("Citizen verification rejected.");
+        await wardapi.rejectCitizen(citizen?.id, rejectReason);
+        citizen.status = "REJECTED";
       }
 
       onClose();
+
+      onSuccess(
+        confirmAction === "approve"
+          ? "Citizen verification approved successfully."
+          : "Citizen verification rejected."
+      );
+
     } catch (err) {
       toast.error("Action failed");
     } finally {
@@ -103,46 +109,46 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
           {/* Citizen Avatar + Status */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-              {(citizen?.citizen?.full_name?.[0] ?? "?")}
+              {(citizen?.full_name?.[0] ?? "?")}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-base font-bold text-gray-900 truncate">
-                {citizen?.citizen?.full_name ?? "—"}
+                {citizen?.full_name ?? "—"}
               </p>
-              <p className="text-xs text-gray-500 truncate mt-0.5">{citizen?.citizen?.email ?? "—"}</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{citizen?.email ?? "—"}</p>
             </div>
-            <StatusBadge status={citizen?.verification?.status} />
+            <StatusBadge status={citizen?.status} />
           </div>
           {/* Aadhaar Image */}
-          {citizen?.verification?.aadhaar_image && (
+          {citizen?.aadhaar_image && (
             <img
-              src={citizen?.verification?.aadhaar_image}
+              src={citizen?.aadhaar_image}
               alt="aadhaar"
-              onClick={() => setPreviewImage(citizen?.verification?.aadhaar_image)}
+              onClick={() => setPreviewImage(citizen?.aadhaar_image)}
               className="w-full max-h-60 object-contain rounded-xl border cursor-pointer hover:scale-[1.02] transition"
             />
           )}
 
           {/* Selfie Image */}
-          {citizen?.verification?.selfie_image && (
+          {citizen?.selfie_image && (
             <img
-              src={citizen?.verification?.selfie_image}
+              src={citizen?.selfie_image}
               alt="selfie"
-              onClick={() => setPreviewImage(citizen?.verification?.selfie_image)}
+              onClick={() => setPreviewImage(citizen?.selfie_image)}
               className="w-full max-h-60 object-contain rounded-xl border cursor-pointer hover:scale-[1.02] transition"
             />
           )}
 
           {/* Detail Grid */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <DetailRow label="Full Name" value={citizen?.citizen?.full_name} />
-            <DetailRow label="Email" value={citizen?.citizen?.email} />
-            <DetailRow label="Phone" value={citizen?.citizen?.phone} />
-            <DetailRow label="Submitted Date" value={formatDate(citizen?.verification?.submitted_at)} />
+            <DetailRow label="Full Name" value={citizen?.full_name} />
+            <DetailRow label="Email" value={citizen?.email} />
+            <DetailRow label="Phone" value={citizen?.phone} />
+            <DetailRow label="Submitted Date" value={formatDate(citizen?.submitted_at)} />
             <div className="col-span-2">
               <DetailRow
                 label="Address"
-                value={`${citizen?.citizen?.house_number ?? ""}, ${citizen?.citizen?.street_name ?? ""}`}
+                value={`${citizen?.house_number ?? ""}, ${citizen?.street_name ?? ""}`}
               />
             </div>
           </div>
@@ -298,8 +304,8 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
                 onClick={handleConfirm}
                 disabled={isSubmitting}
                 className={`flex-1 px-4 py-2 rounded-xl text-white text-sm font-semibold ${confirmAction === "approve"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-red-600 hover:bg-red-700"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
                   }`}
               >
                 {isSubmitting

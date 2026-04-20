@@ -6,36 +6,36 @@ import wardapi from "@/service/wardurls";
 // CONFIG
 // ─────────────────────────────────────────────
 const CATEGORY_CONFIG = {
-  ROAD:        { bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-200", dot: "bg-orange-500" },
-  WATER:       { bg: "bg-blue-100",   text: "text-blue-700",   border: "border-blue-200",   dot: "bg-blue-500"   },
+  ROAD: { bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-200", dot: "bg-orange-500" },
+  WATER: { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-200", dot: "bg-blue-500" },
   ELECTRICITY: { bg: "bg-yellow-100", text: "text-yellow-700", border: "border-yellow-200", dot: "bg-yellow-500" },
-  WASTE:       { bg: "bg-green-100",  text: "text-green-700",  border: "border-green-200",  dot: "bg-green-500"  },
-  OTHER:       { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200", dot: "bg-purple-500" },
+  WASTE: { bg: "bg-green-100", text: "text-green-700", border: "border-green-200", dot: "bg-green-500" },
+  OTHER: { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200", dot: "bg-purple-500" },
 };
 
 const STATUS_CONFIG = {
-  PENDING:     { bg: "bg-yellow-100",  text: "text-yellow-700",  border: "border-yellow-200",  dot: "bg-yellow-500",  label: "Pending",     accent: "border-l-yellow-400"  },
-  IN_PROGRESS: { bg: "bg-amber-100",   text: "text-amber-700",   border: "border-amber-200",   dot: "bg-amber-500",   label: "In Progress", accent: "border-l-amber-400"   },
-  RESOLVED:    { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500", label: "Resolved",    accent: "border-l-emerald-500" },
-  ESCALATED:   { bg: "bg-red-100",     text: "text-red-700",     border: "border-red-200",     dot: "bg-red-500",     label: "Escalated",   accent: "border-l-red-500"     },
+  PENDING: { bg: "bg-yellow-100", text: "text-yellow-700", border: "border-yellow-200", dot: "bg-yellow-500", label: "Pending", accent: "border-l-yellow-400" },
+  IN_PROGRESS: { bg: "bg-amber-100", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-500", label: "In Progress", accent: "border-l-amber-400" },
+  RESOLVED: { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500", label: "Resolved", accent: "border-l-emerald-500" },
+  ESCALATED: { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", dot: "bg-red-500", label: "Escalated", accent: "border-l-red-500" },
 };
 
 const TIMELINE_ICON_PATHS = {
-  filed:      "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-  received:   "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
-  update:     "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-  escalated:  "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
+  filed: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+  received: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+  update: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+  escalated: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z",
   reassigned: "M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4",
-  resolved:   "M5 13l4 4L19 7",
+  resolved: "M5 13l4 4L19 7",
 };
 
 const TIMELINE_STYLE = {
-  filed:      { bg: "bg-blue-100",    color: "text-blue-600"    },
-  received:   { bg: "bg-slate-100",   color: "text-slate-600"   },
-  update:     { bg: "bg-amber-100",   color: "text-amber-600"   },
-  escalated:  { bg: "bg-red-100",     color: "text-red-600"     },
-  reassigned: { bg: "bg-indigo-100",  color: "text-indigo-600"  },
-  resolved:   { bg: "bg-emerald-100", color: "text-emerald-600" },
+  filed: { bg: "bg-blue-100", color: "text-blue-600" },
+  received: { bg: "bg-slate-100", color: "text-slate-600" },
+  update: { bg: "bg-amber-100", color: "text-amber-600" },
+  escalated: { bg: "bg-red-100", color: "text-red-600" },
+  reassigned: { bg: "bg-indigo-100", color: "text-indigo-600" },
+  resolved: { bg: "bg-emerald-100", color: "text-emerald-600" },
 };
 
 // ─────────────────────────────────────────────
@@ -166,9 +166,9 @@ function MediaGrid({ items = [], onPreview }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {items.map((item, i) => {
-        const url   = item.file ?? item.url ?? item;
+        const url = item.file ?? item.url ?? item;
         const label = item.caption ?? item.name ?? `File ${i + 1}`;
-        const vid   = isVideo(url);
+        const vid = isVideo(url);
 
         return vid ? (
           <div
@@ -215,8 +215,8 @@ function MediaGrid({ items = [], onPreview }) {
 //  ResolveModal
 // ─────────────────────────────────────────────
 function ResolveModal({ onClose, onConfirm, loading }) {
-  const [message, setMessage]   = useState("");
-  const [files, setFiles]       = useState([]);
+  const [message, setMessage] = useState("");
+  const [files, setFiles] = useState([]);
   const canSubmit = message.trim().length > 0 && !loading;
 
   return (
@@ -347,8 +347,8 @@ function Timeline({ events = [] }) {
       <div className="space-y-4">
         {events.map((item, i) => {
           const typeKey = item.type ?? "update";
-          const style   = TIMELINE_STYLE[typeKey] ?? TIMELINE_STYLE.update;
-          const iconD   = TIMELINE_ICON_PATHS[typeKey] ?? TIMELINE_ICON_PATHS.update;
+          const style = TIMELINE_STYLE[typeKey] ?? TIMELINE_STYLE.update;
+          const iconD = TIMELINE_ICON_PATHS[typeKey] ?? TIMELINE_ICON_PATHS.update;
           return (
             <div key={i} className="flex gap-4 relative">
               <div className={`w-9 h-9 rounded-xl ${style.bg} flex items-center justify-center flex-shrink-0 z-10 border-2 border-white shadow-sm`}>
@@ -411,25 +411,25 @@ function PageSkeleton() {
 // MAIN PAGE: ReassignedComplaintDetail
 // ─────────────────────────────────────────────
 export default function ReassignedComplaintDetail() {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  const [complaint,     setComplaint]     = useState(null);
-  const [loading,       setLoading]       = useState(true);
-  const [fetchError,    setFetchError]    = useState(null);
-  const [previewImg,    setPreviewImg]    = useState(null);
-  const [showModal,     setShowModal]     = useState(false);
-  const [resolving,     setResolving]     = useState(false);
-  const [resolveError,  setResolveError]  = useState(null);
-  const [resolveSuccess,setResolveSuccess]= useState(false);
+  const [complaint, setComplaint] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+  const [previewImg, setPreviewImg] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [resolveError, setResolveError] = useState(null);
+  const [resolveSuccess, setResolveSuccess] = useState(false);
 
   // ── Fetch complaint ──
   const fetchComplaint = useCallback(async () => {
     try {
       setLoading(true);
       setFetchError(null);
-      const { data } = await wardapi.getReassignedComplaintDetail(id);
-      setComplaint(data);
+      const response = await wardapi.getReassignedComplaintDetail(id);
+      setComplaint(response.data.data);
     } catch (err) {
       setFetchError(
         err?.response?.data?.detail ?? "Failed to load complaint. Please try again."
@@ -514,14 +514,14 @@ export default function ReassignedComplaintDetail() {
   // ─────────────────────────────────────────
   // HELPERS from data
   // ─────────────────────────────────────────
-  const status          = complaint.status ?? "PENDING";
-  const statusCfg       = STATUS_CONFIG[status] ?? STATUS_CONFIG.PENDING;
-  const isResolved      = status === "RESOLVED";
-  const originalMedia   = complaint.media ?? complaint.original_media ?? [];
+  const status = complaint.status ?? "PENDING";
+  const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.PENDING;
+  const isResolved = status === "RESOLVED";
+  const originalMedia = complaint.media ?? complaint.original_media ?? [];
   const panchayathMedia = complaint.reassign_media ?? complaint.panchayath_media ?? [];
-  const timeline        = complaint.timeline ?? [];
-  const citizen         = complaint.citizen ?? {};
-  const ward            = complaint.ward ?? {};
+  const timeline = complaint.timeline ?? [];
+  const citizen = complaint.citizen ?? {};
+  const ward = complaint.ward ?? {};
 
   // ─────────────────────────────────────────
   // PAGE
@@ -533,10 +533,10 @@ export default function ReassignedComplaintDetail() {
         {/* ── Breadcrumb ── */}
         <nav className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-6 flex-wrap">
           {[
-            { label: "SPIMS",                   path: "/"                              },
-            { label: "Ward Dashboard",           path: "/ward/dashboard"               },
-            { label: "Reassigned Complaints",    path: "/ward/reassigned-complaints"   },
-            { label: complaint.complaint_id ?? `#${id}`, path: null                   },
+            { label: "SPIMS", path: "/" },
+            { label: "Ward Dashboard", path: "/ward/dashboard" },
+            { label: "Reassigned Complaints", path: "/ward/reassigned-complaints" },
+            { label: complaint.complaint_id ?? `#${id}`, path: null },
           ].map((crumb, i, arr) => (
             <span key={crumb.label} className="flex items-center gap-1.5">
               <span
@@ -610,12 +610,14 @@ export default function ReassignedComplaintDetail() {
                 {
                   label: "Location",
                   value: complaint.location,
-                  icon:  "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z",
+                  icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z",
                 },
                 {
                   label: "Date Filed",
-                  value: formatDate(complaint.created_at ?? complaint.createdAt),
-                  icon:  "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+                  value: complaint.created_at
+                    ? formatDate(complaint.created_at)
+                    : "—",
+                  icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
                 },
               ].map((m) => (
                 <div key={m.label} className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">

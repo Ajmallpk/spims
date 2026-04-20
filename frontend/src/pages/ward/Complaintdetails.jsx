@@ -44,7 +44,7 @@ export default function ComplaintDetails() {
 
       const res = await wardapi.getComplaintDetail(id);
       console.log("API RESPONSE 👉", res.data);
-      setComplaintData(res.data);
+      setComplaintData(res.data.data);
 
     } catch (err) {
       if (err.response?.status === 404) {

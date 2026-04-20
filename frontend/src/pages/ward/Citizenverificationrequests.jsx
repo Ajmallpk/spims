@@ -20,11 +20,9 @@ export default function CitizenVerificationRequests() {
   const fetchVerifications = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await wardapi.getverificationList()
-      const data = res.data;
-      setRequests(Array.isArray(data) ? data : (data.results ?? []));
+      const res = await wardapi.getverificationList();
+      setRequests(res.data.data);
     } catch (err) {
-      // interceptor will show toast
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -47,8 +45,14 @@ export default function CitizenVerificationRequests() {
       setIsLoading(true);
 
       const res = await wardapi.getCitizenDetails(citizen.id);
+      console.log("FULL RESPONSE:", res);
 
-      setSelectedCitizen(res.data); 
+      const data = res.data.data;
+
+      setSelectedCitizen({
+        ...data.citizen,
+        ...data.verification
+      });
       setIsModalOpen(true);
 
     } catch (err) {
@@ -62,6 +66,12 @@ export default function CitizenVerificationRequests() {
     setIsModalOpen(false);
     setSelectedCitizen(null);
   };
+
+  // const handleSuccess = (message) => {
+  //   setSuccessMessage(message);
+  //   fetchVerifications();
+  // };
+
 
   const handleSuccess = (message) => {
     setSuccessMessage(message);
