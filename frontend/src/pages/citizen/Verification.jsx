@@ -57,8 +57,8 @@ const Verification = () => {
         citizenapi.getVerificationStatus(),
       ]);
 
-      setProfile(profileRes.data);
-      setVerificationStatus(statusRes.data);
+      setProfile(profileRes.data.data);
+      setVerificationStatus(statusRes.data.data);
     } catch (err) {
       setFetchError(err.message);
     } finally {

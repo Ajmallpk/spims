@@ -61,9 +61,9 @@ const Profile = () => {
         citizenapi.getVerificationStatus()
       ]);
 
-      setProfile(profileRes.data);
-      setVerificationStatus(verificationRes.data);
-
+      setProfile(profileRes.data.data);
+      setVerificationStatus(verificationRes.data.data);
+      
       const complaints = complaintsRes.data?.results ?? complaintsRes.data ?? [];
       setIssues(complaints);
 

@@ -24,6 +24,7 @@ from .serialzers import EscalateComplaintSerializer
 import uuid
 import mimetypes
 import logging
+from .utils.responses import success_response,error_response
 
 
 
@@ -39,37 +40,57 @@ class WardProfile(APIView):
     permission_classes = [IsWard]
 
     def get(self, request):
-        user = request.user
-        verification = WardVerification.objects.filter(user=user).first()
+        try:
+            user = request.user
 
-        if not verification:
-            return Response({
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "status": user.status,
-                "verification_status": "NOT_SUBMITTED"
-            })
+            verification = WardVerification.objects.filter(user=user).first()
 
-        return Response({
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "status": user.status,
-            "verification_status": verification.status,
+            if not verification:
+                logger.info(f"Ward {user.id} fetched profile (no verification)")
 
-            "officer_full_name": verification.officer_full_name,
-            "official_email": verification.official_email,
-            "official_contact": verification.official_contact,
+                return success_response(
+                    message="Profile fetched",
+                    data={
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "status": user.status,
+                        "verification_status": "NOT_SUBMITTED"
+                    }
+                )
 
-            "ward_name": verification.ward_name,
-            "panchayath_name": verification.panchayath.username,
-            "office_address": verification.office_address,
+            logger.info(f"Ward {user.id} fetched profile with verification")
 
-            "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
-            "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
-            "supporting_document": verification.supporting_document.url if verification.supporting_document else None,
-        })
+            return success_response(
+                message="Profile fetched",
+                data={
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "status": user.status,
+                    "verification_status": verification.status,
+
+                    "officer_full_name": verification.officer_full_name,
+                    "official_email": verification.official_email,
+                    "official_contact": verification.official_contact,
+
+                    "ward_name": verification.ward_name,
+                    "panchayath_name": verification.panchayath.username,
+                    "office_address": verification.office_address,
+
+                    "aadhaar_image": request.build_absolute_uri(verification.aadhaar_image.url) if verification.aadhaar_image else None,
+                    "selfie_image": request.build_absolute_uri(verification.selfie_image.url) if verification.selfie_image else None,
+                    "supporting_document": request.build_absolute_uri(verification.supporting_document.url) if verification.supporting_document else None,
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"WardProfile error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
         
         
     

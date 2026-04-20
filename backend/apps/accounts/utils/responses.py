@@ -1,17 +1,3 @@
-ALLOWED_TRANSITIONS = {
-    "PENDING": ["IN_PROGRESS", "ESCALATED", "REJECTED"],
-    "IN_PROGRESS": ["RESOLVED", "ESCALATED","PENDING"],
-    "ESCALATED": ["IN_PROGRESS", "RESOLVED"],
-    "RESOLVED": [],
-    "REJECTED": [],
-}
-
-def can_change_status(current, new):
-    return new in ALLOWED_TRANSITIONS.get(current, [])
-
-
-
-
 from rest_framework.response import Response
 
 def success_response(message="", data=None, status=200):

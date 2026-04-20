@@ -80,14 +80,15 @@ const TopNavigation = () => {
       try {
 
         const res = await citizenapi.getVerificationStatus();
+        const data = res.data.data
 
-        if (!res.data.submitted) {
+        if (!data.submitted) {
           setVerificationStatus("NOT_VERIFIED");
         }
-        else if (res.data.status === "PENDING") {
+        else if (data.status === "PENDING") {
           setVerificationStatus("PENDING");
         }
-        else if (res.data.status === "APPROVED") {
+        else if (data.status === "APPROVED") {
           setVerificationStatus("APPROVED");
         }
 

@@ -38,7 +38,7 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     const fetchWards = async () => {
       try {
         const res = await citizenapi.getWards();
-        setWards(res.data);
+        setWards(res.data.data);
       } catch (error) {
         console.error("Failed to load wards", error);
       }

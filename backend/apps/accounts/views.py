@@ -15,8 +15,8 @@ from .otp_utils import (generate_otp,verify_otp,get_cache_key,resend_otp,store_s
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
-
-
+from .utils.responses import success_response,error_response
+from rest_framework import serializers
 
 
 
@@ -33,85 +33,165 @@ User = get_user_model()
 
 class CitizenSignupRequestView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
-        serializer = SignupSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data["email"]
-            if User.objects.filter(email=email).exists():
-                return Response(
-                    {"error": "User with this email already exists"},
+        try:
+            serializer = SignupSerializer(data=request.data)
+
+            if not serializer.is_valid():
+                return error_response(
+                    message="Validation failed",
+                    errors=serializer.errors,
                     status=400
                 )
-            
-            logger.info(f"Signup OTP requested for {email}")
+
+            email = serializer.validated_data["email"]
+
+            if User.objects.filter(email=email).exists():
+                return error_response(
+                    message="User with this email already exists",
+                    status=400
+                )
+
             otp = generate_otp()
             username = serializer.validated_data["username"]
 
             store_signup_data(email, serializer.validated_data, role="CITIZEN")
             store_otp(email, otp, purpose="signup")
             send_otp_email(email, otp, username)
-            return Response({"message": "OTP sent to email"}, status=200)
-        return Response(serializer.errors, status=400)
+
+            logger.info(f"Signup OTP sent to {email}")
+
+            return success_response(
+                message="OTP sent to email"
+            )
+
+        except Exception as e:
+            logger.error(f"CitizenSignup error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
         
         
         
         
 class AuthoritySignupRequestView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
-        role = request.data.get("role")
+        try:
+            role = request.data.get("role")
 
-        if role not in ["WARD", "PANCHAYATH"]:
-            return Response({"error": "Invalid authority role"}, status=400)
-        serializer = SignupSerializer(data=request.data)
-
-        if serializer.is_valid():
-            email = serializer.validated_data["email"]
-            if User.objects.filter(email=email).exists():
-                return Response(
-                    {"error": "User with this email already exists"},
+            if role not in ["WARD", "PANCHAYATH"]:
+                return error_response(
+                    message="Invalid authority role",
                     status=400
                 )
+
+            serializer = SignupSerializer(data=request.data)
+
+            
+            if not serializer.is_valid():
+                return error_response(
+                    message="Validation failed",
+                    errors=serializer.errors,
+                    status=400
+                )
+
+            email = serializer.validated_data["email"]
+
+            
+            if User.objects.filter(email=email).exists():
+                return error_response(
+                    message="User with this email already exists",
+                    status=400
+                )
+
+            
             otp = generate_otp()
             username = serializer.validated_data["username"]
 
             store_signup_data(email, serializer.validated_data, role=role)
             store_otp(email, otp, purpose="signup")
             send_otp_email(email, otp, username)
-            return Response({"message": "OTP sent to email"}, status=200)
-        return Response(serializer.errors, status=400)
+
+            logger.info(f"{role} signup OTP sent to {email}")
+
+            return success_response(
+                message="OTP sent to email"
+            )
+
+        except Exception as e:
+            logger.error(f"AuthoritySignup error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
     
     
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
-        email = request.data.get("email")
-        otp = request.data.get("otp")
+        try:
+            email = request.data.get("email")
+            otp = request.data.get("otp")
 
-        valid, message = verify_otp(email, otp, purpose="signup")
-        if not valid:
-            return Response({"error": message}, status=400)
+            if not email or not otp:
+                return error_response(
+                    message="Email and OTP are required",
+                    status=400
+                )
 
-        signup_data = get_signup_data(email)
-        if not signup_data:
-            return Response({"error": "Signup expired"}, status=400)
+            valid, message = verify_otp(email, otp, purpose="signup")
 
-        role = signup_data["role"]
-        logger.info(f"User account created for {email} with role {role}")
-        user = User.objects.create_user(
-            username=signup_data["username"],  
-            email=signup_data["email"],
-            password=signup_data["password"],
-            role=role,
-            status=User.Status.ACTIVE,
-            is_verified=False
-        )
+            if not valid:
+                return error_response(
+                    message=message,
+                    status=400
+                )
 
-        clear_otp(email, "signup")
-        delete_signup_data(email)
-        return Response({"message": "Account created successfully"}, status=201)
+            signup_data = get_signup_data(email)
+
+            if not signup_data:
+                return error_response(
+                    message="Signup expired",
+                    status=400
+                )
+
+            role = signup_data.get("role")
+
+            user = User.objects.create_user(
+                username=signup_data.get("username"),
+                email=signup_data.get("email"),
+                password=signup_data.get("password"),
+                role=role,
+                status=User.Status.ACTIVE,
+                is_verified=False
+            )
+
+            clear_otp(email, "signup")
+            delete_signup_data(email)
+
+            logger.info(f"User created successfully: {email}, role: {role}")
+
+            return success_response(
+                message="Account created successfully",
+                status=201
+            )
+
+        except Exception as e:
+            logger.error(f"VerifyOTP error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
         
         
             
@@ -119,22 +199,48 @@ class VerifyOTPView(APIView):
 
 class ResendOTPView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
-        email = request.data.get("email")
-        success, result = resend_otp(email, purpose="signup")
+        try:
+            email = request.data.get("email")
 
-        if not success:
-            return Response({"error": result}, status=400)
+            if not email:
+                return error_response(
+                    message="Email is required",
+                    status=400
+                )
 
-        signup_data = get_signup_data(email)
-        username = signup_data["username"] if signup_data else "User"
+            
+            success, result = resend_otp(email, purpose="signup")
 
-        send_otp_email(email, result["otp"], username)
+            if not success:
+                return error_response(
+                    message=result,
+                    status=400
+                )
 
-        return Response({
-            "message": "OTP resent successfully",
-            "remaining": result["remaining"]
-        }, status=200)
+            
+            signup_data = get_signup_data(email)
+            username = signup_data.get("username") if signup_data else "User"
+
+            send_otp_email(email, result["otp"], username)
+
+            logger.info(f"OTP resent to {email}")
+
+            return success_response(
+                message="OTP resent successfully",
+                data={
+                    "remaining": result.get("remaining")
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"ResendOTP error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
             
         
     
@@ -147,41 +253,63 @@ class EmailLoginView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+            serializer.is_valid(raise_exception=True)
 
-        user = serializer.user
+            user = serializer.user
 
-        refresh = RefreshToken.for_user(user)
-        access = str(refresh.access_token)
+            refresh = RefreshToken.for_user(user)
+            access = str(refresh.access_token)
 
-        response = Response({
-            "message": "Login successful",
-            "role": serializer.validated_data.get("role"),
-            "status": serializer.validated_data.get("status"),
-            "is_superuser": serializer.validated_data.get("is_superuser"),
-            "is_verified": serializer.validated_data.get("is_verified"),
-        })
+            response = success_response(
+                message="Login successful",
+                data={
+                    "role": serializer.validated_data.get("role"),
+                    "status": serializer.validated_data.get("status"),
+                    "is_superuser": serializer.validated_data.get("is_superuser"),
+                    "is_verified": serializer.validated_data.get("is_verified"),
+                }
+            )
 
-        
-        response.set_cookie(
-            key="access_token",
-            value=access,
-            httponly=True,
-            secure=False,  
-            samesite="Lax"
-        )
+           
+            response.set_cookie(
+                key="access_token",
+                value=access,
+                httponly=True,
+                secure=False,  
+                samesite="Lax"
+            )
 
-        response.set_cookie(
-            key="refresh_token",
-            value=str(refresh),
-            httponly=True,
-            secure=False,
-            samesite="Lax"
-        )
+            response.set_cookie(
+                key="refresh_token",
+                value=str(refresh),
+                httponly=True,
+                secure=False,
+                samesite="Lax"
+            )
 
-        return response 
+            logger.info(f"User logged in: {user.email}")
+
+            return response
+
+        except serializers.ValidationError as e:
+            logger.warning(f"Login failed: {str(e)}")
+
+            return error_response(
+                message="Invalid email or password",
+                errors=e.detail,
+                status=400
+            )
+
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
     
@@ -197,20 +325,40 @@ class LogoutView(APIView):
             refresh_token = request.COOKIES.get("refresh_token")
 
             if not refresh_token:
-                return Response({"error": "No refresh token"}, status=400)
+                return error_response(
+                    message="No refresh token provided",
+                    status=400
+                )
 
-            token = RefreshToken(refresh_token)
-            token.blacklist() 
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception as token_error:
+                logger.warning(f"Invalid or expired token during logout: {str(token_error)}")
 
-            response = Response({"message": "Logged out successfully"})
+                return error_response(
+                    message="Invalid or expired token",
+                    status=400
+                )
+
+            response = success_response(
+                message="Logged out successfully"
+            )
 
             response.delete_cookie("access_token")
             response.delete_cookie("refresh_token")
 
+            logger.info(f"User logged out: {request.user.email}")
+
             return response
 
-        except Exception:
-            return Response({"error": "Invalid token"}, status=400)  
+        except Exception as e:
+            logger.error(f"Logout error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            ) 
     
     
     
@@ -220,20 +368,43 @@ class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
-        if not email:
-            return Response({"error": "Email required"}, status=400)
         try:
-            User.objects.get(email=email)
-        except User.DoesNotExist:
-            logger.warning(f"Password reset attempted for non-existing email: {email}")
-            return Response({"error": "User not found"}, status=400)
+            email = request.data.get("email")
 
-        otp = generate_otp()
-        store_otp(email, otp, purpose="reset")
-        user = User.objects.get(email=email)
-        send_otp_email(email, otp, user.username)
-        return Response({"message": "Reset OTP sent"}, status=200)
+            if not email:
+                return error_response(
+                    message="Email is required",
+                    status=400
+                )
+
+            user = User.objects.filter(email=email).first()
+
+            if not user:
+                logger.warning(f"Password reset attempted for non-existing email: {email}")
+
+                return error_response(
+                    message="User not found",
+                    status=400
+                )
+
+            otp = generate_otp()
+            store_otp(email, otp, purpose="reset")
+            send_otp_email(email, otp, user.username)
+
+            logger.info(f"Password reset OTP sent to {email}")
+
+            return success_response(
+                message="Reset OTP sent"
+            )
+
+        except Exception as e:
+            logger.error(f"ForgotPassword error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
+
 
 
 
@@ -242,13 +413,39 @@ class VerifyResetOTPView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
-        otp = request.data.get("otp")
+        try:
+            email = request.data.get("email")
+            otp = request.data.get("otp")
 
-        valid, message = verify_otp(email, otp, purpose="reset")
-        if not valid:
-            return Response({"error": message}, status=400)
-        return Response({"message": "OTP verified"}, status=200)
+            if not email or not otp:
+                return error_response(
+                    message="Email and OTP are required",
+                    status=400
+                )
+
+            valid, message = verify_otp(email, otp, purpose="reset")
+
+            if not valid:
+                logger.warning(f"Invalid reset OTP attempt for {email}")
+
+                return error_response(
+                    message=message,
+                    status=400
+                )
+
+            logger.info(f"Reset OTP verified for {email}")
+
+            return success_response(
+                message="OTP verified"
+            )
+
+        except Exception as e:
+            logger.error(f"VerifyResetOTP error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
         
         
         
@@ -258,27 +455,58 @@ class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
-        new_password = request.data.get("new_password")
-        confirm_password = request.data.get("confirm_password")
-
-        if new_password != confirm_password:
-            return Response({"error": "Passwords do not match"}, status=400)
-
-        key = get_cache_key(email, "reset")
-        data = cache.get(key)
-
-        if not data or not data.get("verified"):
-            return Response({"error": "OTP not verified"}, status=400)
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=400)
+            email = request.data.get("email")
+            new_password = request.data.get("new_password")
+            confirm_password = request.data.get("confirm_password")
 
-        user.set_password(new_password)
-        user.save()
-        clear_otp(email, "reset")
-        return Response({"message": "Password reset successful"}, status=200)
+            if not email or not new_password or not confirm_password:
+                return error_response(
+                    message="All fields are required",
+                    status=400
+                )
+
+            if new_password != confirm_password:
+                return error_response(
+                    message="Passwords do not match",
+                    status=400
+                )
+
+            key = get_cache_key(email, "reset")
+            data = cache.get(key)
+
+            if not data or not data.get("verified"):
+                return error_response(
+                    message="OTP not verified",
+                    status=400
+                )
+
+            user = User.objects.filter(email=email).first()
+
+            if not user:
+                return error_response(
+                    message="User not found",
+                    status=400
+                )
+
+            user.set_password(new_password)
+            user.save()
+
+            clear_otp(email, "reset")
+
+            logger.info(f"Password reset successful for {email}")
+
+            return success_response(
+                message="Password reset successful"
+            )
+
+        except Exception as e:
+            logger.error(f"ResetPassword error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
     

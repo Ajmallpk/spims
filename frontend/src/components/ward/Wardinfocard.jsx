@@ -108,8 +108,10 @@ export default function WardInfoCard({ profile, isLoading }) {
           <InfoRow icon="🏘️" label="Ward Name" value={profile.ward_name} />
           <InfoRow icon="🏛️" label="Panchayath" value={profile.panchayath_name} />
           <InfoRow icon="✉️" label="Email" value={profile.email} />
-          <InfoRow icon="📱" label="Phone" value={profile.phone ?? profile.mobile} />
-          <InfoRow icon="📍" label="Address" value={profile.address} />
+          {/* <InfoRow icon="📱" label="Phone" value={profile.phone ?? profile.mobile} />
+          <InfoRow icon="📍" label="Address" value={profile.address} /> */}
+          <InfoRow icon="📱" label="Phone" value={profile.official_contact} />
+          <InfoRow icon="📍" label="Address" value={profile.office_address} />
           <InfoRow icon="📅" label="Registered On" value={formatDate(profile.created_at ?? profile.registered_at)} />
         </div>
       </div>

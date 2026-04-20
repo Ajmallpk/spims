@@ -112,11 +112,11 @@ const Home = () => {
 
   const handleLogout = async () => {
     try {
-      await citizenapi.logout();  
+      await citizenapi.logout();
     } catch (error) {
       console.error("Logout failed", error);
     } finally {
-      
+
       localStorage.removeItem("role");
       localStorage.removeItem("status");
       localStorage.removeItem("is_verified");
@@ -185,13 +185,17 @@ const Home = () => {
       try {
         const res = await citizenapi.getVerificationStatus();
 
-        if (!res.data.submitted) {
+        const data = res.data.data;   // 🔥 VERY IMPORTANT (your API wraps inside data)
+
+        console.log("Verification API:", data);
+
+        if (data.submitted === false) {
           setCitizenVerificationStatus(VERIFICATION_STATUS.NOT_VERIFIED);
         }
-        else if (res.data.status === "PENDING") {
+        else if (data.status === "PENDING") {
           setCitizenVerificationStatus(VERIFICATION_STATUS.PENDING);
         }
-        else if (res.data.status === "APPROVED") {
+        else if (data.status === "APPROVED") {
           setCitizenVerificationStatus(VERIFICATION_STATUS.APPROVED);
         }
 

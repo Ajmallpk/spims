@@ -148,7 +148,7 @@ export default function WardProfile() {
 
       const res = await wardapi.profile();
 
-      setProfile(res.data);
+      setProfile(res.data.data);
     } catch (err) {
       // interceptor will show toast
       

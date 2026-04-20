@@ -99,6 +99,7 @@ const ChangePasswordForm = ({ token }) => {
       await citizenapi.changePassword({
         current_password: form.currentPassword,
         new_password: form.newPassword,
+        confirm_password: form.confirmPassword,
       });
       setSuccess(true);
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });

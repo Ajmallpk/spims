@@ -191,19 +191,17 @@ export function AuthForm() {
       })
 
       // Save tokens
-      localStorage.setItem("role", response.data.role)
-      localStorage.setItem("status", response.data.status)
-      // localStorage.setItem("is_verified", response.data.is_verified)
-      localStorage.setItem("is_verified", String(response.data.is_verified))
+      localStorage.setItem("role", response.data.data.role)
+      localStorage.setItem("status", response.data.data.status)
+      localStorage.setItem("is_verified", String(response.data.data.is_verified))
 
-      // Check if ACTIVE
-      const role = response.data.role
-      const isVerified = String(response.data.is_verified)
+      const role = response.data.data.role
+      const isVerified = response.data.data.is_verified
 
       if (role === "WARD") {
         if (isVerified === "true") {
           // navigate("/ward")
-          navigate("/ward/dashboard", { replace: true }) 
+          navigate("/ward/dashboard", { replace: true })
         } else {
           // navigate("/ward/profile")
           navigate("/ward/profile", { replace: true })
@@ -212,7 +210,7 @@ export function AuthForm() {
       } else if (role === "PANCHAYATH") {
         if (isVerified === "true") {
           // navigate("/panchayath")
-          navigate("/panchayath/dashboard", { replace: true }) 
+          navigate("/panchayath/dashboard", { replace: true })
         } else {
           // navigate("/panchayath/profile")
           navigate("/panchayath/profile", { replace: true })
