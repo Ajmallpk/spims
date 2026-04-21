@@ -144,8 +144,9 @@ export default function WardList() {
           setTotalPages(1);
           setTotalCount(data.length);
         } else {
-          setWards(data.results ?? []);
-          setTotalCount(data.count ?? data.total ?? 0);
+           const actualData = data.results?.data || [];
+          setWards(actualData);
+          setTotalCount(data.count ?? actualData.length)
           setTotalPages(
             data.total_pages ??
             data.num_pages ??

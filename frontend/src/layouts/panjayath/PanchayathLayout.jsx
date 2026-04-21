@@ -47,10 +47,10 @@ export default function PanchayathLayout() {
     const syncVerification = async () => {
       try {
         const res = await panchayathapi.verificationStatus();
-        const status = (res.data?.status || "").toUpperCase();
+        const status = (res.data?.data?.status || "").toUpperCase();
         console.log("Verification API response:", res.data);
         const verified = status === "APPROVED";
-        const submitted = status === "PENDING";
+        const submitted = ["PENDING", "APPROVED"].includes(status);
 
         // Update state
         setIsVerified(verified);

@@ -158,8 +158,8 @@ function FilterTab({ label, count, active, onClick }) {
     <button
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 ${active
-          ? "bg-blue-600 text-white shadow-sm"
-          : "text-slate-500 hover:bg-slate-100"
+        ? "bg-blue-600 text-white shadow-sm"
+        : "text-slate-500 hover:bg-slate-100"
         }`}
     >
       {label}
@@ -194,12 +194,23 @@ export default function WardVerificationRequests() {
     setIsLoading(true);
     setFetchError("");
     try {
-      const { data } = await panchayathApi.wardVerifications();
-      // Support both array response and { results: [] } pagination envelope
-      setRequests(Array.isArray(data) ? data : (data.results ?? []));
+      const res = await panchayathApi.wardVerifications();
+
+      const raw = res.data?.data;
+
+      // handle all cases
+      const list = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw?.data)
+          ? raw.data
+          : [];
+
+      setRequests(list);
+
+      setRequests(list);
     } catch (err) {
       if (err.response?.status === 401) {
-         panchayathApi.handleAuthError(err);
+        panchayathApi.handleAuthError(err);
         toast.error("Unauthorized: JWT may be expired.");
       }
       setFetchError(

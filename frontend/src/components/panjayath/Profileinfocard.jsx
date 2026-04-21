@@ -156,8 +156,8 @@ export default function ProfileInfoCard({ profile, isLoading }) {
               }
             />
             <InfoRow
-              label="Office Address"
-              value={profile?.address || profile?.office_address}
+              label="District"
+              value={profile?.district || profile?.office_address}
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4 text-blue-600">
                   <path strokeLinecap="round" strokeLinejoin="round"
@@ -171,7 +171,7 @@ export default function ProfileInfoCard({ profile, isLoading }) {
             />
             <InfoRow
               label="Registration Date"
-              value={formatDate(profile?.registered_at || profile?.created_at || profile?.date_joined)}
+              value={formatDate(profile?.reviewed_at || profile?.created_at || profile?.date_joined)}
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4 text-blue-600">
                   <path strokeLinecap="round" strokeLinejoin="round"

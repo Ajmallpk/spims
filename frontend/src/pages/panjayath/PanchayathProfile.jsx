@@ -185,8 +185,8 @@ export default function PanchayathProfile() {
     setIsLoadingProfile(true);
     setProfileError("");
     try {
-      const { data } = await panchayathapi.profile()
-      setProfile(data);
+      const response = await panchayathapi.profile()
+      setProfile(response.data.data);
     } catch (err) {
       if (err.response?.status === 401) {
         panchayathapi.handleAuthError(err);
@@ -210,10 +210,10 @@ export default function PanchayathProfile() {
     setStatusError("");
     try {
       const { data } = await panchayathapi.verificationStatus();
-      setVerificationStatus(data);
+      setVerificationStatus(data.data);
 
       // Sync localStorage verification flags so sidebar locking stays consistent
-      const status = (data?.status || "").toUpperCase();
+      const status = (data?.data?.status || "").toUpperCase();
       localStorage.setItem("is_verified", String(status === "APPROVED"));
       localStorage.setItem(
         "verification_submitted",

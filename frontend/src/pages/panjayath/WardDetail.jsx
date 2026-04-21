@@ -16,10 +16,10 @@ export default function WardDetail() {
     const fetchDetail = async () => {
       try {
         const res = await panchayathApi.wardDetail(id);
-        setWard(res.data);
+        setWard(res.data.data);
       } catch (err) {
         panchayathApi.handleAuthError(err);
-        toast.error("Ward detail error:", err);
+        toast.error(err?.response?.data?.message || "Failed to load ward details");
         setError("Failed to load ward details.");
       } finally {
         setIsLoading(false);

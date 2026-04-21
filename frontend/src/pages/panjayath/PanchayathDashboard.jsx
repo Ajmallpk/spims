@@ -236,7 +236,7 @@ export default function Dashboard() {
     const fetchDashboard = async () => {
       try {
         const res = await panchayathApi.dashboard();
-        setDashboardData(res.data);
+        setDashboardData(res.data.data);
       } catch (err) {
         panchayathApi.handleAuthError(err);
         toast.error("Dashboard fetch error:", err);

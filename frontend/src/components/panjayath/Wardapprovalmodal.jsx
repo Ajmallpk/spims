@@ -138,7 +138,7 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
     const fetchWardDetail = async () => {
       try {
         const res = await panchayathApi.wardDetail(ward.id);
-        setWardDetail(res.data);
+        setWardDetail(res.data.data);
       } catch (err) {
         console.error("Failed to load ward details", err);
       }

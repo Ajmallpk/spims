@@ -120,7 +120,7 @@ const WardRow = React.memo(function WardRow({ ward }) {
             />
           </svg>
           <span className="text-sm text-slate-600">
-            {formatDate(ward.joined_at || ward.approved_at || ward.created_at)}
+            {formatDate(ward.reviewed_at || ward.approved_at || ward.created_at)}
           </span>
         </div>
       </td>

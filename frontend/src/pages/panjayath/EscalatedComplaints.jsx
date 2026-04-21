@@ -95,7 +95,8 @@ function StatusBadge({ status }) {
 }
 
 function ComplaintCard({ complaint }) {
-    const accent = STATUS_CONFIG[complaint.status].cardAccent;
+    const statusConfig = STATUS_CONFIG[complaint.status] || STATUS_CONFIG.ESCALATED;
+    const accent = statusConfig.cardAccent;
 
     return (
         <div
@@ -191,8 +192,26 @@ export default function EscalatedComplaints() {
                     panchayathApi.listWard(),
                 ]);
 
-                setComplaints(complaintsRes.data);
-                setWards(wardsRes.data.results || wardsRes.data); // pagination safe
+                const raw = complaintsRes.data;
+
+                const list = Array.isArray(raw)
+                    ? raw
+                    : Array.isArray(raw.results)
+                        ? raw.results
+                        : [];
+
+                setComplaints(list);
+                const wardRaw = wardsRes.data;
+
+                const wardList = Array.isArray(wardRaw)
+                    ? wardRaw
+                    : Array.isArray(wardRaw.results)
+                        ? wardRaw.results
+                        : Array.isArray(wardRaw.data)
+                            ? wardRaw.data
+                            : [];
+
+                setWards(wardList);// pagination safe
 
             } catch (err) {
                 console.error(err);
@@ -212,8 +231,8 @@ export default function EscalatedComplaints() {
     const filtered = complaints.filter((c) => {
         const matchSearch =
             search === "" ||
-            c.title.toLowerCase().includes(search.toLowerCase()) ||
-            c.citizen_name.toLowerCase().includes(search.toLowerCase());
+            (c.title || "").toLowerCase().includes(search.toLowerCase()) ||
+            (c.citizen_name || "").toLowerCase().includes(search.toLowerCase());
 
         const matchWard =
             wardFilter === "ALL" || c.ward_id === wardFilter;
@@ -415,7 +434,7 @@ export default function EscalatedComplaints() {
                             <button
                                 onClick={() => {
                                     setSearch("");
-                                    setWardFilter("All Wards");
+                                    setWardFilter("ALL");
                                     setCategoryFilter("ALL");
                                     setStatusFilter("ALL");
                                     setActiveToggle("ALL");

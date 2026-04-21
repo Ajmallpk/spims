@@ -39,6 +39,7 @@ import logging
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from django.conf import settings
+from .utils.responses import success_response,error_response
 
 
 logger = logging.getLogger(__name__)
@@ -57,29 +58,49 @@ class AdminLoginView(TokenObtainPairView):
     serializer_class = AdminLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
+        try:
+            response = super().post(request, *args, **kwargs)
 
-        access = response.data.get("access")
-        refresh = response.data.get("refresh")
+            access = response.data.get("access")
+            refresh = response.data.get("refresh")
 
-        
-        response.set_cookie(
-            key="access_token",
-            value=access,
-            httponly=True,
-            secure=False,
-            samesite="None"
-        )
+            if not access or not refresh:
+                return error_response(
+                    message="Invalid login response",
+                    status=400
+                )
+            response.data = {
+                "message": "Login successful",
+                "role": "ADMIN"
+            }
+            response.set_cookie(
+                key="access_token",
+                value=access,
+                httponly=True,
+                secure=True,  
+                samesite="None"
+            )
 
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh,
-            httponly=True,
-            secure=False,
-            samesite="None"
-        )
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh,
+                httponly=True,
+                secure=True,
+                samesite="None"
+            )
 
-        return response
+            logger.info(f"Admin login success: {request.data.get('email')}")
+
+            return response
+
+        except Exception as e:
+            logger.error(f"AdminLogin error: {str(e)}")
+
+            return error_response(
+                message="Login failed",
+                status=500
+            )
+    
     
 
 class AdminProfileView(APIView):

@@ -21,11 +21,15 @@ from django.conf import settings
 from django.core.signing import BadSignature
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
-from apps.complaints.models import Complaint
+from apps.complaints.models import Complaint,ComplaintHistory
 from rest_framework.pagination import PageNumberPagination
 import logging
 from rest_framework.parsers import MultiPartParser, FormParser
 from apps.complaints.models import ComplaintResolution, ResolutionMedia
+from .utils import success_response,error_response
+import mimetypes
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -41,20 +45,36 @@ class PanchayathProfileView(APIView):
     permission_classes = [IsPanchayath]
 
     def get(self, request):
+        try:
+            user = request.user
+            verification = getattr(user, "panchayath_verification", None)
 
-        user = request.user
-        verification = getattr(user, "panchayath_verification", None)
+            data = {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "status": user.status,
+                "panchayath_name": verification.panchayath_name if verification else None,
+                "phone": verification.phone if verification else None,
+                "district": verification.district if verification else None,
+                "verification_status": verification.status if verification else "NOT_SUBMITTED",
+                "created_at": verification.reviewed_at if verification else None,
+            }
 
-        return Response({
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "status": user.status,
-            "panchayath_name": verification.panchayath_name if verification else None,
-            "phone": verification.phone if verification else None,
-            "district": verification.district if verification else None,
-            "verification_status": verification.status if verification else "NOT_SUBMITTED",
-        })
+            logger.info(f"Panchayath {user.id} fetched profile")
+
+            return success_response(
+                message="Profile fetched successfully",
+                data=data
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathProfile error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -66,39 +86,63 @@ class SubmitPanchayathVerificationView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
+        try:
+            user = request.user
+            verification = getattr(user, "panchayath_verification", None)
 
-        user = request.user
-        verification = getattr(user, "panchayath_verification", None)
+            serializer = PanchayathVerificationSerializer(data=request.data)
 
-        serializer = PanchayathVerificationSerializer(data=request.data)
+            if not serializer.is_valid():
+                return error_response(
+                    message="Validation failed",
+                    errors=serializer.errors,
+                    status=400
+                )
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
+            if verification:
+                if verification.status == "PENDING":
+                    return error_response(
+                        message="Verification already pending",
+                        status=400
+                    )
 
-        if verification:
+                if verification.status == "APPROVED":
+                    return error_response(
+                        message="Already verified",
+                        status=400
+                    )
 
-            if verification.status == "PENDING":
-                return Response({"error": "Verification already pending"}, status=400)
+                for field, value in serializer.validated_data.items():
+                    if value is not None:
+                        setattr(verification, field, value)
 
-            if verification.status == "APPROVED":
-                return Response({"error": "Already verified"}, status=400)
+                verification.status = "PENDING"
+                verification.reject_reason = None
+                verification.reviewed_at = None
+                verification.save()
 
-            for field, value in serializer.validated_data.items():
-                setattr(verification, field, value)
+                logger.info(f"Panchayath {user.id} resubmitted verification")
+                return success_response(
+                    message="Verification resubmitted successfully"
+                )
+            PanchayathVerification.objects.create(
+                user=user,
+                **serializer.validated_data
+            )
 
-            verification.status = "PENDING"
-            verification.reject_reason = None
-            verification.reviewed_at = None
-            verification.save()
-            logger.info(f"Panchayath {user.id} resubmitted verification")
-            return Response({"message": "Verification resubmitted"})
+            logger.info(f"Panchayath {user.id} submitted verification")
 
-        PanchayathVerification.objects.create(
-            user=user,
-            **serializer.validated_data
-        )
-        logger.info(f"Panchayath {user.id} submitted verification request")
-        return Response({"message": "Verification submitted"})
+            return success_response(
+                message="Verification submitted successfully"
+            )
+
+        except Exception as e:
+            logger.error(f"SubmitPanchayathVerification error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -109,30 +153,52 @@ class PanchayathDashboardView(APIView):
     permission_classes = [IsActivePanchayath]
 
     def get(self, request):
-        user = request.user
-        verification_stats = WardVerification.objects.filter(
-            panchayath=user
-        ).aggregate(
-            pending=Count("id", filter=Q(status="PENDING")),
-            rejected=Count("id", filter=Q(status="REJECTED")),
-        )
-        approved_wards = User.objects.filter(
-            role=User.Role.WARD,
-            status=User.Status.ACTIVE,
-            is_verified=True,
-            ward_verification__panchayath=user
-        ).count()
+        try:
+            user = request.user
 
-        total_wards = approved_wards + verification_stats["pending"] + verification_stats["rejected"]
-        verification = getattr(user, "panchayath_verification", None)
-        return Response({
-            "panchayath_name": verification.panchayath_name if verification else None,
-            "status": user.status,
-            "total_wards": total_wards,
-            "approved_wards": approved_wards,
-            "pending_wards": verification_stats["pending"],
-            "rejected_wards": verification_stats["rejected"],
-        })
+            verification_stats = WardVerification.objects.filter(
+                panchayath=user
+            ).aggregate(
+                pending=Count("id", filter=Q(status="PENDING")),
+                rejected=Count("id", filter=Q(status="REJECTED")),
+            )
+
+            approved_wards = User.objects.filter(
+                role=User.Role.WARD,
+                status=User.Status.ACTIVE,
+                is_verified=True,
+                ward_verification__panchayath=user
+            ).count()
+
+            total_wards = (
+                approved_wards +
+                (verification_stats.get("pending") or 0) +
+                (verification_stats.get("rejected") or 0)
+            )
+
+            verification = getattr(user, "panchayath_verification", None)
+
+            logger.info(f"Panchayath {user.id} accessed dashboard")
+
+            return success_response(
+                message="Dashboard data fetched successfully",
+                data={
+                    "panchayath_name": verification.panchayath_name if verification else None,
+                    "status": user.status,
+                    "total_wards": total_wards,
+                    "approved_wards": approved_wards,
+                    "pending_wards": verification_stats.get("pending", 0),
+                    "rejected_wards": verification_stats.get("rejected", 0),
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathDashboard error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
         
         
         
@@ -143,20 +209,33 @@ class PanchayathWardListView(APIView):
     permission_classes = [IsActivePanchayath]
 
     def get(self, request):
+        try:
+            user = request.user
 
-        user = request.user
+            wards = WardVerification.objects.select_related("user").filter(
+                panchayath=user,
+                status="APPROVED"
+            ).order_by("-submitted_at")
 
-        wards = WardVerification.objects.select_related("user").filter(
-            panchayath=user,
-            status="APPROVED"
-        ).order_by("-submitted_at")
+            paginator = StandardResultsSetPagination()
+            paginated_qs = paginator.paginate_queryset(wards, request)
 
-        paginator = StandardResultsSetPagination()
-        paginated_queryset = paginator.paginate_queryset(wards, request)
+            serializer = WardVerificationSerializer(paginated_qs, many=True)
 
-        serializer = WardVerificationSerializer(paginated_queryset, many=True)
+            logger.info(f"Panchayath {user.id} fetched approved ward list")
 
-        return paginator.get_paginated_response(serializer.data)
+            return paginator.get_paginated_response({
+                "message": "Ward list fetched successfully",
+                "data": serializer.data
+            })
+
+        except Exception as e:
+            logger.error(f"PanchayathWardList error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -166,40 +245,56 @@ class WardVerificationDetailView(APIView):
     permission_classes = [IsActivePanchayath]
 
     def get(self, request, pk):
-
-        user = request.user
-
         try:
-            ward = WardVerification.objects.get(
+            user = request.user
+
+            ward = WardVerification.objects.filter(
                 pk=pk,
                 panchayath=user
+            ).first()
+
+            if not ward:
+                return error_response(
+                    message="Ward not found",
+                    status=404
+                )
+
+            documents = []
+
+            if ward.aadhaar_image:
+                documents.append(request.build_absolute_uri(ward.aadhaar_image.url))
+
+            if ward.selfie_image:
+                documents.append(request.build_absolute_uri(ward.selfie_image.url))
+
+            if ward.supporting_document:
+                documents.append(request.build_absolute_uri(ward.supporting_document.url))
+
+            logger.info(f"Panchayath {user.id} viewed ward {ward.id}")
+
+            return success_response(
+                message="Ward details fetched successfully",
+                data={
+                    "id": ward.id,
+                    "ward_name": ward.ward_name,
+                    "officer_name": ward.officer_full_name,
+                    "email": ward.official_email,
+                    "phone": ward.official_contact,
+                    "address": ward.office_address,
+                    "status": ward.status,
+                    "rejection_reason": ward.reject_reason,
+                    "documents": documents,
+                    "submitted_at": ward.submitted_at,
+                }
             )
-        except WardVerification.DoesNotExist:
-            return Response({"error": "Ward not found"}, status=404)
 
-        documents = []
+        except Exception as e:
+            logger.error(f"WardVerificationDetail error: {str(e)}")
 
-        if ward.aadhaar_image:
-            documents.append(request.build_absolute_uri(ward.aadhaar_image.url))
-
-        if ward.selfie_image:
-            documents.append(request.build_absolute_uri(ward.selfie_image.url))
-
-        if ward.supporting_document:
-            documents.append(request.build_absolute_uri(ward.supporting_document.url))
-
-        return Response({
-            "id": ward.id,
-            "ward_name": ward.ward_name,
-            "officer_name": ward.officer_full_name,
-            "email": ward.official_email,
-            "phone": ward.official_contact,
-            "address": ward.office_address,
-            "status": ward.status,
-            "rejection_reason": ward.reject_reason,
-            "documents": documents,
-            "submitted_at": ward.submitted_at,
-        })
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -209,19 +304,24 @@ class ApproveWardView(APIView):
     permission_classes = [IsActivePanchayath]
 
     def post(self, request, pk):
-
-        user = request.user
-
         try:
+            user = request.user
+
             with transaction.atomic():
-                ward = WardVerification.objects.select_for_update().get(
+                ward = WardVerification.objects.select_for_update().filter(
                     pk=pk,
                     panchayath=user
-                )
+                ).first()
+
+                if not ward:
+                    return error_response(
+                        message="Ward not found",
+                        status=404
+                    )
 
                 if ward.status != "PENDING":
-                    return Response(
-                        {"error": "This ward request has already been reviewed."},
+                    return error_response(
+                        message="This ward request has already been reviewed",
                         status=400
                     )
 
@@ -233,13 +333,20 @@ class ApproveWardView(APIView):
                 ward.user.status = User.Status.ACTIVE
                 ward.user.is_verified = True
                 ward.user.save()
-                
+
                 logger.info(f"Panchayath {user.id} approved ward {ward.id}")
 
-        except WardVerification.DoesNotExist:
-            return Response({"error": "Ward not found"}, status=404)
+                return success_response(
+                    message="Ward approved successfully"
+                )
 
-        return Response({"message": "Ward approved successfully"})
+        except Exception as e:
+            logger.error(f"ApproveWard error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
      
     
@@ -249,42 +356,56 @@ class RejectWardView(APIView):
     permission_classes = [IsActivePanchayath]
 
     def post(self, request, pk):
-
-        user = request.user
-        reason = request.data.get("reason")
-
-        if not reason or len(reason.strip()) < 10:
-            return Response(
-                {"error": "Rejection reason must be at least 10 characters"},
-                status=400
-            )
-
         try:
-            with transaction.atomic():
-                ward = WardVerification.objects.select_for_update().get(
-                    pk=pk,
-                    panchayath=user
+            user = request.user
+            reason = request.data.get("reason", "").strip()
+
+            if not reason or len(reason) < 10:
+                return error_response(
+                    message="Rejection reason must be at least 10 characters",
+                    status=400
                 )
 
+            with transaction.atomic():
+                ward = WardVerification.objects.select_for_update().filter(
+                    pk=pk,
+                    panchayath=user
+                ).first()
+
+                if not ward:
+                    return error_response(
+                        message="Ward not found",
+                        status=404
+                    )
+
                 if ward.status != "PENDING":
-                    return Response(
-                        {"error": "This ward request has already been reviewed."},
+                    return error_response(
+                        message="This ward request has already been reviewed",
                         status=400
                     )
 
                 ward.status = "REJECTED"
-                ward.reject_reason = reason.strip()
+                ward.reject_reason = reason
                 ward.reviewed_at = timezone.now()
                 ward.save()
 
                 ward.user.status = User.Status.SUSPENDED
                 ward.user.is_verified = False
                 ward.user.save()
-                logger.warning(f"Panchayath {user.id} rejected ward {ward.id}")
-        except WardVerification.DoesNotExist:
-            return Response({"error": "Ward not found"}, status=404)
 
-        return Response({"message": "Ward rejected successfully"})
+                logger.warning(f"Panchayath {user.id} rejected ward {ward.id}")
+
+                return success_response(
+                    message="Ward rejected successfully"
+                )
+
+        except Exception as e:
+            logger.error(f"RejectWard error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -296,21 +417,39 @@ class PanchayathVerificationStatusView(APIView):
     permission_classes = [IsPanchayath]
 
     def get(self, request):
-        user = request.user
-        verification = getattr(user, "panchayath_verification", None)
+        try:
+            user = request.user
+            verification = getattr(user, "panchayath_verification", None)
 
-        if not verification:
-            return Response({
-                "status": "NOT_SUBMITTED"
-            })
+            if not verification:
+                logger.info(f"Panchayath {user.id} checked verification (not submitted)")
 
-        return Response({
-            "status": verification.status,
-            "rejection_reason": verification.reject_reason,
-            "submitted_at": verification.submitted_at,
-            "reviewed_at": verification.reviewed_at,
-        })  
-    
+                return success_response(
+                    message="Verification not submitted",
+                    data={
+                        "status": "NOT_SUBMITTED"
+                    }
+                )
+
+            logger.info(f"Panchayath {user.id} checked verification status")
+
+            return success_response(
+                message="Verification status fetched",
+                data={
+                    "status": verification.status,
+                    "rejection_reason": verification.reject_reason,
+                    "submitted_at": verification.submitted_at,
+                    "reviewed_at": verification.reviewed_at,
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathVerificationStatus error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -318,27 +457,40 @@ class PanchayathWardVerificationListView(APIView):
     permission_classes = [IsActivePanchayath]
 
     def get(self, request):
+        try:
+            user = request.user
 
-        user = request.user
+            wards = WardVerification.objects.select_related("user").filter(
+                panchayath=user,
+                # status="PENDING"
+            ).order_by("-submitted_at")
 
-        wards = WardVerification.objects.select_related("user").filter(
-            panchayath=user,
-            status="PENDING"
-        ).order_by("-submitted_at")
-        
-        data = []
+            data = [
+                {
+                    "id": ward.id,
+                    "ward_name": ward.ward_name,
+                    "email": ward.user.email,
+                    "phone": ward.official_contact,
+                    "status": ward.status,
+                    "submitted_at": ward.submitted_at,
+                }
+                for ward in wards
+            ]
 
-        for ward in wards:
-            data.append({
-                "id": ward.id,
-                "ward_name": ward.ward_name,
-                "email": ward.user.email,
-                "phone": ward.official_contact,
-                "status": ward.status,
-                "submitted_at": ward.submitted_at,
-            })
+            logger.info(f"Panchayath {user.id} fetched pending ward verifications")
 
-        return Response(data)
+            return success_response(
+                message="Pending ward verification list fetched",
+                data=data
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathWardVerificationList error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
 
@@ -348,18 +500,45 @@ class PanchayathChangePasswordView(APIView):
     permission_classes = [IsPanchayath]
 
     def post(self, request):
+        try:
+            user = request.user
 
-        user = request.user
-        current_password = request.data.get("current_password")
-        new_password = request.data.get("new_password")
+            current_password = request.data.get("current_password", "").strip()
+            new_password = request.data.get("new_password", "").strip()
+            if not current_password or not new_password:
+                return error_response(
+                    message="Both passwords are required",
+                    status=400
+                )
+            if not user.check_password(current_password):
+                logger.warning(f"Panchayath {user.id} entered wrong current password")
 
-        if not check_password(current_password, user.password):
-            return Response({"message": "Current password is incorrect"}, status=400)
+                return error_response(
+                    message="Current password is incorrect",
+                    status=400
+                )
 
-        user.set_password(new_password)
-        user.save()
-        logger.warning(f"Panchayath {user.id} changed password")
-        return Response({"message": "Password changed successfully"})
+            if len(new_password) < 6:
+                return error_response(
+                    message="New password must be at least 6 characters",
+                    status=400
+                )
+            user.set_password(new_password)
+            user.save()
+
+            logger.info(f"Panchayath {user.id} changed password successfully")
+
+            return success_response(
+                message="Password changed successfully"
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathChangePassword error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
 
@@ -368,80 +547,127 @@ class PanchayathChangePasswordView(APIView):
 signer = TimestampSigner()
 
 class PanchayathRequestEmailChangeView(APIView):
-    permission_classes = [IsPanchayath]
-
+    permission_classes = [IsActivePanchayath]
     def post(self, request):
+        try:
+            user = request.user
 
-        user = request.user
-        new_email = request.data.get("email")
-        password = request.data.get("password")
+            new_email = request.data.get("email", "").strip()
+            password = request.data.get("password", "").strip()
+            if not new_email or not password:
+                return error_response(
+                    message="Email and password are required",
+                    status=400
+                )
 
-        if not check_password(password, user.password):
-            return Response({"message": "Password incorrect"}, status=400)
-        
-        if User.objects.filter(email=new_email).exists():
-            return Response({"message": "Email already in use"}, status=400)
+            if not user.check_password(password):
+                logger.warning(f"Panchayath {user.id} entered wrong password for email change")
 
-        token = signer.sign(f"{user.id}:{new_email}")
+                return error_response(
+                    message="Password incorrect",
+                    status=400
+                )
+            if User.objects.filter(email=new_email).exists():
+                return error_response(
+                    message="Email already in use",
+                    status=400
+                )
+            token = signer.sign(f"{user.id}:{new_email}")
 
-        logger.info(f"Panchayath {user.id} requested email change")
-        
-        link = f"http://localhost:5173/panchayath/email-change-confirm/{token}"
+            link = f"http://localhost:5173/panchayath/email-change-confirm/{token}"
 
-        generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+            generated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        send_mail(
-            subject="SPIMS Panchayath Email Change Confirmation",
-            message=f"""
-        Hello {user.username},
+            send_mail(
+                subject="SPIMS Panchayath Email Change Confirmation",
+                message=f"""
+Hello {user.username},
 
-        You requested to change the email address for your SPIMS Panchayath account.
+You requested to change your email address.
 
-        To confirm this request, please click the link below:
+Click below to confirm:
+{link}
 
-        {link}
+This link expires in 1 hour.
 
-        This link will expire in 1 hour.
+Generated at: {generated_time}
 
-        Generated at: {generated_time}
-        System: SPIMS Security
+If not you, ignore this email.
 
-        If you did not request this change, please ignore this email.
+Regards,
+SPIMS Security
+""",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+            )
 
-        Regards,
-        SPIMS Security Team
-        """,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[user.email],
-        )
+            logger.info(f"Panchayath {user.id} requested email change")
 
-        return Response({"message": "Verification email sent to your current email"})
+            return success_response(
+                message="Verification email sent"
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathEmailChangeRequest error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
 
 
 
 
+from rest_framework.permissions import AllowAny
+
 class PanchayathConfirmEmailChangeView(APIView):
-    permission_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request, token):
-
         try:
             data = signer.unsign(token, max_age=3600)
-            user_id, new_email = data.split(":")
 
-            user = User.objects.get(id=user_id)
+            try:
+                user_id, new_email = data.split(":")
+            except ValueError:
+                return error_response(
+                    message="Invalid token format",
+                    status=400
+                )
+            user = User.objects.filter(id=user_id).first()
+
+            if not user:
+                return error_response(
+                    message="User not found",
+                    status=400
+                )
+
             user.email = new_email
             user.save()
-            logger.info(f"Panchayath {user.id} changed email successfully")
-            return Response({
-                "message": "Email updated successfully",
-                "email": new_email
-            })
+
+            logger.info(f"Panchayath {user.id} email changed successfully")
+
+            return success_response(
+                message="Email updated successfully",
+                data={"email": new_email}
+            )
 
         except BadSignature:
-            return Response({"error": "Invalid or expired token"}, status=400)
-        
+            logger.warning("Invalid or expired email change token")
+
+            return error_response(
+                message="Invalid or expired token",
+                status=400
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathEmailConfirm error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
         
         
 class PanchayathComplaintPagination(PageNumberPagination):
@@ -449,34 +675,48 @@ class PanchayathComplaintPagination(PageNumberPagination):
         
         
 class PanchayathComplaintListView(APIView):
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [IsActivePanchayath]
+
     def get(self, request):
-        user = request.user
-        
-        if user.role != "PANCHAYATH":
-            return Response({"error": "Permission denied"}, status=403)
-        
-        complaints = Complaint.objects.select_related("citizen", "ward").filter(
-            panchayath=user,
-            status="ESCALATED",
-        ).order_by("-created_at")
-        
-        data = [
-            {
-                "id": c.id,
-                "title": c.title,
-                "status": c.status,
-                "category": c.category,
-                "created_at": c.created_at,
-                "citizen_name": c.citizen.username,   
-                "ward_id": c.ward.id,
-                "ward_name": c.ward.username,         
-            }
-            for c in complaints
-        ]
-        
-        return Response(data)
+        try:
+            user = request.user
+
+            complaints = Complaint.objects.select_related(
+                "citizen", "ward"
+            ).filter(
+                panchayath=user,
+                status="ESCALATED"
+            ).order_by("-created_at")
+
+            paginator = PanchayathComplaintPagination()
+            paginated_qs = paginator.paginate_queryset(complaints, request)
+
+            data = [
+                {
+                    "id": c.id,
+                    "title": c.title,
+                    "status": c.status,
+                    "category": c.category,
+                    "created_at": c.created_at,
+
+                    "citizen_name": c.citizen.username,
+                    "ward_id": c.ward.id,
+                    "ward_name": c.ward.username,
+                }
+                for c in paginated_qs
+            ]
+
+            logger.info(f"Panchayath {user.id} fetched escalated complaints")
+
+            return paginator.get_paginated_response(data)
+
+        except Exception as e:
+            logger.error(f"PanchayathComplaintList error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
 
@@ -516,140 +756,185 @@ class PanchayathComplaintListView(APIView):
     
     
 class ReassignComplaintView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActivePanchayath]
 
     def post(self, request, complaint_id):
-        user = request.user
-
         try:
-            complaint = Complaint.objects.get(id=complaint_id)
-        except Complaint.DoesNotExist:
-            return Response({"error": "Not found"}, status=404)
+            user = request.user
 
-        if user.role != "PANCHAYATH" or complaint.panchayath != user:
-            return Response({"error": "Permission denied"}, status=403)
+            complaint = Complaint.objects.filter(
+                id=complaint_id,
+                panchayath=user
+            ).first()
 
-        serializer = ReassignComplaintSerializer(
-            complaint,
-            data=request.data,
-            partial=True,
-            context={"request": request},
-        )
+            if not complaint:
+                return error_response(
+                    message="Complaint not found",
+                    status=404
+                )
 
-        if serializer.is_valid():
+            serializer = ReassignComplaintSerializer(
+                complaint,
+                data=request.data,
+                partial=True,
+                context={"request": request},
+            )
+
+            if not serializer.is_valid():
+                return error_response(
+                    message="Validation failed",
+                    errors=serializer.errors,
+                    status=400
+                )
+
             serializer.save()
-            return Response({
-                "message": "Complaint reassigned to ward",
-                "status": "PENDING"
-            })
 
-        return Response(serializer.errors, status=400)
+            logger.info(f"Panchayath {user.id} reassigned complaint {complaint.id}")
+
+            return success_response(
+                message="Complaint reassigned to ward",
+                data={"status": "PENDING"}
+            )
+
+        except Exception as e:
+            logger.error(f"ReassignComplaint error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
     
 class PanchayathComplaintDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [IsActivePanchayath]
 
     def get(self, request, complaint_id):
-        user = request.user 
-
-        if user.role != "PANCHAYATH":
-            return Response({"error": "Permission denied"}, status=403)
-
         try:
-            complaint = Complaint.objects.select_related("citizen", "ward").get(
+            user = request.user
+
+            complaint = Complaint.objects.select_related(
+                "citizen", "ward"
+            ).prefetch_related(
+                "media", "history"
+            ).filter(
                 id=complaint_id,
                 panchayath=user
+            ).first()
+
+            if not complaint:
+                return error_response(
+                    message="Complaint not found",
+                    status=404
+                )
+
+            media = [
+                {
+                    "type": m.file_type.lower(),
+                    "url": request.build_absolute_uri(m.file.url),
+                    "caption": "Complaint Media"
+                }
+                for m in complaint.media.all()
+            ]
+
+            timeline = [
+                {
+                    "date": h.created_at,
+                    "event": h.action,
+                    "actor": h.performed_by.username if h.performed_by else "System",
+                    "type": "update"
+                }
+                for h in complaint.history.all().order_by("created_at")
+            ]
+
+            logger.info(f"Panchayath {user.id} viewed complaint {complaint.id}")
+
+            return success_response(
+                message="Complaint detail fetched",
+                data={
+                    "id": complaint.id,
+                    "title": complaint.title,
+                    "description": complaint.description,
+                    "category": complaint.category,
+                    "status": complaint.status,
+                    "location": complaint.location,
+                    "created_at": complaint.created_at,
+
+                    "media": media,
+                    "timeline": timeline,
+
+                    "citizen": {
+                        "id": complaint.citizen.id,
+                        "name": complaint.citizen.username,
+                        "email": complaint.citizen.email,
+                        "phone": getattr(complaint.citizen, "phone", "Not Available"),
+                    },
+
+                    "ward": {
+                        "id": complaint.ward.id,
+                        "name": complaint.ward.username,
+                        "officer": complaint.ward.username,
+                        "officerPhone": getattr(complaint.ward, "phone", "Not Available"),
+                        "officerEmail": complaint.ward.email,
+                    }
+                }
             )
-        except Complaint.DoesNotExist:
-            return Response({"error": "Complaint not found"}, status=404)
 
-        
-        media = [
-            {
-                "type": m.file_type.lower(),
-                "url": request.build_absolute_uri(m.file.url),
-                "caption": "Complaint Media"
-            }
-            for m in complaint.media.all()
-        ]
+        except Exception as e:
+            logger.error(f"PanchayathComplaintDetail GET error: {str(e)}")
 
-        
-        timeline = [
-            {
-                "date": h.created_at,
-                "event": h.action,
-                "actor": h.performed_by.username if h.performed_by else "System",
-                "type": "update"
-            }
-            for h in complaint.history.all().order_by("created_at")
-        ]
-        
-        
-        
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
-        return Response({
-            "id": complaint.id,
-            "title": complaint.title,
-            "description": complaint.description,
-            "category": complaint.category,
-            "status": complaint.status,
-            "location": complaint.location,
-            "created_at": complaint.created_at,
 
-            
-            "media": media,
-
-            
-            "timeline": timeline,
-
-            
-            "citizen": {
-                "id": complaint.citizen.id,
-                "name": complaint.citizen.username,
-                "email": complaint.citizen.email,
-                "phone": getattr(complaint.citizen, "phone", "Not Available"),
-            },
-
-            
-            "ward": {
-                "id": complaint.ward.id,
-                "name": complaint.ward.username,
-                "officer": complaint.ward.username,
-                "officerPhone": getattr(complaint.ward, "phone", "Not Available"),
-                "officerEmail": complaint.ward.email,
-            }
-        })
-        
-        
     def post(self, request, complaint_id):
-        user = request.user
-
-        if user.role != "PANCHAYATH":
-            return Response({"error": "Permission denied"}, status=403)
-
         try:
-            complaint = Complaint.objects.get(
+            user = request.user
+
+            complaint = Complaint.objects.filter(
                 id=complaint_id,
                 panchayath=user
+            ).first()
+
+            if not complaint:
+                return error_response(
+                    message="Complaint not found",
+                    status=404
+                )
+
+            action = request.data.get("action")
+
+            if action == "START_WORK":
+
+                if complaint.status != "ESCALATED":
+                    return error_response(
+                        message="Invalid state",
+                        status=400
+                    )
+
+                complaint.status = "IN_PROGRESS"
+                complaint.save()
+
+                logger.info(f"Panchayath {user.id} started work on complaint {complaint.id}")
+
+                return success_response(
+                    message="Complaint moved to IN_PROGRESS"
+                )
+
+            return error_response(
+                message="Invalid action",
+                status=400
             )
-        except Complaint.DoesNotExist:
-            return Response({"error": "Complaint not found"}, status=404)
 
-        action = request.data.get("action")
+        except Exception as e:
+            logger.error(f"PanchayathComplaintDetail POST error: {str(e)}")
 
-        if action == "START_WORK":
-
-            if complaint.status != "ESCALATED":
-                return Response({"error": "Invalid state"}, status=400)
-
-            complaint.status = "IN_PROGRESS"
-            complaint.save()
-
-            return Response({"message": "Complaint moved to IN_PROGRESS"})
-
-        return Response({"error": "Invalid action"}, status=400)
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
     
     
@@ -658,56 +943,82 @@ class PanchayathComplaintDetailView(APIView):
 
 
 class PanchayathResolveView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActivePanchayath]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, complaint_id):
-        user = request.user
-
         try:
-            complaint = Complaint.objects.get(id=complaint_id, panchayath=user)
-        except Complaint.DoesNotExist:
-            return Response({"error": "Not found"}, status=404)
+            user = request.user
 
-        if user.role != "PANCHAYATH":
-            return Response({"error": "Permission denied"}, status=403)
+            complaint = Complaint.objects.filter(
+                id=complaint_id,
+                panchayath=user
+            ).first()
 
-       
-        if complaint.status != "IN_PROGRESS":
-            return Response({"error": "Invalid state"}, status=400)
+            if not complaint:
+                return error_response(
+                    message="Complaint not found",
+                    status=404
+                )
+            if complaint.status != "IN_PROGRESS":
+                return error_response(
+                    message="Complaint must be IN_PROGRESS to resolve",
+                    status=400
+                )
 
-        message = request.data.get("message")
+            message = request.data.get("message", "").strip()
 
-        if not message or len(message.strip()) < 5:
-            return Response({"error": "Message required"}, status=400)
-
-        
-        resolution = ComplaintResolution.objects.create(
-            complaint=complaint,
-            authority=user,
-            message=message
-        )
-
-        
-        files = request.FILES.getlist("media_files")
-
-        for file in files:
-            file_type = "IMAGE"
-
-            import mimetypes
-            mime_type, _ = mimetypes.guess_type(file.name)
-
-            if mime_type and mime_type.startswith("video"):
-                file_type = "VIDEO"
-
-            ResolutionMedia.objects.create(
-                resolution=resolution,
-                file=file,
-                file_type=file_type
+            if not message or len(message) < 5:
+                return error_response(
+                    message="Resolution message must be at least 5 characters",
+                    status=400
+                )
+            resolution = ComplaintResolution.objects.create(
+                complaint=complaint,
+                authority=user,
+                message=message
             )
 
-        
-        complaint.status = "RESOLVED"
-        complaint.save()
+            files = request.FILES.getlist("media_files")
 
-        return Response({"message": "Resolved successfully"})
+            for file in files:
+                if file.size > 5 * 1024 * 1024:
+                    continue  
+
+                mime_type, _ = mimetypes.guess_type(file.name)
+
+                if mime_type and mime_type.startswith("video"):
+                    file_type = "VIDEO"
+                else:
+                    file_type = "IMAGE"
+
+                ResolutionMedia.objects.create(
+                    resolution=resolution,
+                    file=file,
+                    file_type=file_type
+                )
+
+            complaint.status = "RESOLVED"
+            complaint.resolved_at = timezone.now()
+            complaint.save()
+
+            ComplaintHistory.objects.create(
+                complaint=complaint,
+                action="RESOLVED_BY_PANCHAYATH",
+                performed_by=user,
+                note=message
+            )
+
+            logger.info(f"Panchayath {user.id} resolved complaint {complaint.id}")
+
+            return success_response(
+                message="Complaint resolved successfully"
+            )
+
+        except Exception as e:
+            logger.error(f"PanchayathResolve error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )

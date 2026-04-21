@@ -121,7 +121,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
     const fetchPanchayaths = async () => {
       try {
         const res = await wardapi.getPanchayathDropdown();
-        setPanchayaths(res.data);
+        setPanchayaths(res.data.data);
       } catch (error) {
         // interceptor will show toast
       }
