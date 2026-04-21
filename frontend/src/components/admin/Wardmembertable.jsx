@@ -64,7 +64,7 @@ const WardMemberTable = ({ members, isLoading }) => {
               Array.from({ length: 5 }).map((_, i) => (
                 <SkeletonRow key={i} />
               ))
-            ) : !members || members.length === 0 ? (
+            ) : !Array.isArray(members) || members.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-5 py-12 text-center">
                   <div className="flex flex-col items-center gap-2 text-gray-400">

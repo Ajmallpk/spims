@@ -20,7 +20,7 @@ const AdminProfile = () => {
       setLoading(true);
       try {
         const { data } = await adminapi.profile()
-        setProfile(data);
+        setProfile(data.data);
       } catch (err) {
         handleApiError(err, "Error fetching admin profile:");
       } finally {

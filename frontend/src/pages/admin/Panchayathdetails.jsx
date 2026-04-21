@@ -52,7 +52,7 @@ const PanchayathDetails = () => {
       setLoading(true);
       try {
         const res = await adminapi.getPanchayathDetail(id);
-        setData(res.data);
+        setData(res.data.data);
       } catch (err) {
         // toast.error("Error fetching panchayath details:", err);
         handleApiError(err, "Failed to fetch panchayath details");

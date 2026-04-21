@@ -67,13 +67,15 @@ const WardDetailsPage = () => {
       try {
         const { data: res } = await adminapi.wardDetail(id);
 
+        const actual = res.data;  
+
         setData({
-          ...res,
-          total_users: res.statistics?.total_citizens,
-          total_complaints: res.statistics?.total_complaints,
-          pending_complaints: res.statistics?.pending_complaints,
-          resolved_complaints: res.statistics?.resolved_complaints,
-          escalated_complaints: res.statistics?.escalated_complaints || 0,
+          ...actual,
+          total_users: actual.statistics?.total_citizens,
+          total_complaints: actual.statistics?.total_complaints,
+          pending_complaints: actual.statistics?.pending_complaints,
+          resolved_complaints: actual.statistics?.resolved_complaints,
+          escalated_complaints: actual.statistics?.escalated_complaints || 0,
         });
       } catch (err) {
         // toast.error("Error fetching ward details:", err);
@@ -85,7 +87,7 @@ const WardDetailsPage = () => {
     if (id) fetchDetails();
   }, [id]);
 
-  const authority = data || {};
+  const authority = data?.officer || {};
   const members = data?.members || data?.ward_members || [];
   const complaints = data?.complaints || [];
 

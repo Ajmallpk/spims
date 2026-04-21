@@ -123,7 +123,7 @@ const AdminDashboard = () => {
     const fetchDashboardStats = async () => {
       try {
         const { data } = await adminapi.dashboard();
-        setStats(data);
+        setStats(data.data);
       } catch (err) {
         handleApiError(err, "Failed to load dashboard stats");
       } finally {
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
     const fetchRecentVerifications = async () => {
       try {
         const { data } = await adminapi.recentVerification();
-        setVerifications(data);
+        setVerifications(data.data);
       } catch (err) {
         toast.error("Error fetching recent verifications");
       } finally {
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
     const fetchCriticalAlerts = async () => {
       try {
         const { data } = await adminapi.criticalAlert();
-        setCriticalAlerts(data);
+        setCriticalAlerts(Array.isArray(data.data) ? data.data : []);
       } catch (err) {
         toast.error("Error fetching critical alerts");
       } finally {

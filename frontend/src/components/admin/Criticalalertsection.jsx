@@ -36,7 +36,7 @@ const CriticalAlertSection = ({ alerts, isLoading }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-2.5">
+      {/* <div className="p-4 space-y-2.5">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -44,25 +44,53 @@ const CriticalAlertSection = ({ alerts, isLoading }) => {
               className="h-14 rounded-lg bg-gray-100 animate-pulse"
             />
           ))
-        ) : alerts.length === 0 ? (
+        ) : !alerts || alerts.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
             <ShieldAlert className="w-8 h-8 mx-auto mb-2 opacity-40" />
             <p className="text-sm">No critical alerts at this time</p>
           </div>
         ) : (
-          alerts.map((alert) => {
+          Array.isArray(alerts) && alerts.map((alert) => {
             const severity = alert.severity || getSeverity(alert.report_count);
             return (
               <AlertCard
                 key={alert.id}
                 variant="critical"
-                title={alert.reported_user || alert.user || "Unknown User"}
-                subtitle={`Reports: ${alert.report_count ?? 0} · ${
-                  alert.issue_type || "Unspecified Issue"
-                }`}
+                title={alert.type}
+                subtitle={alert.message}
                 badge={severity}
                 actionLabel="Review"
                 onAction={() => navigate(`/admin/critical-alerts/${alert.id}`)}
+              />
+            );
+          })
+        )}
+      </div> */}
+
+
+      <div className="p-4 space-y-2.5">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-14 rounded-lg bg-gray-100 animate-pulse" />
+          ))
+        ) : !Array.isArray(alerts) || alerts.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <ShieldAlert className="w-8 h-8 mx-auto mb-2 opacity-40" />
+            <p className="text-sm">No critical alerts at this time</p>
+          </div>
+        ) : (
+          alerts.map((alert, index) => {
+            const severity = getSeverity(alert);
+
+            return (
+              <AlertCard
+                key={alert.id || index}
+                variant="critical"
+                title={alert.type}
+                subtitle={alert.message}
+                badge={severity}
+                actionLabel="Review"
+                onAction={() => navigate(`/admin/critical-alerts/${alert.id || ""}`)}
               />
             );
           })

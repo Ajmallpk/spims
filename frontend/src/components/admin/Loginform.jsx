@@ -34,15 +34,15 @@ const LoginForm = () => {
       const { data } = await adminapi.login(email, password);
 
       // Validate that the returned role is ADMIN
-      if (data.role !== "ADMIN") {
+      if (data.data.role !== "ADMIN") {
         setError("Access denied. This portal is restricted to Admin accounts.");
         return;
       }
 
       // Store tokens and session data
       
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("status", data.status);
+      localStorage.setItem("role", data.data.role);
+      localStorage.setItem("status", data.data.status);
 
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {

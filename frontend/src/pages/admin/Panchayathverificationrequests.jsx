@@ -37,12 +37,12 @@ const PanchayathVerificationRequests = () => {
 
   const handleView = async (req) => {
     try {
-      const { data } = await adminapi.getVerificationDetail(req.id);
-      setSelectedRequest(data);
+      const res = await adminapi.getVerificationDetail(req.id);
+      setSelectedRequest(res.data.data);
       setIsModalOpen(true);
     } catch (error) {
       // toast.error("Error fetching verification detail");
-      handleApiError(err, "Error fetching verification detail");
+      handleApiError(error, "Error fetching verification detail");
       console.error(error);
     }
   };
@@ -130,7 +130,7 @@ const PanchayathVerificationRequests = () => {
         />
       )}
 
-      
+
 
     </div>
   );

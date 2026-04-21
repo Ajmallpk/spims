@@ -11,7 +11,7 @@ export default function CitizenDetail() {
   const fetchDetail = async () => {
     try {
       const res = await adminapi.citizenDetail(id);
-      setData(res.data);
+      setData(res.data.data);
     } catch (err) {
       handleApiError(err, "Failed to load citizen details");
     }

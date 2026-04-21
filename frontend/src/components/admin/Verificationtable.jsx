@@ -89,7 +89,7 @@ const VerificationTable = ({ requests, isLoading, onView }) => {
                     {req.email || "—"}
                   </td>
                   <td className="px-5 py-4 text-gray-500 whitespace-nowrap">
-                    {formatDate(req.submitted_date || req.created_at)}
+                    {formatDate(req.submitted_at)}
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge status={req.status} />

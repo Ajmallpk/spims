@@ -24,7 +24,8 @@ const CitizenList = () => {
         ward: wardFilter,
         panchayath: panchayathFilter,
       });
-      setCitizens(data);
+
+      setCitizens(data.results || []);
     } catch (err) {
       handleApiError(err, "Failed to fetch citizens");
     } finally {
@@ -34,7 +35,7 @@ const CitizenList = () => {
 
   useEffect(() => {
     fetchCitizens();
-  }, []);
+  }, [wardFilter, panchayathFilter]);
 
   const handleSuspend = (id) => {
     setActionModal({ open: true, type: "suspend", id });
@@ -167,7 +168,7 @@ const CitizenList = () => {
                     ) : (
                       <button
                         onClick={(e) => {
-                          e.stopPropagation();   
+                          e.stopPropagation();
                           handleActivate(c.id);
                         }}
                         className="text-green-600 hover:underline text-sm"

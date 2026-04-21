@@ -38,7 +38,7 @@ const PanchayathList = () => {
         setTotalPages(1);
       } else {
         setList(data.results || []);
-        setTotalPages(data.total_pages || Math.ceil((data.count || 0) / 10) || 1);
+        setTotalPages(Math.ceil((data.count || 0) / 10));
       }
     } catch (err) {
       // toast.error("Error fetching panchayaths:", err);

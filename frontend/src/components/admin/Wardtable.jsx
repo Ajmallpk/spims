@@ -35,7 +35,7 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
                 "Total Complaints",
                 "Pending",
                 "Status",   
-                "Action"
+                "Actions"
               ].map((col) => (
                 <th
                   key={col}
@@ -50,9 +50,9 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
           <tbody className="divide-y divide-gray-100">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
-            ) : !wards || wards.length === 0 ? (
+            ) : !Array.isArray(wards) || wards.length === 0? (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center">
+                <td colSpan={8} className="px-5 py-12 text-center">
                   <div className="flex flex-col items-center gap-2 text-gray-400">
                     <svg className="w-8 h-8 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />

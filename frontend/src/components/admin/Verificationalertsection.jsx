@@ -5,7 +5,7 @@ import AlertCard from "@/components/admin/Alertcard";
 const VerificationAlertSection = ({ verifications, isLoading }) => {
   const navigate = useNavigate();
 
-  const topFive = verifications?.slice(0, 5) || [];
+  const topFive = Array.isArray(verifications) ? verifications.slice(0, 5) : [];
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
