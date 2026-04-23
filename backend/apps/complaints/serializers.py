@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Complaint,ComplaintComment,ComplaintChatMessage,ComplaintResolution,ComplaintChat,Notification,ComplaintHistory,ComplaintMedia,ResolutionMedia
+from .models import Complaint,ComplaintComment,ComplaintResolution,ComplaintHistory,ComplaintMedia,ResolutionMedia
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from apps.notification.models import Notification
 
 User = get_user_model()
 
@@ -94,6 +95,7 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
 class ComplaintCommentSerializer(serializers.ModelSerializer):
 
     user_name = serializers.CharField(source="user.username", read_only=True)
+    replies = serializers.SerializerMethodField()
 
     class Meta:
         model = ComplaintComment
@@ -102,25 +104,18 @@ class ComplaintCommentSerializer(serializers.ModelSerializer):
             "comment",
             "user_name",
             "created_at",
+            "parent",
+            "replies",
         ]
-        
-        
-class ComplaintChatMessageSerializer(serializers.ModelSerializer):
 
-    sender_name = serializers.CharField(source="sender.username", read_only=True)
-
-    class Meta:
-        model = ComplaintChatMessage
-        fields = [
-            "id",
-            "sender_name",
-            "message",
-            "created_at",
-        ]
+    def get_replies(self, obj):
+        if obj.parent is None:
+            replies = obj.replies.all().order_by("created_at")
+            return ComplaintCommentSerializer(replies, many=True).data
+        return []
         
         
-
-        
+          
 
 class ComplaintDetailSerializer(serializers.ModelSerializer):
 
@@ -160,42 +155,9 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
         return obj.comments.count()
     
     
+
+        
     
-
-class ComplaintChatListSerializer(serializers.ModelSerializer):
-
-    complaint_title = serializers.CharField(source="complaint.title", read_only=True)
-    ward_name = serializers.CharField(source="complaint.ward.username", read_only=True)
-
-    last_message = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ComplaintChat
-        fields = [
-            "id",
-            "complaint",
-            "complaint_title",
-            "ward_name",
-            "is_closed",
-            "last_message",
-            "created_at",
-        ]
-
-    def get_last_message(self, obj):
-
-        last_msg = obj.messages.order_by("-created_at").first()
-
-        if not last_msg:
-            return None
-
-        return {
-            "sender": last_msg.sender.username,
-            "message": last_msg.message,
-            "created_at": last_msg.created_at,
-        }
-        
-        
-        
 class NotificationSerializer(serializers.ModelSerializer):
 
     complaint_title = serializers.CharField(

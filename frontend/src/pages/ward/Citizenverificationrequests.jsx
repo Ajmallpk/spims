@@ -21,7 +21,7 @@ export default function CitizenVerificationRequests() {
     try {
       setIsLoading(true);
       const res = await wardapi.getverificationList();
-      setRequests(res.data.data);
+      setRequests(Array.isArray(res.data.data) ? res.data.data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -51,7 +51,8 @@ export default function CitizenVerificationRequests() {
 
       setSelectedCitizen({
         ...data.citizen,
-        ...data.verification
+        ...data.verification,
+        verification_id: data.id
       });
       setIsModalOpen(true);
 
@@ -79,11 +80,27 @@ export default function CitizenVerificationRequests() {
   };
 
   // Stats derived from requests
+  // const stats = {
+  //   total: requests.length,
+  //   pending: requests.filter((r) => (r.status ?? "pending").toLowerCase() === "pending").length,
+  //   approved: requests.filter((r) => (r.status ?? "").toLowerCase() === "approved").length,
+  //   rejected: requests.filter((r) => (r.status ?? "").toLowerCase() === "rejected").length,
+  // };
+
+
+  const safeRequests = Array.isArray(requests) ? requests : [];
+
   const stats = {
-    total: requests.length,
-    pending: requests.filter((r) => (r.status ?? "pending").toLowerCase() === "pending").length,
-    approved: requests.filter((r) => (r.status ?? "").toLowerCase() === "approved").length,
-    rejected: requests.filter((r) => (r.status ?? "").toLowerCase() === "rejected").length,
+    total: safeRequests.length,
+    pending: safeRequests.filter(
+      (r) => (r.status ?? "pending").toLowerCase() === "pending"
+    ).length,
+    approved: safeRequests.filter(
+      (r) => (r.status ?? "").toLowerCase() === "approved"
+    ).length,
+    rejected: safeRequests.filter(
+      (r) => (r.status ?? "").toLowerCase() === "rejected"
+    ).length,
   };
 
   return (

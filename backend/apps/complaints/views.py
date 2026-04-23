@@ -5,11 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintChatMessage,ComplaintChat,Notification,ComplaintHistory,ComplaintMedia,ResolutionMedia
-from .serializers import ComplaintCreateSerializer,ComplaintDetailSerializer,ComplaintChatListSerializer,NotificationSerializer,UpdateComplaintStatusSerializer
+from .models import Complaint,ComplaintUpvote,ComplaintComment,ComplaintHistory,ComplaintMedia,ResolutionMedia
+from .serializers import ComplaintCreateSerializer,ComplaintDetailSerializer,NotificationSerializer,UpdateComplaintStatusSerializer
 from rest_framework.generics import ListAPIView
 from apps.ward.models import WardVerification
-from .serializers import ComplaintFeedSerializer,ComplaintCommentSerializer,ComplaintChatMessageSerializer,ComplaintResolutionSerializer,ComplaintUpdateSerializer
+from .serializers import ComplaintFeedSerializer,ComplaintCommentSerializer,ComplaintResolutionSerializer,ComplaintUpdateSerializer
 from django.db.models import Count
 from .pagination import ComplaintFeedPagination
 from django.shortcuts import get_object_or_404
@@ -18,6 +18,9 @@ from apps.citizen.models import CitizenVerification
 import mimetypes
 from .utils import error_response,success_response
 import logging
+from apps.notification.utils import send_notification
+
+from apps.notification.models import Notification
 
 User = get_user_model()
 
@@ -71,6 +74,16 @@ class CitizenCreateComplaintView(APIView):
                 ward=ward,
                 panchayath=ward_verification.panchayath
             )
+            
+            send_notification(
+                user=ward,
+                title="New Complaint",
+                message=f"A new complaint has been submitted: {complaint.title}",
+                n_type="NEW_COMPLAINT",
+                complaint=complaint,
+                sender=user
+            )
+            
 
             files = request.FILES.getlist("media_files")
 
@@ -97,6 +110,16 @@ class CitizenCreateComplaintView(APIView):
                 action="CREATED",
                 performed_by=user,
                 note="Complaint created"
+            )
+            
+            
+            send_notification(
+                user = complaint.ward,
+                title= "New Complaint",
+                message = "A new complaint has been assigned to you",
+                n_type="COMPLAINT_STATUS",
+                complaint=complaint,
+                sender=request.user
             )
 
             logger.info(f"Citizen {user.id} created complaint {complaint.id}")
@@ -135,6 +158,36 @@ class CitizenComplaintFeedView(ListAPIView):
         comments_count=Count("comments")
     ).order_by("-created_at")
     
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        
+        category = self.request.query_params.get("category")
+        ward = self.request.query_params.get("ward")
+        panchayath = self.request.query_params.get("panchayath")
+        sort = self.request.query_params.get("sort")
+        
+        if category:
+            queryset = queryset.filter(category=category)
+            
+        if ward:
+            queryset = queryset.filter(ward_id=ward)
+            
+        if panchayath:
+            queryset = queryset.filter(panchayath_id=panchayath)
+            
+            
+        if sort == "oldest":
+            queryset = queryset.order_by("created_at")
+            
+        if sort == "most_upvoted":
+            queryset = queryset.order_by("-upvotes_count")
+            
+        else:
+            queryset = queryset.order_by("-created_at")
+            
+        return queryset
+    
     
     
 class ComplaintUpvoteView(APIView):
@@ -170,11 +223,13 @@ class ComplaintUpvoteView(APIView):
                 )
 
             if complaint.citizen != user:
-                Notification.objects.create(
+                send_notification(
                     user=complaint.citizen,
-                    complaint=complaint,
+                    title="New Upvote",
                     message="Someone upvoted your complaint",
-                    notification_type="UPVOTE"
+                    n_type="UPVOTE",
+                    complaint=complaint,
+                    sender=user
                 )
 
             logger.info(f"Citizen {user.id} upvoted complaint {complaint.id}")
@@ -207,6 +262,11 @@ class ComplaintCommentCreateView(APIView):
                 )
 
             comment_text = request.data.get("comment", "").strip()
+            parent_id = request.data.get("parent")
+            parent_comment = None
+            
+            if parent_id:
+                parent_comment = ComplaintComment.objects.filter(id=parent_id).first()
 
             if not comment_text:
                 return error_response(
@@ -225,15 +285,28 @@ class ComplaintCommentCreateView(APIView):
             comment = ComplaintComment.objects.create(
                 complaint=complaint,
                 user=user,
-                comment=comment_text
+                comment=comment_text,
+                parent = parent_comment
             )
 
-            if complaint.citizen != user:
-                Notification.objects.create(
+            if complaint.citizen != request.user:
+                send_notification(
                     user=complaint.citizen,
+                    title="New Comment",
+                    message="New commented on your complaint",
+                    n_type="COMMENT",
                     complaint=complaint,
-                    message="Someone commented on your complaint",
-                    notification_type="COMMENT"
+                    sender=request.user
+                )
+                
+            if parent_comment and parent_comment.user != user:
+                send_notification(
+                    user=parent_comment.user,
+                    title="New Reply",
+                    message=f"{user.username} replied to your comment",
+                    n_type="COMMENT",
+                    complaint=complaint,
+                    sender=user
                 )
 
             logger.info(f"Citizen {user.id} commented on complaint {complaint.id}")
@@ -266,127 +339,11 @@ class ComplaintCommentListView(ListAPIView):
         complaint_id = self.kwargs["complaint_id"]
 
         return ComplaintComment.objects.filter(
-            complaint_id=complaint_id
-        ).select_related("user").order_by("-created_at")
+            complaint_id=complaint_id,
+            parent__isnull=True  
+        ).select_related("user").prefetch_related("replies").order_by("-created_at")
         
-        
-class ComplaintChatMessagesView(ListAPIView):
-
-    serializer_class = ComplaintChatMessageSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-
-        complaint_id = self.kwargs["complaint_id"]
-        user = self.request.user
-
-        try:
-            complaint = Complaint.objects.get(id=complaint_id)
-        except Complaint.DoesNotExist:
-            return ComplaintChatMessage.objects.none()
-
-        if user not in [complaint.citizen, complaint.ward, complaint.panchayath]:
-            return ComplaintChatMessage.objects.none()
-
-        return ComplaintChatMessage.objects.filter(
-            chat__complaint_id=complaint_id
-        ).select_related("sender").order_by("created_at")
-    
-    
-    
-        
-class ComplaintSendMessageView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, complaint_id):
-        try:
-            user = request.user
-            message_text = request.data.get("message", "").strip()
-
-            if not message_text:
-                return error_response(
-                    message="Message cannot be empty",
-                    status=400
-                )
-
-            complaint = Complaint.objects.filter(id=complaint_id).first()
-
-            if not complaint:
-                return error_response(
-                    message="Complaint not found",
-                    status=404
-                )
-
-            chat = ComplaintChat.objects.filter(complaint=complaint).first()
-
-            if not chat:
-                if user.role not in ["WARD", "PANCHAYATH"]:
-                    return error_response(
-                        message="Chat not started yet",
-                        status=400
-                    )
-
-                chat = ComplaintChat.objects.create(
-                    complaint=complaint,
-                    citizen=complaint.citizen,
-                    authority=user
-                )
-
-            if user not in [complaint.citizen, complaint.ward, complaint.panchayath]:
-                return error_response(
-                    message="Not allowed to access this chat",
-                    status=403
-                )
-
-            if chat.is_closed:
-                return error_response(
-                    message="Chat is closed",
-                    status=400
-                )
-
-            if user.role == "CITIZEN":
-                first_message_exists = ComplaintChatMessage.objects.filter(chat=chat).exists()
-
-                if not first_message_exists:
-                    return error_response(
-                        message="Wait for authority to start chat",
-                        status=403
-                    )
-
-            message = ComplaintChatMessage.objects.create(
-                chat=chat,
-                sender=user,
-                message=message_text
-            )
-            
-            if user.role in ["WARD", "PANCHAYATH"]:
-                Notification.objects.create(
-                    user=chat.citizen,
-                    complaint=complaint,
-                    message="Authority replied to your complaint",
-                    notification_type="CHAT"
-                )
-
-            logger.info(f"User {user.id} sent message in complaint {complaint.id}")
-
-            serializer = ComplaintChatMessageSerializer(message)
-
-            return success_response(
-                message="Message sent successfully",
-                data=serializer.data,
-                status=201
-            )
-
-        except Exception as e:
-            logger.error(f"SendMessage error: {str(e)}")
-
-            return error_response(
-                message="Something went wrong",
-                status=500
-            )
-    
-    
-    
+          
     
     
 class ComplaintResolutionCreateView(APIView):
@@ -521,29 +478,7 @@ class ComplaintDetailView(APIView):
                 status=500
             )
     
-    
-    
-    
-class CitizenChatInboxView(ListAPIView):
 
-    permission_classes = [IsAuthenticated]
-    serializer_class = ComplaintChatListSerializer
-
-    def get_queryset(self):
-
-        user = self.request.user
-
-        if user.role != "CITIZEN":
-            return ComplaintChat.objects.none()
-
-        return ComplaintChat.objects.filter(
-            citizen=user
-        ).select_related(
-            "complaint",
-            "complaint__ward"
-        ).prefetch_related(
-            "messages"
-        ).order_by("-created_at")
         
         
         

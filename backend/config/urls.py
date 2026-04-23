@@ -28,7 +28,8 @@ urlpatterns = [
     path('api/ward/',include('apps.ward.urls')),
     path("api/admin/", include("apps.adminpanel.urls")),
     path("api/citizen/",include("apps.citizen.urls")),
-    path("api/complaints/",include("apps.complaints.urls"))
+    path("api/complaints/",include("apps.complaints.urls")),
+    path("api/notification/",include("apps.notification.urls"))
   
 ]
 

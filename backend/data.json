@@ -1,0 +1,1175 @@
+[
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "accounts",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "panchayath",
+    "model": "panchayathverification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "ward",
+    "model": "escalationmedia"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "ward",
+    "model": "wardverification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "citizen",
+    "model": "citizenprofile"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "citizen",
+    "model": "citizenverification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaint"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaintchat"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaintchatmessage"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaintcomment"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complainthistory"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaintmedia"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaintresolution"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "complaintupvote"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "notification"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "complaints",
+    "model": "resolutionmedia"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "token_blacklist",
+    "model": "blacklistedtoken"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "fields": {
+    "app_label": "token_blacklist",
+    "model": "outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": [
+      "admin",
+      "logentry"
+    ],
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view permission",
+    "content_type": [
+      "auth",
+      "permission"
+    ],
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view group",
+    "content_type": [
+      "auth",
+      "group"
+    ],
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view content type",
+    "content_type": [
+      "contenttypes",
+      "contenttype"
+    ],
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view session",
+    "content_type": [
+      "sessions",
+      "session"
+    ],
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add user",
+    "content_type": [
+      "accounts",
+      "user"
+    ],
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change user",
+    "content_type": [
+      "accounts",
+      "user"
+    ],
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete user",
+    "content_type": [
+      "accounts",
+      "user"
+    ],
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view user",
+    "content_type": [
+      "accounts",
+      "user"
+    ],
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add panchayath verification",
+    "content_type": [
+      "panchayath",
+      "panchayathverification"
+    ],
+    "codename": "add_panchayathverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change panchayath verification",
+    "content_type": [
+      "panchayath",
+      "panchayathverification"
+    ],
+    "codename": "change_panchayathverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete panchayath verification",
+    "content_type": [
+      "panchayath",
+      "panchayathverification"
+    ],
+    "codename": "delete_panchayathverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view panchayath verification",
+    "content_type": [
+      "panchayath",
+      "panchayathverification"
+    ],
+    "codename": "view_panchayathverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add ward verification",
+    "content_type": [
+      "ward",
+      "wardverification"
+    ],
+    "codename": "add_wardverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change ward verification",
+    "content_type": [
+      "ward",
+      "wardverification"
+    ],
+    "codename": "change_wardverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete ward verification",
+    "content_type": [
+      "ward",
+      "wardverification"
+    ],
+    "codename": "delete_wardverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view ward verification",
+    "content_type": [
+      "ward",
+      "wardverification"
+    ],
+    "codename": "view_wardverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add escalation media",
+    "content_type": [
+      "ward",
+      "escalationmedia"
+    ],
+    "codename": "add_escalationmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change escalation media",
+    "content_type": [
+      "ward",
+      "escalationmedia"
+    ],
+    "codename": "change_escalationmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete escalation media",
+    "content_type": [
+      "ward",
+      "escalationmedia"
+    ],
+    "codename": "delete_escalationmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view escalation media",
+    "content_type": [
+      "ward",
+      "escalationmedia"
+    ],
+    "codename": "view_escalationmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add citizen profile",
+    "content_type": [
+      "citizen",
+      "citizenprofile"
+    ],
+    "codename": "add_citizenprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change citizen profile",
+    "content_type": [
+      "citizen",
+      "citizenprofile"
+    ],
+    "codename": "change_citizenprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete citizen profile",
+    "content_type": [
+      "citizen",
+      "citizenprofile"
+    ],
+    "codename": "delete_citizenprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view citizen profile",
+    "content_type": [
+      "citizen",
+      "citizenprofile"
+    ],
+    "codename": "view_citizenprofile"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add citizen verification",
+    "content_type": [
+      "citizen",
+      "citizenverification"
+    ],
+    "codename": "add_citizenverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change citizen verification",
+    "content_type": [
+      "citizen",
+      "citizenverification"
+    ],
+    "codename": "change_citizenverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete citizen verification",
+    "content_type": [
+      "citizen",
+      "citizenverification"
+    ],
+    "codename": "delete_citizenverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view citizen verification",
+    "content_type": [
+      "citizen",
+      "citizenverification"
+    ],
+    "codename": "view_citizenverification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint",
+    "content_type": [
+      "complaints",
+      "complaint"
+    ],
+    "codename": "add_complaint"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint",
+    "content_type": [
+      "complaints",
+      "complaint"
+    ],
+    "codename": "change_complaint"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint",
+    "content_type": [
+      "complaints",
+      "complaint"
+    ],
+    "codename": "delete_complaint"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint",
+    "content_type": [
+      "complaints",
+      "complaint"
+    ],
+    "codename": "view_complaint"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint chat",
+    "content_type": [
+      "complaints",
+      "complaintchat"
+    ],
+    "codename": "add_complaintchat"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint chat",
+    "content_type": [
+      "complaints",
+      "complaintchat"
+    ],
+    "codename": "change_complaintchat"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint chat",
+    "content_type": [
+      "complaints",
+      "complaintchat"
+    ],
+    "codename": "delete_complaintchat"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint chat",
+    "content_type": [
+      "complaints",
+      "complaintchat"
+    ],
+    "codename": "view_complaintchat"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint chat message",
+    "content_type": [
+      "complaints",
+      "complaintchatmessage"
+    ],
+    "codename": "add_complaintchatmessage"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint chat message",
+    "content_type": [
+      "complaints",
+      "complaintchatmessage"
+    ],
+    "codename": "change_complaintchatmessage"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint chat message",
+    "content_type": [
+      "complaints",
+      "complaintchatmessage"
+    ],
+    "codename": "delete_complaintchatmessage"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint chat message",
+    "content_type": [
+      "complaints",
+      "complaintchatmessage"
+    ],
+    "codename": "view_complaintchatmessage"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint comment",
+    "content_type": [
+      "complaints",
+      "complaintcomment"
+    ],
+    "codename": "add_complaintcomment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint comment",
+    "content_type": [
+      "complaints",
+      "complaintcomment"
+    ],
+    "codename": "change_complaintcomment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint comment",
+    "content_type": [
+      "complaints",
+      "complaintcomment"
+    ],
+    "codename": "delete_complaintcomment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint comment",
+    "content_type": [
+      "complaints",
+      "complaintcomment"
+    ],
+    "codename": "view_complaintcomment"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint resolution",
+    "content_type": [
+      "complaints",
+      "complaintresolution"
+    ],
+    "codename": "add_complaintresolution"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint resolution",
+    "content_type": [
+      "complaints",
+      "complaintresolution"
+    ],
+    "codename": "change_complaintresolution"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint resolution",
+    "content_type": [
+      "complaints",
+      "complaintresolution"
+    ],
+    "codename": "delete_complaintresolution"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint resolution",
+    "content_type": [
+      "complaints",
+      "complaintresolution"
+    ],
+    "codename": "view_complaintresolution"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint upvote",
+    "content_type": [
+      "complaints",
+      "complaintupvote"
+    ],
+    "codename": "add_complaintupvote"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint upvote",
+    "content_type": [
+      "complaints",
+      "complaintupvote"
+    ],
+    "codename": "change_complaintupvote"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint upvote",
+    "content_type": [
+      "complaints",
+      "complaintupvote"
+    ],
+    "codename": "delete_complaintupvote"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint upvote",
+    "content_type": [
+      "complaints",
+      "complaintupvote"
+    ],
+    "codename": "view_complaintupvote"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add notification",
+    "content_type": [
+      "complaints",
+      "notification"
+    ],
+    "codename": "add_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change notification",
+    "content_type": [
+      "complaints",
+      "notification"
+    ],
+    "codename": "change_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete notification",
+    "content_type": [
+      "complaints",
+      "notification"
+    ],
+    "codename": "delete_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view notification",
+    "content_type": [
+      "complaints",
+      "notification"
+    ],
+    "codename": "view_notification"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint history",
+    "content_type": [
+      "complaints",
+      "complainthistory"
+    ],
+    "codename": "add_complainthistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint history",
+    "content_type": [
+      "complaints",
+      "complainthistory"
+    ],
+    "codename": "change_complainthistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint history",
+    "content_type": [
+      "complaints",
+      "complainthistory"
+    ],
+    "codename": "delete_complainthistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint history",
+    "content_type": [
+      "complaints",
+      "complainthistory"
+    ],
+    "codename": "view_complainthistory"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add complaint media",
+    "content_type": [
+      "complaints",
+      "complaintmedia"
+    ],
+    "codename": "add_complaintmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change complaint media",
+    "content_type": [
+      "complaints",
+      "complaintmedia"
+    ],
+    "codename": "change_complaintmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete complaint media",
+    "content_type": [
+      "complaints",
+      "complaintmedia"
+    ],
+    "codename": "delete_complaintmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view complaint media",
+    "content_type": [
+      "complaints",
+      "complaintmedia"
+    ],
+    "codename": "view_complaintmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add resolution media",
+    "content_type": [
+      "complaints",
+      "resolutionmedia"
+    ],
+    "codename": "add_resolutionmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change resolution media",
+    "content_type": [
+      "complaints",
+      "resolutionmedia"
+    ],
+    "codename": "change_resolutionmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete resolution media",
+    "content_type": [
+      "complaints",
+      "resolutionmedia"
+    ],
+    "codename": "delete_resolutionmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view resolution media",
+    "content_type": [
+      "complaints",
+      "resolutionmedia"
+    ],
+    "codename": "view_resolutionmedia"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add Blacklisted Token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "add_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change Blacklisted Token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "change_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete Blacklisted Token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "delete_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view Blacklisted Token",
+    "content_type": [
+      "token_blacklist",
+      "blacklistedtoken"
+    ],
+    "codename": "view_blacklistedtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can add Outstanding Token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "add_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can change Outstanding Token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "change_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can delete Outstanding Token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "delete_outstandingtoken"
+  }
+},
+{
+  "model": "auth.permission",
+  "fields": {
+    "name": "Can view Outstanding Token",
+    "content_type": [
+      "token_blacklist",
+      "outstandingtoken"
+    ],
+    "codename": "view_outstandingtoken"
+  }
+}
+]

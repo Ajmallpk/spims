@@ -30,7 +30,12 @@ const TIMELINE_ICONS = {
 };
 
 function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    if (!dateStr) return "N/A";   // ✅ ADD THIS LINE
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
 }
 function formatDateTime(dateStr) {
     return new Date(dateStr).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -46,10 +51,17 @@ function CategoryBadge({ category }) {
 }
 
 function StatusBadge({ status }) {
-    const s = STATUS_CONFIG[status];
+    const s = STATUS_CONFIG[status] || {
+        bg: "bg-gray-100",
+        text: "text-gray-700",
+        border: "border-gray-200",
+        dot: "bg-gray-400",
+        label: status || "Unknown"
+    };
+
     return (
         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${s.bg} ${s.text} ${s.border}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${s.dot} animate-pulse`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
             {s.label}
         </span>
     );
@@ -272,8 +284,11 @@ export default function PanchayathComplaintDetail() {
 
                 console.log("DETAIL 👉", res.data);
 
-                setComplaint(res.data);
-                setCurrentStatus(res.data.status);
+                const data = res.data.data;   // ✅ FIX HERE
+
+                setComplaint(data);
+                setCurrentStatus(data.status);
+
             } catch (err) {
                 console.error(err);
             } finally {
@@ -310,9 +325,9 @@ export default function PanchayathComplaintDetail() {
 
 
             const res = await panchayathApi.getComplaintDetail(id);
-
-            setComplaint(res.data);
-            setCurrentStatus(res.data.status);
+            const data = res.data.data;
+            setComplaint(data);
+            setCurrentStatus(data.status);
 
             setModal(null);
 
@@ -327,9 +342,9 @@ export default function PanchayathComplaintDetail() {
 
 
             const res = await panchayathApi.getComplaintDetail(id);
-
-            setComplaint(res.data);
-            setCurrentStatus(res.data.status);
+            const data = res.data.data;
+            setComplaint(data);
+            setCurrentStatus(data.status);
 
         } catch (err) {
             console.error(err);

@@ -28,6 +28,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from apps.complaints.models import ComplaintResolution, ResolutionMedia
 from .utils import success_response,error_response
 import mimetypes
+from apps.notification.utils import send_notification
 
 
 
@@ -718,42 +719,7 @@ class PanchayathComplaintListView(APIView):
                 status=500
             )
     
-    
-
-# class PanchayathResolveView(APIView):
-#     permission_classes = [IsAuthenticated]
-    
-#     def post(self,request,complaint_id):
-#         user = request.user 
-        
-#         try:
-#             complaint = Complaint.objects.get(id=complaint_id)
-#         except Complaint.DoesNotExist:
-#             return Response({"error":"Not found"},status=404)
-        
-#         if user.role != "PANCHAYATH" or complaint.panchayath != user:
-#             return Response({"error":"permission denied"},status=403)
-        
-#         if complaint.status == "PENDIGN":
-#             complaint.status = "IN_PROGRESS"
-#             complaint.save()
-            
-#         serializer = PanchayathResoveSerializer(
-#             complaint,
-#             data = request.data,
-#             partial = True,
-#             context={"request": request}
-#         )
-        
-        
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({"Message":"Complaint Resolved by panchayath"})
-        
-        
-#         return Response(serializer.errors,status=400)
-    
-    
+     
     
 class ReassignComplaintView(APIView):
     permission_classes = [IsActivePanchayath]
@@ -788,6 +754,16 @@ class ReassignComplaintView(APIView):
                 )
 
             serializer.save()
+            
+            
+            send_notification(
+                user = complaint.ward,
+                title="Complaint Reassigned",
+                message="A complain has been reassigned to you",
+                n_type="REASSIGN",
+                complaint = complaint,
+                sender=request.user
+            )
 
             logger.info(f"Panchayath {user.id} reassigned complaint {complaint.id}")
 
@@ -999,6 +975,15 @@ class PanchayathResolveView(APIView):
                 )
 
             complaint.status = "RESOLVED"
+            send_notification(
+                user=complaint.citizen,
+                title="Complaint Resolved",
+                message="Your complaint has been resolved by Panchayath",
+                n_type="RESOLUTION",
+                complaint=complaint,
+                sender=user
+            )
+            
             complaint.resolved_at = timezone.now()
             complaint.save()
 

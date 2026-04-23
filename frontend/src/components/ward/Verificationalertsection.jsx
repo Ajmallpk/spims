@@ -51,13 +51,14 @@ export default function VerificationAlertSection({ verifications, isLoading, onV
       <div className="divide-y divide-gray-50">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
-        ) : verifications.length === 0 ? (
+        ) : !Array.isArray(verifications) || verifications.length === 0 ? (
           <div className="py-10 text-center">
             <UserCheck className="w-10 h-10 text-gray-200 mx-auto mb-2" />
             <p className="text-sm text-gray-400">No verification requests found</p>
           </div>
         ) : (
-          verifications.map((v, index) => (
+          Array.isArray(verifications) &&
+          verifications.map((v) => (
             <div
               key={v.id}
               className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-2 px-2 rounded-lg transition-colors"
@@ -80,13 +81,12 @@ export default function VerificationAlertSection({ verifications, isLoading, onV
 
               {/* Status Badge */}
               <span
-                className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                  v.status === "approved"
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold ${v.status === "approved"
                     ? "bg-green-50 text-green-700"
                     : v.status === "rejected"
-                    ? "bg-red-50 text-red-700"
-                    : "bg-amber-50 text-amber-700"
-                }`}
+                      ? "bg-red-50 text-red-700"
+                      : "bg-amber-50 text-amber-700"
+                  }`}
               >
                 {v.status
                   ? v.status.charAt(0).toUpperCase() + v.status.slice(1)

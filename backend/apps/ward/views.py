@@ -24,6 +24,7 @@ from .serialzers import EscalateComplaintSerializer
 import uuid
 import mimetypes
 import logging
+from apps.notification.utils import send_notification
 from .utils.responses import success_response,error_response
 
 
@@ -157,6 +158,15 @@ class SubmitWardVerificationView(APIView):
                 verification.reject_reason = None
                 verification.reviewed_at = None
                 verification.save()
+                
+                send_notification(
+                    user=panchayath_user,
+                    title="Ward Verification Resubmitted",
+                    message="A ward officer resubmitted verification",
+                    n_type="WARD_VERIFICATION",
+                    sender=user
+                )
+                
 
                 logger.info(f"Ward {user.id} resubmitted verification")
 
@@ -170,7 +180,15 @@ class SubmitWardVerificationView(APIView):
                 status="PENDING",
                 **data
             )
-
+            
+            send_notification(
+                user=panchayath_user,
+                title="New Ward Verification",
+                message="A ward officer submitted verification request",
+                n_type="WARD_VERIFICATION",
+                sender=user
+            )
+            
             logger.info(f"Ward {user.id} submitted verification")
 
             return success_response(
@@ -1007,8 +1025,29 @@ class EscalateComplaintView(APIView):
                 )
 
             serializer.save()
+            
+            send_notification(
+                user=complaint.citizen,
+                title="Complaint Escalated",
+                message="Your complaint has been escalated to Panchayath",
+                n_type="ESCALATION",
+                complaint=complaint,
+                sender=user
+            )
+            
             complaint.is_reassigned = True
             complaint.save()
+            
+            send_notification(
+                user=complaint.panchayath,
+                title="Complaint Escalated",
+                message="A complaint has been escalated to you",
+                n_type="ESCALATION",
+                complaint=complaint,
+                sender = request.user
+            )
+            
+            
             files = request.FILES.getlist("media_files")
 
             for file in files:
@@ -1165,8 +1204,25 @@ class WardResolveComplaintView(APIView):
                     file_type=file_type
                 )
             complaint.status = "RESOLVED"
+            send_notification(
+                user=complaint.citizen,
+                title="Complaint Resolved",
+                message="Your complaint has been resolved by Ward",
+                n_type="RESOLUTION",
+                complaint=complaint,
+                sender=user
+            )
             complaint.resolved_at = timezone.now()
             complaint.save()
+            
+            send_notification(
+                user = complaint.citizen,
+                title= "Complaint Resolved",
+                message= "Your complaint has been resolved",
+                n_type="RESOLUTION",
+                complaint=complaint,
+                sender=request.user
+            )
 
             ComplaintHistory.objects.create(
                 complaint=complaint,

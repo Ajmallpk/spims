@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from apps.complaints.models import Complaint,ComplaintHistory
 from apps.complaints.utils import can_change_status
-from apps.complaints.models import Notification
+from apps.notification.models import Notification
 
 
 # class ResolveComplaintSerializer(serializers.ModelSerializer):

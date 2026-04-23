@@ -121,7 +121,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
     const fetchPanchayaths = async () => {
       try {
         const res = await wardapi.getPanchayathDropdown();
-        setPanchayaths(res.data.data);
+        setPanchayaths(res.data?.data || []);
       } catch (error) {
         // interceptor will show toast
       }
@@ -317,7 +317,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
               >
                 <option value="">-- Select Panchayath --</option>
 
-                {panchayaths.map((p) => (
+                {Array.isArray(panchayaths) && panchayaths.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.panchayath_name}
                   </option>

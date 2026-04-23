@@ -16,7 +16,7 @@ import re
 from django.utils import timezone
 import logging
 from .utils.responses import success_response,error_response
-
+from apps.notification.utils import send_notification
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +161,16 @@ class CitizenVerificationSubmitView(APIView):
 
             # serializer.save(user=user)
             serializer.save(user=user, status="PENDING")
+
+            verification = CitizenVerification.objects.get(user=user)
+
+            send_notification(
+                user=verification.ward,
+                title="New Citizen Verification",
+                message="A citizen has submitted verification",
+                n_type="CITIZEN_VERIFICATION",
+                sender=user
+            )
 
             logger.info(f"Citizen {user.id} submitted verification")
 

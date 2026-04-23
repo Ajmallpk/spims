@@ -70,6 +70,9 @@ INSTALLED_APPS = [
     'apps.ward',
     'apps.citizen',
     "apps.complaints",
+    "apps.notification",
+    "apps.chat",
+    "channels",
     'rest_framework_simplejwt.token_blacklist',
     
     
@@ -134,14 +137,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+ASGI_APPLICATION = "config.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fixit',
+        'USER': 'postgres',
+        'PASSWORD': '576113',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

@@ -151,65 +151,22 @@ class ComplaintComment(models.Model):
 
     comment = models.TextField()
 
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null= True,
+        blank=True,
+        related_name="replies"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Comment by {self.user} on {self.complaint.id}"
     
     
-    
-class ComplaintChat(models.Model):
-
-    complaint = models.OneToOneField(
-        Complaint,
-        on_delete=models.CASCADE,
-        related_name="chat"
-    )
-
-    citizen = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="citizen_chats"
-    )
-
-    authority = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="authority_chats",
-        limit_choices_to={"role__in": ["WARD", "PANCHAYATH"]}
-    )
-
-    is_closed = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Chat for Complaint {self.complaint.id}"
-    
-    
-    
-    
-    
-class ComplaintChatMessage(models.Model):
-
-    chat = models.ForeignKey(
-        ComplaintChat,
-        on_delete=models.CASCADE,
-        related_name="messages"
-    )
-
-    sender = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    message = models.TextField()
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Message by {self.sender}"
-    
+  
     
 class ComplaintResolution(models.Model):
 
@@ -246,47 +203,7 @@ class ComplaintResolution(models.Model):
     
     
 
-class Notification(models.Model):
 
-    TYPE_CHOICES = [
-        ("COMMENT", "Comment"),
-        ("UPVOTE", "Upvote"),
-        ("RESOLUTION", "Resolution"),
-        ("CHAT", "Chat Message"),
-        ("ESCALATION", "Escalation"),
-    ]
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="notifications"
-    )
-
-    complaint = models.ForeignKey(
-        Complaint,
-        on_delete=models.CASCADE,
-        related_name="notifications",
-        null=True,
-        blank=True
-    )
-
-    message = models.CharField(max_length=255)
-
-    notification_type = models.CharField(
-        max_length=20,
-        choices=TYPE_CHOICES
-    )
-
-    is_read = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Notification for {self.user}"
-    
-    
-    
-    
     
 class ComplaintHistory(models.Model):
     complaint = models.ForeignKey(

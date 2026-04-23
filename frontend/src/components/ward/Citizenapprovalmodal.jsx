@@ -58,7 +58,7 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
       setIsSubmitting(true);
 
       if (confirmAction === "approve") {
-        await wardapi.approveCitizen(citizen?.id);
+        await wardapi.approveCitizen(citizen?.verification_id);
       }
 
       if (confirmAction === "reject") {
