@@ -1,5 +1,8 @@
 from rest_framework.response import Response
 from .models import Notification
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from .tasks import send_notification_task
 
 
 def success_response(message="", data=None, status=200):
@@ -17,13 +20,31 @@ def error_response(message="", errors=None, status=400):
         "errors": errors or {}
     }, status=status)
     
-    
-def send_notification(user,title,message,n_type,complaint=None,sender=None):
-    Notification.objects.create(
-        user = user,
-        title = title,
-        message = message,
-        notification_type = n_type,
-        complaint=complaint,
-        sender = sender
+ 
+
+
+def send_notification(
+    user,
+    title,
+    message,
+    n_type,
+    complaint=None,
+    sender=None
+):
+
+    send_notification_task.delay(
+        user_id=user.id,
+        title=title,
+        message=message,
+        n_type=n_type,
+        complaint_id=(
+            complaint.id
+            if complaint
+            else None
+        ),
+        sender_id=(
+            sender.id
+            if sender
+            else None
+        )
     )

@@ -31,6 +31,16 @@ class User(AbstractUser):
         default=Status.PENDING,
         db_index=True
     )
+    
+    
+    is_online = models.BooleanField(
+        default=False
+    )
+
+    last_seen = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     is_verified = models.BooleanField(default=False)
 

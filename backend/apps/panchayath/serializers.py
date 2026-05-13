@@ -64,31 +64,6 @@ class WardVerificationSerializer(serializers.ModelSerializer):
         
         
 
-# class PanchayathResoveSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Complaint
-#         fields = ["resolution_description","image_proof"]
-        
-#     def update(self, instance, validated_data):
-#         if not can_change_status(instance.status,"RESOLVED"):
-#             raise serializers.ValidationError(
-#                 f"Cannot reslove form {instance.status}"
-#             )
-        
-#         instance.status = "RESOLVED"
-#         instance.resolution_description = validated_data.get("resolution_description")
-#         instance.image_proof = validated_data.get("image_proof",instance.image_proof)
-#         instance.resolved_at = timezone.now()
-#         instance.chat_closed = True
-        
-#         instance.save()
-#         ComplaintHistory.objects.create(
-#             complaint=instance,
-#             action="RESOLVED_BY_PANCHAYATH",
-#             performed_by=self.context["request"].user,
-#             note=instance.resolution_description
-#         )
-#         return instance
     
     
     

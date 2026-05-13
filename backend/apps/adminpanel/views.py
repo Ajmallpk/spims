@@ -185,7 +185,7 @@ class AdminDashboardView(APIView):
                     "pending_ward_verifications": pending_ward_verifications,
                     "pending_panchayath_verifications":pending_panchayath_verifications,
 
-                    # Chart
+                    
                     "complaint_status_chart": [
                         {"status": "Pending", "count": complaint_stats["pending"]},
                         {"status": "Resolved", "count": complaint_stats["resolved"]},

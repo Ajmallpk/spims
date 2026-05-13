@@ -3,7 +3,7 @@ from .pagination import NotificationPagination
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from .models import Notification
+from .models import Notification,FCMDevice
 from .serializers import NotificationSerializer
 from .utils import success_response,error_response
 # Create your views here.
@@ -111,3 +111,40 @@ class UnreadNotificationCountView(APIView):
             )
             
              
+             
+             
+class RegisterFCMDeviceView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+
+    def post(self, request):
+
+        try:
+
+            token = request.data.get("token")
+
+            if not token:
+
+                return error_response(
+                    message="Token is required",
+                    status=400
+                )
+
+            FCMDevice.objects.update_or_create(
+                token=token,
+                defaults={
+                    "user": request.user
+                }
+            )
+
+            return success_response(
+                message="FCM token registered successfully"
+            )
+
+        except Exception:
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )

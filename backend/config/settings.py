@@ -29,11 +29,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES':(
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     ),
-# }
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -44,6 +39,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    
+    "DEFAULT_THROTTLE_RATES": {
+
+        "chat_message": "30/min",
+        
+        "chat_upload": "5/min",
+    },
+    
 }
 
 SIMPLE_JWT = {
@@ -74,6 +77,7 @@ INSTALLED_APPS = [
     "apps.chat",
     "channels",
     'rest_framework_simplejwt.token_blacklist',
+    
     
     
 ]
@@ -245,4 +249,19 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False     
 CSRF_COOKIE_SAMESITE = "Lax"
 
+
+
+CELERY_BROKER_URL = (
+    "redis://127.0.0.1:6379/0"
+)
+
+CELERY_ACCEPT_CONTENT = ["json"]
+
+CELERY_TASK_SERIALIZER = "json"
+
+CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_TIMEZONE = "UTC"
+
+from .firebase.firebase_config import *
 
