@@ -95,6 +95,10 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
 class ComplaintCommentSerializer(serializers.ModelSerializer):
 
     user_name = serializers.CharField(source="user.username", read_only=True)
+    user_id = serializers.IntegerField(
+        source="user.id",
+        read_only=True
+    )
     replies = serializers.SerializerMethodField()
 
     class Meta:
@@ -103,6 +107,7 @@ class ComplaintCommentSerializer(serializers.ModelSerializer):
             "id",
             "comment",
             "user_name",
+            "user_id",
             "created_at",
             "parent",
             "replies",

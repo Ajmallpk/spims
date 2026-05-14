@@ -9,7 +9,7 @@ from rest_framework.generics import ListAPIView
 from apps.ward.models import WardVerification
 from .serializers import ComplaintFeedSerializer,ComplaintCommentSerializer,ComplaintResolutionSerializer,ComplaintUpdateSerializer
 from django.db.models import Count
-from .pagination import ComplaintFeedPagination
+from .pagination import ComplaintFeedPagination,CommentPagination
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from apps.citizen.models import CitizenVerification
@@ -18,7 +18,11 @@ from .utils import error_response,success_response
 import logging
 from apps.notification.utils import send_notification
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from apps.notification.models import Notification
+import re
 
 User = get_user_model()
 
@@ -286,6 +290,49 @@ class ComplaintCommentCreateView(APIView):
                 comment=comment_text,
                 parent = parent_comment
             )
+            
+            
+            channel_layer = get_channel_layer()
+
+            async_to_sync(channel_layer.group_send)(
+                f"comments_{complaint.id}",
+                {
+                    "type": "send_comment",
+
+                    "id": comment.id,
+                    "comment": comment.comment,
+                    "user_name": user.username,
+                    "user_id": user.id,
+                    "created_at": str(comment.created_at),
+
+                    "parent_id": (
+                        parent_comment.id
+                        if parent_comment
+                        else None
+                    )
+
+                }
+            )
+            
+            
+            mentions = re.findall(r'@(\w+)', comment_text)
+
+            for username in mentions:
+
+                mentioned_user = User.objects.filter(
+                    username=username
+                ).first()
+
+                if mentioned_user and mentioned_user != user:
+
+                    send_notification(
+                        user=mentioned_user,
+                        title="Mentioned in Comment",
+                        message=f"{user.username} mentioned you in a comment",
+                        n_type="COMMENT",
+                        complaint=complaint,
+                        sender=user
+                    )
 
             if complaint.citizen != request.user:
                 send_notification(
@@ -331,6 +378,7 @@ class ComplaintCommentListView(ListAPIView):
 
     serializer_class = ComplaintCommentSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CommentPagination
 
     def get_queryset(self):
 
@@ -767,6 +815,142 @@ class DeleteComplaintView(APIView):
                 message="Something went wrong",
                 status=500
             )
+ 
+ 
+ 
+ 
+class DeleteCommentView(APIView):
+    permission_classes = [IsAuthenticated]
     
+    def delete(self,request,comment_id):
+        try:
+            comment = ComplaintComment.objects.filter(id=comment_id).first()
+            
+            if not comment:
+                return error_response(
+                    message="Comment not found",
+                    status=404
+                )   
+                
+            if request.user != comment.user:
+                return error_response(
+                    message="Permission denied",
+                    status=403
+                )
+                
+                
+            channel_layer = get_channel_layer()
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"comments_{comment.complaint.id}",
+                {
+                    "type":"delete_comment",
+                    "id":comment.id
+                }
+            )
+                
+                
+            comment.delete()
+            
+            
+            return success_response(
+                message="Comment deleted successfully"
+            )
+            
+        except Exception as e:
+            logger.error(f"Deletecomment error:{str(e)}")
+            
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
     
-    
+   
+   
+   
+class EditCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, comment_id):
+        try:
+            comment = ComplaintComment.objects.filter(
+                id=comment_id
+            ).first()
+
+            if not comment:
+                return error_response(
+                    message="Comment not found",
+                    status=404
+                )
+
+            if request.user != comment.user:
+                return error_response(
+                    message="Permission denied",
+                    status=403
+                )
+
+            new_comment = request.data.get("comment", "").strip()
+
+            if not new_comment:
+                return error_response(
+                    message="Comment cannot be empty",
+                    status=400
+                )
+
+            comment.comment = new_comment
+            comment.save()
+            
+            channel_layer = get_channel_layer()
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"comments_{comment.complaint.id}",
+                {
+                    "type": "edit_comment",
+
+                    "id": comment.id,
+
+                    "comment": comment.comment
+                }
+            )
+
+            serializer = ComplaintCommentSerializer(comment)
+
+            return success_response(
+                message="Comment updated successfully",
+                data=serializer.data
+            )
+
+        except Exception as e:
+            logger.error(f"EditComment error: {str(e)}")
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            ) 
+            
+            
+            
+class SearchUsersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        query = request.GET.get("q", "")
+
+        users = User.objects.filter(
+            username__icontains=query
+        )[:5]
+
+        data = [
+            {
+                "id": user.id,
+                "username": user.username,
+            }
+            for user in users
+        ]
+
+        return Response(data)
