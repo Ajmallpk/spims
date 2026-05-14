@@ -117,8 +117,16 @@ const complaintapi = {
   },
 
   // Comments
-  getComments: (complaintId) => {
-    return axiosInstance.get(`/complaints/${complaintId}/comments/`);
+  getComments: (complaintId, page = 1) => {
+    return axiosInstance.get(
+      `/complaints/${complaintId}/comments/?page=${page}`
+    );
+  },
+
+  searchUsers: (query) => {
+    return axiosInstance.get(
+      `/complaints/search-users/?q=${query}`
+    );
   },
 
   createComment: (complaintId, data) => {
@@ -162,6 +170,18 @@ const complaintapi = {
     return axiosInstance.delete(`/complaints/${id}/delete/`);
   },
 
+  deleteComment: (commentId) => {
+    return axiosInstance.delete(`/complaints/comment/${commentId}/delete/`)
+  },
+
+
+  editComment: (commentId, data) => {
+    return axiosInstance.patch(
+      `/complaints/comment/${commentId}/edit/`,
+      data
+    );
+  },
+
   // Resolve complaint
   resolveComplaint: (complaintId, formData) => {
     return axiosInstance.post(
@@ -179,6 +199,10 @@ const complaintapi = {
 
   updateComplaintStatus: (id, data) => {
     return axiosInstance.patch(`/complaints/${id}/status/`, data);
+  },
+
+  getCurrentUser: () => {
+    return axiosInstance.get("/auth/me/");
   },
 
 };

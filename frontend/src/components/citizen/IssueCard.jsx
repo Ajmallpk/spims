@@ -9,6 +9,7 @@ const IssueCard = ({ issue }) => {
   console.log(issue);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
+  const [commentCount, setCommentCount] = useState(issue.commentCount || 0);
   const [showComments, setShowComments] = useState(false);
   const [showResponse, setShowResponse] = useState(
     issue.status === "RESOLVED"
@@ -243,7 +244,7 @@ const IssueCard = ({ issue }) => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
-            <span>{issue.commentCount} Comments</span>
+            <span>{commentCount} Comments</span>
           </button>
         </div>
 
@@ -278,9 +279,13 @@ const IssueCard = ({ issue }) => {
 
       {/* Comments */}
       {showComments && (
-        <CommentSection comments={issue.comments || []} issueId={issue.id} />
+        <CommentSection
+          issueId={issue.id}
+          onCommentAdded={() =>
+            setCommentCount((prev) => prev + 1)
+          }
+        />
       )}
-
       {previewIndex !== null && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"

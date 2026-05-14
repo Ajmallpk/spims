@@ -1,0 +1,33 @@
+[33ma9c81c6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m feat:comment implimented
+[33m195673d[m feat:chat
+[33mcb1e584[m[33m ([m[1;31morigin/main[m[33m)[m fix:fixed ward citizen verification and panchayath escalated compalint detail page
+[33m2cf02d8[m fix:fixed admin views
+[33m5cd15c9[m fix:panchayath view fixed
+[33me3c5672[m fix:ward views fixed
+[33m15b1ec1[m fix:added error handling in complaintapp
+[33m880061f[m fix:admin login fixed
+[33m83e8051[m fix:citizen update complaint fixed
+[33m454132e[m feat:panchayath complaint management finished
+[33m3979aa4[m ward complaint management finished
+[33mf7491e3[m feat:ward side complaints and complaint detail page created
+[33m4554525[m feat:Complaint crud backend implimented
+[33mc0bc3bb[m feat:validation added for the password in the citizen side
+[33m9c7e7e9[m fix:fixed ward citizen detail verification page
+[33m069ff86[m feat:permission middleware implemented
+[33m6b1908a[m feat:loggers added to the views
+[33m8084f15[m feat:admin profile change mail change password implemented
+[33m615fa65[m feat:admin wardlist fixed
+[33m6841f3e[m feat:ward editprofile done
+[33md39df8b[m feat:citizen editmail,editpassword implimented
+[33m2535d39[m feat:citizen frontend partially done
+[33m59066d3[m feat:citizen backend implemented
+[33mbcf0ef7[m feat:authority login password validation and strength checker implimented
+[33m457beee[m feat:ward frontend created
+[33m4a6f352[m feat:compleated weak-1 admin
+[33mfad3d3c[m feat:implemented admin frontend
+[33m32628de[m feat:panchayath week1 done
+[33m8286267[m fix:fixed authority registration section removed block and added panchayath
+[33m19eaff7[m fix:fixed authority registration an citizen registration and the the views also
+[33m2dc5623[m feat:admin side blockverification functionality implemented
+[33m08824e8[m feat:created basic admin static pages and block pages
+[33me7d1b4d[m first commit
