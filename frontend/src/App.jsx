@@ -41,6 +41,7 @@ import WardDetail from "@/pages/panjayath/WardDetail";
 import PanchayathEmailChangeConfirm from "./components/panjayath/PanchayathEmailChangeConfirm";
 import EscalatedComplaints from "./pages/panjayath/EscalatedComplaints";
 import PanchayathComplaintDetail from "./pages/panjayath/PanchayathComplaintDetail";
+import PanchayathAuthorityChat from "@/pages/panjayath/PanchayathAuthorityChat";
 
 
 /* ───────── WARD MODULE ───────── */
@@ -234,6 +235,15 @@ export default function App() {
             element={
               <VerificationGuard>
                 <PanchayathComplaintDetail />
+              </VerificationGuard>
+            }
+          />
+
+          <Route
+            path="chat"
+            element={
+              <VerificationGuard>
+                <PanchayathAuthorityChat />
               </VerificationGuard>
             }
           />

@@ -1230,6 +1230,73 @@ class SendAuthorityMessageView(APIView):
             
             
             
+            
+class DeleteAuthorityMessageView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, message_id):
+
+        try:
+
+            user = request.user
+
+            message = Message.objects.filter(
+                id=message_id
+            ).first()
+
+            if not message:
+
+                return error_response(
+                    message="Message not found",
+                    status=404
+                )
+
+            if message.sender != user:
+
+                return error_response(
+                    message="You can delete only your messages",
+                    status=403
+                )
+
+            message.is_deleted = True
+
+            message.deleted_at = now()
+
+            message.message = ""
+
+            message.save()
+
+            channel_layer = get_channel_layer()
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"authority_chat_{message.chat.id}",
+                {
+                    "type": "message_deleted",
+                    "event_type": "message_deleted",
+                    "message_id": message.id
+                }
+            )
+
+            return success_response(
+                message="Message deleted"
+            )
+
+        except Exception as e:
+
+            logger.error(
+                f"DeleteAuthorityMessageView error: {str(e)}"
+            )
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
+            
+            
+            
 
         
 

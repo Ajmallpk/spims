@@ -77,6 +77,28 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+
+  {
+    id: "chat",
+    label: "Authority Chat",
+    path: "/panchayath/chat",
+    locked: true,
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        className="w-5 h-5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m0 0h3.375m-3.375 3H15m-6.75 0h3.375m8.25 6.75H6a2.25 2.25 0 0 1-2.25-2.25V6A2.25 2.25 0 0 1 6 3.75h12A2.25 2.25 0 0 1 20.25 6v11.25A2.25 2.25 0 0 1 18 19.5Z"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export default function PanchayathSidebar({
@@ -253,11 +275,11 @@ export default function PanchayathSidebar({
             // }}
             onClick={async () => {
               try {
-                await axiosInstance.post("auth/logout/"); 
+                await axiosInstance.post("auth/logout/");
               } catch (error) {
                 console.error("Logout failed", error);
               } finally {
-                localStorage.clear(); 
+                localStorage.clear();
                 navigate("/login");
               }
             }}
