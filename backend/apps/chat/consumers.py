@@ -622,6 +622,9 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
         self.user = self.scope["user"]
+        
+        print("WEBSOCKET USER:", self.user)
+        print("IS AUTH:", self.user.is_authenticated)
 
         if self.user.is_anonymous:
             await self.close()
@@ -648,11 +651,13 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
 
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-        
+        if hasattr(self, "room_group_name"):
+
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
+
         await self.set_user_offline()
         
         

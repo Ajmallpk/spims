@@ -57,6 +57,7 @@ import WardEmailChangeConfirm from "./components/ward/WardEmailChangeConfirm";
 import ComplaintDetails from "./pages/ward/Complaintdetails";
 import ReassignedComplaints from "@/pages/ward/ReassignedComplaints";
 import ReassignedComplaintDetail from "@/pages/ward/ReassignedComplaintDetail";
+import WardAuthorityChat from "@/pages/ward/WardAuthorityChat";
 
 
 
@@ -310,6 +311,11 @@ export default function App() {
 
           <Route path="reassigned-complaints" element={<ReassignedComplaints />} />
           <Route path="reassigned-complaints/:id" element={<ReassignedComplaintDetail />} />
+
+          <Route
+            path="chat"
+            element={<WardAuthorityChat />}
+          />
 
         </Route>
 

@@ -1,4 +1,7 @@
-const EmptyChatState = () => {
+const EmptyChatState = ({
+  title = "SPIMS Internal Chat",
+  description = "Select a chat to start messaging",
+}) => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 select-none">
       <div className="relative mb-6">
@@ -25,10 +28,10 @@ const EmptyChatState = () => {
       </div>
 
       <h2 className="text-xl font-semibold text-gray-700 mb-2">
-        SPIMS Internal Chat
+        {title}
       </h2>
       <p className="text-gray-400 text-sm text-center max-w-xs leading-relaxed mb-6">
-        Select a ward chat from the sidebar to begin a secure internal conversation
+        {description}
       </p>
 
       <div className="flex flex-col gap-2 w-64">

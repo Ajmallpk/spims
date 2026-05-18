@@ -3,13 +3,28 @@ import SearchBar from "./SearchBar";
 import ChatUserCard from "./ChatUserCard";
 import ChatSkeleton from "./ChatSkeleton";
 
-const ChatSidebar = ({ contacts, selectedId, onSelectContact, currentUser, isLoading }) => {
+const ChatSidebar = ({
+  contacts,
+  selectedId,
+  onSelectContact,
+  currentUser,
+  isLoading,
+
+  title = "SPIMS Chat",
+  subtitle = "Internal Communication",
+
+  searchPlaceholder = "Search chats...",
+
+  sectionTitle = "Chats",
+
+  currentRoleLabel = "Authority",
+}) => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
   const filtered = contacts.filter((c) => {
     const matchSearch =
-      c.chat_user?.toLowerCase().includes(search.toLowerCase()) ||
+      c.name?.toLowerCase().includes(search.toLowerCase()) ||
       c.lastMessage?.toLowerCase().includes(search.toLowerCase());
     const matchFilter =
       filter === "all" ||
@@ -23,8 +38,13 @@ const ChatSidebar = ({ contacts, selectedId, onSelectContact, currentUser, isLoa
       <div className="px-4 pt-5 pb-3 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="font-bold text-lg text-gray-900 tracking-tight">SPIMS Chat</h1>
-            <p className="text-xs text-gray-500">Internal Authority Communication</p>
+            <h1 className="font-bold text-lg text-gray-900 tracking-tight">
+              {title}
+            </h1>
+
+            <p className="text-xs text-gray-500">
+              {subtitle}
+            </p>
           </div>
           <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +59,9 @@ const ChatSidebar = ({ contacts, selectedId, onSelectContact, currentUser, isLoa
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold text-blue-900 truncate">{currentUser?.name}</p>
-            <p className="text-xs text-blue-500 truncate">{currentUser?.designation}</p>
+            <p className="text-xs text-blue-500 truncate">
+              {currentUser?.designation || currentRoleLabel}
+            </p>
           </div>
           <div className="ml-auto w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
         </div>
@@ -47,7 +69,7 @@ const ChatSidebar = ({ contacts, selectedId, onSelectContact, currentUser, isLoa
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search ward chats..."
+          placeholder={searchPlaceholder}
         />
 
         <div className="flex gap-1.5 mt-3">
@@ -59,11 +81,10 @@ const ChatSidebar = ({ contacts, selectedId, onSelectContact, currentUser, isLoa
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                filter === f.key
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+              className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${filter === f.key
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
             >
               {f.label}
             </button>
@@ -73,7 +94,7 @@ const ChatSidebar = ({ contacts, selectedId, onSelectContact, currentUser, isLoa
 
       <div className="flex-1 overflow-y-auto">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-2.5">
-          Wards ({filtered.length})
+          {sectionTitle} ({filtered.length})
         </p>
 
         {isLoading ? (

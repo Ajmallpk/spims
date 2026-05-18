@@ -35,6 +35,12 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from rest_framework.generics import ListAPIView
 from .tasks import generate_thumbnail_task
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from apps.chat.models import Chat
+from apps.ward.models import WardVerification
 # Create your views here.
 
 

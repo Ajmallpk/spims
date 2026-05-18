@@ -99,7 +99,7 @@ const MessageList = ({ messages, currentUserId, isTyping, typingUser, onReply, o
                                 onReply={onReply}
                                 onDelete={onDelete}
                                 isCurrentUser={
-                                    msg.sender_name === currentUserId
+                                    Number(msg.sender) === Number(currentUserId)
                                 }
                             />
                         </div>

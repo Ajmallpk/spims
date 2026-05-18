@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import ChatSidebar from "@/components/panjayath/ChatSidebar";
-import ChatHeader from "@/components/panjayath/ChatHeader";
-import MessageList from "@/components/panjayath/MessageList";
-import ChatInput from "@/components/panjayath/ChatInput";
-import EmptyChatState from "@/components/panjayath/EmptyChatState";
-import ChatSkeleton from "@/components/panjayath/ChatSkeleton";
+import ChatSidebar from "@/components/chat/ChatSidebar";
+import ChatHeader from "@/components/chat/ChatHeader";
+import MessageList from "@/components/chat/MessageList";
+import ChatInput from "@/components/chat/ChatInput";
+import EmptyChatState from "@/components/chat/EmptyChatState";
+import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import authoritychatapi from "@/service/authoritychaturls";
 
 const PanchayathAuthorityChat = () => {
@@ -38,10 +38,10 @@ const PanchayathAuthorityChat = () => {
 
         console.log("AUTHORITY INBOX:", res.data);
 
-        const formattedContacts = (
-          res.data?.data || []
-        ).map((chat) => ({
+        const formattedContacts = (res.data || []).map((chat) => ({
           id: chat.id,
+
+          chat_user: chat.chat_user,
 
           name: chat.chat_user,
 
@@ -57,6 +57,14 @@ const PanchayathAuthorityChat = () => {
         }));
 
         setContacts(formattedContacts);
+
+        if (formattedContacts.length > 0) {
+
+          handleSelectContact(
+            formattedContacts[0]
+          );
+
+        }
 
       } catch (error) {
 
@@ -353,6 +361,12 @@ const PanchayathAuthorityChat = () => {
 
     if (!selectedContact) return;
 
+    if (socketRef.current) {
+
+      socketRef.current.close();
+
+    }
+
     socketRef.current = new WebSocket(
       `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/`
     );
@@ -387,10 +401,17 @@ const PanchayathAuthorityChat = () => {
       // NEW MESSAGE
       if (eventType === "message") {
 
-        setMessages((prev) => [
-          ...prev,
-          data,
-        ]);
+        setMessages((prev) => {
+
+          const exists = prev.some(
+            (msg) => msg.id === data.id
+          );
+
+          if (exists) return prev;
+
+          return [...prev, data];
+
+        });
 
         if (
           data.sender_name !== currentUser?.name
@@ -719,6 +740,11 @@ const PanchayathAuthorityChat = () => {
           onSelectContact={handleSelectContact}
           currentUser={currentUser}
           isLoading={isLoading}
+          title="SPIMS Chat"
+          subtitle="Internal Authority Communication"
+          searchPlaceholder="Search ward chats..."
+          sectionTitle="WARDS"
+          currentRoleLabel="Panchayath Authority"
         />
       </div>
 
@@ -762,7 +788,7 @@ const PanchayathAuthorityChat = () => {
             ) : (
               <MessageList
                 messages={messages}
-                currentUserId={currentUser?.name}
+                currentUserId={currentUser?.id}
                 isTyping={isTyping}
                 typingUser={selectedContact?.name?.split("–")[0]?.trim()}
                 onReply={setReplyMessage}

@@ -4,6 +4,10 @@ from .models import Message,Chat
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    sender = serializers.IntegerField(
+        source="sender.id",
+        read_only=True
+    )
     sender_name = serializers.CharField(source="sender.username", read_only=True)
     file_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
@@ -14,6 +18,7 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = [
             "id",
+            "sender"
             "sender_name",
             "display_message",
             "reply_data",

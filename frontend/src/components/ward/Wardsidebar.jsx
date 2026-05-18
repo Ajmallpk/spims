@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  MessageCircle,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -25,6 +26,13 @@ const NAV_ITEMS = [
     protected: true
   },
   { label: "Profile", path: "/ward/profile", icon: UserCircle, protected: false },
+
+  {
+    label: "Authority Chat",
+    path: "/ward/chat",
+    icon: MessageCircle,
+    protected: true,
+  },
 ];
 
 export default function WardSidebar({
