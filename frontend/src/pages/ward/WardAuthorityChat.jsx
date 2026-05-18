@@ -35,9 +35,27 @@ const WardAuthorityChat = () => {
 
                 setIsLoading(true);
 
-                await axiosInstance.post(
-                    "chat/authority/start/",
+                const startRes = await axiosInstance.post(
+                    "chat/authority/start/"
                 );
+
+                const createdChatId =
+                    startRes.data.data.chat_id;
+
+
+                await fetchMessages(
+                    createdChatId,
+                    1,
+                    true
+                );
+
+                setSelectedContact({
+                    id: createdChatId,
+                    chat_user: "Panchayath",
+                    name: "Panchayath",
+                    isOnline: false,
+                    unreadCount: 0,
+                });
 
                 const res = await authoritychatapi.getInbox();
 

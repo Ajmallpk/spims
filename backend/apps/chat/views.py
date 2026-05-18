@@ -1002,13 +1002,13 @@ class StartAuthorityChatView(APIView):
         try:
             user = request.user
 
-            receiver_id = request.data.get("receiver_id")
+            # receiver_id = request.data.get("receiver_id")
 
-            if not receiver_id:
-                return error_response(
-                    message="receiver_id is required",
-                    status=400
-                )
+            # if not receiver_id:
+            #     return error_response(
+            #         message="receiver_id is required",
+            #         status=400
+            #     )
 
             if user.role not in ["WARD", "PANCHAYATH"]:
                 return error_response(
@@ -1016,15 +1016,56 @@ class StartAuthorityChatView(APIView):
                     status=403
                 )
 
-            receiver = User.objects.filter(
-                id=receiver_id
-            ).first()
+            # receiver = User.objects.filter(
+            #     id=receiver_id
+            # ).first()
 
-            if not receiver:
-                return error_response(
-                    message="Receiver not found",
-                    status=404
-                )
+            # if not receiver:
+            #     return error_response(
+            #         message="Receiver not found",
+            #         status=404
+            #     )
+            
+            if user.role == "WARD":
+
+                verification = WardVerification.objects.filter(
+                    user=user,
+                    status="APPROVED"
+                ).select_related(
+                    "panchayath"
+                ).first()
+
+                if not verification:
+
+                    return error_response(
+                        message="Ward verification not found",
+                        status=404
+                    )
+
+                receiver = verification.panchayath
+
+            else:
+
+                receiver_id = request.data.get("receiver_id")
+
+                if not receiver_id:
+
+                    return error_response(
+                        message="receiver_id is required",
+                        status=400
+                    )
+
+                receiver = User.objects.filter(
+                    id=receiver_id,
+                    role="WARD"
+                ).first()
+
+                if not receiver:
+
+                    return error_response(
+                        message="Ward not found",
+                        status=404
+                    )
 
             if receiver.role not in ["WARD", "PANCHAYATH"]:
                 return error_response(
