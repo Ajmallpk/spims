@@ -14,6 +14,8 @@ from .permissions import (
 from .rate_limit import is_rate_limited
 from asgiref.sync import async_to_sync
 from django.core.cache import cache
+import asyncio
+from django.db.models import Q
 
 
 
@@ -85,17 +87,40 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
                 update_fields=["is_online"]
             )
 
-            async_to_sync(
-                self.channel_layer.group_send
-            )(
-                self.room_group_name,
-                {
-                    "type": "presence_update",
-                    "event_type": "presence",
-                    "username": self.user.username,
-                    "is_online": True
-                }
+            # async_to_sync(
+            #     self.channel_layer.group_send
+            # )(
+            #     self.room_group_name,
+            #     {
+            #         "type": "presence_update",
+            #         "event_type": "presence",
+            #         "username": self.user.username,
+            #         "is_online": True
+            #     }
+            # )
+            
+            
+            chat_ids = Chat.objects.filter(
+                Q(sender_authority=self.user) |
+                Q(receiver_authority=self.user)
+            ).values_list(
+                "id",
+                flat=True
             )
+
+            for chat_id in chat_ids:
+
+                async_to_sync(
+                    self.channel_layer.group_send
+                )(
+                    f"authority_chat_{chat_id}",
+                    {
+                        "type":"presence_update",
+                        "event_type":"presence",
+                        "username":self.user.username,
+                        "is_online":True,
+                    }
+                )
         
         
     @database_sync_to_async
@@ -646,7 +671,21 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        
+        
+        # await self.send(text_data=json.dumps({
+        #     "type": "presence",
+        #     "data": {
+        #         "user": self.user.username,
+        #         "is_online": True
+        #     }
+        # }))
+        
+        
+        
         await self.set_user_online()
+        
+        
 
 
     async def disconnect(self, close_code):
@@ -657,6 +696,8 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 self.channel_name
             )
+            
+        # await asyncio.sleep(3)
 
         await self.set_user_offline()
         
@@ -667,6 +708,11 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         cache_key = (
             f"user_connections_{self.user.id}"
         )
+        print(
+            "ONLINE",
+            self.user.username,
+            cache.get(cache_key)
+        )
 
         connections = cache.get(
             cache_key,
@@ -675,7 +721,8 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
         cache.set(
             cache_key,
-            connections + 1
+            connections + 1,
+            timeout=120
         )
 
         if connections == 0:
@@ -686,26 +733,130 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
                 update_fields=["is_online"]
             )
 
-            async_to_sync(
-                self.channel_layer.group_send
-            )(
-                self.room_group_name,
-                {
-                    "type": "presence_update",
-                    "event_type": "presence",
-                    "username": self.user.username,
-                    "is_online": True
-                }
+            # async_to_sync(
+            #     self.channel_layer.group_send
+            # )(
+            #     self.room_group_name,
+            #     {
+            #         "type": "presence_update",
+            #         "event_type": "presence",
+            #         "username": self.user.username,
+            #         "is_online": True
+            #     }
+            # )
+            
+            
+            chat_ids = Chat.objects.filter(
+                Q(sender_authority=self.user) |
+                Q(receiver_authority=self.user)
+            ).values_list(
+                "id",
+                flat=True
             )
+
+            for chat_id in chat_ids:
+
+                async_to_sync(
+                    self.channel_layer.group_send
+                )(
+                    f"authority_chat_{chat_id}",
+                    {
+                        "type":"presence_update",
+                        "event_type":"presence",
+                        "username":self.user.username,
+                        "is_online":True,
+                    }
+                )
         
         
+    # @database_sync_to_async
+    # def set_user_offline(self):
+
+    #     from django.utils.timezone import now
+
+    #     cache_key = (
+    #         f"user_connections_{self.user.id}"
+    #     )
+
+    #     connections = cache.get(
+    #         cache_key,
+    #         0
+    #     )
+
+    #     remaining_connections = max(
+    #         connections - 1,
+    #         0
+    #     )
+
+    #     cache.set(
+    #         cache_key,
+    #         remaining_connections
+    #     )
+
+    #     if remaining_connections == 0:
+
+    #         self.user.is_online = False
+
+    #         self.user.last_seen = now()
+
+    #         self.user.save(
+    #             update_fields=[
+    #                 "is_online",
+    #                 "last_seen"
+    #             ]
+    #         )
+
+    #         # async_to_sync(
+    #         #     self.channel_layer.group_send
+    #         # )(
+    #         #     self.room_group_name,
+    #         #     {
+    #         #         "type": "presence_update",
+    #         #         "event_type": "presence",
+    #         #         "username": self.user.username,
+    #         #         "is_online": False,
+    #         #         "last_seen": str(
+    #         #             self.user.last_seen
+    #         #         )
+    #         #     }
+    #         # )
+            
+    #         chat_ids = Chat.objects.filter(
+    #             Q(sender_authority=self.user) |
+    #             Q(receiver_authority=self.user)
+    #         ).values_list(
+    #             "id",
+    #             flat=True
+    #         )
+
+    #         for chat_id in chat_ids:
+
+    #             async_to_sync(
+    #                 self.channel_layer.group_send
+    #             )(
+    #                 f"authority_chat_{chat_id}",
+    #                 {
+    #                     "type":"presence_update",
+    #                     "event_type":"presence",
+    #                     "username":self.user.username,
+    #                     "is_online":False,
+    #                     "last_seen":str(
+    #                         self.user.last_seen
+    #                     )
+    #                 }
+    #             )
+    
     @database_sync_to_async
     def set_user_offline(self):
 
         from django.utils.timezone import now
 
-        cache_key = (
-            f"user_connections_{self.user.id}"
+        cache_key = f"user_connections_{self.user.id}"
+        
+        print(
+            "OFFLINE",
+            self.user.username,
+            cache.get(cache_key)
         )
 
         connections = cache.get(
@@ -720,32 +871,52 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
         cache.set(
             cache_key,
-            remaining_connections
+            remaining_connections,
+            timeout=300
         )
 
-        if remaining_connections == 0:
+        fresh_connections = cache.get(
+            cache_key,
+            0
+        )
 
-            self.user.is_online = False
+        if fresh_connections > 0:
 
-            self.user.last_seen = now()
+            return
 
-            self.user.save(
-                update_fields=[
-                    "is_online",
-                    "last_seen"
-                ]
-            )
+        self.user.refresh_from_db()
+
+        self.user.is_online = False
+
+        self.user.last_seen = now()
+
+        self.user.save(
+            update_fields=[
+                "is_online",
+                "last_seen"
+            ]
+        )
+
+        chat_ids = Chat.objects.filter(
+            Q(sender_authority=self.user) |
+            Q(receiver_authority=self.user)
+        ).values_list(
+            "id",
+            flat=True
+        )
+
+        for chat_id in chat_ids:
 
             async_to_sync(
                 self.channel_layer.group_send
             )(
-                self.room_group_name,
+                f"authority_chat_{chat_id}",
                 {
-                    "type": "presence_update",
-                    "event_type": "presence",
-                    "username": self.user.username,
-                    "is_online": False,
-                    "last_seen": str(
+                    "type":"presence_update",
+                    "event_type":"presence",
+                    "username":self.user.username,
+                    "is_online":False,
+                    "last_seen":str(
                         self.user.last_seen
                     )
                 }

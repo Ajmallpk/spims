@@ -23,25 +23,80 @@ const SeenStatus = ({ status, isSent }) => {
     );
 };
 
-const ReplyPreview = ({ reply, isSent }) => (
+const ReplyPreview = ({
+    reply,
+    isSent
+}) => (
+
     <div
         className={`flex border-l-2 rounded-lg px-2 py-1.5 mb-2 text-xs ${isSent
             ? "border-blue-300 bg-blue-700"
             : "border-blue-400 bg-gray-100"
             }`}
     >
+
         <div>
-            <p className={`font-semibold mb-0.5 ${isSent ? "text-blue-200" : "text-blue-600"}`}>
+
+            <p
+                className={`font-semibold mb-0.5 ${isSent
+                    ? "text-blue-200"
+                    : "text-blue-600"
+                    }`}
+            >
                 {reply.sender}
             </p>
-            <p className={`truncate max-w-[200px] ${isSent ? "text-blue-100" : "text-gray-500"}`}>
-                {reply.message}
-            </p>
-        </div>
-    </div>
-);
 
-const MessageBubble = ({ message, isCurrentUser, onReply, }) => {
+            {
+
+                reply.file_type === "IMAGE"
+                &&
+
+                <p>
+                    📷 Image
+                </p>
+
+            }
+
+            {
+
+                reply.file_type === "VIDEO"
+                &&
+
+                <p>
+                    🎥 Video
+                </p>
+
+            }
+
+            {
+
+                reply.file_type === "AUDIO"
+                &&
+
+                <p>
+                    🎤 Voice
+                </p>
+
+            }
+
+            {
+
+                !reply.file_type
+                &&
+
+                <p>
+                    {reply.message}
+                </p>
+
+            }
+
+        </div>
+
+    </div>
+
+)
+
+const MessageBubble = ({ message, isCurrentUser, onReply, onDelete, onReplyClick }) => {
     const {
         display_message,
         created_at,
@@ -52,7 +107,7 @@ const MessageBubble = ({ message, isCurrentUser, onReply, }) => {
         file_type,
         reply_data,
         is_forwarded,
-        onDelete,
+
     } = message;
 
 
@@ -148,25 +203,48 @@ const MessageBubble = ({ message, isCurrentUser, onReply, }) => {
                         </button>
                     )}
 
-                    {reply_data && (
+                    {/* {reply_data && (
                         <ReplyPreview
                             reply={reply_data}
                             isSent={isCurrentUser}
                         />
+                    )} */}
+
+                    {reply_data && (
+
+                        <div
+                            onClick={() =>
+                                onReplyClick(
+                                    reply_data.id
+                                )
+                            }
+                            className="cursor-pointer"
+                        >
+
+                            <ReplyPreview
+                                reply={reply_data}
+                                isSent={isCurrentUser}
+                            />
+
+                        </div>
+
                     )}
 
-                    {file_url && (
-                        <FilePreview
-                            file={{
-                                url: message.file_url,
-                                type: message.file_type,
-                                name: "Attachment",
-                                fileType:
-                                    message.file_type,
-                            }}
-                            isSent={isCurrentUser}
-                        />
-                    )}
+                    {
+                        !message.is_deleted &&
+                        file_url && (
+
+                            <FilePreview
+                                file_url={message.file_url}
+                                file_type={message.file_type}
+                                file={{
+                                    name: "Attachment"
+                                }}
+                                isSent={isCurrentUser}
+                            />
+
+                        )
+                    }
 
                     {/* {display_message && (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">

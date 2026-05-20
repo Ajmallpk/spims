@@ -35,27 +35,9 @@ const WardAuthorityChat = () => {
 
                 setIsLoading(true);
 
-                const startRes = await axiosInstance.post(
+                await axiosInstance.post(
                     "chat/authority/start/"
                 );
-
-                const createdChatId =
-                    startRes.data.data.chat_id;
-
-
-                await fetchMessages(
-                    createdChatId,
-                    1,
-                    true
-                );
-
-                setSelectedContact({
-                    id: createdChatId,
-                    chat_user: "Panchayath",
-                    name: "Panchayath",
-                    isOnline: false,
-                    unreadCount: 0,
-                });
 
                 const res = await authoritychatapi.getInbox();
 
@@ -93,12 +75,26 @@ const WardAuthorityChat = () => {
         };
 
         const storedUser = {
-            id: localStorage.getItem("user_id"),
+            id: Number(localStorage.getItem("user_id")),
             name: localStorage.getItem("name"),
             designation: "Ward Authority",
         };
 
         setCurrentUser(storedUser);
+
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+
+                if (socketRef.current) {
+
+                    socketRef.current.close()
+
+                }
+
+            }
+        )
 
         fetchInbox();
 
@@ -376,6 +372,12 @@ const WardAuthorityChat = () => {
 
         if (!selectedContact) return;
 
+        if (socketRef.current) {
+
+            socketRef.current.close();
+
+        }
+
         socketRef.current = new WebSocket(
             `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/`
         );
@@ -410,10 +412,17 @@ const WardAuthorityChat = () => {
             // NEW MESSAGE
             if (eventType === "message") {
 
-                setMessages((prev) => [
-                    ...prev,
-                    data,
-                ]);
+                setMessages((prev) => {
+
+                    const exists = prev.some(
+                        (msg) => msg.id === data.id
+                    );
+
+                    if (exists) return prev;
+
+                    return [...prev, data];
+
+                });
 
                 if (
                     data.sender_name !== currentUser?.name
@@ -421,10 +430,17 @@ const WardAuthorityChat = () => {
 
                     socketRef.current.send(
                         JSON.stringify({
-                            type: "seen",
-                            message_id: data.id,
+                            type: "delivered",
+                            message_id: data.id
                         })
-                    );
+                    )
+
+                    socketRef.current.send(
+                        JSON.stringify({
+                            type: "seen",
+                            message_id: data.id
+                        })
+                    )
 
                 }
 
@@ -499,7 +515,21 @@ const WardAuthorityChat = () => {
             }
 
             // PRESENCE
-            if (eventType === "presence") {
+            if (
+                eventType === "presence" ||
+                eventType === "presence_update"
+            ) {
+
+
+                console.log(
+                    "CONTACT USER:",
+                    selectedContact?.chat_user
+                );
+
+                console.log(
+                    "PRESENCE DATA USER:",
+                    data.user
+                );
 
                 setContacts((prev) =>
                     prev.map((contact) =>
@@ -515,30 +545,32 @@ const WardAuthorityChat = () => {
                     )
                 );
 
-                setSelectedContact(
-                    (prev) => {
+                setSelectedContact((prev) => {
 
-                        if (!prev) return prev;
+                    if (!prev) return prev;
 
-                        if (
-                            prev.chat_user ===
-                            data.user
-                        ) {
-
-                            return {
-                                ...prev,
-                                isOnline:
-                                    data.is_online,
-                                lastSeen:
-                                    data.last_seen,
-                            };
-
-                        }
+                    if (prev.chat_user !== data.user) {
 
                         return prev;
 
                     }
-                );
+
+                    if (
+                        prev.isOnline === data.is_online &&
+                        prev.lastSeen === data.last_seen
+                    ) {
+
+                        return prev;
+
+                    }
+
+                    return {
+                        ...prev,
+                        isOnline: data.is_online,
+                        lastSeen: data.last_seen,
+                    };
+
+                });
 
             }
 
@@ -551,14 +583,12 @@ const WardAuthorityChat = () => {
 
         };
 
-        socketRef.current.onclose = () => {
+        socketRef.current.onclose = (event) => {
 
-            console.log(
-                "WebSocket Disconnected"
-            );
+            console.log("WebSocket Disconnected");
 
-            // AUTO RECONNECT
             if (
+                !event.wasClean &&
                 reconnectAttemptsRef.current < 5
             ) {
 
@@ -566,10 +596,6 @@ const WardAuthorityChat = () => {
 
                 reconnectTimeoutRef.current =
                     setTimeout(() => {
-
-                        console.log(
-                            `Reconnect attempt ${reconnectAttemptsRef.current}`
-                        );
 
                         connectWebSocket();
 
@@ -584,31 +610,25 @@ const WardAuthorityChat = () => {
 
     useEffect(() => {
 
-        if (!selectedContact) return;
+        if (!selectedContact?.id) {
+
+            return;
+
+        }
 
         connectWebSocket();
 
         return () => {
 
-            if (socketRef.current) {
-
-                socketRef.current.close();
-
-            }
-
-            if (
+            clearTimeout(
                 reconnectTimeoutRef.current
-            ) {
+            );
 
-                clearTimeout(
-                    reconnectTimeoutRef.current
-                );
-
-            }
+            socketRef.current?.close();
 
         };
 
-    }, [selectedContact]);
+    }, [selectedContact?.id]);
 
 
 
@@ -639,10 +659,13 @@ const WardAuthorityChat = () => {
                     file.originalFile
                 );
 
-                await authoritychatapi.sendMessage(
-                    selectedContact.id,
-                    formData
-                );
+                const res =
+                    await authoritychatapi.sendMessage(
+                        selectedContact.id,
+                        formData
+                    );
+
+
 
                 return;
             }

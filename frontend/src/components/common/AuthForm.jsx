@@ -194,6 +194,10 @@ export function AuthForm() {
       localStorage.setItem("role", response.data.data.role)
       localStorage.setItem("status", response.data.data.status)
       localStorage.setItem("is_verified", String(response.data.data.is_verified))
+      localStorage.setItem(
+        "user_id",
+        response.data.data.user_id
+      )
 
       const role = response.data.data.role
       const isVerified = response.data.data.is_verified

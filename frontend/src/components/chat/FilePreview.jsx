@@ -1,3 +1,6 @@
+import { useState } from "react"
+
+
 const FilePreview = ({
   file,
   file_url,
@@ -11,23 +14,168 @@ const FilePreview = ({
     file_type === "PDF";
 
   const isVoice =
-    file_type === "VOICE";
+    file_type === "AUDIO";
+
+  const isVideo =
+    file_type === "VIDEO";
+
+
+
+  const [previewOpen, setPreviewOpen] =
+    useState(false)
 
   if (isImage) {
+
     return (
-      <div className="mt-1 rounded-xl overflow-hidden max-w-xs">
-        <img
-          src={file_url}
-          alt={file.name || "Image"}
-          className="w-full object-cover max-h-48 rounded-xl"
-        />
-        {file.name && (
-          <p className={`text-xs mt-1 ${isSent ? "text-blue-100" : "text-gray-400"}`}>
-            {file.name}
-          </p>
-        )}
-      </div>
-    );
+
+      <>
+
+        <div className="mt-1 rounded-xl overflow-hidden max-w-xs">
+
+          <img
+            src={file_url}
+            alt="image"
+
+            onClick={() =>
+              setPreviewOpen(true)
+            }
+
+            className="
+              w-full
+              object-cover
+              max-h-48
+              rounded-xl
+              cursor-pointer
+              "
+          />
+
+        </div>
+
+        {
+
+          previewOpen && (
+
+            <div
+
+              onClick={() =>
+                setPreviewOpen(false)
+              }
+
+              className="
+fixed
+inset-0
+bg-black/90
+z-[9999]
+flex
+justify-center
+items-center
+p-5
+"
+
+            >
+
+              <img
+
+                src={file_url}
+
+                className="
+max-h-full
+max-w-full
+rounded-lg
+"
+
+              />
+
+            </div>
+
+          )
+
+        }
+
+      </>
+
+    )
+
+  }
+
+  if (isVideo) {
+
+    return (
+
+      <>
+
+        <div className="mt-2 max-w-xs">
+
+          <video
+
+            controls
+
+            onClick={() =>
+              setPreviewOpen(true)
+            }
+
+            className="
+rounded-xl
+w-full
+cursor-pointer
+"
+
+          >
+
+            <source src={file_url} />
+
+          </video>
+
+        </div>
+
+        {
+
+          previewOpen && (
+
+            <div
+
+              onClick={() =>
+                setPreviewOpen(false)
+              }
+
+              className="
+fixed
+inset-0
+bg-black/90
+z-[9999]
+flex
+justify-center
+items-center
+"
+
+            >
+
+              <video
+
+                src={file_url}
+
+                controls
+
+                autoPlay
+
+                className="
+max-h-full
+max-w-full
+rounded-lg
+"
+
+              />
+
+            </div>
+
+          )
+
+        }
+
+      </>
+
+    )
+
   }
 
   if (isPdf) {
@@ -49,43 +197,53 @@ const FilePreview = ({
             {file.size || "PDF Document"}
           </p>
         </div>
-        <button className={`flex-shrink-0 ${isSent ? "text-blue-200 hover:text-white" : "text-gray-400 hover:text-gray-600"} transition-colors`}>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        <a
+          href={file_url}
+          target="_blank"
+          rel="noreferrer"
+          download
+        >
+
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            />
+
           </svg>
-        </button>
+
+        </a>
       </div>
     );
   }
 
   if (isVoice) {
     return (
-      <div
-        className={`flex items-center gap-3 mt-1 px-3 py-2 rounded-xl ${isSent ? "bg-blue-700" : "bg-gray-100"
-          } w-52`}
-      >
-        <button className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isSent ? "bg-white text-blue-600" : "bg-blue-600 text-white"}`}>
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </button>
-        <div className="flex-1">
-          <div className="flex items-center gap-0.5 h-6">
-            {[3, 5, 8, 6, 4, 7, 5, 3, 6, 8, 4, 5].map((h, i) => (
-              <div
-                key={i}
-                className={`w-1 rounded-full ${isSent ? "bg-blue-300" : "bg-blue-400"}`}
-                style={{ height: `${h * 3}px` }}
-              />
-            ))}
-          </div>
-          <p className={`text-xs mt-0.5 ${isSent ? "text-blue-200" : "text-gray-400"}`}>
-            {file.duration || "0:32"}
-          </p>
-        </div>
+      <div className="mt-2 max-w-xs">
+        <audio
+          controls
+          preload="metadata"
+          controlsList="nodownload"
+          className="
+ w-full
+ min-w-[300px]
+"
+        >
+          <source src={file_url} />
+        </audio>
       </div>
     );
   }
+
+
 
   return (
     <div className={`flex items-center gap-3 mt-1 p-3 rounded-xl ${isSent ? "bg-blue-700" : "bg-gray-100"} max-w-xs`}>
@@ -95,6 +253,66 @@ const FilePreview = ({
       <span className={`text-sm truncate ${isSent ? "text-white" : "text-gray-700"}`}>
         {file.name || "Attachment"}
       </span>
+
+      {
+        previewOpen && (
+
+          <div
+            onClick={() =>
+              setPreviewOpen(false)
+            }
+            className="
+fixed
+inset-0
+bg-black/90
+z-[999]
+flex
+justify-center
+items-center
+p-5
+"
+          >
+
+            {
+
+              isImage && (
+
+                <img
+                  src={file_url}
+                  className="
+max-h-full
+max-w-full
+rounded-lg
+"
+                />
+
+              )
+
+            }
+
+            {
+
+              isVideo && (
+
+                <video
+                  src={file_url}
+                  controls
+                  autoPlay
+                  className="
+                  max-h-full
+                  max-w-full
+                  rounded-lg
+                  "
+                />
+
+              )
+
+            }
+
+          </div>
+
+        )
+      }
     </div>
   );
 };

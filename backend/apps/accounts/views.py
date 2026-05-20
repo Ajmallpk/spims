@@ -266,6 +266,7 @@ class EmailLoginView(TokenObtainPairView):
             response = success_response(
                 message="Login successful",
                 data={
+                    "user_id": user.id,
                     "role": serializer.validated_data.get("role"),
                     "status": serializer.validated_data.get("status"),
                     "is_superuser": serializer.validated_data.get("is_superuser"),

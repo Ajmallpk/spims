@@ -18,7 +18,7 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = [
             "id",
-            "sender"
+            "sender",
             "sender_name",
             "display_message",
             "reply_data",
@@ -63,21 +63,53 @@ class MessageSerializer(serializers.ModelSerializer):
     
     
     
-    def get_reply_data(self, obj):
+    # def get_reply_data(self, obj):
+
+    #     if not obj.reply_to:
+    #         return None
+        
+        
+    #     reply_message = obj.reply_to.message
+
+    #     if obj.reply_to.is_deleted:
+    #         reply_message = "This message was deleted"
+
+    #     return {
+    #         "id": obj.reply_to.id,
+    #         "sender": obj.reply_to.sender.username,
+    #         "message": reply_message,
+    #     }
+    
+    
+    def get_reply_data(self,obj):
 
         if not obj.reply_to:
             return None
-        
-        
-        reply_message = obj.reply_to.message
 
-        if obj.reply_to.is_deleted:
-            reply_message = "This message was deleted"
+        reply= obj.reply_to
+
+        reply_message=reply.message
+
+        if reply.is_deleted:
+
+            reply_message="This message was deleted"
 
         return {
-            "id": obj.reply_to.id,
-            "sender": obj.reply_to.sender.username,
-            "message": reply_message,
+
+            "id":reply.id,
+
+            "sender":
+            reply.sender.username,
+
+            "message":
+            reply_message,
+
+            "file_type":
+            reply.file_type,
+
+            "file_url":
+            self.get_file_url(reply),
+
         }
         
         

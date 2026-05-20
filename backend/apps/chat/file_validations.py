@@ -21,6 +21,8 @@ ALLOWED_EXTENSIONS = [
     ".ogg",
     ".m4a",
     
+    ".webm",
+    
 ]
 
 
@@ -94,4 +96,5 @@ ALLOWED_MIME_TYPES = [
     "audio/wav",
     "audio/ogg",
     "audio/x-m4a",
+    "audio/webm",
 ]

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 
@@ -48,10 +48,79 @@ const groupMessagesByDate = (messages) => {
 const MessageList = ({ messages, currentUserId, isTyping, typingUser, onReply, onDelete, loadMoreMessages, hasMore, loadingMore, }) => {
     const bottomRef = useRef(null);
     const containerRef = useRef(null);
+    const messageRefs = useRef({});
+    const [highlightedId, setHighlightedId] = useState(null)
+
+    const previousHeightRef = useRef(0);
+
+    const firstLoadDoneRef = useRef(false);
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, isTyping]);
+
+        if (
+            !containerRef.current ||
+            !messages.length
+        ) return;
+
+        const container =
+            containerRef.current;
+
+        // OPEN CHAT -> GO BOTTOM
+
+        if (
+            !firstLoadDoneRef.current
+        ) {
+
+            const scrollBottom = () => {
+
+                container.scrollTop =
+                    container.scrollHeight;
+
+            };
+
+            setTimeout(
+                scrollBottom,
+                100
+            );
+
+            setTimeout(
+                scrollBottom,
+                300
+            );
+
+            setTimeout(
+                scrollBottom,
+                600
+            );
+
+            firstLoadDoneRef.current =
+                true;
+
+            return;
+
+        }
+
+        // LOAD OLD MESSAGES
+
+        if (loadingMore) {
+
+            requestAnimationFrame(() => {
+
+                const newHeight =
+                    container.scrollHeight;
+
+                const diff =
+                    newHeight -
+                    previousHeightRef.current;
+
+                container.scrollTop += diff;
+
+            });
+
+        }
+
+    }, [messages]);
+
 
     const handleScroll = () => {
 
@@ -59,11 +128,17 @@ const MessageList = ({ messages, currentUserId, isTyping, typingUser, onReply, o
             return;
 
         if (
-            containerRef.current
-                .scrollTop < 100 &&
-            hasMore &&
+
+            containerRef.current.scrollTop < 100
+            &&
+            hasMore
+            &&
             !loadingMore
+
         ) {
+
+            previousHeightRef.current =
+                containerRef.current.scrollHeight;
 
             loadMoreMessages();
 
@@ -72,6 +147,38 @@ const MessageList = ({ messages, currentUserId, isTyping, typingUser, onReply, o
     };
 
     const grouped = groupMessagesByDate(messages);
+
+
+    useEffect(() => {
+
+        firstLoadDoneRef.current =
+            false;
+
+    }, [currentUserId]);
+
+
+
+    const scrollToMessage = (messageId) => {
+
+        const target =
+            messageRefs.current[messageId]
+
+        if (!target) return
+
+        target.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        })
+
+        setHighlightedId(messageId)
+
+        setTimeout(() => {
+
+            setHighlightedId(null)
+
+        }, 2000)
+
+    }
 
     return (
         <div
@@ -92,12 +199,35 @@ const MessageList = ({ messages, currentUserId, isTyping, typingUser, onReply, o
                         return <DateSeparator key={`date-${i}`} date={item.value} />;
                     }
                     const msg = item.value;
+
+                    console.log("MSG SENDER:", msg.sender);
+                    console.log("CURRENT USER:", currentUserId);
+                    console.log(
+                        "MATCH:",
+                        Number(msg.sender) === Number(currentUserId)
+                    );
                     return (
-                        <div key={msg.id} className="px-4 py-0.5">
+                        <div
+                            key={msg.id}
+                            ref={(el) => {
+
+                                messageRefs.current[msg.id] = el
+
+                            }}
+                            className={`
+                                    px-4 py-0.5
+                                    transition-all
+                                    ${highlightedId === msg.id
+                                    ? "bg-yellow-200 rounded-lg"
+                                    : ""
+                                }
+`}
+                        >
                             <MessageBubble
                                 message={msg}
                                 onReply={onReply}
                                 onDelete={onDelete}
+                                onReplyClick={scrollToMessage}
                                 isCurrentUser={
                                     Number(msg.sender) === Number(currentUserId)
                                 }

@@ -58,13 +58,7 @@ const PanchayathAuthorityChat = () => {
 
         setContacts(formattedContacts);
 
-        if (formattedContacts.length > 0) {
 
-          handleSelectContact(
-            formattedContacts[0]
-          );
-
-        }
 
       } catch (error) {
 
@@ -78,7 +72,7 @@ const PanchayathAuthorityChat = () => {
     };
 
     const storedUser = {
-      id: localStorage.getItem("user_id"),
+      id: Number(localStorage.getItem("user_id")),
       name: localStorage.getItem("name"),
       designation: "Panchayath Authority",
     };
@@ -419,10 +413,17 @@ const PanchayathAuthorityChat = () => {
 
           socketRef.current.send(
             JSON.stringify({
-              type: "seen",
-              message_id: data.id,
+              type: "delivered",
+              message_id: data.id
             })
-          );
+          )
+
+          socketRef.current.send(
+            JSON.stringify({
+              type: "seen",
+              message_id: data.id
+            })
+          )
 
         }
 
@@ -497,7 +498,21 @@ const PanchayathAuthorityChat = () => {
       }
 
       // PRESENCE
-      if (eventType === "presence") {
+      if (
+        eventType === "presence" ||
+        eventType === "presence_update"
+      ) {
+
+        console.log(
+          "CONTACT USER:",
+          selectedContact?.chat_user
+        );
+
+        console.log(
+          "PRESENCE DATA USER:",
+          data.user
+        );
+
 
         setContacts((prev) =>
           prev.map((contact) =>
@@ -513,30 +528,32 @@ const PanchayathAuthorityChat = () => {
           )
         );
 
-        setSelectedContact(
-          (prev) => {
+        setSelectedContact((prev) => {
 
-            if (!prev) return prev;
+          if (!prev) return prev;
 
-            if (
-              prev.chat_user ===
-              data.user
-            ) {
-
-              return {
-                ...prev,
-                isOnline:
-                  data.is_online,
-                lastSeen:
-                  data.last_seen,
-              };
-
-            }
+          if (prev.chat_user !== data.user) {
 
             return prev;
 
           }
-        );
+
+          if (
+            prev.isOnline === data.is_online &&
+            prev.lastSeen === data.last_seen
+          ) {
+
+            return prev;
+
+          }
+
+          return {
+            ...prev,
+            isOnline: data.is_online,
+            lastSeen: data.last_seen,
+          };
+
+        });
 
       }
 
@@ -549,14 +566,12 @@ const PanchayathAuthorityChat = () => {
 
     };
 
-    socketRef.current.onclose = () => {
+    socketRef.current.onclose = (event) => {
 
-      console.log(
-        "WebSocket Disconnected"
-      );
+      console.log("WebSocket Disconnected");
 
-      // AUTO RECONNECT
       if (
+        !event.wasClean &&
         reconnectAttemptsRef.current < 5
       ) {
 
@@ -564,10 +579,6 @@ const PanchayathAuthorityChat = () => {
 
         reconnectTimeoutRef.current =
           setTimeout(() => {
-
-            console.log(
-              `Reconnect attempt ${reconnectAttemptsRef.current}`
-            );
 
             connectWebSocket();
 
@@ -582,31 +593,25 @@ const PanchayathAuthorityChat = () => {
 
   useEffect(() => {
 
-    if (!selectedContact) return;
+    if (!selectedContact?.id) {
+
+      return;
+
+    }
 
     connectWebSocket();
 
     return () => {
 
-      if (socketRef.current) {
-
-        socketRef.current.close();
-
-      }
-
-      if (
+      clearTimeout(
         reconnectTimeoutRef.current
-      ) {
+      );
 
-        clearTimeout(
-          reconnectTimeoutRef.current
-        );
-
-      }
+      socketRef.current?.close();
 
     };
 
-  }, [selectedContact]);
+  }, [selectedContact?.id]);
 
 
 
@@ -637,10 +642,13 @@ const PanchayathAuthorityChat = () => {
           file.originalFile
         );
 
-        await authoritychatapi.sendMessage(
-          selectedContact.id,
-          formData
-        );
+        const res =
+          await authoritychatapi.sendMessage(
+            selectedContact.id,
+            formData
+          );
+
+
 
         return;
       }

@@ -573,7 +573,7 @@ class SendMessageview(APIView):
                         file_type = "VIDEO"
 
                     elif mime_type.startswith("audio"):
-                        file_type = "VOICE"
+                        file_type = "AUDIO"
 
                     elif mime_type == "application/pdf":
                         file_type = "PDF"
@@ -1215,6 +1215,10 @@ class SendAuthorityMessageView(APIView):
 
                     elif mime_type.startswith("video"):
                         file_type = "VIDEO"
+                        
+                        
+                    elif mime_type.startswith("audio"):
+                        file_type = "AUDIO"
 
                     elif mime_type == "application/pdf":
                         file_type = "PDF"
@@ -1230,9 +1234,19 @@ class SendAuthorityMessageView(APIView):
                 file_type=file_type
             )
 
+            message = Message.objects.select_related(
+                "sender",
+                "reply_to",
+                "reply_to__sender"
+            ).get(
+                id=message.id
+            )
+
             serializer = MessageSerializer(
                 message,
-                context={"request": request}
+                context={
+                    "request": request
+                }
             )
             
             

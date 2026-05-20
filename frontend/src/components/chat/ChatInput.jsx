@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 
 
 const EmojiPicker = ({ onSelect, onClose }) => {
-    const emojis = ["😊", "👍", "🙏", "✅", "📋", "📌", "⚠️", "🔔", "💬", "📞", "🏛️", "📄", "✔️", "❌", "🔴", "🟢"];
+    const emojis = ["😊", "👍", "🙏", "✅", "📋", "📌", "⚠️", "🔔", "💬", "📞", "🏛️", "📄", "✔️", "❌", "🔴", "🟢","✍🏻","⛈️","🔥"];
     return (
         <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-2xl shadow-lg p-3 z-10">
             <div className="grid grid-cols-8 gap-1">
@@ -33,8 +33,16 @@ const ChatInput = ({
     const [text, setText] = useState("");
     const [showEmoji, setShowEmoji] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [isPaused, setIsPaused] =
+        useState(false)
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const recordingIntervalRef = useRef(null);
     const fileRef = useRef(null);
+    const textareaRef = useRef(null)
     const typingTimeoutRef = useRef(null);
+
 
     const handleSend = () => {
 
@@ -67,12 +75,56 @@ const ChatInput = ({
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
+
+        const file =
+            e.target.files[0];
+
         if (!file) return;
-        const isImage = file.type.startsWith("image/");
+
+        let fileType = "file"
+
+        if (
+            file.type.startsWith(
+                "image/"
+            )
+        ) {
+
+            fileType = "image"
+
+        }
+        else if (
+            file.type.startsWith(
+                "video/"
+            )
+        ) {
+
+            fileType = "video"
+
+        }
+        else if (
+            file.type.startsWith(
+                "audio/"
+            )
+        ) {
+
+            fileType = "audio"
+
+        }
+        else if (
+            file.type ===
+            "application/pdf"
+        ) {
+
+            fileType = "pdf"
+
+        }
+
         onSendMessage({
+
             text: "",
+
             file: {
+
                 originalFile: file,
 
                 name: file.name,
@@ -80,34 +132,297 @@ const ChatInput = ({
                 type: file.type,
 
                 size:
-                    (file.size / 1024).toFixed(0) + " KB",
+                    (
+                        file.size / 1024
+                    ).toFixed(0)
+                    + " KB",
 
-                fileType: isImage
-                    ? "image"
-                    : "pdf",
+                fileType: fileType,
 
-                url: isImage
-                    ? URL.createObjectURL(file)
-                    : null,
+                url:
+                    fileType === "image" ||
+                        fileType === "video"
+                        ? URL.createObjectURL(file)
+                        : null,
 
-                preview: isImage
-                    ? URL.createObjectURL(file)
-                    : null,
-            },
-        });
-        e.target.value = "";
+                preview:
+                    fileType === "image"
+                        ? URL.createObjectURL(file)
+                        : null,
+
+            }
+
+        })
+
+        e.target.value = ""
+
+    }
+
+    const startRecording = async () => {
+
+        try {
+
+            const stream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                });
+
+            const mediaRecorder =
+                new MediaRecorder(stream);
+
+            mediaRecorderRef.current =
+                mediaRecorder;
+
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (
+                event
+            ) => {
+
+                if (event.data.size > 0) {
+
+                    audioChunksRef.current.push(
+                        event.data
+                    );
+
+                }
+
+            };
+
+            mediaRecorder.onstop = async () => {
+
+                const mimeType =
+
+                    MediaRecorder
+                        .isTypeSupported(
+                            "audio/webm"
+                        )
+
+                        ? "audio/webm"
+
+                        : "audio/mp4"
+
+                const audioBlob =
+                    new Blob(
+
+                        audioChunksRef.current,
+
+                        {
+                            type: mimeType
+                        }
+
+                    )
+
+                const audioFile =
+                    new File(
+                        [audioBlob],
+                        `voice_${Date.now()}.webm`,
+                        {
+                            type: "audio/webm",
+                        }
+                    );
+
+                onSendMessage({
+                    text: "",
+                    file: {
+                        originalFile: audioFile,
+                        name: audioFile.name,
+                        type: audioFile.type,
+                        size:
+                            (
+                                audioFile.size /
+                                1024
+                            ).toFixed(0) + " KB",
+                        fileType: "audio",
+                    },
+                });
+
+                stream
+                    .getTracks()
+                    .forEach((track) =>
+                        track.stop()
+                    );
+
+            };
+
+            mediaRecorder.start();
+
+            setIsRecording(true);
+
+            setRecordingTime(0);
+
+            recordingIntervalRef.current =
+                setInterval(() => {
+
+                    setRecordingTime(
+                        (prev) => prev + 1
+                    );
+
+                }, 1000);
+
+        } catch (error) {
+
+            console.error(
+                "Recording error:",
+                error
+            );
+
+        }
+
     };
 
-    const toggleRecording = () => {
-        if (isRecording) {
-            setIsRecording(false);
-            onSendMessage({
-                text: "",
-                file: { fileType: "voice", duration: "0:08" },
-            });
-        } else {
-            setIsRecording(true);
+
+
+    const stopRecording = () => {
+
+        if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state !==
+            "inactive"
+        ) {
+
+            mediaRecorderRef.current.stop();
+
         }
+
+        clearInterval(
+            recordingIntervalRef.current
+        );
+
+        setIsRecording(false);
+
+    };
+
+
+    const pauseRecording = () => {
+
+        if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state === "recording"
+        ) {
+
+            mediaRecorderRef.current.pause()
+
+            clearInterval(
+                recordingIntervalRef.current
+            )
+
+            setIsPaused(true)
+
+        }
+
+    }
+
+
+
+    const resumeRecording = () => {
+
+        if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state === "paused"
+        ) {
+
+            mediaRecorderRef.current.resume()
+
+            recordingIntervalRef.current =
+                setInterval(() => {
+
+                    setRecordingTime(
+                        prev => prev + 1
+                    )
+
+                }, 1000)
+
+            setIsPaused(false)
+
+        }
+
+    }
+
+
+
+    const cancelRecording = () => {
+
+        if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state !==
+            "inactive"
+        ) {
+
+            mediaRecorderRef.current.stop();
+
+        }
+
+        audioChunksRef.current = [];
+
+        clearInterval(
+            recordingIntervalRef.current
+        );
+
+        setRecordingTime(0);
+
+        setIsRecording(false);
+
+    };
+
+
+    useEffect(() => {
+
+        if (replyMessage) {
+
+            textareaRef
+                .current
+                ?.focus()
+
+        }
+
+    }, [replyMessage])
+
+
+
+    useEffect(() => {
+
+        return () => {
+
+            clearTimeout(
+                typingTimeoutRef.current
+            )
+
+            if (
+                socketRef?.current?.readyState === 1
+            ) {
+
+                socketRef.current.send(
+
+                    JSON.stringify({
+
+                        type: "typing",
+
+                        is_typing: false
+
+                    })
+
+                )
+
+            }
+
+        }
+
+    }, [])
+
+
+    const formatTime = (seconds) => {
+
+        const mins = Math.floor(
+            seconds / 60
+        );
+
+        const secs = seconds % 60;
+
+        return `${mins}:${secs
+            .toString()
+            .padStart(2, "0")}`;
+
     };
 
     return (
@@ -141,7 +456,6 @@ const ChatInput = ({
                 </div>
             )}
 
-            <div className="bg-white border-t border-gray-200 px-4 py-3"></div>
             <div className="bg-white border-t border-gray-200 px-4 py-3">
                 <div className="flex items-end gap-2">
                     <div className="relative flex-1">
@@ -163,6 +477,7 @@ const ChatInput = ({
                             </button>
 
                             <textarea
+                                ref={textareaRef}
                                 value={text}
                                 onChange={(e) => {
 
@@ -189,21 +504,28 @@ const ChatInput = ({
                                     }
 
                                     // STOP TYPING AFTER 1 SECOND
-                                    typingTimeoutRef.current = setTimeout(() => {
+                                    typingTimeoutRef.current =
+                                        setTimeout(() => {
 
-                                        if (socketRef?.current) {
+                                            if (
+                                                socketRef?.current?.readyState === 1
+                                            ) {
 
-                                            socketRef.current.send(
-                                                JSON.stringify({
-                                                    type: "typing",
-                                                    is_typing: false,
-                                                })
-                                            );
+                                                socketRef.current.send(
 
-                                        }
+                                                    JSON.stringify({
 
-                                    }, 1000);
+                                                        type: "typing",
 
+                                                        is_typing: false
+
+                                                    })
+
+                                                )
+
+                                            }
+
+                                        }, 1500)
                                 }}
                                 onKeyDown={handleKeyDown}
                                 placeholder={disabled ? "Select a chat to start messaging" : "Type a message..."}
@@ -226,7 +548,14 @@ const ChatInput = ({
                             <input
                                 ref={fileRef}
                                 type="file"
-                                accept="image/*,.pdf,.doc,.docx"
+                                accept="
+                                image/*,
+                                video/*,
+                                audio/*,
+                                .pdf,
+                                .doc,
+                                .docx
+                                "
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
@@ -234,7 +563,27 @@ const ChatInput = ({
                     </div>
 
                     <button
-                        onClick={text.trim() ? handleSend : toggleRecording}
+                        onClick={() => {
+
+                            if (text.trim()) {
+
+                                handleSend();
+
+                            } else {
+
+                                if (isRecording) {
+
+                                    stopRecording();
+
+                                } else {
+
+                                    startRecording();
+
+                                }
+
+                            }
+
+                        }}
                         disabled={disabled}
                         className={`w-11 h-11 flex-shrink-0 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${isRecording
                             ? "bg-red-500 hover:bg-red-600 animate-pulse"
@@ -261,14 +610,71 @@ const ChatInput = ({
                 </div>
 
                 {isRecording && (
-                    <div className="flex items-center gap-2 mt-2 px-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
-                        <span className="text-xs text-red-500 font-medium">Recording... Click mic to send</span>
+
+                    <div
+                        className="
+                            flex
+                            justify-between
+                            items-center
+                            mt-2
+                            px-2
+                            "
+                    >
+
+                        <div>
+
+                            Recording...
+                            {formatTime(recordingTime)}
+
+                        </div>
+
+                        <div
+                            className="
+                                flex
+                                gap-2
+                                "
+                        >
+
+                            <button
+                                onClick={
+                                    isPaused
+                                        ? resumeRecording
+                                        : pauseRecording
+                                }
+                            >
+
+                                {
+                                    isPaused
+                                        ? "Resume"
+                                        : "Pause"
+                                }
+
+                            </button>
+
+                            <button
+                                onClick={stopRecording}
+                            >
+
+                                Send
+
+                            </button>
+
+                            <button
+                                onClick={cancelRecording}
+                            >
+
+                                Cancel
+
+                            </button>
+
+                        </div>
+
                     </div>
+
                 )}
             </div>
-            </>
-            );
+        </>
+    );
 };
 
 export default ChatInput;
