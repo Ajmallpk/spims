@@ -29,6 +29,7 @@ class CitizenProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username", read_only=True)
     is_verified = serializers.BooleanField(source="user.is_verified", read_only=True)
     ward_name = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
     class Meta:
         model = CitizenProfile
         fields = [
@@ -45,6 +46,14 @@ class CitizenProfileSerializer(serializers.ModelSerializer):
             "address",
             "created_at",
         ]
+        
+        
+    def get_profile_image(self,obj):
+
+        if obj.profile_image:
+            return obj.profile_image.url
+
+        return None
         
         
         

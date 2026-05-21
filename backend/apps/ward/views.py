@@ -79,9 +79,9 @@ class WardProfile(APIView):
                     "panchayath_name": verification.panchayath.username,
                     "office_address": verification.office_address,
 
-                    "aadhaar_image": request.build_absolute_uri(verification.aadhaar_image.url) if verification.aadhaar_image else None,
-                    "selfie_image": request.build_absolute_uri(verification.selfie_image.url) if verification.selfie_image else None,
-                    "supporting_document": request.build_absolute_uri(verification.supporting_document.url) if verification.supporting_document else None,
+                    "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
+                    "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
+                    "supporting_document": verification.supporting_document.url if verification.supporting_document else None,
                 }
             )
 
@@ -362,8 +362,8 @@ class CitizenVerificationDetailView(APIView):
                     "status": citizen.status,
                     "reject_reason": citizen.reject_reason,
 
-                    "aadhaar_image": request.build_absolute_uri(citizen.aadhaar_image.url) if citizen.aadhaar_image else None,
-                    "selfie_image": request.build_absolute_uri(citizen.selfie_image.url) if citizen.selfie_image else None,
+                    "aadhaar_image": citizen.aadhaar_image.url if citizen.aadhaar_image else None,
+                    "selfie_image": citizen.selfie_image.url if citizen.selfie_image else None,
 
                     "submitted_at": citizen.submitted_at,
                 }
@@ -848,8 +848,8 @@ class CitizenFullDetailView(APIView):
                 },
                 "verification": {
                     "status": verification.status,
-                    "aadhaar_image": request.build_absolute_uri(verification.aadhaar_image.url) if verification.aadhaar_image else None,
-                    "selfie_image": request.build_absolute_uri(verification.selfie_image.url) if verification.selfie_image else None,
+                    "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
+                    "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
                     "submitted_at": verification.submitted_at, 
                 },
                 "stats": stats,
@@ -905,7 +905,7 @@ class ComplaintDetailView(APIView):
                 "location": complaint.location,
                 "media": [
                     {
-                        "file": request.build_absolute_uri(m.file.url),
+                        "file": m.file.url,
                         "type": m.file_type
                     } for m in complaint.media.all()
                 ],
@@ -971,7 +971,7 @@ class WardComplaintListView(APIView):
                     "citizen_name": c.citizen.username,
                     "location": c.location,
 
-                    "image": request.build_absolute_uri(c.image_proof.url) if c.image_proof else None,
+                    "image": c.image_proof.url if c.image_proof else None
                 }
                 for c in paginated_qs
             ]
@@ -1051,8 +1051,11 @@ class EscalateComplaintView(APIView):
             files = request.FILES.getlist("media_files")
 
             for file in files:
-                if file.size > 5 * 1024 * 1024:
-                    continue
+                if file.size > 20 * 1024 * 1024:
+                    return error_response(
+                        message="File exceeds 20MB",
+                        status=400
+                    )
 
                 mime_type, _ = mimetypes.guess_type(file.name)
 
@@ -1188,8 +1191,11 @@ class WardResolveComplaintView(APIView):
             files = request.FILES.getlist("media_files")
 
             for file in files:
-                if file.size > 5 * 1024 * 1024:
-                    continue
+                if file.size > 20 * 1024 * 1024:
+                    return error_response(
+                        message="File exceeds 20MB",
+                        status=400
+                    )
 
                 mime_type, _ = mimetypes.guess_type(file.name)
 
@@ -1299,7 +1305,7 @@ class WardReassignedComplaintDetailView(APIView):
 
                 "media": [
                     {
-                        "file": request.build_absolute_uri(m.file.url),
+                        "file": m.file.url,
                         "type": m.file_type
                     } for m in complaint.media.all()
                 ],

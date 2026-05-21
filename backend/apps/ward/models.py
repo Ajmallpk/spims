@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from apps.complaints.models import Complaint
+from cloudinary.models import CloudinaryField
 
 User = get_user_model()
 
@@ -35,13 +36,33 @@ class WardVerification(models.Model):
     ward_name = models.CharField(max_length=255)
     office_address = models.TextField()
 
-    aadhaar_image = models.ImageField(upload_to="ward/aadhaar/")
-    selfie_image = models.ImageField(upload_to="ward/selfie/")
-    supporting_document = models.FileField(
-        upload_to="ward/supporting/",
+    # aadhaar_image = models.ImageField(upload_to="ward/aadhaar/")
+    # selfie_image = models.ImageField(upload_to="ward/selfie/")
+    # supporting_document = models.FileField(
+    #     upload_to="ward/supporting/",
+    #     null=True,
+    #     blank=True
+    # )
+
+    
+    aadhaar_image = CloudinaryField(
+        resource_type="image"
+    )
+
+    selfie_image = CloudinaryField(
+        resource_type="image"
+    )
+    
+    
+    supporting_document = CloudinaryField(
+        resource_type="raw",
         null=True,
         blank=True
     )
+
+
+
+
 
     status = models.CharField(
         max_length=20,
@@ -76,7 +97,12 @@ class EscalationMedia(models.Model):
         related_name="escalation_media"
     )
 
-    file = models.FileField(upload_to="complaints/escalation_media/")
+    # file = models.FileField(upload_to="complaints/escalation_media/")
+    
+    
+    file = CloudinaryField(
+        resource_type="auto"
+    )
 
     file_type = models.CharField(
         max_length=10,

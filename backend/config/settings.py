@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,11 +63,16 @@ SIMPLE_JWT = {
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
+    'cloudinary',
     'django.contrib.staticfiles',
     'apps.accounts',
     'rest_framework',
@@ -75,7 +84,6 @@ INSTALLED_APPS = [
     "apps.complaints",
     "apps.notification",
     "apps.chat",
-    "daphne",
     "channels",
     'rest_framework_simplejwt.token_blacklist',
     
@@ -203,7 +211,46 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+# MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+
+
+
+CLOUDINARY_STORAGE = {
+
+    "CLOUD_NAME": os.getenv(
+        "CLOUDINARY_CLOUD_NAME"
+    ),
+
+    "API_KEY": os.getenv(
+        "CLOUDINARY_API_KEY"
+    ),
+
+    "API_SECRET": os.getenv(
+        "CLOUDINARY_API_SECRET"
+    ),
+
+}
+
+
+
+STORAGES = {
+
+    "default": {
+
+        "BACKEND":
+        "cloudinary_storage.storage.MediaCloudinaryStorage",
+
+    },
+
+    "staticfiles": {
+
+        "BACKEND":
+        "django.contrib.staticfiles.storage.StaticFilesStorage",
+
+    },
+
+}
+
 
 AUTH_USER_MODEL = 'accounts.User'
 

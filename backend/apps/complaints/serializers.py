@@ -28,23 +28,48 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
     
 
 class ComplaintMediaSerializer(serializers.ModelSerializer):
+    file = serializers.SerializerMethodField()
+    
     class Meta:
         model = ComplaintMedia
         fields = ["id","file","file_type"]
         
         
+    def get_file(self, obj):
+
+        if obj.file:
+
+            return obj.file.url
+
+        return None
+        
+        
         
         
 class ResolutionMediaSerializer(serializers.ModelSerializer):
+    file = serializers.SerializerMethodField()
     class Meta:
         model = ResolutionMedia
         fields = ["id", "file", "file_type"]
+        
+        
+    def get_file(self, obj):
+
+        if obj.file:
+
+            return obj.file.url
+
+        return None
+        
+    
         
 
 class ComplaintResolutionSerializer(serializers.ModelSerializer):
 
     authority_name = serializers.CharField(source="authority.username", read_only=True)
     media = ResolutionMediaSerializer(many=True, read_only=True)
+    proof_image = serializers.SerializerMethodField()
+    proof_video = serializers.SerializerMethodField()
 
     class Meta:
         model = ComplaintResolution
@@ -57,13 +82,31 @@ class ComplaintResolutionSerializer(serializers.ModelSerializer):
             "created_at",
             "media",
         ]
+        
+    def get_proof_image(self, obj):
+
+        if obj.proof_image:
+
+            return obj.proof_image.url
+
+        return None
+
+
+    def get_proof_video(self, obj):
+
+        if obj.proof_video:
+
+            return obj.proof_video.url
+
+        return None
     
     
 class ComplaintFeedSerializer(serializers.ModelSerializer):
 
     citizen_name = serializers.CharField(source="citizen.username")
     ward_name = serializers.CharField(source="ward.username")
-
+    image_proof = serializers.SerializerMethodField()
+    video_proof = serializers.SerializerMethodField()
     upvotes_count = serializers.IntegerField(read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
     media = ComplaintMediaSerializer(many=True, read_only=True)
@@ -89,6 +132,23 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "media",
             "resolution",
         ]
+        
+    def get_image_proof(self, obj):
+
+        if obj.image_proof:
+
+            return obj.image_proof.url
+
+        return None
+
+
+    def get_video_proof(self, obj):
+
+        if obj.video_proof:
+
+            return obj.video_proof.url
+
+        return None
 
     
     
@@ -126,7 +186,8 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
 
     citizen_name = serializers.CharField(source="citizen.username", read_only=True)
     ward_name = serializers.CharField(source="ward.username", read_only=True)
-
+    image_proof = serializers.SerializerMethodField()
+    video_proof = serializers.SerializerMethodField()
     upvotes_count = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
 
@@ -158,6 +219,24 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
 
     def get_comments_count(self, obj):
         return obj.comments.count()
+    
+    
+    def get_image_proof(self, obj):
+
+        if obj.image_proof:
+
+            return obj.image_proof.url
+
+        return None
+
+
+    def get_video_proof(self, obj):
+
+        if obj.video_proof:
+
+            return obj.video_proof.url
+
+        return None
     
     
 

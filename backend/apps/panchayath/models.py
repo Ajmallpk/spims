@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from cloudinary.models import CloudinaryField
 
 User = get_user_model()
 
@@ -23,8 +24,17 @@ class PanchayathVerification(models.Model):
     district = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     
-    aadhaar_image = models.ImageField(upload_to="panchayath/aadhaar/")
-    selfie_image = models.ImageField(upload_to="panchayath/selfie/")
+    # aadhaar_image = models.ImageField(upload_to="panchayath/aadhaar/")
+    # selfie_image = models.ImageField(upload_to="panchayath/selfie/")
+    
+    aadhaar_image = CloudinaryField(
+        resource_type="image"
+    )
+
+    selfie_image = CloudinaryField(
+        resource_type="image"
+    )
+    
     status = models.CharField(max_length=20,choices=STATUS_CHOICES,default="PENDING")
     reject_reason = models.TextField(blank=True,null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)

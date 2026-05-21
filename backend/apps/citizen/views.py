@@ -266,13 +266,24 @@ class UploadAvatarView(APIView):
 
             logger.info(f"Citizen {request.user.id} updated avatar")
 
+            # return success_response(
+            #     message="Avatar uploaded successfully",
+            #     data={
+            #         "avatar_url": request.build_absolute_uri(profile.profile_image.url)
+            #     }
+            # )
             return success_response(
                 message="Avatar uploaded successfully",
                 data={
-                    "avatar_url": request.build_absolute_uri(profile.profile_image.url)
+                    "avatar_url": (
+                        profile.profile_image.url
+                        if profile.profile_image
+                        else None
+                    )
                 }
             )
-
+            
+            
         except Exception as e:
             logger.error(f"UploadAvatar error: {str(e)}")
 

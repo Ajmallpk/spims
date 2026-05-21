@@ -64,10 +64,10 @@ export default function VerificationDetailsModal({
               </p>
 
               <img
-                src={`http://127.0.0.1:8000${verification.aadhaar_image}`}
+                src={verification.aadhaar_image}
                 className="rounded-lg border cursor-pointer hover:opacity-80 transition"
                 onClick={() =>
-                  setPreviewImage(`http://127.0.0.1:8000${verification.aadhaar_image}`)
+                  setPreviewImage(verification.aadhaar_image)
                 }
               />
             </div>
@@ -80,10 +80,10 @@ export default function VerificationDetailsModal({
               </p>
 
               <img
-                src={`http://127.0.0.1:8000${verification.selfie_image}`}
+                src={verification.selfie_image}
                 className="rounded-lg border cursor-pointer hover:opacity-80 transition"
                 onClick={() =>
-                  setPreviewImage(`http://127.0.0.1:8000${verification.selfie_image}`)
+                  setPreviewImage(verification.selfie_image)
                 }
               />
             </div>

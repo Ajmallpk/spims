@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from cloudinary.models import CloudinaryField
 
 
 User = get_user_model()
@@ -58,14 +59,27 @@ class Complaint(models.Model):
 
     location = models.CharField(max_length=255)
 
-    image_proof = models.ImageField(
-        upload_to="complaints/images/",
+    # image_proof = models.ImageField(
+    #     upload_to="complaints/images/",
+    #     blank=True,
+    #     null=True
+    # )
+
+    
+    image_proof = CloudinaryField(
+        resource_type="image",
         blank=True,
         null=True
     )
-
-    video_proof = models.FileField(
-        upload_to="complaints/videos/",
+    
+    # video_proof = models.FileField(
+    #     upload_to="complaints/videos/",
+    #     blank=True,
+    #     null=True
+    # )
+    
+    video_proof = CloudinaryField(
+        resource_type="video",
         blank=True,
         null=True
     )
@@ -184,14 +198,28 @@ class ComplaintResolution(models.Model):
 
     message = models.TextField()
 
-    proof_image = models.ImageField(
-        upload_to="complaints/resolution_images/",
+    # proof_image = models.ImageField(
+    #     upload_to="complaints/resolution_images/",
+    #     blank=True,
+    #     null=True
+    # )
+
+    
+    proof_image = CloudinaryField(
+        resource_type="image",
         blank=True,
         null=True
     )
-
-    proof_video = models.FileField(
-        upload_to="complaints/resolution_videos/",
+    
+    
+    # proof_video = models.FileField(
+    #     upload_to="complaints/resolution_videos/",
+    #     blank=True,
+    #     null=True
+    # )
+    
+    proof_video = CloudinaryField(
+        resource_type="video",
         blank=True,
         null=True
     )
@@ -236,7 +264,12 @@ class ComplaintMedia(models.Model):
         related_name="media"
     )
     
-    file = models.FileField(upload_to="complaints/media/")
+    # file = models.FileField(upload_to="complaints/media/")
+    
+    file = CloudinaryField(
+        resource_type="auto"
+    )
+    
     
     file_type  = models.CharField(
         max_length= 10,
@@ -256,7 +289,12 @@ class ResolutionMedia(models.Model):
         related_name="media"
     ) 
     
-    file = models.FileField(upload_to="complaint/resolution_media/")
+    # file = models.FileField(upload_to="complaint/resolution_media/")
+    
+    file = CloudinaryField(
+        resource_type="auto"
+    )
+    
     
     file_type = models.CharField(
         max_length=10,

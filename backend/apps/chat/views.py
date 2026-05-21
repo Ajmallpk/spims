@@ -1326,7 +1326,13 @@ class DeleteAuthorityMessageView(APIView):
 
             message.message = ""
 
-            message.save()
+            message.save(
+                update_fields=[
+                    "is_deleted",
+                    "deleted_at",
+                    "message"
+                ]
+            )
 
             channel_layer = get_channel_layer()
 

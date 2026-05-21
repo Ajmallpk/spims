@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from cloudinary.models import CloudinaryField
 
 
 class CitizenVerification(models.Model):
@@ -29,8 +30,16 @@ class CitizenVerification(models.Model):
     house_number = models.CharField(max_length=10)
     street_name = models.CharField(max_length=50)
 
-    aadhaar_image = models.ImageField(upload_to="citizen/aadhaar/")
-    selfie_image = models.ImageField(upload_to="citizen/selfie/")
+    # aadhaar_image = models.ImageField(upload_to="citizen/aadhaar/")
+    # selfie_image = models.ImageField(upload_to="citizen/selfie/")
+    
+    aadhaar_image = CloudinaryField(
+        resource_type="image"
+    )
+    
+    selfie_image = CloudinaryField(
+        resource_type="image"
+    )
 
     status = models.CharField(
         max_length=20,
@@ -81,12 +90,20 @@ class CitizenProfile(models.Model):
     street_name = models.CharField(max_length=100, blank=True)
     address = models.TextField(blank=True)
 
-    profile_image = models.ImageField(
-        upload_to="citizen/profile/",
+    # profile_image = models.ImageField(
+    #     upload_to="citizen/profile/",
+    #     null=True,
+    #     blank=True
+    # )
+
+    
+    profile_image = CloudinaryField(
+        resource_type="image",
         null=True,
         blank=True
     )
-
+    
+    
     bio = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

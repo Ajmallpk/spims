@@ -6,6 +6,7 @@ import os
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
+from cloudinary.models import CloudinaryField
 # Create your models here.
 
 
@@ -133,18 +134,31 @@ class Message(models.Model):
         related_name="forwarded_messages"
     )
     
-    file = models.FileField(
-    upload_to=chat_file_upload_path,
-    null=True,
-    blank=True
-    )
+    # file = models.FileField(
+    # upload_to=chat_file_upload_path,
+    # null=True,
+    # blank=True
+    # )
     
-    thumbnail = models.ImageField(
-        upload_to="chat_thumbnails/",
+    file = CloudinaryField(
+        resource_type="auto",
         null=True,
         blank=True
     )
+    
+    # thumbnail = models.ImageField(
+    #     upload_to="chat_thumbnails/",
+    #     null=True,
+    #     blank=True
+    # )
 
+    thumbnail = CloudinaryField(
+        resource_type="image",
+        null=True,
+        blank=True
+    )
+    
+    
     file_type = models.CharField(
         max_length=20,
         null=True,

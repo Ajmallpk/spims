@@ -723,8 +723,11 @@ class UpdateComplaintView(APIView):
             files = request.FILES.getlist("media_files")
 
             if files:
-                complaint.media.all().delete()
-
+                # complaint.media.all().delete()
+                for media in complaint.media.all():
+                    media.file.delete(save=False)
+                    media.delete()
+                    
                 for file in files:
                     if file.size > 5 * 1024 * 1024:
                         continue
@@ -799,6 +802,26 @@ class DeleteComplaintView(APIView):
                 performed_by=request.user,
                 note="Complaint deleted"
             )
+            
+            
+            if complaint.image_proof:
+                complaint.image_proof.delete(save=False)
+
+            if complaint.video_proof:
+                complaint.video_proof.delete(save=False)
+
+            for media in complaint.media.all():
+
+                if media.file:
+                    media.file.delete(save=False)
+
+            for resolution_media in ResolutionMedia.objects.filter(
+                resolution__complaint=complaint
+            ):
+
+                if resolution_media.file:
+                    resolution_media.file.delete(save=False)
+                    
 
             complaint.delete()
 

@@ -263,13 +263,19 @@ class WardVerificationDetailView(APIView):
             documents = []
 
             if ward.aadhaar_image:
-                documents.append(request.build_absolute_uri(ward.aadhaar_image.url))
+                documents.append(
+                    ward.aadhaar_image.url
+                )
 
             if ward.selfie_image:
-                documents.append(request.build_absolute_uri(ward.selfie_image.url))
+                documents.append(
+                    ward.selfie_image.url
+                )
 
             if ward.supporting_document:
-                documents.append(request.build_absolute_uri(ward.supporting_document.url))
+                documents.append(
+                    ward.supporting_document.url
+                )
 
             logger.info(f"Panchayath {user.id} viewed ward {ward.id}")
 
@@ -807,7 +813,7 @@ class PanchayathComplaintDetailView(APIView):
             media = [
                 {
                     "type": m.file_type.lower(),
-                    "url": request.build_absolute_uri(m.file.url),
+                    "url": m.file.url,
                     "caption": "Complaint Media"
                 }
                 for m in complaint.media.all()
@@ -892,6 +898,12 @@ class PanchayathComplaintDetailView(APIView):
 
                 complaint.status = "IN_PROGRESS"
                 complaint.save()
+                
+                ComplaintHistory.objects.create(
+                    complaint=complaint,
+                    action="STARTED_WORK",
+                    performed_by=user
+                )
 
                 logger.info(f"Panchayath {user.id} started work on complaint {complaint.id}")
 
@@ -958,8 +970,12 @@ class PanchayathResolveView(APIView):
             files = request.FILES.getlist("media_files")
 
             for file in files:
-                if file.size > 5 * 1024 * 1024:
-                    continue  
+                if file.size > 20 * 1024 * 1024:
+
+                    return error_response(
+                        message="File size exceeds 20MB",
+                        status=400
+                    )  
 
                 mime_type, _ = mimetypes.guess_type(file.name)
 
