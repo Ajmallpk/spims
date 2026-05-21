@@ -220,23 +220,7 @@ const Home = () => {
     }
   };
 
-  // const handleIssueSubmit = (formData) => {
-  //   const newIssue = {
-  //     id: Date.now(),
-  //     citizenName: "You",
-  //     ward: formData.ward,
-  //     location: formData.location || "Your location",
-  //     timeAgo: "Just now",
-  //     description: formData.description,
-  //     category: formData.title,
-  //     image: formData.image ? URL.createObjectURL(formData.image) : null,
-  //     upvotes: 0,
-  //     commentCount: 0,
-  //     authorityResponse: null,
-  //     comments: [],
-  //   };
-  //   setIssues((prev) => [newIssue, ...prev]);
-  // };
+
 
   const handleIssueSubmit = async (formData) => {
     try {

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Avatar from "@/components/ui/Avatar";
 import { useNavigate, useLocation } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
+import NotificationBell from "@/components/citizen/NotificationBell";
 
 
 
@@ -68,39 +69,188 @@ const navItems = [
   },
 ];
 
-const TopNavigation = () => {
+const TopNavigation = ({
+
+  notifications,
+
+  setNotifications,
+
+  unreadCount,
+
+  setUnreadCount
+
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState("NOT_VERIFIED");
+  // const [unreadCount, setUnreadCount] = useState(0)
+  const socketRef = useRef(null)
 
 
   useEffect(() => {
 
-    const fetchVerificationStatus = async () => {
-      try {
+    const fetchVerificationStatus =
+      async () => {
 
-        const res = await citizenapi.getVerificationStatus();
-        const data = res.data.data
+        try {
 
-        if (!data.submitted) {
-          setVerificationStatus("NOT_VERIFIED");
-        }
-        else if (data.status === "PENDING") {
-          setVerificationStatus("PENDING");
-        }
-        else if (data.status === "APPROVED") {
-          setVerificationStatus("APPROVED");
+          const res =
+
+            await citizenapi
+              .getVerificationStatus()
+
+          const data =
+            res.data.data
+
+          if (
+            !data.submitted
+          ) {
+
+            setVerificationStatus(
+              "NOT_VERIFIED"
+            )
+
+          }
+
+          else if (
+
+            data.status === "PENDING"
+
+          ) {
+
+            setVerificationStatus(
+              "PENDING"
+            )
+
+          }
+
+          else if (
+
+            data.status === "APPROVED"
+
+          ) {
+
+            setVerificationStatus(
+              "APPROVED"
+            )
+
+          }
+
         }
 
-      } catch (error) {
-        console.error("Failed to fetch verification status", error);
+        catch (error) {
+
+          console.log(error)
+
+        }
+
       }
 
-    };
+    const fetchUnread = async () => {
 
-    fetchVerificationStatus();
+      try {
 
-  }, []);
+        const res =
+
+          await citizenapi
+            .getUnreadCount()
+
+        setUnreadCount(
+
+          res.data
+            .data
+            .unread_count
+
+        )
+
+      }
+
+      catch (error) {
+
+        console.log(error)
+
+      }
+
+    }
+
+    fetchVerificationStatus()
+
+    fetchUnread()
+
+  }, [])
+
+
+
+  useEffect(() => {
+
+    const token =
+
+      localStorage
+        .getItem("access")
+
+    if (!token)
+      return
+
+    const ws =
+
+      new WebSocket(
+
+        `ws://localhost:8000/ws/notifications/?token=${token}`
+
+      )
+
+    socketRef.current = ws
+
+    ws.onmessage = (event) => {
+
+      const data =
+
+        JSON.parse(
+          event.data
+        )
+
+      if (
+
+        data.type ===
+        "new_notification"
+
+      ) {
+
+        setUnreadCount(
+
+          prev =>
+
+            prev + 1
+
+        )
+
+      }
+
+    }
+
+    ws.onerror = (error) => {
+
+      console.log(
+        error
+      )
+
+    }
+
+    ws.onclose = () => {
+
+      console.log(
+        "socket closed"
+      )
+
+    }
+
+    return () => {
+
+      ws.close()
+
+    }
+
+  }, [])
 
   return (
     <div className="sticky top-0 z-40 pt-4 pb-2 bg-gray-100">
@@ -133,13 +283,17 @@ const TopNavigation = () => {
 
         {/* Right icons */}
         <div className="flex items-center gap-3">
-          <button className="relative p-2 rounded-full hover:bg-white transition-colors">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-gray-500">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
+          <NotificationBell
+
+            unreadCount={unreadCount}
+
+            notifications={notifications}
+
+            setNotifications={setNotifications}
+
+            setUnreadCount={setUnreadCount}
+
+          />
           <Avatar alt="Citizen User" size="sm" />
         </div>
       </div>

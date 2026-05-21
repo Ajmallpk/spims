@@ -23,6 +23,39 @@ def error_response(message="", errors=None, status=400):
  
 
 
+# def send_notification(
+#     user,
+#     title,
+#     message,
+#     n_type,
+#     complaint=None,
+#     sender=None
+# ):
+
+#     send_notification_task.delay(
+#         user_id=user.id,
+#         title=title,
+#         message=message,
+#         n_type=n_type,
+#         complaint_id=(
+#             complaint.id
+#             if complaint
+#             else None
+#         ),
+#         sender_id=(
+#             sender.id
+#             if sender
+#             else None
+#         )
+#     )
+
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 def send_notification(
     user,
     title,
@@ -31,6 +64,12 @@ def send_notification(
     complaint=None,
     sender=None
 ):
+
+    logger.info(
+        f"NOTIFICATION CALLED -> "
+        f"user={user.username} "
+        f"type={n_type}"
+    )
 
     send_notification_task.delay(
         user_id=user.id,
