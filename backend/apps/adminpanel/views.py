@@ -40,6 +40,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from django.conf import settings
 from .utils.responses import success_response,error_response
+from apps.complaints.serializers import ComplaintDetailSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -391,7 +392,12 @@ class AdminPanchayathListView(APIView):
     def get(self, request):
         try:
             status_filter = request.GET.get("status", "").lower()
-            search = request.GET.get("search", "").strip()
+            # search = request.GET.get("search", "").strip()
+            
+            
+            name = request.GET.get("name", "").strip()
+            email = request.GET.get("email", "").strip()
+            complaint_sort = request.GET.get("complaints")
 
             users = User.objects.filter(role=User.Role.PANCHAYATH)
             if status_filter == "approved":
@@ -399,10 +405,24 @@ class AdminPanchayathListView(APIView):
             elif status_filter == "suspended":
                 users = users.filter(status=User.Status.SUSPENDED)
 
-            if search:
+            # if search:
+            #     users = users.filter(
+            #         Q(username__icontains=search) |
+            #         Q(email__icontains=search)
+            #     )
+            
+            
+            if name:
                 users = users.filter(
-                    Q(username__icontains=search) |
-                    Q(email__icontains=search)
+                    Q(username__icontains=name) |
+                    Q(
+                        panchayath_verification__panchayath_name__icontains=name
+                    )
+                )
+
+            if email:
+                users = users.filter(
+                    email__icontains=email
                 )
 
             users = users.order_by("-date_joined")
@@ -412,6 +432,20 @@ class AdminPanchayathListView(APIView):
             paginated_users = paginator.paginate_queryset(users, request)
 
             data = []
+            
+            
+            if complaint_sort == "high":
+                data = sorted(
+                    data,
+                    key=lambda x: x["total_complaints"],
+                    reverse=True
+                )
+
+            elif complaint_sort == "low":
+                data = sorted(
+                    data,
+                    key=lambda x: x["total_complaints"]
+    )
 
             for user in paginated_users:
 
@@ -642,14 +676,46 @@ class AdminWardListView(APIView):
 
     def get(self, request):
         try:
+            # panchayath_id = request.GET.get("panchayath")
+            
             panchayath_id = request.GET.get("panchayath")
+
+            name = request.GET.get("name", "").strip()
+
+            email = request.GET.get("email", "").strip()
+
+            status = request.GET.get("status", "").strip()
+
+            complaints = request.GET.get("complaints")
 
             wards = WardVerification.objects.filter(
                 status="APPROVED"
             ).select_related("user", "panchayath")
+            
+            
+            
 
             if panchayath_id:
                 wards = wards.filter(panchayath_id=panchayath_id)
+                
+                
+            if name:
+
+                wards = wards.filter(
+                    ward_name__icontains=name
+                )
+
+            if email:
+
+                wards = wards.filter(
+                    official_email__icontains=email
+                )
+                
+            if status:
+
+                wards = wards.filter(
+                    user__status=status.upper()
+                )
 
             wards = wards.order_by("-submitted_at")
 
@@ -689,6 +755,22 @@ class AdminWardListView(APIView):
                     "status": ward_user.status
                 })
 
+            if complaints == "high":
+
+                data = sorted(
+                    data,
+                    key=lambda x: x["total_complaints"],
+                    reverse=True
+                )
+
+            elif complaints == "low":
+
+                data = sorted(
+                    data,
+                    key=lambda x: x["total_complaints"]
+                )
+                
+                
             logger.info(f"Admin {request.user.id} fetched ward list")
 
             return paginator.get_paginated_response(data)
@@ -983,6 +1065,158 @@ class AdminWardDetailView(APIView):
                 message="Something went wrong",
                 status=500
             )
+            
+            
+            
+class AdminComplaintDetailView(APIView):
+
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request, complaint_id):
+
+        try:
+
+            complaint = Complaint.objects.select_related(
+                "citizen",
+                "ward",
+                "panchayath"
+            ).prefetch_related(
+                "media",
+                "history",
+                "resolution__media"
+            ).filter(
+                id=complaint_id
+            ).first()
+
+            if not complaint:
+
+                return error_response(
+                    message="Complaint not found",
+                    status=404
+                )
+
+            citizen = complaint.citizen
+
+            citizen_verification = getattr(
+                citizen,
+                "citizen_verification",
+                None
+            )
+
+            ward_verification = WardVerification.objects.filter(
+                user=complaint.ward
+            ).first()
+
+            panchayath_verification = None
+
+            if complaint.panchayath:
+
+                panchayath_verification = getattr(
+                    complaint.panchayath,
+                    "panchayath_verification",
+                    None
+                )
+
+            serializer = ComplaintDetailSerializer(
+                complaint
+            )
+
+            return success_response(
+
+                message="Complaint detail fetched",
+
+                data={
+
+                    **serializer.data,
+
+                    "citizen": {
+
+                        "id": citizen.id,
+
+                        "name": citizen.username,
+
+                        "email": citizen.email,
+
+                        "phone": (
+                            citizen_verification.phone
+                            if citizen_verification
+                            else None
+                        )
+
+                    },
+
+                    "ward": {
+
+                        "id": complaint.ward.id,
+
+                        "name": (
+                            ward_verification.ward_name
+                            if ward_verification
+                            else None
+                        )
+
+                    },
+
+                    "panchayath": {
+
+                        "id": (
+                            complaint.panchayath.id
+                            if complaint.panchayath
+                            else None
+                        ),
+
+                        "name": (
+
+                            panchayath_verification.panchayath_name
+
+                            if panchayath_verification
+
+                            else None
+
+                        )
+
+                    },
+
+                    "timeline":[
+
+                        {
+
+                            "action":h.action,
+
+                            "note":h.note,
+
+                            "time":h.created_at,
+
+                            "user":(
+
+                                h.performed_by.username
+
+                                if h.performed_by
+
+                                else None
+
+                            )
+
+                        }
+
+                        for h in complaint.history.all()
+
+                    ]
+
+                }
+
+            )
+
+        except Exception as e:
+
+            logger.error(
+                f"AdminComplaintDetail error:{str(e)}"
+            )
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )
 
 
 
@@ -1168,6 +1402,7 @@ class AdminCitizenListView(APIView):
             search = request.GET.get("search", "").strip()
             ward_filter = request.GET.get("ward", "").strip()
             panchayath_filter = request.GET.get("panchayath", "").strip()
+            status_filter = request.GET.get("status", "").strip()
 
             citizens = User.objects.filter(
                 role=User.Role.CITIZEN,
@@ -1177,6 +1412,12 @@ class AdminCitizenListView(APIView):
                 citizens = citizens.filter(
                     Q(username__icontains=search) |
                     Q(email__icontains=search)
+                )
+                
+            if status_filter:
+
+                citizens = citizens.filter(
+                    status=status_filter.upper()
                 )
 
             paginator = PageNumberPagination()

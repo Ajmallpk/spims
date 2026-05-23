@@ -12,7 +12,7 @@ const SkeletonRow = () => (
   </tr>
 );
 
-const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
+const WardTable = ({ wards, isLoading, searching, onSuspend, onActivate }) => {
   const navigate = useNavigate();
 
   return (
@@ -34,7 +34,7 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
                 "Total Users",
                 "Total Complaints",
                 "Pending",
-                "Status",   
+                "Status",
                 "Actions"
               ].map((col) => (
                 <th
@@ -50,14 +50,36 @@ const WardTable = ({ wards, isLoading, onSuspend, onActivate }) => {
           <tbody className="divide-y divide-gray-100">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
-            ) : !Array.isArray(wards) || wards.length === 0? (
+            ) : !Array.isArray(wards) || wards.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-5 py-12 text-center">
                   <div className="flex flex-col items-center gap-2 text-gray-400">
                     <svg className="w-8 h-8 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
-                    <p className="text-sm font-medium">No wards found</p>
+                    <p className="text-sm font-medium">
+
+                      {
+
+                        searching
+
+                          ?
+
+                          "No matching ward found"
+
+                          :
+
+                          "No wards found"
+
+                      }
+
+                    </p>
+
+                    <p className="text-xs">
+
+                      Try another name or email
+
+                    </p>
                   </div>
                 </td>
               </tr>

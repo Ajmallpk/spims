@@ -27,7 +27,7 @@ ALLOWED_EXTENSIONS = [
 
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
-# 10 MB
+
 
 
 def validate_chat_file(uploaded_file):

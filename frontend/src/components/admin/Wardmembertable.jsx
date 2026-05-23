@@ -34,7 +34,7 @@ const SkeletonRow = () => (
  *  - members: array
  *  - isLoading: boolean
  */
-const WardMemberTable = ({ members, isLoading }) => {
+const WardMemberTable = ({ members, isLoading, onMemberClick }) => {
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
@@ -89,7 +89,29 @@ const WardMemberTable = ({ members, isLoading }) => {
               members.map((member, idx) => (
                 <tr
                   key={member.id || idx}
-                  className="hover:bg-gray-50 transition-colors duration-100 group"
+
+                  onClick={() => {
+
+                    if (
+                      member.id &&
+                      onMemberClick
+                    ) {
+
+                      onMemberClick(
+                        member.id
+                      )
+
+                    }
+
+                  }}
+
+                  className="
+  hover:bg-gray-50
+  transition-colors
+  duration-100
+  group
+  cursor-pointer
+  "
                 >
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2.5">

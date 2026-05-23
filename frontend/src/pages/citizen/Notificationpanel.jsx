@@ -258,22 +258,41 @@ const NotificationPanel = ({
 
         setNotifications(prev =>
 
-            prev.map(n => ({
+            prev.map(n =>
 
-                ...n,
-                is_read: true
+                n.id === id
 
-            }))
+                    ? {
+
+                        ...n,
+
+                        is_read: true
+
+                    }
+
+                    : n
+
+            )
 
         )
 
-        setUnreadCount(0)
+        setUnreadCount(prev =>
+
+            prev > 0
+
+                ? prev - 1
+
+                : 0
+
+        )
 
         try {
 
             await citizenapi.markNotificationRead(id)
 
-        } catch (error) {
+        }
+
+        catch (error) {
 
             console.log(error)
 

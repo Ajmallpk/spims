@@ -27,6 +27,7 @@ import WardDetailsPage from "./pages/admin/Warddetailsout";
 import PanchayathDetails from "./pages/admin/Panchayathdetails";
 import AdminCitizenList from "@/pages/admin/CitizenList";
 import AdminCitizenDetail from "@/pages/admin/CitizenDetail";
+import ComplaintDetailPage from "./pages/admin/ComplaintDetailPage";
 
 
 
@@ -277,6 +278,7 @@ export default function App() {
           <Route path="wards/:id" element={<WardDetailsPage />} />
           <Route path="citizens" element={<AdminCitizenList />} />
           <Route path="citizens/:id" element={<AdminCitizenDetail />} />
+          <Route path="/admin/complaints/:id" element={<ComplaintDetailPage />}/>
         </Route>
 
         {/* ───────── ADMIN ROUTES ───────── */}

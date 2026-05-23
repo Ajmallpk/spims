@@ -36,29 +36,69 @@ def get_user(token):
         return None
 
 
+# class JWTAuthMiddleware(BaseMiddleware):
+
+#     async def __call__(self, scope, receive, send):
+
+#         headers = dict(scope["headers"])
+
+#         cookies = headers.get(b"cookie", b"").decode()
+
+#         token = None
+
+#         for cookie in cookies.split(";"):
+
+#             cookie = cookie.strip()
+
+#             if cookie.startswith("access_token="):
+
+#                 token = cookie.split("=")[1]
+
+#                 break
+
+#         if token:
+
+#             user = await get_user(token)
+
+#             scope["user"] = user
+
+#         else:
+
+#             scope["user"] = None
+
+#         return await super().__call__(
+#             scope,
+#             receive,
+#             send
+#         )
+
+
+
+from urllib.parse import parse_qs
+
 class JWTAuthMiddleware(BaseMiddleware):
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(
+        self,
+        scope,
+        receive,
+        send
+    ):
 
-        headers = dict(scope["headers"])
+        query_string = parse_qs(
+            scope["query_string"].decode()
+        )
 
-        cookies = headers.get(b"cookie", b"").decode()
-
-        token = None
-
-        for cookie in cookies.split(";"):
-
-            cookie = cookie.strip()
-
-            if cookie.startswith("access_token="):
-
-                token = cookie.split("=")[1]
-
-                break
+        token = query_string.get(
+            "token",
+            [None]
+        )[0]
 
         if token:
 
-            user = await get_user(token)
+            user = await get_user(
+                token
+            )
 
             scope["user"] = user
 

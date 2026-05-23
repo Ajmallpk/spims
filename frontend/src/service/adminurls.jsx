@@ -43,5 +43,11 @@ export const adminapi = {
         axiosInstance.post(`/admin/citizen/activate/${id}/`),
     citizenDetail: (id) =>
         axiosInstance.get(`/admin/citizen/${id}/`),
+
+    complaintDetail: (id) =>
+        axiosInstance.get(
+            `/admin/complaints/${id}/`
+        ),
+        
     me: () => axiosInstance.get("/admin/auth/me/"),
 }

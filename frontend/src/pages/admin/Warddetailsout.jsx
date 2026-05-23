@@ -67,7 +67,7 @@ const WardDetailsPage = () => {
       try {
         const { data: res } = await adminapi.wardDetail(id);
 
-        const actual = res.data;  
+        const actual = res.data;
 
         setData({
           ...actual,
@@ -172,8 +172,15 @@ const WardDetailsPage = () => {
       </div>
 
       {/* C) Ward Member Table */}
-      <WardMemberTable members={members} isLoading={loading} />
-
+      {/* <WardMemberTable members={members} isLoading={loading} /> */}
+      <WardMemberTable
+        members={members}
+        isLoading={loading}
+        onMemberClick={(memberId) =>
+          navigate(`/admin/citizens/${memberId}`)
+        }
+      />
+      
       {/* D) Complaint Preview Table */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2.5">
@@ -225,9 +232,24 @@ const WardDetailsPage = () => {
                 </tr>
               ) : (
                 complaints.map((c, idx) => (
+
                   <tr
                     key={c.id || idx}
-                    className="hover:bg-gray-50 transition-colors duration-100"
+
+                    onClick={() =>
+
+                      navigate(
+                        `/admin/complaints/${c.id}`
+                      )
+
+                    }
+
+                    className="
+                          hover:bg-gray-50
+                          transition-colors
+                          duration-100
+                          cursor-pointer
+                          "
                   >
                     <td className="px-5 py-3.5 text-gray-400 text-xs font-medium">
                       {idx + 1}

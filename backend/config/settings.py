@@ -44,6 +44,10 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
     
+    
+    "EXCEPTION_HANDLER":
+    "apps.accounts.exceptions.custom_exception_handler",
+    
     "DEFAULT_THROTTLE_RATES": {
 
         "chat_message": "30/min",

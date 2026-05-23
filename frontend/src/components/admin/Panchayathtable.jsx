@@ -13,7 +13,7 @@ const SkeletonRow = () => (
   </tr>
 );
 
-const PanchayathTable = ({ panchayaths, isLoading, onSuspend, onActivate }) => {
+const PanchayathTable = ({ panchayaths, isLoading, searching, onSuspend, onActivate }) => {
   const navigate = useNavigate();
 
   return (
@@ -45,8 +45,23 @@ const PanchayathTable = ({ panchayaths, isLoading, onSuspend, onActivate }) => {
                     <svg className="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <p className="text-sm font-medium">No panchayaths found</p>
-                    <p className="text-xs">Try adjusting your search query</p>
+                    <p className="text-sm font-medium">
+
+                      {searching
+
+                        ? "No matching panchayath found"
+
+                        : "No panchayaths found"
+
+                      }
+
+                    </p>
+
+                    <p className="text-xs">
+
+                      Try another name or email
+
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -80,7 +95,7 @@ const PanchayathTable = ({ panchayaths, isLoading, onSuspend, onActivate }) => {
                     ) : (
                       <button
                         onClick={(e) => {
-                          e.stopPropagation();  
+                          e.stopPropagation();
                           onActivate(p.id);
                         }}
                         className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all duration-150"

@@ -129,9 +129,19 @@ const CitizenLayout = () => {
       if (!token)
         return
 
-      socket = new WebSocket(
-        `ws://localhost:8000/ws/notifications/?token=${token}`
+      const WS_URL =
+        `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
+
+      console.log(
+        "CONNECTING TO:",
+        WS_URL
       )
+
+      socket =
+        new WebSocket(
+          WS_URL
+        )
+
 
       socket.onopen = () => {
 
@@ -142,6 +152,11 @@ const CitizenLayout = () => {
       }
 
       socket.onmessage = (event) => {
+
+        console.log(
+          "RAW WS EVENT:",
+          event.data
+        )
 
         const data =
           JSON.parse(
@@ -161,21 +176,41 @@ const CitizenLayout = () => {
 
           message: data.message,
 
+          type:
+            data.notification_type,
+
           notification_type:
             data.notification_type,
 
           is_read: false,
+
+          createdAt:
+            new Date().toISOString(),
 
           created_at:
             new Date().toISOString()
 
         }
 
+        console.log(
+          "ADDING TO STATE:",
+          newNotification
+        )
+
         setNotifications(
-          prev => [
-            newNotification,
-            ...prev
-          ]
+          prev => {
+
+            console.log(
+              "PREVIOUS:",
+              prev
+            )
+
+            return [
+              newNotification,
+              ...prev
+            ]
+
+          }
         )
 
         setUnreadCount(

@@ -84,7 +84,7 @@ const TopNavigation = ({
   const navigate = useNavigate();
   const [verificationStatus, setVerificationStatus] = useState("NOT_VERIFIED");
   // const [unreadCount, setUnreadCount] = useState(0)
-  const socketRef = useRef(null)
+  // const socketRef = useRef(null)
 
 
   useEffect(() => {
@@ -181,76 +181,76 @@ const TopNavigation = ({
 
 
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const token =
+  //   const token =
 
-      localStorage
-        .getItem("access")
+  //     localStorage
+  //       .getItem("access")
 
-    if (!token)
-      return
+  //   if (!token)
+  //     return
 
-    const ws =
+  //   const ws =
 
-      new WebSocket(
+  //     new WebSocket(
 
-        `ws://localhost:8000/ws/notifications/?token=${token}`
+  //       `ws://localhost:8000/ws/notifications/?token=${token}`
 
-      )
+  //     )
 
-    socketRef.current = ws
+  //   socketRef.current = ws
 
-    ws.onmessage = (event) => {
+  //   ws.onmessage = (event) => {
 
-      const data =
+  //     const data =
 
-        JSON.parse(
-          event.data
-        )
+  //       JSON.parse(
+  //         event.data
+  //       )
 
-      if (
+  //     if (
 
-        data.type ===
-        "new_notification"
+  //       data.type ===
+  //       "new_notification"
 
-      ) {
+  //     ) {
 
-        setUnreadCount(
+  //       setUnreadCount(
 
-          prev =>
+  //         prev =>
 
-            prev + 1
+  //           prev + 1
 
-        )
+  //       )
 
-      }
+  //     }
 
-    }
+  //   }
 
-    ws.onerror = (error) => {
+  //   ws.onerror = (error) => {
 
-      console.log(
-        error
-      )
+  //     console.log(
+  //       error
+  //     )
 
-    }
+  //   }
 
-    ws.onclose = () => {
+  //   ws.onclose = () => {
 
-      console.log(
-        "socket closed"
-      )
+  //     console.log(
+  //       "socket closed"
+  //     )
 
-    }
+  //   }
 
-    return () => {
+  //   return () => {
 
-      ws.close()
+  //     ws.close()
 
-    }
+  //   }
 
-  }, [])
+  // }, [])
 
   return (
     <div className="sticky top-0 z-40 pt-4 pb-2 bg-gray-100">
