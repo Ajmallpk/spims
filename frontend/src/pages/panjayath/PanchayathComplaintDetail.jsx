@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import panchayathApi from "@/service/panchayathurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 
 const CATEGORY_CONFIG = {
@@ -290,7 +291,10 @@ export default function PanchayathComplaintDetail() {
                 setCurrentStatus(data.status);
 
             } catch (err) {
-                console.error(err);
+                handleApiError(
+                    error,
+                    "Failed to load complaint details"
+                );
             } finally {
                 setLoading(false);
             }
@@ -332,7 +336,12 @@ export default function PanchayathComplaintDetail() {
             setModal(null);
 
         } catch (err) {
-            console.error(err);
+            handleApiError(
+                error,
+                type === "resolve"
+                    ? "Failed to resolve complaint"
+                    : "Failed to reassign complaint"
+            );
         }
     };
 
@@ -347,7 +356,10 @@ export default function PanchayathComplaintDetail() {
             setCurrentStatus(data.status);
 
         } catch (err) {
-            console.error(err);
+            handleApiError(
+                error,
+                "Failed to update complaint status"
+            );
         }
     };
 

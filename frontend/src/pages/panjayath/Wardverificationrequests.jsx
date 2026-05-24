@@ -12,6 +12,7 @@ import WardApprovalModal from "@/components/panjayath/Wardapprovalmodal";
 import StatusBadge from "@/components/panjayath/StatusBadge";
 // import { handleAuthError } from "@/service/panchayathurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -207,16 +208,13 @@ export default function WardVerificationRequests() {
 
       setRequests(list);
 
-      setRequests(list);
+
     } catch (err) {
-      if (err.response?.status === 401) {
-        panchayathApi.handleAuthError(err);
-        toast.error("Unauthorized: JWT may be expired.");
-      }
-      setFetchError(
-        err.response?.data?.detail ||
-        err.message ||
-        "An unexpected error occurred while fetching requests."
+      panchayathApi.handleAuthError(err);
+
+      handleApiError(
+        err,
+        "Failed to fetch ward verification requests"
       );
     } finally {
       setIsLoading(false);

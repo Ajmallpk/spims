@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import panchayathApi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
+import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
 
 
@@ -239,9 +240,12 @@ export default function Dashboard() {
         setDashboardData(res.data.data);
       } catch (err) {
         panchayathApi.handleAuthError(err);
-        toast.error("Dashboard fetch error:", err);
+        handleApiError(
+          error,
+          "Failed to load dashboard"
+        );
         setError("Failed to load dashboard.");
-      }finally {
+      } finally {
         setIsLoading(false);
       }
     };

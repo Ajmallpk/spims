@@ -5,6 +5,7 @@ import CommentSection from "@/components/citizen/Commentsection";
 import complaintapi from "@/service/complaintsurls";
 import StatusBadge from "../../components/ward/Statusbadge";
 import CreateIssueModal from "@/components/citizen/Createissuemodal";
+import { handleApiError } from "@/utils/handleApiError";
 const IssueCard = ({ issue }) => {
   console.log(issue);
   const [upvoted, setUpvoted] = useState(false);
@@ -74,7 +75,7 @@ const IssueCard = ({ issue }) => {
       await complaintapi.deleteComplaint(issue.id);
       window.location.reload();
     } catch (err) {
-      console.error(err);
+      handleApiError(err, "Failed to delete complaint");
     }
   };
 
@@ -377,7 +378,7 @@ const IssueCard = ({ issue }) => {
             window.location.reload();
 
           } catch (err) {
-            console.error("Edit failed:", err.response?.data || err);
+            handleApiError(err, "Failed to update complaint");
           }
         }}
 

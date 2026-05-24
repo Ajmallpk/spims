@@ -11,29 +11,68 @@ const ChangeEmailForm = () => {
   const [otpSent, setOtpSent] = useState(false);
 
   const handleSendOTP = async () => {
+
+    if (!newEmail.trim()) {
+
+      handleApiError(
+        {},
+        "Email is required"
+      );
+
+      return;
+
+    }
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(newEmail)) {
+
+      handleApiError(
+        {},
+        "Enter a valid email address"
+      );
+
+      return;
+
+    }
+
     try {
 
-      await adminapi.requestEmailChange(newEmail);
-
-      toast.success("OTP sent to your email");
+      await adminapi.requestEmailChange(
+        newEmail
+      );
 
       setOtpSent(true);
 
     } catch (err) {
 
-      // toast.error(err.response?.data?.error || "Failed to send OTP");
-      handleApiError(err, "Failed to send OTP");
-      
+      handleApiError(
+        err,
+        "Failed to send OTP"
+      );
 
     }
+
   };
 
   const handleVerifyOTP = async () => {
     try {
 
+
+      if (!otp.trim()) {
+
+        handleApiError(
+          {},
+          "OTP is required"
+        )
+
+        return
+
+      }
+
       await adminapi.verifyEmailChange(otp);
 
-      toast.success("Email updated successfully");
 
       setNewEmail("");
       setOtp("");

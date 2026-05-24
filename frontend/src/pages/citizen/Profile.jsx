@@ -16,6 +16,7 @@ import citizenapi from "@/service/citizenurls";
 import complaintapi from "@/service/complaintsurls";
 import VerificationStatusCard from "@/components/citizen/Verificationstatuscard";
 import VerificationProgress from "@/components/citizen/Verificationprogress";
+import { handleApiError } from "@/utils/handleApiError";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 const getAuthToken = () => localStorage.getItem("spims_token") || "";
@@ -63,11 +64,17 @@ const Profile = () => {
 
       setProfile(profileRes.data.data);
       setVerificationStatus(verificationRes.data.data);
-      
+
       const complaints = complaintsRes.data?.results ?? complaintsRes.data ?? [];
       setIssues(complaints);
 
     } catch (err) {
+
+      handleApiError(
+        err,
+        "Failed to load profile"
+      )
+
       setFetchError(err.message);
     } finally {
       setLoading(false);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import panchayathApi from "@/service/panchayathurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const PanchayathChangePasswordForm = () => {
 
@@ -36,8 +37,9 @@ const PanchayathChangePasswordForm = () => {
 
     } catch (error) {
 
-      toast.error(
-        error?.response?.data?.message || "Failed to change password"
+      handleApiError(
+        error,
+        "Failed to change password"
       );
 
     } finally {
@@ -58,7 +60,7 @@ const PanchayathChangePasswordForm = () => {
         <input
           type="password"
           value={currentPassword}
-          onChange={(e)=>setCurrentPassword(e.target.value)}
+          onChange={(e) => setCurrentPassword(e.target.value)}
           className="w-full mt-1 px-3 py-2 border rounded-lg"
           required
         />
@@ -73,7 +75,7 @@ const PanchayathChangePasswordForm = () => {
         <input
           type="password"
           value={newPassword}
-          onChange={(e)=>setNewPassword(e.target.value)}
+          onChange={(e) => setNewPassword(e.target.value)}
           className="w-full mt-1 px-3 py-2 border rounded-lg"
           required
         />
@@ -88,7 +90,7 @@ const PanchayathChangePasswordForm = () => {
         <input
           type="password"
           value={confirmPassword}
-          onChange={(e)=>setConfirmPassword(e.target.value)}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full mt-1 px-3 py-2 border rounded-lg"
           required
         />

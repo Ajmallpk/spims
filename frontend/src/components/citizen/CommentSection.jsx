@@ -223,7 +223,7 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
       onCommentAdded?.();
 
     } catch (error) {
-      console.error("Comment failed:", error);
+      handleApiError(error, "Failed to post comment");
     } finally {
       setPosting(false);
     }
@@ -342,7 +342,7 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
                           setEditText("");
 
                         } catch (err) {
-                          console.error(err);
+                          handleApiError(err, "Failed to edit comment");
                         }
                       }}
                       className="text-xs text-green-600 font-medium"
@@ -392,7 +392,7 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
                           );
 
                         } catch (err) {
-                          console.error(err);
+                          handleApiError(err, "Failed to delete comment");
                         }
                       }}
                       className="text-xs text-red-500 hover:text-red-700"

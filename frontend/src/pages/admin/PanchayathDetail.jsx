@@ -1,20 +1,59 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { adminapi } from "@/service/adminurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const PanchayathDetail = () => {
   const { id } = useParams();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     const fetchDetail = async () => {
-      const res = await adminapi.getPanchayathDetail(id);
-      setData(res.data);
+
+      try {
+
+        const res =
+          await adminapi
+            .getPanchayathDetail(id);
+
+        setData(res.data);
+
+      }
+
+      catch (err) {
+
+        handleApiError(
+          err,
+          "Failed loading panchayath details"
+        );
+
+      }
+
+      finally {
+
+        setLoading(false);
+
+      }
+
     };
+
     fetchDetail();
+
   }, [id]);
 
-  if (!data) return <p>Loading...</p>;
+  if (loading) {
+
+    return <p>Loading...</p>;
+
+  }
+
+  if (!data) {
+
+    return <p>No data found</p>;
+
+  }
 
   return (
     <div className="space-y-6">

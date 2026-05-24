@@ -5,6 +5,7 @@ import LoginInput from "@/components/admin/Logininput";
 import LoginButton from "@/components/admin/Loginbutton";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -40,31 +41,21 @@ const LoginForm = () => {
       }
 
       // Store tokens and session data
-      
+
       localStorage.setItem("role", data.data.role);
       localStorage.setItem("status", data.data.status);
 
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Login failed");
 
-      const status = err.response?.status;
-      const detail =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        err.response?.data?.non_field_errors?.[0];
-
-      if (status === 401 || status === 400) {
-        setError(detail || "Invalid email or password. Please try again.");
-      } else if (status === 403) {
-        setError("Your account does not have permission to access this portal.");
-      } else if (status === 423) {
-        setError("Your account has been suspended. Please contact support.");
-      } else {
-        setError(
-          detail || "Something went wrong. Please check your connection and try again."
+      const message =
+        handleApiError(
+          err,
+          "Login failed"
         );
-      }
+
+      setError(message);
+
     } finally {
       setLoading(false);
     }

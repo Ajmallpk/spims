@@ -25,7 +25,7 @@ const PanchayathVerificationRequests = () => {
     } catch (err) {
       // toast.error("Error fetching panchayath verifications");
       handleApiError(err, "Error fetching panchayath verifications");
-      console.error(err);
+      
     } finally {
       setLoading(false);
     }
@@ -43,7 +43,7 @@ const PanchayathVerificationRequests = () => {
     } catch (error) {
       // toast.error("Error fetching verification detail");
       handleApiError(error, "Error fetching verification detail");
-      console.error(error);
+      
     }
   };
 
@@ -53,7 +53,7 @@ const PanchayathVerificationRequests = () => {
   };
 
   const handleActionSuccess = (message) => {
-    toast.success(message);
+    
     fetchRequests();
   };
 

@@ -13,7 +13,7 @@ import { useState } from "react";
 import DocumentUploadField from "@/components/panjayath/Documentuploadfield";
 import panchayathapi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
-
+import { handleApiError } from "@/utils/handleApiError";
 
 // ─── Field component ─────────────────────────────────────────────────────────
 
@@ -225,27 +225,14 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
       onSuccess();
     } catch (err) {
+
       panchayathapi.handleAuthError(err);
-      toast.error("[VerificationForm] Submission error:", err);
 
-      // Handle field-level backend errors
-      const data = err.response?.data;
-      if (data && typeof data === "object" && !data.detail) {
-        const backendErrors = { ...INITIAL_ERRORS };
-        Object.keys(data).forEach((key) => {
-          if (key in backendErrors) {
-            backendErrors[key] = Array.isArray(data[key]) ? data[key][0] : data[key];
-          }
-        });
-        setErrors(backendErrors);
-      }
-
-      setApiError(
-        data?.detail ||
-        data?.message ||
-        err.message ||
-        "Submission failed. Please check your details and try again."
+      handleApiError(
+        err,
+        "Verification submission failed"
       );
+
     } finally {
       setIsSubmitting(false);
     }

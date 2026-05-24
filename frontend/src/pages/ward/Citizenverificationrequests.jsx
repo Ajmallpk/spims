@@ -6,6 +6,8 @@ import wardapi from "@/service/wardurls";
 import citizenapi from "@/service/citizenurls";
 
 
+
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 export default function CitizenVerificationRequests() {

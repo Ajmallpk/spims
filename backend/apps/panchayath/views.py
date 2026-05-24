@@ -213,11 +213,70 @@ class PanchayathWardListView(APIView):
         try:
             user = request.user
 
-            wards = WardVerification.objects.select_related("user").filter(
-                panchayath=user,
-                status="APPROVED"
-            ).order_by("-submitted_at")
+            # wards = WardVerification.objects.select_related("user").filter(
+            #     panchayath=user,
+            #     status="APPROVED"
+            # ).order_by("-submitted_at")
 
+            
+            sort_type = request.GET.get(
+                "complaint_sort"
+            )
+            
+            search = request.GET.get(
+                "search",
+                ""
+            ).strip()
+
+            wards = (
+                WardVerification.objects
+                .select_related("user")
+                .filter(
+                    panchayath=user,
+                    status="APPROVED"
+                )
+                .annotate(
+                    complaint_count=Count(
+                        "user__ward_complaints"
+                    )
+                )
+            )
+
+            if search:
+
+                wards = wards.filter(
+
+                    Q(
+                        ward_name__icontains=search
+                    )
+
+                    |
+
+                    Q(
+                        official_email__icontains=search
+                    )
+
+                )
+
+            if sort_type == "low":
+
+                wards = wards.order_by(
+                    "complaint_count"
+                )
+
+            elif sort_type == "high":
+
+                wards = wards.order_by(
+                    "-complaint_count"
+                )
+
+            else:
+
+                wards = wards.order_by(
+                    "-submitted_at"
+                )
+            
+            
             paginator = StandardResultsSetPagination()
             paginated_qs = paginator.paginate_queryset(wards, request)
 

@@ -38,7 +38,7 @@ export default function EscalateModal({ complaintId, onClose, onSuccess }) {
       onClose();
 
     } catch (err) {
-      toast.error("Escalate failed");
+      
     } finally {
       setIsSubmitting(false);
     }

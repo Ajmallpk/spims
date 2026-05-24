@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import panchayathApi from "@/service/panchayathurls";
-
+import { handleApiError } from "@/utils/handleApiError";
 
 
 const CATEGORY_COLORS = {
@@ -214,7 +214,10 @@ export default function EscalatedComplaints() {
                 setWards(wardList);// pagination safe
 
             } catch (err) {
-                console.error(err);
+                handleApiError(
+                    err,
+                    "Failed to load complaints"
+                );
             } finally {
                 setLoading(false);
             }

@@ -71,7 +71,7 @@ export default function ComplaintDetails() {
 
       fetchDetails(); // refresh UI
     } catch (err) {
-      toast.error("Failed to update status");
+      
     }
   };
 

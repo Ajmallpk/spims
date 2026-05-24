@@ -13,6 +13,7 @@ import RejectReasonSection from "@/components/panjayath/Rejectreasonsection";
 import StatusBadge from "@/components/panjayath/StatusBadge";
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/common/ConfirmModal";
+import { handleApiError } from "@/utils/handleApiError";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -225,15 +226,14 @@ export default function WardApprovalModal({ ward, onClose, onSuccess }) {
       onClose();
 
     } catch (err) {
-      if (err.response?.status === 401) {
-        toast.error("Unauthorized: JWT may be expired.");
-      }
 
-      setApiError(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Action failed. Please try again."
-      );
+      panchayathApi.handleAuthError(err)
+
+      handleApiError(
+        err,
+        "Ward action failed"
+      )
+
     } finally {
       setIsSubmitting(false);
     }

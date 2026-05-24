@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Filter, ChevronDown } from "lucide-react";
-import toast from "react-hot-toast";
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("access")}`,
-});
+import { handleApiError } from "@/utils/handleApiError";
+import { adminapi } from "@/service/adminurls";
+
 
 /**
  * PanchayathFilter
@@ -16,22 +14,46 @@ const PanchayathFilter = ({ value, onChange }) => {
   const [panchayaths, setPanchayaths] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  console.log("PANCHAYATH LIST:", panchayaths);
 
   useEffect(() => {
     const fetch = async () => {
+
       try {
-        const { data } = await axios.get("/admin/panchayaths/", {
-          headers: getAuthHeaders(),
-          params: { status: "approved" },
-        });
-        const list = Array.isArray(data) ? data : data.results || [];
+
+        const { data } =
+          await adminapi.getPanchayaths(
+            {
+              status: "approved"
+            }
+          );
+
+        const list =
+
+          Array.isArray(data)
+
+            ? data
+
+            : data.results || [];
+
         setPanchayaths(list);
-      } catch (err) {
-        toast.error("Error fetching panchayaths for filter:", err);
-      } finally {
-        setLoading(false);
+
       }
+
+      catch (err) {
+
+        handleApiError(
+          err,
+          "Failed to load panchayaths"
+        );
+
+      }
+
+      finally {
+
+        setLoading(false);
+
+      }
+
     };
     fetch();
   }, []);

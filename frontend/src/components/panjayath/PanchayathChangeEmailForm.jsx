@@ -1,12 +1,13 @@
 import { useState } from "react";
 import panchayathApi from "@/service/panchayathurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const PanchayathChangeEmailForm = ({ currentEmail }) => {
 
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
-  const [loading,setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
 
@@ -28,8 +29,9 @@ const PanchayathChangeEmailForm = ({ currentEmail }) => {
 
     } catch (error) {
 
-      toast.error(
-        error?.response?.data?.message || "Email change request failed"
+      handleApiError(
+        error,
+        "Email change request failed"
       );
 
     } finally {
@@ -58,7 +60,7 @@ const PanchayathChangeEmailForm = ({ currentEmail }) => {
         <input
           type="email"
           value={email}
-          onChange={(e)=>setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full mt-1 px-3 py-2 border rounded-lg"
           required
         />
@@ -70,7 +72,7 @@ const PanchayathChangeEmailForm = ({ currentEmail }) => {
         <input
           type="password"
           value={password}
-          onChange={(e)=>setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full mt-1 px-3 py-2 border rounded-lg"
           required
         />

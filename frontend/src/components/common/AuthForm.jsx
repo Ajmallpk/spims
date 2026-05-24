@@ -35,6 +35,7 @@ import {
   ArrowLeft,
 } from "lucide-react"
 import toast from "react-hot-toast"
+import { handleApiError } from "@/utils/handleApiError"
 import { triggerSuspension } from "@/utils/suspensionHandler";
 
 
@@ -226,22 +227,31 @@ export function AuthForm() {
 
 
     } catch (error) {
-      const data = error.response?.data
+
+      const data =
+        error.response?.data
 
       if (
+
         data?.error === "ACCOUNT_SUSPENDED" ||
-        data?.message?.includes("suspended")
+
+        data?.message?.includes(
+          "suspended"
+        )
+
       ) {
+
         triggerSuspension()
+
         return
+
       }
 
-      const message =
-        error.response?.data?.error ||
-        error.response?.data?.detail ||
+      handleApiError(
+        error,
         "Invalid email or password"
+      )
 
-      toast.error(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -270,13 +280,11 @@ export function AuthForm() {
       setOtpSent(true)
 
     } catch (error) {
-      const message =
-        error.response?.data?.error ||
-        error.response?.data?.detail ||
-        error.response?.data?.email?.[0] ||
-        "Signup failed"
 
-      toast.error(message)
+      handleApiError(
+        error,
+        "Signup failed"
+      )
 
     } finally {
       setIsSubmitting(false)
@@ -329,12 +337,12 @@ export function AuthForm() {
 
       setOtpVerified(true)
     } catch (error) {
-      const message =
-        error.response?.data?.error ||
-        error.response?.data?.detail ||
-        "Invalid OTP"
 
-      toast.error(message)
+      handleApiError(
+        error,
+        "Invalid OTP"
+      )
+
     } finally {
       setIsSubmitting(false)
     }
@@ -355,12 +363,12 @@ export function AuthForm() {
       setCanResend(false)
 
     } catch (error) {
-      const message =
-        error.response?.data?.error ||
-        error.response?.data?.detail ||
-        "Resend failed"
 
-      toast.error(message)
+      handleApiError(
+        error,
+        "Resend failed"
+      )
+
     } finally {
       setIsResending(false)
     }
@@ -387,7 +395,12 @@ export function AuthForm() {
       setResetCanResend(false)
 
     } catch (error) {
-      alert(error.response?.data?.error || "Failed")
+
+      handleApiError(
+        error,
+        "Failed"
+      )
+
     }
   }
 
@@ -400,7 +413,12 @@ export function AuthForm() {
       alert("OTP verified")
       setResetStep(3)
     } catch (error) {
-      alert(error.response?.data?.error || "Invalid OTP")
+
+      handleApiError(
+        error,
+        "Invalid OTP"
+      )
+
     }
   }
 
@@ -420,7 +438,12 @@ export function AuthForm() {
       setMode("login")
 
     } catch (error) {
-      alert(error.response?.data?.error || "Reset failed")
+
+      handleApiError(
+        error,
+        "Reset failed"
+      )
+
     }
   }
 
@@ -440,7 +463,12 @@ export function AuthForm() {
       setResetCanResend(false)
 
     } catch (error) {
-      alert(error.response?.data?.error || "Resend failed")
+
+      handleApiError(
+        error,
+        "Resend failed"
+      )
+
     } finally {
       setIsResetResending(false)
     }

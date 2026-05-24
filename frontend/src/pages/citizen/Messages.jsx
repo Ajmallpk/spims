@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback } from "react";
 import ConversationList from "@/components/citizen/Conversationlist";
 import ChatWindow from "@/components/citizen/Chatwindow";
 import EmptyMessagesState from "@/components/citizen/Emptymessagesstate";
+import { handleApiError } from "@/utils/handleApiError";
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 const getAuthToken = () => localStorage.getItem("spims_token") || "";
@@ -134,6 +135,10 @@ const Messages = () => {
     } catch {
       // Remove optimistic message on failure
       setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+      handleApiError(
+        error,
+        "Failed to send message"
+      );
     } finally {
       setSending(false);
     }

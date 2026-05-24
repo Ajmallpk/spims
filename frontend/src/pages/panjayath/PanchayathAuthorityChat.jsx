@@ -6,6 +6,7 @@ import ChatInput from "@/components/chat/ChatInput";
 import EmptyChatState from "@/components/chat/EmptyChatState";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import authoritychatapi from "@/service/authoritychaturls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const PanchayathAuthorityChat = () => {
   const [contacts, setContacts] = useState([]);
@@ -62,7 +63,10 @@ const PanchayathAuthorityChat = () => {
 
       } catch (error) {
 
-        console.error("Inbox fetch failed:", error);
+        handleApiError(
+          error,
+          "Failed to load inbox"
+        );
 
       } finally {
 
@@ -161,9 +165,9 @@ const PanchayathAuthorityChat = () => {
 
     } catch (error) {
 
-      console.error(
-        "Message fetch failed:",
-        error
+      handleApiError(
+        error,
+        "Failed to load messages"
       );
 
     } finally {
@@ -678,9 +682,9 @@ const PanchayathAuthorityChat = () => {
 
     } catch (error) {
 
-      console.error(
-        "Send message failed:",
-        error
+      handleApiError(
+        error,
+        "Failed to send message"
       );
 
     }
@@ -700,9 +704,9 @@ const PanchayathAuthorityChat = () => {
 
     } catch (error) {
 
-      console.error(
-        "Delete failed:",
-        error
+      handleApiError(
+        error,
+        "Failed to delete message"
       );
 
     }

@@ -4,6 +4,7 @@ import StatusBadge from "@/components/admin/Statusbadge";
 import RejectReasonSection from "@/components/admin/Rejectreasonsection";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -71,7 +72,10 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
       onSuccess("Panchayath approved successfully.");
       onClose();
     } catch (err) {
-      toast.error("Error approving Panchayath");
+      handleApiError(
+        err,
+        "Failed to approve panchayath"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +98,10 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
       onSuccess("Panchayath registration rejected.");
       onClose();
     } catch (err) {
-      toast.error("Error rejecting Panchayath");
+      handleApiError(
+        err,
+        "Failed to reject panchayath"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -322,8 +329,8 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
 
                 }}
                 className={`px-4 py-2 text-white rounded-lg ${confirmAction === "approve"
-                    ? "bg-emerald-600"
-                    : "bg-red-600"
+                  ? "bg-emerald-600"
+                  : "bg-red-600"
                   }`}
               >
                 Confirm

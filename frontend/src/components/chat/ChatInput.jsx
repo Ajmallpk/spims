@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import { handleApiError } from "@/utils/handleApiError";
 
 
 
 const EmojiPicker = ({ onSelect, onClose }) => {
-    const emojis = ["😊", "👍", "🙏", "✅", "📋", "📌", "⚠️", "🔔", "💬", "📞", "🏛️", "📄", "✔️", "❌", "🔴", "🟢","✍🏻","⛈️","🔥"];
+    const emojis = ["😊", "👍", "🙏", "✅", "📋", "📌", "⚠️", "🔔", "💬", "📞", "🏛️", "📄", "✔️", "❌", "🔴", "🟢", "✍🏻", "⛈️", "🔥"];
     return (
         <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-2xl shadow-lg p-3 z-10">
             <div className="grid grid-cols-8 gap-1">
@@ -262,9 +263,9 @@ const ChatInput = ({
 
         } catch (error) {
 
-            console.error(
-                "Recording error:",
-                error
+            handleApiError(
+                error,
+                "Voice recording failed"
             );
 
         }

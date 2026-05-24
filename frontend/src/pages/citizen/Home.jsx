@@ -6,6 +6,7 @@ import CreateIssueModal from "@/components/citizen/Createissuemodal";
 import VerificationRequiredModal from "@/components/citizen/Verificationrequiredmodal";
 import complaintapi from "@/service/complaintsurls";
 import citizenapi from "@/service/citizenurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 // Verification status constants
 const VERIFICATION_STATUS = {
@@ -246,7 +247,7 @@ const Home = () => {
       await loadFeed();   // refresh feed automatically
 
     } catch (error) {
-      console.error(error);
+      handleApiError(error, "Failed to create complaint");
     }
   };
 

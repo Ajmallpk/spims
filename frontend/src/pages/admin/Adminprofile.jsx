@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
 import { UserCog } from "lucide-react";
 import AdminInfoCard from "@/components/admin/Admininfocard";
 import SecuritySettingsCard from "@/components/admin/Securitysettingscard";
 import { adminapi } from "@/service/adminurls";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
 
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("access")}`,
-});
+
 
 const AdminProfile = () => {
   const [profile, setProfile] = useState(null);

@@ -36,7 +36,7 @@ function SkeletonRow() {
           </div>
         </div>
       </td>
-      {[60, 48, 40, 36].map((w, i) => (
+      {[60, 48, 40, 35, 35].map((w, i) => (
         <td key={i} className="px-5 py-4">
           <div
             className="h-3.5 bg-slate-200 rounded-lg animate-pulse"
@@ -105,6 +105,29 @@ const WardRow = React.memo(function WardRow({ ward }) {
         </span>
       </td>
 
+      {/* Complaint Count */}
+      <td className="px-5 py-3.5">
+
+        <div
+          className="
+      inline-flex
+      items-center
+      justify-center
+      min-w-[48px]
+      px-3
+      py-1
+      rounded-full
+      bg-orange-100
+      text-orange-700
+      text-xs
+      font-bold
+    "
+        >
+          {ward.complaint_count || 0}
+        </div>
+
+      </td>
+
       {/* Joined Date */}
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-1.5">
@@ -133,7 +156,7 @@ const WardRow = React.memo(function WardRow({ ward }) {
       {/* View action */}
       <td className="px-5 py-3.5">
         <button
-         onClick={() => navigate(`/panchayath/ward/${ward.id}`)}
+          onClick={() => navigate(`/panchayath/ward/${ward.id}`)}
           className="
             inline-flex items-center gap-1.5
             px-3 py-1.5
@@ -172,6 +195,7 @@ const COLUMNS = [
   { label: "Ward Name" },
   { label: "Email" },
   { label: "Phone" },
+  { label: "Complaints" },
   { label: "Joined Date" },
   { label: "Status" },
   { label: "Action" },
@@ -205,8 +229,8 @@ export default function WardTable({ wards, isLoading }) {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
             : wards.map((ward) => (
-                <WardRow key={ward.id} ward={ward} />
-              ))}
+              <WardRow key={ward.id} ward={ward} />
+            ))}
         </tbody>
       </table>
     </div>

@@ -11,6 +11,7 @@
 import { useState, useEffect } from "react";
 import DocumentUploadField from "@/components/citizen/Documentuploadfield";
 import citizenapi from "@/service/citizenurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 ;
 
@@ -150,11 +151,16 @@ const CitizenVerificationForm = ({
       }, 1000);
 
     } catch (err) {
-      if (err.response && err.response.data) {
-        setSubmitError(JSON.stringify(err.response.data));
-      } else {
-        setSubmitError("Verification failed. Please try again.");
-      }
+
+      handleApiError(
+        err,
+        "Verification submission failed"
+      );
+
+      setSubmitError(
+        "Verification submission failed"
+      );
+
     } finally {
       setIsSubmitting(false);
     }

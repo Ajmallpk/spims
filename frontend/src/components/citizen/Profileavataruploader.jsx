@@ -10,6 +10,7 @@
 
 import { useRef, useState } from "react";
 import citizenapi from "@/service/citizenurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 const getInitials = (name = "") =>
   name
@@ -52,6 +53,10 @@ const ProfileAvatarUploader = ({ avatarUrl, fullName, onUpload, token }) => {
       const data = res.data;
       onUpload?.(data.avatarUrl ?? data.avatar_url ?? preview);
     } catch (err) {
+      handleApiError(
+        err,
+        "Avatar upload failed"
+      )
       setError("Upload failed. Please try again.");
       setPreview(null);
     } finally {
@@ -87,8 +92,8 @@ const ProfileAvatarUploader = ({ avatarUrl, fullName, onUpload, token }) => {
         {/* Hover / uploading overlay */}
         <div
           className={`absolute inset-0 flex flex-col items-center justify-center gap-1 transition-opacity duration-200 ${uploading
-              ? "bg-black/50 opacity-100"
-              : "bg-black/40 opacity-0 group-hover:opacity-100"
+            ? "bg-black/50 opacity-100"
+            : "bg-black/40 opacity-0 group-hover:opacity-100"
             }`}
         >
           {uploading ? (

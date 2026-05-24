@@ -25,8 +25,8 @@ const PasswordField = ({ label, id, value, onChange, show, onToggle, error, plac
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || label}
         className={`w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-150 ${error
-            ? "border-red-400 focus:ring-red-200"
-            : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
+          ? "border-red-400 focus:ring-red-200"
+          : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
           }`}
       />
       <button
@@ -114,14 +114,15 @@ const ChangePasswordForm = () => {
       setForm({ current_password: "", new_password: "", confirm_password: "" });
       setErrors({});
     } catch (err) {
-      // toast.error("Error changing password:", err);
-      handleApiError(err, "Error changing password");
+
       const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        err.response?.data?.current_password?.[0] ||
-        "Failed to change password. Please try again.";
+        handleApiError(
+          err,
+          "Failed to change password"
+        );
+
       setApiError(msg);
+
     } finally {
       setIsSubmitting(false);
     }

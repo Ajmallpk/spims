@@ -8,7 +8,7 @@ import { triggerSuspension } from "@/utils/suspensionHandler";
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8000/api/",
   withCredentials: true,
-  xsrfCookieName: "csrftoken",        
+  xsrfCookieName: "csrftoken",
   xsrfHeaderName: "X-CSRFToken",
 });
 
@@ -33,9 +33,35 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+// axiosInstance.interceptors.response.use(
+//   (response) => {
+//     NProgress.done();
+//     return response;
+//   },
 axiosInstance.interceptors.response.use(
+
   (response) => {
+
     NProgress.done();
+
+    const method =
+      response.config.method;
+
+    const successMessage =
+      response.data?.message;
+
+    const allowedMethods =
+      ["post", "put", "patch", "delete"];
+
+    if (
+      successMessage &&
+      allowedMethods.includes(method)
+    ) {
+
+      toast.success(successMessage);
+
+    }
+
     return response;
   },
 

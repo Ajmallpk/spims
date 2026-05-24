@@ -8,6 +8,7 @@ import panchayathapi from "@/service/panchayathurls"
 import toast from "react-hot-toast";
 import PanchayathSecuritySettings from "@/components/panjayath/PanchayathSecuritySettings";
 import { useLocation, useNavigate } from "react-router-dom";
+import { handleApiError } from "@/utils/handleApiError";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
@@ -158,7 +159,7 @@ export default function PanchayathProfile() {
   const navigate = useNavigate();
 
   // ── Fetch profile ─────────────────────────────────────────────────────────
-  
+
   useEffect(() => {
 
     if (!location.state) return;
@@ -188,17 +189,16 @@ export default function PanchayathProfile() {
       const response = await panchayathapi.profile()
       setProfile(response.data.data);
     } catch (err) {
+
       if (err.response?.status === 401) {
         panchayathapi.handleAuthError(err);
-        toast.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
-      } else {
-        toast.error("[PanchayathProfile] Profile fetch error:", err);
       }
-      setProfileError(
-        err.response?.data?.detail ||
-        err.message ||
-        "Failed to load profile information."
+
+      handleApiError(
+        err,
+        "Failed to load profile information"
       );
+
     } finally {
       setIsLoadingProfile(false);
     }
@@ -220,17 +220,16 @@ export default function PanchayathProfile() {
         String(["PENDING", "APPROVED", "REJECTED"].includes(status))
       );
     } catch (err) {
+
       if (err.response?.status === 401) {
         panchayathapi.handleAuthError(err);
-        toast.error("[PanchayathProfile] Unauthorized – JWT may be expired.");
-      } else {
-        toast.error("[PanchayathProfile] Verification status fetch error:", err);
       }
-      setStatusError(
-        err.response?.data?.detail ||
-        err.message ||
-        "Failed to load verification status."
+
+      handleApiError(
+        err,
+        "Failed to load verification status"
       );
+
     } finally {
       setIsLoadingStatus(false);
     }

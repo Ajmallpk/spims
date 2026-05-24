@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import panchayathApi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 export default function WardDetail() {
   const { id } = useParams();
@@ -19,7 +20,10 @@ export default function WardDetail() {
         setWard(res.data.data);
       } catch (err) {
         panchayathApi.handleAuthError(err);
-        toast.error(err?.response?.data?.message || "Failed to load ward details");
+        handleApiError(
+          err,
+          "Failed to load ward details"
+        );
         setError("Failed to load ward details.");
       } finally {
         setIsLoading(false);

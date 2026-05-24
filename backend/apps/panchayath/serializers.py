@@ -67,6 +67,7 @@ class WardVerificationSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     email = serializers.CharField(source="official_email")
     phone = serializers.CharField(source="official_contact")
+    complaint_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = WardVerification
@@ -76,6 +77,7 @@ class WardVerificationSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "phone",
+            "complaint_count",
             "status",
             "submitted_at",
             "reviewed_at"

@@ -11,6 +11,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import citizenapi from "@/service/citizenurls";
+import { handleApiError } from "@/utils/handleApiError";
 
 // ─── Types & config ───────────────────────────────────────────────────────────
 const NOTIF_CONFIG = {
@@ -235,8 +236,9 @@ const NotificationPanel = ({
 
             catch (error) {
 
-                console.log(
-                    error
+                handleApiError(
+                    error,
+                    "Failed to load notifications"
                 )
 
             }
@@ -327,7 +329,10 @@ const NotificationPanel = ({
 
         catch (error) {
 
-            console.log(error)
+            handleApiError(
+                error,
+                "Failed to mark notifications as read"
+            )
 
         }
 
