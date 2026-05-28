@@ -14,6 +14,8 @@ User = get_user_model()
 class Notification(models.Model):
 
     TYPE_CHOICES = [
+        
+        ("NEW_COMPLAINT","New Complaint"),
         ("COMPLAINT_STATUS", "Complaint Status"),
         ("UPVOTE", "Upvote"),
         ("COMMENT", "Comment"),

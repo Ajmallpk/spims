@@ -65,6 +65,47 @@ const panchayathApi = {
     );
   },
 
+
+  getNotifications: (page = 1) => {
+
+    return axiosInstance.get(
+
+      `/notification/notifications/?page=${page}`
+
+    )
+
+  },
+
+  getUnreadCount: () => {
+
+    return axiosInstance.get(
+
+      "/notification/notifications/unread-count/"
+
+    )
+
+  },
+
+  markNotificationRead: (id) => {
+
+    return axiosInstance.post(
+
+      `/notification/notifications/read/${id}/`
+
+    )
+
+  },
+
+  markAllNotificationsRead: () => {
+
+    return axiosInstance.post(
+
+      "/notification/notifications/read-all/"
+
+    )
+
+  },
+
 };
 
 
