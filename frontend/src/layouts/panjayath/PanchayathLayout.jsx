@@ -35,6 +35,9 @@ export default function PanchayathLayout() {
 
   // ── Mobile sidebar state ─────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+
 
   // ── Role guard ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -84,7 +87,7 @@ export default function PanchayathLayout() {
     }
   }, [isVerified, verificationSubmitted, role]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (
       role === "PANCHAYATH" &&
       isVerified &&
@@ -104,8 +107,159 @@ export default function PanchayathLayout() {
   //   }
 
   // }, [isVerified, role, navigate]);
- 
+
   if (!role || role !== "PANCHAYATH") return null;
+
+
+
+  useEffect(() => {
+
+    const loadNotifications = async () => {
+
+      try {
+
+        const notif =
+
+          await panchayathapi
+            .getNotifications()
+
+        const unread =
+
+          await panchayathapi
+            .getUnreadCount()
+
+        setNotifications(
+
+          notif.data
+            .results
+            .data
+
+        )
+
+        setUnreadCount(
+
+          unread.data
+            .data
+            .unread_count
+
+        )
+
+      }
+
+      catch (error) {
+
+        console.log(error)
+
+      }
+
+    }
+
+    loadNotifications()
+
+  }, [])
+
+
+  useEffect(() => {
+
+    let socket = null
+
+    const connectSocket = () => {
+
+      const token =
+
+        localStorage.getItem(
+          "access"
+        )
+
+      if (!token)
+        return
+
+      socket =
+
+        new WebSocket(
+
+          `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
+
+        )
+
+      socket.onopen = () => {
+
+        console.log(
+          "PANCHAYATH WS CONNECTED"
+        )
+
+      }
+
+      socket.onmessage = (event) => {
+
+        const data =
+
+          JSON.parse(
+            event.data
+          )
+
+        const newNotification = {
+
+          id: Date.now(),
+
+          title: data.title,
+
+          message: data.message,
+
+          notification_type:
+            data.notification_type,
+
+          is_read: false,
+
+          created_at:
+            new Date()
+              .toISOString()
+
+        }
+
+        setNotifications(
+          prev => [
+
+            newNotification,
+
+            ...prev
+
+          ])
+
+        setUnreadCount(
+          prev =>
+            prev + 1
+        )
+
+      }
+
+      socket.onclose = () => {
+
+        setTimeout(
+
+          () => {
+
+            connectSocket()
+
+          },
+
+          3000
+
+        )
+
+      }
+
+    }
+
+    connectSocket()
+
+    return () => {
+
+      socket?.close()
+
+    }
+
+  }, [])
 
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
@@ -122,7 +276,31 @@ export default function PanchayathLayout() {
       {/* ── Main content area ── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Header */}
-        <PanchayathHeader onMenuToggle={() => setSidebarOpen((o) => !o)} />
+        <PanchayathHeader
+
+          onMenuToggle={
+            () => setSidebarOpen(
+              o => !o
+            )
+          }
+
+          notifications={
+            notifications
+          }
+
+          setNotifications={
+            setNotifications
+          }
+
+          unreadCount={
+            unreadCount
+          }
+
+          setUnreadCount={
+            setUnreadCount
+          }
+
+        />
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">

@@ -58,12 +58,12 @@ export default function ComplaintActionPanel({
       )}
 
       {/* 💬 CHAT */}
-      <button
+      {/* <button
         onClick={onToggleChat}
         className="w-full mt-2 px-4 py-2.5 text-blue-600 bg-blue-50 border border-blue-200 rounded-xl"
       >
         {chatOpen ? "Hide Chat" : "Open Chat"}
-      </button>
+      </button> */}
     </div>
   );
 }

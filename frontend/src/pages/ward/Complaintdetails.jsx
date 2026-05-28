@@ -5,7 +5,7 @@ import CitizenPreviewCard from "@/components/ward/Citizenpreviewcard";
 import ComplaintActionPanel from "@/components/ward/Complaintactionpanel";
 import ResolveModal from "@/components/ward/Resolvemodal";
 import EscalateModal from "@/components/ward/Escalatemodal";
-import ChatPanel from "@/pages/ward/Chatpanel";
+// import ChatPanel from "@/pages/ward/Chatpanel";
 import wardapi from "@/service/wardurls";
 import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";

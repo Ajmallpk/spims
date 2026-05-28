@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, LogOut, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import WardNotificationBell from "./WardNotificationBell";
 
 const PAGE_TITLES = {
   "/ward/dashboard": "Dashboard",
@@ -10,7 +11,16 @@ const PAGE_TITLES = {
   "/ward/profile": "My Profile",
 };
 
-export default function WardHeader() {
+export default function WardHeader({
+  notifications,
+
+  setNotifications,
+
+  unreadCount,
+
+  setUnreadCount
+
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -66,10 +76,24 @@ export default function WardHeader() {
       {/* Right Controls */}
       <div className="flex items-center gap-3">
         {/* Notification Bell */}
-        <button className="relative w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-        </button>
+
+        <WardNotificationBell
+
+          notifications={notifications}
+
+          setNotifications={
+            setNotifications
+          }
+
+          unreadCount={
+            unreadCount
+          }
+
+          setUnreadCount={
+            setUnreadCount
+          }
+
+        />
 
         {/* Role Badge */}
         <span className="px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-100">
