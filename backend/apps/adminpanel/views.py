@@ -73,6 +73,10 @@ class AdminLoginView(TokenObtainPairView):
             response.data = {
                 "message": "Login successful",
                 "data": {
+
+                    "access": access,
+                    "refresh": refresh,
+
                     "role": "ADMIN",
                     "status": "ACTIVE",
                 }

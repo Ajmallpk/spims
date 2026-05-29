@@ -34,6 +34,28 @@ const LoginForm = () => {
     try {
       const { data } = await adminapi.login(email, password);
 
+
+      console.log("FULL RESPONSE", data)
+      console.log("DATA", data.data)
+      console.log("ACCESS", data.data?.access)
+      console.log("REFRESH", data.data?.refresh)
+
+      console.log(
+        "LOGIN RESPONSE:",
+        data
+      )
+
+      console.log(
+        "ACCESS:",
+        data.data.access
+      )
+
+      console.log(
+        "REFRESH:",
+        data.data.refresh
+      )
+      console.log("LOGIN RESPONSE:", data)
+
       // Validate that the returned role is ADMIN
       if (data.data.role !== "ADMIN") {
         setError("Access denied. This portal is restricted to Admin accounts.");
@@ -41,7 +63,15 @@ const LoginForm = () => {
       }
 
       // Store tokens and session data
+      localStorage.setItem(
+        "access",
+        data.data.access
+      )
 
+      localStorage.setItem(
+        "refresh",
+        data.data.refresh
+      )
       localStorage.setItem("role", data.data.role);
       localStorage.setItem("status", data.data.status);
 

@@ -130,6 +130,23 @@ class SubmitPanchayathVerificationView(APIView):
                 user=user,
                 **serializer.validated_data
             )
+            
+            admin_user = User.objects.filter(
+                is_superuser=True
+            ).first()
+            
+            print("ADMIN USER:", admin_user)
+            
+            if admin_user:
+                
+                print("SEND NOTIFICATION EXECUTING")
+                send_notification(
+                    user=admin_user,
+                    title="New Panchayath Verification",
+                    message=f"{user.username} submitted verification request",
+                    n_type="PANCHAYATH_VERIFICATION",
+                    sender=user
+                )
 
             logger.info(f"Panchayath {user.id} submitted verification")
 

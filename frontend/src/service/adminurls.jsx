@@ -3,11 +3,13 @@ import axiosInstance from "@/api/axiosInstance";
 
 export const adminapi = {
     login: (email, password) => {
-        return axiosInstance.post("auth/login/authority/", {
-            email: email.trim().toLowerCase(),
-            password,
-            role: "ADMIN"
-        });
+        return axiosInstance.post(
+            "/admin/login/",
+            {
+                email: email.trim().toLowerCase(),
+                password
+            }
+        );
     },
     dashboard: () => { return axiosInstance.get("/admin/dashboard/") },
     recentVerification: () => { return axiosInstance.get("/admin/recent-verifications/") },
@@ -48,6 +50,30 @@ export const adminapi = {
         axiosInstance.get(
             `/admin/complaints/${id}/`
         ),
-        
+
     me: () => axiosInstance.get("/admin/auth/me/"),
+
+    getNotifications: (page = 1) => {
+        return axiosInstance.get(
+            `notification/notifications/?page=${page}`
+        )
+    },
+
+    getUnreadCount: () => {
+        return axiosInstance.get(
+            "notification/notifications/unread-count/"
+        )
+    },
+
+    markNotificationRead: (id) => {
+        return axiosInstance.post(
+            `notification/notifications/read/${id}/`
+        )
+    },
+
+    markAllNotificationsRead: () => {
+        return axiosInstance.post(
+            "notification/notifications/read-all/"
+        )
+    },
 }
