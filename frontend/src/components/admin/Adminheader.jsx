@@ -1,5 +1,8 @@
 import { useLocation } from "react-router-dom";
-import { Bell, ShieldCheck, Menu } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import AdminNotificationBell from "./AdminNotificationBell";
+import { adminapi } from "@/service/adminurls";
+import { useEffect } from "react";
 
 const routeTitleMap = {
   "/admin/dashboard": "Dashboard",
@@ -9,13 +12,57 @@ const routeTitleMap = {
   "/admin/profile": "Profile",
 };
 
-const AdminHeader = () => {
+const AdminHeader = ({
+
+  notifications,
+
+  setNotifications,
+
+  unreadCount,
+
+  setUnreadCount
+
+}) => {
   const location = useLocation();
 
   const pageTitle =
     Object.entries(routeTitleMap).find(([key]) =>
       location.pathname.startsWith(key)
     )?.[1] || "Admin Panel";
+
+
+
+  useEffect(() => {
+
+    const fetchUnread = async () => {
+
+      try {
+
+        const res =
+          await adminapi
+            .getUnreadCount()
+
+        setUnreadCount(
+
+          res.data
+            .data
+            .unread_count
+
+        )
+
+      }
+
+      catch (error) {
+
+        console.log(error)
+
+      }
+
+    }
+
+    fetchUnread()
+
+  }, [setUnreadCount])
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0">
@@ -34,10 +81,17 @@ const AdminHeader = () => {
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
         {/* Notification Bell */}
-        <button className="relative p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200">
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white" />
-        </button>
+        <AdminNotificationBell
+
+          notifications={notifications}
+
+          setNotifications={setNotifications}
+
+          unreadCount={unreadCount}
+
+          setUnreadCount={setUnreadCount}
+
+        />
 
         {/* Divider */}
         <div className="w-px h-6 bg-gray-200" />

@@ -226,7 +226,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
       onSuccess();
     } catch (err) {
       panchayathapi.handleAuthError(err);
-      toast.error("[VerificationForm] Submission error:", err);
+      // toast.error("[VerificationForm] Submission error:", err);
 
       // Handle field-level backend errors
       const data = err.response?.data;
