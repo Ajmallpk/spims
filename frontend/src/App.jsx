@@ -59,6 +59,8 @@ import ComplaintDetails from "./pages/ward/Complaintdetails";
 import ReassignedComplaints from "@/pages/ward/ReassignedComplaints";
 import ReassignedComplaintDetail from "@/pages/ward/ReassignedComplaintDetail";
 import WardAuthorityChat from "@/pages/ward/WardAuthorityChat";
+import ComplaintChatList from "@/pages/ward/ComplaintChatList";
+import ComplaintChatPage from "@/pages/ward/ComplaintChatPage";
 
 
 
@@ -278,7 +280,7 @@ export default function App() {
           <Route path="wards/:id" element={<WardDetailsPage />} />
           <Route path="citizens" element={<AdminCitizenList />} />
           <Route path="citizens/:id" element={<AdminCitizenDetail />} />
-          <Route path="/admin/complaints/:id" element={<ComplaintDetailPage />}/>
+          <Route path="/admin/complaints/:id" element={<ComplaintDetailPage />} />
         </Route>
 
         {/* ───────── ADMIN ROUTES ───────── */}
@@ -317,6 +319,16 @@ export default function App() {
           <Route
             path="chat"
             element={<WardAuthorityChat />}
+          />
+
+          <Route
+            path="complaint-chats"
+            element={<ComplaintChatList />}
+          />
+
+          <Route
+            path="complaint-chats/:complaintId"
+            element={<ComplaintChatPage />}
           />
 
         </Route>

@@ -441,6 +441,8 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
         
     async def message_deleted(self, event):
 
+        print("MESSAGE DELETE EVENT", event)
+        
         await self.send_event(
             event["event_type"],
             {

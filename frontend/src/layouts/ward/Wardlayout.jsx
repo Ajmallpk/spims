@@ -86,6 +86,11 @@ export default function WardLayout() {
       if (!token)
         return
 
+      console.log(
+        "WARD TOKEN:",
+        token
+      )
+
       socket =
         new WebSocket(
 

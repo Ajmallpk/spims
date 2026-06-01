@@ -25,10 +25,12 @@ import { useEffect, useState } from "react"
 
 const CitizenLayout = () => {
 
+  console.log("CITIZEN LAYOUT RENDERED")
+
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
 
-  
+
 
 
 
@@ -38,6 +40,7 @@ const CitizenLayout = () => {
 
     const connectSocket = () => {
 
+      console.log(document.cookie)
       const token =
         localStorage.getItem(
           "access"
@@ -54,6 +57,7 @@ const CitizenLayout = () => {
         WS_URL
       )
 
+      console.log("WS URL:", WS_URL)
       socket =
         new WebSocket(
           WS_URL

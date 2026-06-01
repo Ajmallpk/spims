@@ -6,6 +6,7 @@ from .views import (
     ToggleChatStatusView,
     ChatMessageListView,
     ChatInboxView,
+    DeleteMessageView,
 
     AuthorityInboxView,
     AuthorityMessageListView,
@@ -40,6 +41,12 @@ urlpatterns = [
     path(
         "complaint/inbox/",
         ChatInboxView.as_view()
+    ),
+    
+    
+    path(
+        "complaint/delete-message/<int:message_id>/",
+        DeleteMessageView.as_view(),
     ),
 
 

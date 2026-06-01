@@ -119,7 +119,22 @@ function LoginForm() {
         role: "CITIZEN"
       });
 
-      
+      console.log("LOGIN RESPONSE", response.data)
+
+      localStorage.setItem(
+        "access",
+        response.data.data.access
+      )
+
+      localStorage.setItem(
+        "refresh",
+        response.data.data.refresh
+      )
+
+      localStorage.setItem(
+        "role",
+        response.data.data.role
+      )
 
       window.location.href = "/citizen/home";
 
@@ -240,7 +255,7 @@ function CitizenSignUpForm({ onSuccess }) {
     const passwordErrors = validatePassword(password);
 
     if (passwordErrors.length > 0) {
-      setError(passwordErrors[0]); 
+      setError(passwordErrors[0]);
       return;
     }
 

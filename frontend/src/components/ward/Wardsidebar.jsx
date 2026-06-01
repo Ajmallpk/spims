@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ShieldCheck,
   MessageCircle,
+  MessageSquare,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -26,6 +27,12 @@ const NAV_ITEMS = [
     protected: true
   },
   { label: "Profile", path: "/ward/profile", icon: UserCircle, protected: false },
+
+  {
+    label: "Complaint Chats",
+    path: "/ward/complaint-chats",
+    icon: MessageSquare,
+  },
 
   {
     label: "Authority Chat",

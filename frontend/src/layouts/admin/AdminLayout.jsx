@@ -26,14 +26,13 @@ const AdminLayout = () => {
 
       console.log("CONNECT SOCKET CALLED")
 
-      const token = localStorage.getItem("access")
+      const token =
+        localStorage.getItem("access")
 
-      console.log("TOKEN:", token)
-
-      if (!token) {
-        console.log("NO TOKEN FOUND")
-        return
-      }
+      console.log(
+        "TOKEN:",
+        token
+      )
 
       socket = new WebSocket(
         `ws://127.0.0.1:8000/ws/notifications/?token=${token}`

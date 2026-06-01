@@ -1,0 +1,240 @@
+import React from "react";
+
+const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete }) => {
+  const {
+    sender,
+    message: text,
+    time,
+    isDelivered,
+    isRead,
+    fileType,
+    fileUrl,
+    isDeleted,
+  } = message;
+  const isWard = sender === "ward";
+
+
+  return (
+    <div
+      ref={(el) => {
+
+        if (el) {
+
+          messageRefs.current[
+            message.id
+          ] = el;
+
+        }
+
+      }}
+      className={`flex ${isWard
+        ? "justify-end"
+        : "justify-start"
+        }`}
+    >
+      <div className={`flex flex-col max-w-[78%] sm:max-w-[65%] ${isWard ? "items-end" : "items-start"}`}>
+        {/* Sender label */}
+        <span className="text-[10px] font-semibold text-slate-400 mb-1 px-1 uppercase tracking-wide">
+          {isWard ? "You (Ward)" : "Citizen"}
+        </span>
+
+        {/* Bubble */}
+        <div
+          onDoubleClick={() => onReply(message)}
+          className={`relative px-4 py-2.5 rounded-2xl shadow-sm ${isWard
+            ? "bg-blue-600 text-white rounded-br-sm"
+            : "bg-white text-slate-800 border border-slate-200 rounded-bl-sm"
+            }`}
+        >
+
+
+          {
+            message.replyData && (
+
+              <div
+                onClick={() => {
+
+                  const target =
+
+                    messageRefs.current[
+                    message.replyData.id
+                    ];
+
+                  if (target) {
+
+                    target.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center"
+                    });
+
+                  }
+
+                }}
+
+                className="
+        mb-2
+        p-2
+        rounded-lg
+        cursor-pointer
+    "
+              >
+
+                <p className="font-semibold">
+
+                  {
+                    message.replyData.sender
+                  }
+
+                </p>
+
+
+
+
+                {
+                  message.replyData?.is_deleted ? (
+
+                    <p className="italic text-gray-400">
+                      This message was deleted
+                    </p>
+
+                  ) : message.replyData.file_type === "IMAGE" ? (
+
+                    <img
+                      src={message.replyData.file_url}
+                      alt="reply-preview"
+                      className="w-16 h-16 object-cover rounded"
+                    />
+
+                  ) : message.replyData.file_type === "VIDEO" ? (
+
+                    <video className="w-24 rounded">
+                      <source src={message.replyData.file_url} />
+                    </video>
+
+                  ) : message.replyData.file_type === "PDF" ? (
+
+                    <span>📄 PDF</span>
+
+                  ) : message.replyData.file_type === "AUDIO" ? (
+
+                    <span>🎵 Audio</span>
+
+                  ) : (
+
+                    <p>{message.replyData.message}</p>
+
+                  )
+                }
+
+              </div>
+
+            )
+          }
+          {isDeleted ? (
+
+            <p className="italic text-gray-400">
+              This message was deleted
+            </p>
+
+          ) : fileType === "IMAGE" ? (
+
+            <img
+              src={fileUrl}
+              alt="chat"
+              className="max-w-[250px] rounded-xl"
+            />
+
+          ) : fileType === "VIDEO" ? (
+
+            <video
+              controls
+              className="max-w-[300px] rounded-xl"
+            >
+              <source
+                src={fileUrl}
+                type="video/mp4"
+              />
+            </video>
+
+          ) : fileType === "AUDIO" ? (
+
+            <audio controls>
+              <source src={fileUrl} />
+            </audio>
+
+          ) : fileType === "PDF" ? (
+
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="
+            block
+            p-3
+            rounded-xl
+            bg-red-50
+            border
+            border-red-200
+        "
+            >
+              📄 Open PDF
+            </a>
+
+          ) : (
+
+            <p className="text-sm">
+              {text}
+            </p>
+
+          )}
+        </div>
+
+        {/* Time */}
+        <span className="text-[10px] text-slate-400 mt-1 px-1">
+
+          {time}
+
+          {isWard && isRead ? (
+
+            <span className="ml-1 text-blue-500">
+              ✓✓
+            </span>
+
+          ) : isWard && isDelivered ? (
+
+            <span className="ml-1 text-emerald-500">
+              ✓
+            </span>
+
+          ) : null}
+
+        </span>
+
+
+
+        {/* Delete Button */}
+        {
+          isWard &&
+          !message.isDeleted && (
+
+            <button
+              onClick={() =>
+                onDelete(message.id)
+              }
+              className="
+        text-xs
+        text-red-500
+        mt-1
+      "
+            >
+              Delete
+            </button>
+
+          )
+        }
+      </div>
+    </div>
+  );
+};
+
+export default ComplaintChatMessage;

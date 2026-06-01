@@ -55,19 +55,16 @@ class NotificationConsumer(
 
     async def connect(self):
 
-        self.user = self.scope["user"]
+        self.user = self.scope.get("user")
 
-        print(
-            "CONNECTED USER:",
-            self.user
-        )
+        print("USER FROM SCOPE:", self.user)
+
+        if not self.user:
+            print("NO USER FOUND")
+            await self.close()
+            return
 
         if self.user.is_anonymous:
-
-            print(
-                "ANONYMOUS CLOSED"
-            )
-
             await self.close()
             return
 

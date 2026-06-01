@@ -19,19 +19,25 @@ def get_user(token):
 
     try:
 
+        print("TOKEN:", token)
+
         access_token = AccessToken(token)
+
+        print("PAYLOAD:", access_token.payload)
 
         user_id = access_token["user_id"]
 
+        print("USER ID:", user_id)
+
         user = User.objects.get(id=user_id)
+
+        print("FOUND USER:", user)
 
         return user
 
-    except (
-        TokenError,
-        User.DoesNotExist,
-        KeyError
-    ):
+    except Exception as e:
+
+        print("JWT ERROR:", str(e))
 
         return None
 
@@ -74,6 +80,48 @@ def get_user(token):
 
 
 
+# from urllib.parse import parse_qs
+
+# class JWTAuthMiddleware(BaseMiddleware):
+
+#     async def __call__(
+#         self,
+#         scope,
+#         receive,
+#         send
+#     ):
+
+#         query_string = parse_qs(
+#             scope["query_string"].decode()
+#         )
+
+#         token = query_string.get(
+#             "token",
+#             [None]
+#         )[0]
+
+#         if token:
+
+#             user = await get_user(
+#                 token
+#             )
+
+#             scope["user"] = user
+
+#         else:
+
+#             scope["user"] = None
+
+#         return await super().__call__(
+#             scope,
+#             receive,
+#             send
+#         )
+
+
+
+
+
 from urllib.parse import parse_qs
 
 class JWTAuthMiddleware(BaseMiddleware):
@@ -94,11 +142,11 @@ class JWTAuthMiddleware(BaseMiddleware):
             [None]
         )[0]
 
+        print("TOKEN:", token)
+
         if token:
 
-            user = await get_user(
-                token
-            )
+            user = await get_user(token)
 
             scope["user"] = user
 

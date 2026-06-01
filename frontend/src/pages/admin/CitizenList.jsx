@@ -333,7 +333,7 @@
 // export default CitizenList;
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect,useCallback } from "react";
 import { Users, Search, SlidersHorizontal, Ban, CheckCircle2, ChevronRight, X } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
 import Pagination from "@/components/admin/Pagination";

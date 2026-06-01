@@ -610,6 +610,18 @@ class SendMessageview(APIView):
                 context={"request": request}
             )
             
+            channel_layer = get_channel_layer()
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"complaint_chat_{complaint.id}",
+                {
+                    "type": "chat_message",
+                    "event_type": "message",
+                    "message_data": serializer.data
+                }
+            )
             
             if message.file_type == "IMAGE":
 
@@ -671,7 +683,14 @@ class ToggleChatStatusView(APIView):
                 
                 
             chat.is_closed = not chat.is_closed
+
+            print("BEFORE SAVE:", chat.is_closed)
+
             chat.save()
+
+            chat.refresh_from_db()
+
+            print("AFTER SAVE:", chat.is_closed)
             
             if chat.is_closed:
                 send_notification(
@@ -780,6 +799,30 @@ class ChatMessageListView(ListAPIView):
         except Exception as e:
             logger.error(f"ChatMessageList error :{str(e)}")
             return Message.objects.none()
+        
+        
+    def list(self, request, *args, **kwargs):
+
+        response = super().list(
+            request,
+            *args,
+            **kwargs
+        )
+
+        complaint_id = self.kwargs.get(
+            "complaint_id"
+        )
+
+        chat = Chat.objects.filter(
+            complaint_id=complaint_id,
+            chat_type="COMPLAINT"
+        ).first()
+
+        response.data["chat"] = {
+            "is_closed": chat.is_closed if chat else False
+        }
+
+        return response
     
     
     
@@ -849,7 +892,13 @@ class ChatInboxView(ListAPIView):
                         "messages",
                         queryset=Message.objects.select_related(
                             "sender"
-                        ).order_by("-created_at")
+                        ).only(
+                            "id",
+                            "message",
+                            "created_at",
+                            "sender__username"
+                        ).order_by("-created_at")[:1],
+                        to_attr="latest_message"
                     )
                 ).order_by("-created_at")
 

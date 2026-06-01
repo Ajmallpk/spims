@@ -191,6 +191,20 @@ export function AuthForm() {
         role: loginData.role
       })
 
+
+      console.log(response.data)
+
+
+      localStorage.setItem(
+        "access",
+        response.data.data.access
+      )
+
+      localStorage.setItem(
+        "refresh",
+        response.data.data.refresh
+      )
+
       // Save tokens
       localStorage.setItem("role", response.data.data.role)
       localStorage.setItem("status", response.data.data.status)

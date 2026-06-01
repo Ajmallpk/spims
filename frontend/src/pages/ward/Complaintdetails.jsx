@@ -10,6 +10,7 @@ import wardapi from "@/service/wardurls";
 import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
 import ComplaintTimeline from "@/components/ward/ComplaintTimeline";
+import { complaintchatapi } from "@/service/complaintchaturls";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
@@ -24,7 +25,7 @@ export default function ComplaintDetails() {
 
   const [showResolveModal, setShowResolveModal] = useState(false);
   const [showEscalateModal, setShowEscalateModal] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  // const [chatOpen, setChatOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
@@ -71,8 +72,27 @@ export default function ComplaintDetails() {
 
       fetchDetails(); // refresh UI
     } catch (err) {
-      
+
     }
+  };
+
+
+  const handleOpenChat = async () => {
+
+    try {
+
+      await complaintchatapi.startChat(id);
+
+      navigate(`/ward/complaint-chats/${id}`);
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error("Unable to open chat");
+
+    }
+
   };
 
   // Normalize data shape
@@ -165,9 +185,9 @@ export default function ComplaintDetails() {
           {!isLoading && <ComplaintTimeline complaintId={id} />}
 
           {/* Chat Panel */}
-          {chatOpen && (
+          {/* {chatOpen && (
             <ChatPanel complaintId={id} isChatClosed={isChatClosed} />
-          )}
+          )} */}
         </div>
 
         {/* Right sidebar (1 col) */}
@@ -182,11 +202,11 @@ export default function ComplaintDetails() {
           ) : (
             <ComplaintActionPanel
               status={status}
-              chatOpen={chatOpen}
+              // chatOpen={chatOpen}
               onResolve={() => setShowResolveModal(true)}
               onEscalate={() => setShowEscalateModal(true)}
               onStartWork={handleStartWork}
-              onToggleChat={() => setChatOpen((v) => !v)}
+              onToggleChat={handleOpenChat}
             />
           )}
 

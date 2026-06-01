@@ -92,26 +92,24 @@ class MessageSerializer(serializers.ModelSerializer):
 
         if reply.is_deleted:
 
-            reply_message="This message was deleted"
-
+            return {
+                "id": reply.id,
+                "sender": reply.sender.username,
+                "message": "This message was deleted",
+                "file_type": None,
+                "file_url": None,
+                "is_deleted": True,
+            }
+            
         return {
-
-            "id":reply.id,
-
-            "sender":
-            reply.sender.username,
-
-            "message":
-            reply_message,
-
-            "file_type":
-            reply.file_type,
-
-            "file_url":
-            self.get_file_url(reply),
-
+            "id": reply.id,
+            "sender": reply.sender.username,
+            "message": reply.message,
+            "file_type": reply.file_type,
+            "file_url": self.get_file_url(reply),
+            "is_deleted": False,
         }
-        
+                
         
     def get_display_message(self, obj):
 
@@ -163,6 +161,9 @@ class ChatListSerializer(serializers.ModelSerializer):
             "latest_message",
             []
         )
+        
+        print("CHAT ID:", obj.id)
+        print("LATEST MESSAGE:", getattr(obj, "latest_message", []))
 
         last_msg = (
             latest_messages[0]

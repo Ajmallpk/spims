@@ -166,20 +166,27 @@ export default function PanchayathLayout() {
     const connectSocket = () => {
 
       const token =
-
         localStorage.getItem(
           "access"
         )
 
-      if (!token)
+      console.log(
+        "PANCHAYATH TOKEN:",
+        token
+      )
+
+      if (!token) {
+
+        console.log(
+          "NO TOKEN FOUND"
+        )
+
         return
+      }
 
       socket =
-
         new WebSocket(
-
           `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
-
         )
 
       socket.onopen = () => {
@@ -190,21 +197,29 @@ export default function PanchayathLayout() {
 
       }
 
-      socket.onmessage = (event) => {
+      socket.onmessage = (
+        event
+      ) => {
 
         const data =
-
           JSON.parse(
             event.data
           )
+
+        console.log(
+          "PANCHAYATH NOTIFICATION:",
+          data
+        )
 
         const newNotification = {
 
           id: Date.now(),
 
-          title: data.title,
+          title:
+            data.title,
 
-          message: data.message,
+          message:
+            data.message,
 
           notification_type:
             data.notification_type,
@@ -224,7 +239,8 @@ export default function PanchayathLayout() {
 
             ...prev
 
-          ])
+          ]
+        )
 
         setUnreadCount(
           prev =>
@@ -234,6 +250,10 @@ export default function PanchayathLayout() {
       }
 
       socket.onclose = () => {
+
+        console.log(
+          "PANCHAYATH SOCKET CLOSED"
+        )
 
         setTimeout(
 
@@ -245,6 +265,17 @@ export default function PanchayathLayout() {
 
           3000
 
+        )
+
+      }
+
+      socket.onerror = (
+        error
+      ) => {
+
+        console.log(
+          "PANCHAYATH WS ERROR",
+          error
         )
 
       }

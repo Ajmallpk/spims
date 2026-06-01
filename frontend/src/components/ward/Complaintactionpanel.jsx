@@ -25,6 +25,15 @@ export default function ComplaintActionPanel({
       )}
 
       {/* 🔵 IN_PROGRESS */}
+
+      <button
+        onClick={onToggleChat}
+        className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-xl"
+      >
+        Open Complaint Chat
+      </button>
+
+
       {statusKey === "in_progress" && (
         <div className="space-y-2.5">
           <button
@@ -44,6 +53,15 @@ export default function ComplaintActionPanel({
       )}
 
       {/* 🔴 ESCALATED */}
+
+      <button
+        onClick={onToggleChat}
+        className="w-full mt-3 px-4 py-2.5 bg-blue-600 text-white rounded-xl"
+      >
+        Open Complaint Chat
+      </button>
+
+      
       {statusKey === "escalated" && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
           Complaint escalated to Panchayath. No further actions allowed.
