@@ -76,6 +76,9 @@ import EmailChangeConfirm from "./components/citizen/EmailChangeConfirm";
 import ForgotPassword from "@/pages/citizen/ForgotPassword"
 import VerifyResetOTP from "@/pages/citizen/VerifyResetOTP"
 import ResetPassword from "@/pages/citizen/ResetPassword"
+import CitizenComplaintChatList from "./pages/citizen/CitizenComplaintChatList";
+import CitizenComplaintChatPage from "./pages/citizen/CitizenComplaintChatPage";
+
 
 
 
@@ -149,7 +152,15 @@ export default function App() {
 
           {/* <Route path="notifications" element={<Notifications />} /> */}
 
-          <Route path="messages" element={<Messages />} />
+          <Route
+            path="messages"
+            element={<CitizenComplaintChatList />}
+          />
+
+          <Route
+            path="messages/:complaintId"
+            element={<CitizenComplaintChatPage />}
+          />
 
           {/* <Route path="insights" element={<Insights />} /> */}
 

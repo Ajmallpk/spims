@@ -121,6 +121,11 @@ function LoginForm() {
 
       console.log("LOGIN RESPONSE", response.data)
 
+      console.log(
+        "FULL LOGIN DATA",
+        response.data.data
+      )
+
       localStorage.setItem(
         "access",
         response.data.data.access
@@ -134,6 +139,12 @@ function LoginForm() {
       localStorage.setItem(
         "role",
         response.data.data.role
+      )
+
+
+      localStorage.setItem(
+        "user_id",
+        response.data.data.user_id
       )
 
       window.location.href = "/citizen/home";

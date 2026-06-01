@@ -88,7 +88,22 @@ const citizenapi = {
     return axiosInstance.post(
       "notification/notifications/read-all/"
     )
-  }
+  },
+
+
+  // COMPLAINTS
+
+  getComplaints: () => {
+    return axiosInstance.get(
+      "citizen/complaints/"
+    );
+  },
+
+  getComplaintDetail: (id) => {
+    return axiosInstance.get(
+      `citizen/complaints/${id}/`
+    );
+  },
 
 
 };

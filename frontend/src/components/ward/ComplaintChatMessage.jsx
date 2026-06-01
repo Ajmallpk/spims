@@ -1,6 +1,6 @@
 import React from "react";
 
-const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete }) => {
+const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete, currentRole = "ward" }) => {
   const {
     sender,
     message: text,
@@ -11,7 +11,10 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete }) => {
     fileUrl,
     isDeleted,
   } = message;
-  const isWard = sender === "ward";
+  const isOwnMessage =
+    currentRole === "ward"
+      ? sender === "ward"
+      : sender === "citizen";
 
 
   return (
@@ -27,21 +30,38 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete }) => {
         }
 
       }}
-      className={`flex ${isWard
+      className={`flex ${isOwnMessage
         ? "justify-end"
         : "justify-start"
         }`}
     >
-      <div className={`flex flex-col max-w-[78%] sm:max-w-[65%] ${isWard ? "items-end" : "items-start"}`}>
+      <div className={`flex flex-col max-w-[78%] sm:max-w-[65%] ${isOwnMessage ? "items-end" : "items-start"
+        }`}>
         {/* Sender label */}
         <span className="text-[10px] font-semibold text-slate-400 mb-1 px-1 uppercase tracking-wide">
-          {isWard ? "You (Ward)" : "Citizen"}
+
+          {
+            currentRole === "ward"
+
+              ? (
+                isOwnMessage
+                  ? "You (Ward)"
+                  : "Citizen"
+              )
+
+              : (
+                isOwnMessage
+                  ? "You"
+                  : "Ward Officer"
+              )
+          }
+
         </span>
 
         {/* Bubble */}
         <div
           onDoubleClick={() => onReply(message)}
-          className={`relative px-4 py-2.5 rounded-2xl shadow-sm ${isWard
+          className={`relative px-4 py-2.5 rounded-2xl shadow-sm ${isOwnMessage
             ? "bg-blue-600 text-white rounded-br-sm"
             : "bg-white text-slate-800 border border-slate-200 rounded-bl-sm"
             }`}
@@ -194,13 +214,13 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete }) => {
 
           {time}
 
-          {isWard && isRead ? (
+          {isOwnMessage && isRead ? (
 
             <span className="ml-1 text-blue-500">
               ✓✓
             </span>
 
-          ) : isWard && isDelivered ? (
+          ) : isOwnMessage && isDelivered ? (
 
             <span className="ml-1 text-emerald-500">
               ✓
@@ -214,7 +234,7 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete }) => {
 
         {/* Delete Button */}
         {
-          isWard &&
+          isOwnMessage &&
           !message.isDeleted && (
 
             <button

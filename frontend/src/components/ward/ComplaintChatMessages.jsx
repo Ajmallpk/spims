@@ -14,7 +14,7 @@ const EmptyChatState = () => (
   </div>
 );
 
-const ComplaintChatMessages = ({ messages, onReply, onDelete, messageRefs, loadMore, hasMore, loadingMore, }) => {
+const ComplaintChatMessages = ({ messages, onReply, onDelete, messageRefs, loadMore, hasMore, loadingMore,currentRole = "ward", }) => {
   const bottomRef = useRef(null);
   // const messageRefs = useRef({});
   const containerRef = useRef(null);
@@ -110,7 +110,7 @@ py-4
     >
       <div className="max-w-4xl mx-auto space-y-4">
         {messages.map((msg) => (
-          <ComplaintChatMessage key={msg.id} message={msg} onReply={onReply} onDelete={onDelete} messageRefs={messageRefs} />
+          <ComplaintChatMessage key={msg.id} message={msg} onReply={onReply} onDelete={onDelete} messageRefs={messageRefs} currentRole={currentRole} />
         ))}
         <div
           id="chat-bottom"

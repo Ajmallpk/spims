@@ -7,6 +7,7 @@ const ComplaintChatPageHeader = ({
   onViewComplaint,
   onCloseChat,
   onReopenChat,
+  showChatControls = true,
 }) => {
   return (
     <div className="flex-shrink-0 bg-white border-b border-slate-200 px-4 py-3 shadow-sm">
@@ -50,25 +51,35 @@ const ComplaintChatPageHeader = ({
             <FileText className="w-4 h-4" />
           </button>
 
-          {isClosed ? (
-            <button
-              onClick={onReopenChat}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-all duration-150 shadow-sm"
-            >
-              <LockOpen className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reopen Chat</span>
-              <span className="sm:hidden">Reopen</span>
-            </button>
-          ) : (
-            <button
-              onClick={onCloseChat}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-all duration-150 shadow-sm"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Close Chat</span>
-              <span className="sm:hidden">Close</span>
-            </button>
-          )}
+          {
+            showChatControls && (
+
+              isClosed ? (
+
+                <button
+                  onClick={onReopenChat}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-all duration-150 shadow-sm"
+                >
+                  <LockOpen className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reopen Chat</span>
+                  <span className="sm:hidden">Reopen</span>
+                </button>
+
+              ) : (
+
+                <button
+                  onClick={onCloseChat}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-all duration-150 shadow-sm"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Close Chat</span>
+                  <span className="sm:hidden">Close</span>
+                </button>
+
+              )
+
+            )
+          }
         </div>
       </div>
     </div>

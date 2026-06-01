@@ -24,17 +24,20 @@ const getAvatarColor = (name = "") => {
 };
 
 const ComplaintChatCard = ({ complaint, onClick }) => {
-  const { id, title, citizen, lastMessage, time, unreadCount, isClosed } = complaint;
-  const initials = getInitials(citizen);
-  const avatarColor = getAvatarColor(citizen);
+  const { id, title, citizen, authority, lastMessage, time, unreadCount, isClosed } = complaint;
+  const initials = getInitials(
+    authority || citizen
+  );
+  const avatarColor = getAvatarColor(
+    authority || citizen
+  );
   const hasUnread = unreadCount > 0 && !isClosed;
 
   return (
     <div
       onClick={() => onClick(id)}
-      className={`group relative flex items-start gap-4 bg-white border rounded-2xl px-4 py-4 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-blue-200 ${
-        hasUnread ? "border-blue-200 bg-blue-50/30" : "border-slate-200"
-      }`}
+      className={`group relative flex items-start gap-4 bg-white border rounded-2xl px-4 py-4 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:border-blue-200 ${hasUnread ? "border-blue-200 bg-blue-50/30" : "border-slate-200"
+        }`}
     >
       {/* Avatar */}
       <div
@@ -49,15 +52,16 @@ const ComplaintChatCard = ({ complaint, onClick }) => {
           <div className="min-w-0">
             {/* Complaint title */}
             <p
-              className={`text-sm font-semibold truncate ${
-                hasUnread ? "text-slate-900" : "text-slate-700"
-              }`}
+              className={`text-sm font-semibold truncate ${hasUnread ? "text-slate-900" : "text-slate-700"
+                }`}
             >
               {title}
             </p>
             {/* Citizen + ID */}
             <p className="text-xs text-slate-500 mt-0.5 truncate">
-              <span className="font-medium text-slate-600">{citizen}</span>
+              <span className="font-medium text-slate-600">
+                {authority || citizen}
+              </span>
               <span className="mx-1.5 text-slate-300">·</span>
               <span className="font-mono text-slate-400">#{id}</span>
             </p>
@@ -67,11 +71,10 @@ const ComplaintChatCard = ({ complaint, onClick }) => {
           <div className="flex-shrink-0 flex flex-col items-end gap-1.5">
             <span className="text-xs text-slate-400 whitespace-nowrap">{time}</span>
             <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide ${
-                isClosed
-                  ? "bg-red-100 text-red-600"
-                  : "bg-emerald-100 text-emerald-700"
-              }`}
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide ${isClosed
+                ? "bg-red-100 text-red-600"
+                : "bg-emerald-100 text-emerald-700"
+                }`}
             >
               {isClosed ? "CLOSED" : "OPEN"}
             </span>

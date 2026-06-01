@@ -76,6 +76,11 @@ const ComplaintChatPage = () => {
                 localStorage.getItem("user_id")
             );
 
+        console.log(
+            "WARD USER ID",
+            loggedInUserId
+        );
+
         const formattedMessages =
             results.reverse().map((msg) => ({
 
@@ -201,6 +206,12 @@ const ComplaintChatPage = () => {
 
             const loggedInUserId = Number(
                 localStorage.getItem("user_id")
+            );
+
+
+            console.log(
+                "WARD USER ID",
+                loggedInUserId
             );
 
             const formattedMessages =
@@ -371,6 +382,12 @@ const ComplaintChatPage = () => {
                     Number(
                         localStorage.getItem("user_id")
                     );
+
+
+                console.log(
+                    "WARD USER ID",
+                    loggedInUserId
+                );
 
                 // const msg = data.data;
 
