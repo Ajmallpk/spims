@@ -8,7 +8,7 @@ import ComplaintChatPageSkeleton from "@/components/ward/ComplaintChatPageSkelet
 import { useParams, useNavigate } from "react-router-dom";
 import { complaintchatapi } from "@/service/complaintchaturls";
 import wardapi from "@/service/wardurls";
-// import citizenapi from "@/service/citizenurls";
+import citizenapi from "@/service/citizenurls";
 
 
 
@@ -126,6 +126,9 @@ const CitizenComplaintChatPage = () => {
 
         fileUrl:
           msg.file_url,
+
+        voiceDuration:
+          msg.voice_duration,
 
         time:
           new Date(
@@ -263,6 +266,9 @@ const CitizenComplaintChatPage = () => {
           fileUrl:
             msg.file_url,
 
+          voiceDuration:
+            msg.voice_duration,
+
           time:
             new Date(
               msg.created_at
@@ -347,6 +353,10 @@ const CitizenComplaintChatPage = () => {
         res.data.data;
 
 
+
+      console.log("COMPLAINT DATA", complaintData);
+
+
       console.log(
         "COMPLAINT DATA",
         complaintData
@@ -355,7 +365,7 @@ const CitizenComplaintChatPage = () => {
       setComplaint({
         id: complaintData.id,
         title: complaintData.title,
-        citizen: complaintData.citizen?.full_name,
+        citizen: complaintData.ward_name,
       });
 
     } catch (error) {
@@ -470,6 +480,10 @@ const CitizenComplaintChatPage = () => {
 
           fileUrl:
             msg.file_url,
+
+
+          voiceDuration:
+            msg.voice_duration,
 
           time:
             new Date(
@@ -666,7 +680,8 @@ const CitizenComplaintChatPage = () => {
 
   const handleSend = async (
     text,
-    file
+    file,
+    voiceDuration
   ) => {
 
     try {
@@ -695,6 +710,15 @@ const CitizenComplaintChatPage = () => {
           "file",
           file
         );
+
+        if (voiceDuration) {
+
+          formData.append(
+            "voice_duration",
+            voiceDuration
+          );
+
+        }
 
       }
 

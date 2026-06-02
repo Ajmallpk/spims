@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete, currentRole = "ward" }) => {
   const {
@@ -16,6 +16,12 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete, current
       ? sender === "ward"
       : sender === "citizen";
 
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+
+  console.log("FILE TYPE =", fileType);
+  console.log("FULL MESSAGE =", message);
 
   return (
     <div
@@ -161,14 +167,28 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete, current
             <img
               src={fileUrl}
               alt="chat"
-              className="max-w-[250px] rounded-xl"
+              onClick={() =>
+                setPreviewOpen(true)
+              }
+              className="
+    max-w-[250px]
+    rounded-xl
+    cursor-pointer
+  "
             />
 
           ) : fileType === "VIDEO" ? (
 
             <video
               controls
-              className="max-w-[300px] rounded-xl"
+              onClick={() =>
+                setPreviewOpen(true)
+              }
+              className="
+    max-w-[300px]
+    rounded-xl
+    cursor-pointer
+  "
             >
               <source
                 src={fileUrl}
@@ -253,6 +273,72 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete, current
           )
         }
       </div>
+
+      {
+        previewOpen && (
+          <div
+            onClick={() =>
+              setPreviewOpen(false)
+            }
+            className="
+        fixed
+        inset-0
+        bg-black/90
+        z-[9999]
+        flex
+        items-center
+        justify-center
+        p-4
+      "
+          >
+
+            <button
+              onClick={() =>
+                setPreviewOpen(false)
+              }
+              className="
+          absolute
+          top-4
+          right-4
+          text-white
+          text-4xl
+        "
+            >
+              ×
+            </button>
+
+            {
+              fileType === "IMAGE" ? (
+
+                <img
+                  src={fileUrl}
+                  alt=""
+                  className="
+              max-w-full
+              max-h-full
+              object-contain
+            "
+                />
+
+              ) : fileType === "VIDEO" ? (
+
+                <video
+                  controls
+                  autoPlay
+                  className="
+              max-w-full
+              max-h-full
+            "
+                >
+                  <source src={fileUrl} />
+                </video>
+
+              ) : null
+            }
+
+          </div>
+        )
+      }
     </div>
   );
 };

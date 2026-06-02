@@ -9,12 +9,14 @@
 
 import { useState } from "react";
 import StatusBadge from "@/components/citizen/Statusbadge";
+import { useNavigate } from "react-router-dom";
 
 const PAGE_SIZE = 5;
 const FILTERS = ["ALL", "PENDING", "OPEN", "RESOLVED", "ESCALATED", "CLOSED"];
 
 const IssueCard = ({ issue }) => {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-5 space-y-3">
@@ -49,9 +51,8 @@ const IssueCard = ({ issue }) => {
 
       {/* Description */}
       <p
-        className={`text-sm text-gray-600 leading-relaxed ${
-          expanded ? "" : "line-clamp-2"
-        }`}
+        className={`text-sm text-gray-600 leading-relaxed ${expanded ? "" : "line-clamp-2"
+          }`}
       >
         {issue.description}
       </p>
@@ -90,11 +91,14 @@ const IssueCard = ({ issue }) => {
             </span>
           )}
         </div>
-        <button className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-medium px-3 py-1.5 rounded-full hover:bg-teal-50 transition-colors">
+        <button
+          onClick={() =>
+            navigate(
+              `/citizen/complaints/${issue.id}`
+            )
+          }
+        >
           View
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
         </button>
       </div>
     </div>
@@ -181,11 +185,10 @@ const IssueHistory = ({ issues = [], loading }) => {
           <button
             key={f}
             onClick={() => handleFilter(f)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              activeFilter === f
+            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${activeFilter === f
                 ? "bg-teal-500 text-white shadow-sm"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-            }`}
+              }`}
           >
             {f === "ALL" ? "All" : f.charAt(0) + f.slice(1).toLowerCase()}
           </button>
@@ -234,9 +237,8 @@ const IssueHistory = ({ issues = [], loading }) => {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`w-7 h-7 rounded-full text-xs font-semibold transition-colors ${
-                  page === p ? "bg-teal-500 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                }`}
+                className={`w-7 h-7 rounded-full text-xs font-semibold transition-colors ${page === p ? "bg-teal-500 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
               >
                 {p}
               </button>

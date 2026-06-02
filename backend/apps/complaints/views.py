@@ -453,6 +453,14 @@ class ComplaintResolutionCreateView(APIView):
 
             complaint.status = "RESOLVED"
             complaint.save()
+            
+            
+            ComplaintHistory.objects.create(
+                complaint=complaint,
+                action="RESOLVED",
+                performed_by=user,
+                note="Complaint resolved"
+            )
 
             Notification.objects.create(
                 user=complaint.citizen,
@@ -638,12 +646,12 @@ class UpdateComplaintStatusView(APIView):
                 notification_type="RESOLUTION"
             )
 
-            ComplaintHistory.objects.create(
-                complaint=complaint,
-                action="STATUS_UPDATED",
-                performed_by=request.user,
-                note=f"{old_status} → {complaint.status}"
-            )
+            # ComplaintHistory.objects.create(
+            #     complaint=complaint,
+            #     action="STATUS_UPDATED",
+            #     performed_by=request.user,
+            #     note=f"{old_status} → {complaint.status}"
+            # )
 
             logger.info(f"Complaint {complaint.id} status changed to {new_status} by {request.user.id}")
 

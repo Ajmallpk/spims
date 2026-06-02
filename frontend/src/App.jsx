@@ -78,7 +78,7 @@ import VerifyResetOTP from "@/pages/citizen/VerifyResetOTP"
 import ResetPassword from "@/pages/citizen/ResetPassword"
 import CitizenComplaintChatList from "./pages/citizen/CitizenComplaintChatList";
 import CitizenComplaintChatPage from "./pages/citizen/CitizenComplaintChatPage";
-
+import CitizenComplaintDetailPage from "./pages/citizen/CitizenComplaintDetailPage";
 
 
 
@@ -167,6 +167,12 @@ export default function App() {
           <Route path="profile" element={<CitizenProfile />} />
 
           <Route path="verification" element={<CitizenVerification />} />
+
+
+          <Route
+            path="/citizen/complaints/:complaintId"
+            element={<CitizenComplaintDetailPage />}
+          />
 
 
         </Route>

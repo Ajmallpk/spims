@@ -1026,6 +1026,15 @@ class EscalateComplaintView(APIView):
 
             serializer.save()
             
+            
+            
+            ComplaintHistory.objects.create(
+                complaint=complaint,
+                action="ESCALATED",
+                performed_by=user,
+                note="Complaint escalated to Panchayath"
+            )
+            
             send_notification(
                 user=complaint.citizen,
                 title="Complaint Escalated",

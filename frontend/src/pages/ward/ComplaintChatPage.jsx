@@ -106,6 +106,9 @@ const ComplaintChatPage = () => {
                 fileUrl:
                     msg.file_url,
 
+                voiceDuration:
+                    msg.voice_duration,
+
                 time:
                     new Date(
                         msg.created_at
@@ -239,6 +242,10 @@ const ComplaintChatPage = () => {
 
                     fileUrl:
                         msg.file_url,
+
+
+                    voiceDuration:
+                        msg.voice_duration,
 
                     time:
                         new Date(
@@ -405,7 +412,7 @@ const ComplaintChatPage = () => {
                 }
 
 
-
+                console.log("FULL MESSAGE =", msg);
 
                 const formattedMessage = {
 
@@ -431,6 +438,9 @@ const ComplaintChatPage = () => {
 
                     fileUrl:
                         msg.file_url,
+
+                    voiceDuration:
+                        msg.voice_duration,
 
                     time:
                         new Date(
@@ -667,7 +677,8 @@ const ComplaintChatPage = () => {
 
     const handleSend = async (
         text,
-        file
+        file,
+        voiceDuration
     ) => {
 
         try {
@@ -696,6 +707,15 @@ const ComplaintChatPage = () => {
                     "file",
                     file
                 );
+
+                if (voiceDuration) {
+
+                    formData.append(
+                        "voice_duration",
+                        voiceDuration
+                    );
+
+                }
 
             }
 

@@ -101,7 +101,14 @@ const citizenapi = {
 
   getComplaintDetail: (id) => {
     return axiosInstance.get(
-      `citizen/complaints/${id}/`
+      `complaints/${id}/`
+    );
+  },
+
+
+  getComplaintTimeline: (id) => {
+    return axiosInstance.get(
+      `complaints/complaint/${id}/timeline/`
     );
   },
 

@@ -560,20 +560,20 @@ class SendMessageview(APIView):
 
             if uploaded_file:
 
-                mime_type, _ = mimetypes.guess_type(
-                    uploaded_file.name
-                )
+                mime_type = uploaded_file.content_type
+
+                print("CONTENT TYPE =", mime_type)
 
                 if mime_type:
 
-                    if mime_type.startswith("image"):
+                    if mime_type.startswith("image/"):
                         file_type = "IMAGE"
 
-                    elif mime_type.startswith("video"):
-                        file_type = "VIDEO"
-
-                    elif mime_type.startswith("audio"):
+                    elif mime_type.startswith("audio/"):
                         file_type = "AUDIO"
+
+                    elif mime_type.startswith("video/"):
+                        file_type = "VIDEO"
 
                     elif mime_type == "application/pdf":
                         file_type = "PDF"
@@ -1253,21 +1253,20 @@ class SendAuthorityMessageView(APIView):
 
             if uploaded_file:
 
-                mime_type, _ = mimetypes.guess_type(
-                    uploaded_file.name
-                )
+                mime_type = uploaded_file.content_type
+
+                print("CONTENT TYPE =", mime_type)
 
                 if mime_type:
 
-                    if mime_type.startswith("image"):
+                    if mime_type.startswith("image/"):
                         file_type = "IMAGE"
 
-                    elif mime_type.startswith("video"):
-                        file_type = "VIDEO"
-                        
-                        
-                    elif mime_type.startswith("audio"):
+                    elif mime_type.startswith("audio/"):
                         file_type = "AUDIO"
+
+                    elif mime_type.startswith("video/"):
+                        file_type = "VIDEO"
 
                     elif mime_type == "application/pdf":
                         file_type = "PDF"

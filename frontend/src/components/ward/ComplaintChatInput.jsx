@@ -306,16 +306,37 @@ const ComplaintChatInput = ({ onSend, replyTo, clearReply }) => {
 
             <div
               className="
+        flex
+        items-center
+        gap-2
         max-w-4xl
         mx-auto
         mt-2
         text-xs
-        text-blue-600
       "
             >
-              Selected:
-              {" "}
-              {selectedFile.name}
+
+              <span className="text-blue-600">
+                Selected: {selectedFile.name}
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedFile(null)
+                }
+                className="
+          px-2
+          py-1
+          bg-red-100
+          text-red-600
+          rounded
+          hover:bg-red-200
+        "
+              >
+                Cancel
+              </button>
+
             </div>
 
           )
