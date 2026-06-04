@@ -10,6 +10,8 @@ import SuspendedModal from "@/components/common/SuspendedModal";
 import { useEffect } from "react";
 import { useSuspension } from "@/context/SuspensionContext";
 import axiosInstance from "@/api/axiosInstance";
+import WardProtectedRoute from "./routes/WardProtectedRoute";
+import PanchayathProtectedRoute from "./routes/PanchayathProtectedRoute";
 
 
 
@@ -189,9 +191,9 @@ export default function App() {
         <Route
           path="/panchayath"
           element={
-            <ProtectedRoute allowedRoles={["PANCHAYATH"]}>
+            <PanchayathProtectedRoute>
               <PanchayathLayout />
-            </ProtectedRoute>
+            </PanchayathProtectedRoute>
           }
         >
 
@@ -310,9 +312,9 @@ export default function App() {
         <Route
           path="/ward"
           element={
-            <ProtectedRoute allowedRoles={["WARD"]}>
+            <WardProtectedRoute>
               <WardLayout />
-            </ProtectedRoute>
+            </WardProtectedRoute>
           }
         >
           <Route index element={<WardDashboard />} />

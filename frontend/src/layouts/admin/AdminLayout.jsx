@@ -9,13 +9,7 @@ const AdminLayout = () => {
 
   const [unreadCount, setUnreadCount] = useState(0)
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("access");
-
-  //   if (!token) {
-  //     navigate("/admin/login", { replace: true });
-  //   }
-  // }, []);
+  
 
 
   useEffect(() => {

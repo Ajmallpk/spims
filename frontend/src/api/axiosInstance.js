@@ -15,20 +15,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config) => {
   NProgress.start();
 
-  // const token = localStorage.getItem("access");
 
-  // const isAuthRoute =
-  //   config.url.includes("auth/login") ||
-  //   config.url.includes("auth/signup") ||
-  //   config.url.includes("auth/verify-otp") ||
-  //   config.url.includes("auth/resend-otp") ||
-  //   config.url.includes("auth/forgot-password") ||
-  //   config.url.includes("auth/verify-reset-otp") ||
-  //   config.url.includes("auth/reset-password");
-
-  // if (token && !isAuthRoute) {
-  //   config.headers.Authorization = `Bearer ${token}`;
-  // }
 
   return config;
 });

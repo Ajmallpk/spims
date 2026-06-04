@@ -82,7 +82,7 @@ class AdminLoginView(TokenObtainPairView):
                 }
             }
             response.set_cookie(
-                key="access_token",
+                key="admin_access_token",
                 value=access,
                 httponly=True,
                 secure=True,  
@@ -90,7 +90,7 @@ class AdminLoginView(TokenObtainPairView):
             )
 
             response.set_cookie(
-                key="refresh_token",
+                key="admin_refresh_token",
                 value=refresh,
                 httponly=True,
                 secure=True,

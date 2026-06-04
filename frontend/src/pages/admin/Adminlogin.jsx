@@ -5,31 +5,7 @@ import LoginCard from "@/components/admin/Logincard";
 const AdminLogin = () => {
   const navigate = useNavigate();
 
-  // Redirect if already authenticated as ADMIN
-  // useEffect(() => {
-  //   const role = localStorage.getItem("role");
-
-  //   if (role === "ADMIN") {
-  //     navigate("/admin/dashboard", { replace: true });
-  //   }
-  // }, [navigate]);
-
-  //   useEffect(() => {
-  //   const role = localStorage.getItem("role");
-
-  //   // ✅ Only redirect if already logged in AND currently on login page
-  //   if (role === "ADMIN" && window.location.pathname === "/admin/login") {
-  //     navigate("/admin/dashboard", { replace: true });
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   const role = localStorage.getItem("role");
-
-  //   if (role === "ADMIN") {
-  //     navigate("/admin/dashboard");
-  //   }
-  // }, []);
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-gray-900 to-gray-800 flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Decorative background circles */}

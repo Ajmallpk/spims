@@ -1,17 +1,5 @@
 
-// import { Navigate } from "react-router-dom";
 
-// export default function AdminProtectedRoute({ children }) {
-
-//   const role = localStorage.getItem("role");
-
-//   // ✅ Direct check (no async, no delay, no loop)
-//   if (role !== "ADMIN") {
-//     return <Navigate to="/admin/login" replace />;
-//   }
-
-//   return children;
-// }
 
 
 

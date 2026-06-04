@@ -278,16 +278,20 @@ class EmailLoginView(TokenObtainPairView):
             )
 
            
+            role = serializer.validated_data.get("role")
+
+            cookie_prefix = role.lower()
+
             response.set_cookie(
-                key="access_token",
+                key=f"{cookie_prefix}_access_token",
                 value=access,
                 httponly=True,
-                secure=False,  
+                secure=False,
                 samesite="Lax"
             )
 
             response.set_cookie(
-                key="refresh_token",
+                key=f"{cookie_prefix}_refresh_token",
                 value=str(refresh),
                 httponly=True,
                 secure=False,

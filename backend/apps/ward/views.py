@@ -1336,4 +1336,12 @@ class WardReassignedComplaintDetailView(APIView):
         
         
 
-        
+class WardMeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "id": request.user.id,
+            "email": request.user.email,
+            "role": request.user.role,
+        })

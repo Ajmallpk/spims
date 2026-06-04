@@ -23,4 +23,5 @@ urlpatterns = [
     path("reassigned-complaints/", views.WardReassignedComplaintListView.as_view()),
     path("reassigned-complaints/<int:complaint_id>/", views.WardReassignedComplaintDetailView.as_view()),
     path("resolve-complaint/<int:complaint_id>/", views.WardResolveComplaintView.as_view()),
+    path("auth/me/", views.WardMeView.as_view()),
 ]
