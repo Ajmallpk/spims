@@ -24,9 +24,49 @@ export default function WardLayout() {
   const [showRequiredModal, setShowRequiredModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
 
-  const role = localStorage.getItem("role");
-  const isVerified = localStorage.getItem("is_verified") === "true";
-  const verificationSubmitted = localStorage.getItem("verification_submitted") === "true";
+  const [user, setUser] = useState(null);
+
+  const [isVerified, setIsVerified] =
+    useState(false);
+
+  const [verificationSubmitted, setVerificationSubmitted] =
+    useState(false);
+
+
+
+
+
+  useEffect(() => {
+
+    const loadUser = async () => {
+
+      try {
+
+        const res =
+          await wardapi.me();
+
+        setUser(res.data);
+
+        setIsVerified(
+          res.data.is_verified
+        );
+
+      }
+
+      catch (error) {
+
+        navigate(
+          "/login",
+          { replace: true }
+        );
+
+      }
+
+    };
+
+    loadUser();
+
+  }, []);
 
 
   useEffect(() => {
@@ -202,16 +242,25 @@ export default function WardLayout() {
   useEffect(() => {
     const syncVerification = async () => {
       try {
+
+
         const res = await axiosInstance.get("/ward/profile/");
-        const status = res.data.data.verification_status;
 
-        const isApproved = status === "APPROVED";
+        const status =
+          res.data.data.verification_status;
 
-        localStorage.setItem("is_verified", isApproved ? "true" : "false");
-        localStorage.setItem(
-          "verification_submitted",
-          status === "PENDING" ? "true" : "false"
-        );
+        const isApproved =
+          status === "APPROVED";
+
+        const submitted =
+          status === "PENDING" ||
+          status === "APPROVED";
+
+        setIsVerified(isApproved);
+
+        setVerificationSubmitted(submitted);
+
+
       } catch (err) {
         console.error("Verification sync failed:", err);
       }
@@ -221,7 +270,10 @@ export default function WardLayout() {
   }, []);
 
   useEffect(() => {
-    if (role !== "WARD") {
+    if (
+      user &&
+      user.role !== "WARD"
+    ) {
       navigate("/login", { replace: true });
       return;
     }
@@ -238,9 +290,21 @@ export default function WardLayout() {
       }
       navigate("/ward/profile", { replace: true });
     }
-  }, [location.pathname, role, isVerified, verificationSubmitted, navigate]);
+  }, [
+    location.pathname,
+    user?.role,
+    isVerified,
+    verificationSubmitted,
+    navigate
+  ]);
 
-  if (role !== "WARD") return null;
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  if (user.role !== "WARD") {
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans overflow-hidden">
