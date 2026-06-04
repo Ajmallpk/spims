@@ -106,6 +106,13 @@ const panchayathApi = {
 
   },
 
+
+  me: () => {
+    return axiosInstance.get(
+      "/panchayath/auth/me/"
+    )
+  },
+
 };
 
 

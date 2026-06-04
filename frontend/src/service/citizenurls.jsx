@@ -113,6 +113,11 @@ const citizenapi = {
   },
 
 
+  me: () => {
+    return axiosInstance.get("/auth/me/");
+  },
+
+
 };
 
 export default citizenapi;

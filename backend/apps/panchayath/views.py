@@ -1110,4 +1110,6 @@ class PanchayathMeView(APIView):
             "id": request.user.id,
             "email": request.user.email,
             "role": request.user.role,
+            "status": request.user.status,
+            "is_verified": request.user.is_verified,
         })

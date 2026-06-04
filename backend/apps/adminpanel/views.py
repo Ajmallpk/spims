@@ -1646,9 +1646,12 @@ class MeView(APIView):
 
     def get(self, request):
         return Response({
-            "role": "ADMIN" if request.user.is_superuser else "USER",
-            "username": request.user.username
-        })
+        "id": request.user.id,
+        "email": request.user.email,
+        "role": "ADMIN",
+        "status": "ACTIVE",
+        "is_verified": True
+    })
         
         
         

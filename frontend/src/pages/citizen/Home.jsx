@@ -111,6 +111,9 @@ const Home = () => {
   // };
 
 
+  
+
+
   const handleLogout = async () => {
     try {
       await citizenapi.logout();
@@ -178,6 +181,7 @@ const Home = () => {
       setLoading(false);
     }
   };
+  
 
   // Simulate fetch
   useEffect(() => {

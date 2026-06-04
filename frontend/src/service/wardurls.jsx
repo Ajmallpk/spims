@@ -140,6 +140,10 @@ const wardapi = {
         )
     },
 
+    me: () => {
+        return axiosInstance.get("/ward/auth/me/");
+    },
+
 };
 
 export default wardapi;

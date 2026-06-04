@@ -542,10 +542,12 @@ class MeView(APIView):
 
     def get(self, request):
         return Response({
-        "id": request.user.id,
-        "email": request.user.email,
-        "role": "ADMIN" if request.user.is_superuser else request.user.role,
-    })
+            "id": request.user.id,
+            "email": request.user.email,
+            "role": request.user.role,
+            "status": request.user.status,
+            "is_verified": request.user.is_verified,
+        })
     
     
     

@@ -23,10 +23,10 @@ export default function PanchayathLayout() {
   const location = useLocation();
 
   // ── Read auth state from localStorage ────────────────────────────────────
-  const role = localStorage.getItem("role");
-  // const [isVerified, setIsVerified] = useState(false);
-  const storedVerified = localStorage.getItem("is_verified") === "true"
-  const [isVerified, setIsVerified] = useState(storedVerified)
+  const [user, setUser] = useState(null)
+
+  const [isVerified, setIsVerified] =
+    useState(false)
   const [verificationSubmitted, setVerificationSubmitted] = useState(false);
 
   // ── Modal state ───────────────────────────────────────────────────────────
@@ -40,11 +40,54 @@ export default function PanchayathLayout() {
 
 
   // ── Role guard ────────────────────────────────────────────────────────────
+
+
   useEffect(() => {
-    if (!role || role !== "PANCHAYATH") {
+
+    const loadUser = async () => {
+
+      try {
+
+        const res =
+          await panchayathapi.me()
+
+        setUser(res.data)
+
+        setIsVerified(
+          res.data.is_verified
+        )
+
+      }
+
+      catch (error) {
+
+        navigate(
+          "/login",
+          { replace: true }
+        )
+
+      }
+
+    }
+
+    loadUser()
+
+  }, [])
+
+
+
+
+
+
+
+  useEffect(() => {
+    if (
+      user &&
+      user.role !== "PANCHAYATH"
+    ) {
       navigate("/login", { replace: true });
     }
-  }, [role, navigate]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const syncVerification = async () => {
@@ -60,22 +103,26 @@ export default function PanchayathLayout() {
         setVerificationSubmitted(submitted);
 
         // Update localStorage
-        localStorage.setItem("is_verified", String(verified));
-        localStorage.setItem("verification_submitted", String(submitted));
+
 
       } catch (err) {
         console.error("Verification sync failed:", err);
       }
     };
 
-    if (role === "PANCHAYATH") {
+    if (
+      user?.role === "PANCHAYATH"
+    ) {
       syncVerification();
     }
-  }, [role]);
+  }, [user]);
 
   // ── Auto-show modal on mount if not verified ──────────────────────────────
   useEffect(() => {
-    if (role === "PANCHAYATH" && isVerified === false) {
+    if (
+      user?.role === "PANCHAYATH" &&
+      isVerified === false
+    ) {
       if (verificationSubmitted) {
         setShowPendingModal(true);
       } else {
@@ -85,17 +132,17 @@ export default function PanchayathLayout() {
       setShowPendingModal(false);
       setShowRequiredModal(false);
     }
-  }, [isVerified, verificationSubmitted, role]);
+  }, [isVerified, verificationSubmitted, user]);
 
   useEffect(() => {
     if (
-      role === "PANCHAYATH" &&
+      user?.role === "PANCHAYATH" &&
       isVerified &&
       location.pathname === "/panchayath"
     ) {
       navigate("/panchayath/dashboard", { replace: true });
     }
-  }, [isVerified, role, location.pathname, navigate]);
+  }, [isVerified, user, location.pathname, navigate]);
   // useEffect(() => {
   //   if (role !== "PANCHAYATH") return;
 
@@ -108,7 +155,7 @@ export default function PanchayathLayout() {
 
   // }, [isVerified, role, navigate]);
 
-  if (!role || role !== "PANCHAYATH") return null;
+
 
 
 
@@ -291,6 +338,14 @@ export default function PanchayathLayout() {
     }
 
   }, [])
+
+
+
+  if (!user)
+    return null;
+
+  if (user.role !== "PANCHAYATH")
+    return null;
 
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
