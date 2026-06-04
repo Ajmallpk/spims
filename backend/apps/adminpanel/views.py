@@ -81,20 +81,34 @@ class AdminLoginView(TokenObtainPairView):
                     "status": "ACTIVE",
                 }
             }
+            
+            
+            # response.delete_cookie("ward_access_token")
+            # response.delete_cookie("ward_refresh_token")
+
+            # response.delete_cookie("panchayath_access_token")
+            # response.delete_cookie("panchayath_refresh_token")
+
+            # response.delete_cookie("citizen_access_token")
+            # response.delete_cookie("citizen_refresh_token")
+            
+            
             response.set_cookie(
                 key="admin_access_token",
                 value=access,
                 httponly=True,
-                secure=True,  
-                samesite="None"
+                secure=False,  
+                samesite="Lax"
             )
+            
+            print(response.cookies)
 
             response.set_cookie(
                 key="admin_refresh_token",
                 value=refresh,
                 httponly=True,
-                secure=True,
-                samesite="None"
+                secure=False,
+                samesite="Lax"
             )
 
             logger.info(f"Admin login success: {request.data.get('email')}")

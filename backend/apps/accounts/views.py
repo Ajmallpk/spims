@@ -244,7 +244,7 @@ class ResendOTPView(APIView):
             
         
     
-    
+#
 
 
 
@@ -281,6 +281,22 @@ class EmailLoginView(TokenObtainPairView):
             role = serializer.validated_data.get("role")
 
             cookie_prefix = role.lower()
+            
+            
+            # response.delete_cookie("admin_access_token")
+            # response.delete_cookie("admin_refresh_token")
+
+            # response.delete_cookie("ward_access_token")
+            # response.delete_cookie("ward_refresh_token")
+
+            # response.delete_cookie("panchayath_access_token")
+            # response.delete_cookie("panchayath_refresh_token")
+
+            # response.delete_cookie("citizen_access_token")
+            # response.delete_cookie("citizen_refresh_token")
+            ##
+            print("ROLE =", role)
+            print("COOKIE PREFIX =", cookie_prefix)
 
             response.set_cookie(
                 key=f"{cookie_prefix}_access_token",
@@ -289,6 +305,9 @@ class EmailLoginView(TokenObtainPairView):
                 secure=False,
                 samesite="Lax"
             )
+            
+            
+            print(response.cookies)
 
             response.set_cookie(
                 key=f"{cookie_prefix}_refresh_token",
@@ -297,6 +316,9 @@ class EmailLoginView(TokenObtainPairView):
                 secure=False,
                 samesite="Lax"
             )
+            
+            
+            
 
             logger.info(f"User logged in: {user.email}")
 

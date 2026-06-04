@@ -33,6 +33,10 @@ export default function WardLayout() {
     useState(false);
 
 
+  const WS_BASE_URL =
+    "ws://localhost:8000";
+
+
 
 
 
@@ -118,24 +122,15 @@ export default function WardLayout() {
 
     const connectSocket = () => {
 
+
       const token =
         localStorage.getItem(
           "access"
         )
 
-      if (!token)
-        return
-
-      console.log(
-        "WARD TOKEN:",
-        token
-      )
-
       socket =
         new WebSocket(
-
-          `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
-
+          `${WS_BASE_URL}/ws/notifications/?token=${token}`
         )
 
       socket.onopen = () => {

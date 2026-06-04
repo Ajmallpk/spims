@@ -9,7 +9,10 @@ const AdminLayout = () => {
 
   const [unreadCount, setUnreadCount] = useState(0)
 
-  
+  const WS_BASE_URL =
+    "ws://localhost:8000";
+
+
 
 
   useEffect(() => {
@@ -18,18 +21,13 @@ const AdminLayout = () => {
 
     const connectSocket = () => {
 
-      console.log("CONNECT SOCKET CALLED")
-
       const token =
-        localStorage.getItem("access")
-
-      console.log(
-        "TOKEN:",
-        token
-      )
+        localStorage.getItem(
+          "access"
+        )
 
       socket = new WebSocket(
-        `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
+        `${WS_BASE_URL}/ws/notifications/?token=${token}`
       )
 
       socket.onopen = () => {

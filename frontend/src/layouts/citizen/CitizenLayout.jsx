@@ -30,6 +30,36 @@ const CitizenLayout = () => {
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
 
+  const WS_BASE_URL =
+    "ws://localhost:8000";
+
+
+  console.log(
+    "CURRENT ROLE",
+    localStorage.getItem("role")
+  )
+
+  console.log(
+    "CURRENT USER",
+    localStorage.getItem("user_id")
+  )
+
+
+  useEffect(() => {
+
+    const role =
+      localStorage.getItem("role");
+
+    if (role !== "CITIZEN") {
+
+      console.log(
+        "WRONG ROLE INSIDE CITIZEN LAYOUT",
+        role
+      );
+
+    }
+
+  }, []);
 
 
 
@@ -40,17 +70,15 @@ const CitizenLayout = () => {
 
     const connectSocket = () => {
 
-      console.log(document.cookie)
+
+
       const token =
         localStorage.getItem(
           "access"
         )
 
-      if (!token)
-        return
-
       const WS_URL =
-        `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
+        `${WS_BASE_URL}/ws/notifications/?token=${token}`
 
       console.log(
         "CONNECTING TO:",

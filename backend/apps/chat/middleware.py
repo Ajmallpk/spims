@@ -1,82 +1,124 @@
-from urllib.parse import parse_qs
+# from urllib.parse import parse_qs
 
-from channels.middleware import BaseMiddleware
+# from channels.middleware import BaseMiddleware
 
-from channels.db import database_sync_to_async
+# from channels.db import database_sync_to_async
 
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 
-from rest_framework_simplejwt.tokens import AccessToken
+# from rest_framework_simplejwt.tokens import AccessToken
 
-from rest_framework_simplejwt.exceptions import TokenError
-
-
-User = get_user_model()
+# from rest_framework_simplejwt.exceptions import TokenError
 
 
-@database_sync_to_async
-def get_user(token):
-
-    try:
-
-        print("TOKEN:", token)
-
-        access_token = AccessToken(token)
-
-        print("PAYLOAD:", access_token.payload)
-
-        user_id = access_token["user_id"]
-
-        print("USER ID:", user_id)
-
-        user = User.objects.get(id=user_id)
-
-        print("FOUND USER:", user)
-
-        return user
-
-    except Exception as e:
-
-        print("JWT ERROR:", str(e))
-
-        return None
+# User = get_user_model()
 
 
-# class JWTAuthMiddleware(BaseMiddleware):
+# @database_sync_to_async
+# def get_user(token):
 
-#     async def __call__(self, scope, receive, send):
+#     try:
 
-#         headers = dict(scope["headers"])
+#         print("TOKEN:", token)
 
-#         cookies = headers.get(b"cookie", b"").decode()
+#         access_token = AccessToken(token)
 
-#         token = None
+#         print("PAYLOAD:", access_token.payload)
 
-#         for cookie in cookies.split(";"):
+#         user_id = access_token["user_id"]
 
-#             cookie = cookie.strip()
+#         print("USER ID:", user_id)
 
-#             if cookie.startswith("access_token="):
+#         user = User.objects.get(id=user_id)
 
-#                 token = cookie.split("=")[1]
+#         print("FOUND USER:", user)
 
-#                 break
+#         return user
 
-#         if token:
+#     except Exception as e:
 
-#             user = await get_user(token)
+#         print("JWT ERROR:", str(e))
 
-#             scope["user"] = user
+#         return None
 
-#         else:
 
-#             scope["user"] = None
+# # class JWTAuthMiddleware(BaseMiddleware):
 
-#         return await super().__call__(
-#             scope,
-#             receive,
-#             send
-#         )
+# #     async def __call__(self, scope, receive, send):
+
+# #         headers = dict(scope["headers"])
+
+# #         cookies = headers.get(b"cookie", b"").decode()
+
+# #         token = None
+
+# #         for cookie in cookies.split(";"):
+
+# #             cookie = cookie.strip()
+
+# #             if cookie.startswith("access_token="):
+
+# #                 token = cookie.split("=")[1]
+
+# #                 break
+
+# #         if token:
+
+# #             user = await get_user(token)
+
+# #             scope["user"] = user
+
+# #         else:
+
+# #             scope["user"] = None
+
+# #         return await super().__call__(
+# #             scope,
+# #             receive,
+# #             send
+# #         )
+
+
+
+# # from urllib.parse import parse_qs
+
+# # class JWTAuthMiddleware(BaseMiddleware):
+
+# #     async def __call__(
+# #         self,
+# #         scope,
+# #         receive,
+# #         send
+# #     ):
+
+# #         query_string = parse_qs(
+# #             scope["query_string"].decode()
+# #         )
+
+# #         token = query_string.get(
+# #             "token",
+# #             [None]
+# #         )[0]
+
+# #         if token:
+
+# #             user = await get_user(
+# #                 token
+# #             )
+
+# #             scope["user"] = user
+
+# #         else:
+
+# #             scope["user"] = None
+
+# #         return await super().__call__(
+# #             scope,
+# #             receive,
+# #             send
+# #         )
+
+
 
 
 
@@ -100,11 +142,11 @@ def get_user(token):
 #             [None]
 #         )[0]
 
+#         print("TOKEN:", token)
+
 #         if token:
 
-#             user = await get_user(
-#                 token
-#             )
+#             user = await get_user(token)
 
 #             scope["user"] = user
 
@@ -122,7 +164,43 @@ def get_user(token):
 
 
 
+
+from channels.middleware import BaseMiddleware
+from channels.db import database_sync_to_async
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import AccessToken
 from urllib.parse import parse_qs
+
+User = get_user_model()
+
+
+@database_sync_to_async
+def get_user(token):
+
+    try:
+
+        print("TOKEN =", token)
+
+        access_token = AccessToken(token)
+
+        print("PAYLOAD =", access_token.payload)
+
+        user_id = access_token["user_id"]
+
+        print("USER ID =", user_id)
+
+        user = User.objects.get(id=user_id)
+
+        print("FOUND USER =", user)
+
+        return user
+
+    except Exception as e:
+
+        print("JWT ERROR =", str(e))
+
+        return None
+
 
 class JWTAuthMiddleware(BaseMiddleware):
 
@@ -133,20 +211,35 @@ class JWTAuthMiddleware(BaseMiddleware):
         send
     ):
 
-        query_string = parse_qs(
-            scope["query_string"].decode()
+        query_string = (
+            scope["query_string"]
+            .decode()
         )
 
-        token = query_string.get(
+        print(
+            "QUERY STRING =",
+            query_string
+        )
+
+        params = parse_qs(
+            query_string
+        )
+
+        token = params.get(
             "token",
             [None]
         )[0]
 
-        print("TOKEN:", token)
+        print(
+            "TOKEN FROM URL =",
+            token
+        )
 
         if token:
 
-            user = await get_user(token)
+            user = await get_user(
+                token
+            )
 
             scope["user"] = user
 

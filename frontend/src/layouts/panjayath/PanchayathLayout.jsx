@@ -41,6 +41,9 @@ export default function PanchayathLayout() {
 
   // ── Role guard ────────────────────────────────────────────────────────────
 
+  const WS_BASE_URL =
+    "ws://localhost:8000";
+
 
   useEffect(() => {
 
@@ -212,29 +215,19 @@ export default function PanchayathLayout() {
 
     const connectSocket = () => {
 
+
+
       const token =
         localStorage.getItem(
           "access"
         )
 
-      console.log(
-        "PANCHAYATH TOKEN:",
-        token
-      )
-
-      if (!token) {
-
-        console.log(
-          "NO TOKEN FOUND"
-        )
-
-        return
-      }
-
       socket =
         new WebSocket(
-          `ws://127.0.0.1:8000/ws/notifications/?token=${token}`
+          `${WS_BASE_URL}/ws/notifications/?token=${token}`
         )
+
+
 
       socket.onopen = () => {
 
