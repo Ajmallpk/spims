@@ -66,6 +66,7 @@ const WardAuthorityChat = () => {
             } catch (error) {
 
                 console.error("Inbox fetch failed:", error);
+                console.log(error.response?.data)
 
             } finally {
 

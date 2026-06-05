@@ -59,28 +59,49 @@ class CookieJWTAuthentication(
 
         raw_token = None
 
-        if path.startswith("/api/admin/"):
+        # if path.startswith("/api/admin/"):
 
-            raw_token = request.COOKIES.get(
-                "admin_access_token"
-            )
+        #     raw_token = request.COOKIES.get(
+        #         "admin_access_token"
+        #     )
+
+        # elif path.startswith("/api/ward/"):
+
+        #     raw_token = request.COOKIES.get(
+        #         "ward_access_token"
+        #     )
+
+        # elif path.startswith("/api/panchayath/"):
+
+        #     raw_token = request.COOKIES.get(
+        #         "panchayath_access_token"
+        #     )
+
+        # else:
+
+        #     raw_token = request.COOKIES.get(
+        #         "citizen_access_token"
+        #     )
+        
+        
+        if path.startswith("/api/admin/"):
+            raw_token = request.COOKIES.get("admin_access_token")
 
         elif path.startswith("/api/ward/"):
-
-            raw_token = request.COOKIES.get(
-                "ward_access_token"
-            )
+            raw_token = request.COOKIES.get("ward_access_token")
 
         elif path.startswith("/api/panchayath/"):
+            raw_token = request.COOKIES.get("panchayath_access_token")
 
-            raw_token = request.COOKIES.get(
-                "panchayath_access_token"
-            )
+        elif path.startswith("/api/citizen/"):
+            raw_token = request.COOKIES.get("citizen_access_token")
 
         else:
-
-            raw_token = request.COOKIES.get(
-                "citizen_access_token"
+            raw_token = (
+                request.COOKIES.get("admin_access_token")
+                or request.COOKIES.get("ward_access_token")
+                or request.COOKIES.get("panchayath_access_token")
+                or request.COOKIES.get("citizen_access_token")
             )
 
         if not raw_token:

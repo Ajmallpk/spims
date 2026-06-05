@@ -15,7 +15,16 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config) => {
   NProgress.start();
 
+  const token = localStorage.getItem("access");
 
+  console.log("TOKEN =", token);
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+
+  console.log("HEADERS =", config.headers);
 
   return config;
 });

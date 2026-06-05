@@ -88,12 +88,16 @@ class MarkAllNotificationsReadView(APIView):
             )
             
             
-            
+                
 class UnreadNotificationCountView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self,request):
         try:
+            
+            
+            print("USER =", request.user)
+            print("AUTH =", request.auth)
             count = Notification.objects.filter(
                 user = request.user,
                 is_read = False
@@ -109,8 +113,8 @@ class UnreadNotificationCountView(APIView):
                 message= "Something went wrong",
                 status=500
             )
-            
-             
+                
+                
              
              
 class RegisterFCMDeviceView(APIView):

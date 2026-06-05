@@ -1050,6 +1050,9 @@ class StartAuthorityChatView(APIView):
 
         try:
             user = request.user
+            
+            print("USER =", request.user)
+            print("ROLE =", request.user.role)
 
             # receiver_id = request.data.get("receiver_id")
 

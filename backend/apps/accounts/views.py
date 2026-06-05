@@ -295,6 +295,8 @@ class EmailLoginView(TokenObtainPairView):
             # response.delete_cookie("citizen_access_token")
             # response.delete_cookie("citizen_refresh_token")
             ##
+            
+        
             print("ROLE =", role)
             print("COOKIE PREFIX =", cookie_prefix)
 

@@ -92,7 +92,6 @@ class AdminLoginView(TokenObtainPairView):
             # response.delete_cookie("citizen_access_token")
             # response.delete_cookie("citizen_refresh_token")
             
-            
             response.set_cookie(
                 key="admin_access_token",
                 value=access,
