@@ -40,6 +40,11 @@ const ComplaintChatPage = () => {
 
 
 
+    const WS_BASE_URL =
+        "ws://localhost:8000";
+
+
+
 
     const loadMore = async () => {
 
@@ -187,6 +192,9 @@ const ComplaintChatPage = () => {
 
             setIsLoading(true);
 
+
+
+
             const res =
                 await complaintchatapi.getMessages(
                     complaintId,
@@ -216,6 +224,19 @@ const ComplaintChatPage = () => {
                 "WARD USER ID",
                 loggedInUserId
             );
+
+
+            results.forEach((msg) => {
+
+                console.log(
+                    "LOAD MESSAGE =>",
+                    "LOCAL USER =", loggedInUserId,
+                    typeof loggedInUserId,
+                    "MSG SENDER =", msg.sender,
+                    typeof msg.sender
+                );
+
+            });
 
             const formattedMessages =
                 results.reverse().map((msg) => ({
@@ -353,17 +374,16 @@ const ComplaintChatPage = () => {
 
     const connectWebSocket = () => {
 
-        const token =
-            localStorage.getItem("access");
 
-        if (!token) {
-            return;
-        }
 
         socketRef.current =
+            // new WebSocket(
+            //     `ws://127.0.0.1:8000/ws/chat/complaint/${complaintId}/?role=ward`
+            // );
+
             new WebSocket(
-                `ws://127.0.0.1:8000/ws/chat/complaint/${complaintId}/?token=${token}`
-            );
+                `${WS_BASE_URL}/ws/chat/complaint/${complaintId}/?role=ward`
+            )
 
         socketRef.current.onopen = () => {
 
@@ -389,6 +409,15 @@ const ComplaintChatPage = () => {
                     Number(
                         localStorage.getItem("user_id")
                     );
+
+
+                console.log(
+                    "WS MESSAGE CHECK =>",
+                    "LOCAL USER =", loggedInUserId,
+                    typeof loggedInUserId,
+                    "MSG SENDER =", msg.sender,
+                    typeof msg.sender
+                );
 
 
                 console.log(

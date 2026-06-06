@@ -15,16 +15,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config) => {
   NProgress.start();
 
-  const token = localStorage.getItem("access");
+  const role =
+    sessionStorage.getItem("role");
 
-  console.log("TOKEN =", token);
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (role) {
+    config.headers["X-Role"] = role;
   }
-
-
-  console.log("HEADERS =", config.headers);
 
   return config;
 });
@@ -35,6 +31,10 @@ axiosInstance.interceptors.request.use((config) => {
 //     return response;
 //   },
 axiosInstance.interceptors.response.use(
+
+
+
+
 
   (response) => {
 

@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/api/axiosInstance";
+import wardAxios from "@/api/wardAxios";
 
 export default function WardProtectedRoute({ children }) {
 
@@ -8,7 +9,7 @@ export default function WardProtectedRoute({ children }) {
 
   useEffect(() => {
 
-    axiosInstance.get("/ward/auth/me/")
+    wardAxios.get("/ward/auth/me/")
       .then((res) => {
 
         if (res.data.role === "WARD") {

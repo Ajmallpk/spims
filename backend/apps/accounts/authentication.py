@@ -52,8 +52,7 @@ class CookieJWTAuthentication(
         request
     ):
         
-        print("PATH =", request.path)
-        print("COOKIES =", request.COOKIES)
+        
 
         path = request.path
 
@@ -97,12 +96,33 @@ class CookieJWTAuthentication(
             raw_token = request.COOKIES.get("citizen_access_token")
 
         else:
-            raw_token = (
-                request.COOKIES.get("admin_access_token")
-                or request.COOKIES.get("ward_access_token")
-                or request.COOKIES.get("panchayath_access_token")
-                or request.COOKIES.get("citizen_access_token")
-            )
+
+            role = request.headers.get("X-Role")
+
+            
+
+            if role == "admin":
+                raw_token = request.COOKIES.get(
+                    "admin_access_token"
+                )
+
+            elif role == "ward":
+                raw_token = request.COOKIES.get(
+                    "ward_access_token"
+                )
+
+            elif role == "panchayath":
+                raw_token = request.COOKIES.get(
+                    "panchayath_access_token"
+                )
+
+            elif role == "citizen":
+                raw_token = request.COOKIES.get(
+                    "citizen_access_token"
+                )
+
+            else:
+                raw_token = None
 
         if not raw_token:
             return None
@@ -122,6 +142,6 @@ class CookieJWTAuthentication(
                 validated_token
             )
 
-        except Exception:
-
+        except Exception as e:
+            print("AUTH ERROR =", e)
             return None

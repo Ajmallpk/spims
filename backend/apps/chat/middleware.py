@@ -170,6 +170,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from urllib.parse import parse_qs
+from django.contrib.auth.models import AnonymousUser
 
 User = get_user_model()
 
@@ -179,19 +180,19 @@ def get_user(token):
 
     try:
 
-        print("TOKEN =", token)
+        
 
         access_token = AccessToken(token)
 
-        print("PAYLOAD =", access_token.payload)
+        
 
         user_id = access_token["user_id"]
 
-        print("USER ID =", user_id)
+        
 
         user = User.objects.get(id=user_id)
 
-        print("FOUND USER =", user)
+        
 
         return user
 
@@ -211,41 +212,92 @@ class JWTAuthMiddleware(BaseMiddleware):
         send
     ):
 
-        query_string = (
-            scope["query_string"]
-            .decode()
+        headers = dict(
+            scope["headers"]
         )
 
-        print(
-            "QUERY STRING =",
-            query_string
+        cookie_header = headers.get(
+            b"cookie",
+            b""
+        ).decode()
+        
+        print("COOKIE HEADER =", cookie_header)
+
+        
+
+        cookies = {}
+
+        for cookie in cookie_header.split(";"):
+
+            if "=" in cookie:
+
+                key, value = (
+                    cookie.strip().split(
+                        "=",
+                        1
+                    )
+                )
+
+                cookies[key] = value
+
+        
+
+        query_params = parse_qs(
+            scope["query_string"].decode()
         )
 
-        params = parse_qs(
-            query_string
-        )
-
-        token = params.get(
-            "token",
+        role = query_params.get(
+            "role",
             [None]
         )[0]
+        
+        
 
-        print(
-            "TOKEN FROM URL =",
-            token
-        )
+        if role == "admin":
 
-        if token:
-
-            user = await get_user(
-                token
+            token = cookies.get(
+                "admin_access_token"
             )
 
-            scope["user"] = user
+        elif role == "ward":
+
+            token = cookies.get(
+                "ward_access_token"
+            )
+
+        elif role == "panchayath":
+
+            token = cookies.get(
+                "panchayath_access_token"
+            )
+
+        elif role == "citizen":
+
+            token = cookies.get(
+                "citizen_access_token"
+            )
 
         else:
 
-            scope["user"] = None
+            token = None
+            
+        
+        print("ROLE =", role)
+        print("TOKEN =", token)
+
+        if token:
+
+            user = await get_user(token)
+
+            scope["user"] = (
+                user
+                if user
+                else AnonymousUser()
+            )
+
+        else:
+
+            scope["user"] = AnonymousUser()
 
         return await super().__call__(
             scope,

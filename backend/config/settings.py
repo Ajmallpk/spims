@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
-
+from corsheaders.defaults import default_headers
 
 load_dotenv()
 
@@ -131,8 +131,8 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",   
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-role",
 ]
 
 ROOT_URLCONF = 'config.urls'

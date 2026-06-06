@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/api/axiosInstance";
 import { useSuspension } from "@/context/SuspensionContext";
+import citizenAxios from "@/api/citizenAxios";
 
 export default function CitizenProtectedRoute({ children }) {
 
@@ -11,7 +12,7 @@ export default function CitizenProtectedRoute({ children }) {
 
   useEffect(() => {
 
-    axiosInstance
+    citizenAxios
       .get("auth/me/")
       .then((res) => {
 

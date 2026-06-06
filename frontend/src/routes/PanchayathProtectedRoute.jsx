@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/api/axiosInstance";
+import panchayathAxios from "@/api/panchayathAxios";
 
 export default function PanchayathProtectedRoute({ children }) {
 
@@ -8,7 +9,7 @@ export default function PanchayathProtectedRoute({ children }) {
 
   useEffect(() => {
 
-    axiosInstance.get("/panchayath/auth/me/")
+    panchayathAxios.get("/panchayath/auth/me/")
       .then((res) => {
 
         if (res.data.role === "PANCHAYATH") {

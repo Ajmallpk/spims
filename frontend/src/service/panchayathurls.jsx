@@ -1,17 +1,18 @@
 
-import axiosInstance from "@/api/axiosInstance";
+import panchayathAxios from "@/api/panchayathAxios";
+
 
 const panchayathApi = {
 
-  dashboard: () => { return axiosInstance.get("/panchayath/dashboard/"); },
-  profile: () => { return axiosInstance.get("/panchayath/profile/"); },
-  verificationStatus: () => { return axiosInstance.get("/panchayath/verification-status/"); },
-  wardVerifications: () => { return axiosInstance.get("/panchayath/ward-verifications/"); },
-  submitVerification: (formData) => { return axiosInstance.post("/panchayath/submit-verification/", formData, { headers: { "Content-Type": "multipart/form-data", }, }); },
-  approveWard: (id) => { return axiosInstance.post(`/panchayath/approve-ward/${id}/`); },
-  rejectWard: (id, reason) => { return axiosInstance.post(`/panchayath/reject-ward/${id}/`, { reason: reason }) },
-  listWard: (params) => axiosInstance.get("/panchayath/wards/", { params }),
-  wardDetail: (id) => { return axiosInstance.get(`/panchayath/ward/${id}/`) },
+  dashboard: () => { return panchayathAxios.get("/panchayath/dashboard/"); },
+  profile: () => { return panchayathAxios.get("/panchayath/profile/"); },
+  verificationStatus: () => { return panchayathAxios.get("/panchayath/verification-status/"); },
+  wardVerifications: () => { return panchayathAxios.get("/panchayath/ward-verifications/"); },
+  submitVerification: (formData) => { return panchayathAxios.post("/panchayath/submit-verification/", formData, { headers: { "Content-Type": "multipart/form-data", }, }); },
+  approveWard: (id) => { return panchayathAxios.post(`/panchayath/approve-ward/${id}/`); },
+  rejectWard: (id, reason) => { return panchayathAxios.post(`/panchayath/reject-ward/${id}/`, { reason: reason }) },
+  listWard: (params) => panchayathAxios.get("/panchayath/wards/", { params }),
+  wardDetail: (id) => { return panchayathAxios.get(`/panchayath/ward/${id}/`) },
   handleAuthError: (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem("access");
@@ -22,34 +23,34 @@ const panchayathApi = {
   },
 
   changePassword: (data) => {
-    return axiosInstance.post("/panchayath/change-password/", data)
+    return panchayathAxios.post("/panchayath/change-password/", data)
   },
 
   requestEmailChange: (data) => {
-    return axiosInstance.post("/panchayath/request-email-change/", data)
+    return panchayathAxios.post("/panchayath/request-email-change/", data)
   },
 
   verifyEmailChange: (token) => {
-    return axiosInstance.post(`/panchayath/confirm-email-change/${token}/`)
+    return panchayathAxios.post(`/panchayath/confirm-email-change/${token}/`)
   },
 
 
   getEscalatedComplaints: (params) => {
-    return axiosInstance.get("/panchayath/complaints/", { params });
+    return panchayathAxios.get("/panchayath/complaints/", { params });
   },
 
   getComplaintDetail: (id) => {
-    return axiosInstance.get(`/panchayath/complaints/${id}/`)
+    return panchayathAxios.get(`/panchayath/complaints/${id}/`)
   },
 
   startWork: (id) =>
-    axiosInstance.post(`/panchayath/complaints/${id}/`, {
+    panchayathAxios.post(`/panchayath/complaints/${id}/`, {
       action: "START_WORK"
     }),
 
 
   resolveComplaint: (id, formData) => {
-    return axiosInstance.post(
+    return panchayathAxios.post(
       `/panchayath/complaints/${id}/resolve/`,
       formData,
       {
@@ -59,7 +60,7 @@ const panchayathApi = {
   },
 
   reassignComplaint: (id, data) => {
-    return axiosInstance.post(
+    return panchayathAxios.post(
       `/panchayath/complaints/${id}/reassign/`,
       data
     );
@@ -68,7 +69,7 @@ const panchayathApi = {
 
   getNotifications: (page = 1) => {
 
-    return axiosInstance.get(
+    return panchayathAxios.get(
 
       `/notification/notifications/?page=${page}`
 
@@ -78,7 +79,7 @@ const panchayathApi = {
 
   getUnreadCount: () => {
 
-    return axiosInstance.get(
+    return panchayathAxios.get(
 
       "/notification/notifications/unread-count/"
 
@@ -88,7 +89,7 @@ const panchayathApi = {
 
   markNotificationRead: (id) => {
 
-    return axiosInstance.post(
+    return panchayathAxios.post(
 
       `/notification/notifications/read/${id}/`
 
@@ -98,7 +99,7 @@ const panchayathApi = {
 
   markAllNotificationsRead: () => {
 
-    return axiosInstance.post(
+    return panchayathAxios.post(
 
       "/notification/notifications/read-all/"
 
@@ -108,7 +109,7 @@ const panchayathApi = {
 
 
   me: () => {
-    return axiosInstance.get(
+    return panchayathAxios.get(
       "/panchayath/auth/me/"
     )
   },

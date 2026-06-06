@@ -41,6 +41,11 @@ const CitizenComplaintChatPage = () => {
 
 
 
+  const WS_BASE_URL =
+    "ws://localhost:8000";
+
+
+
 
   const loadMore = async () => {
 
@@ -240,6 +245,19 @@ const CitizenComplaintChatPage = () => {
         loggedInUserId
       );
 
+
+      results.forEach((msg) => {
+
+        console.log(
+          "LOAD MESSAGE =>",
+          "LOCAL USER =", loggedInUserId,
+          typeof loggedInUserId,
+          "MSG SENDER =", msg.sender,
+          typeof msg.sender
+        );
+
+      });
+
       const formattedMessages =
         results.reverse().map((msg) => ({
 
@@ -379,17 +397,17 @@ const CitizenComplaintChatPage = () => {
 
   const connectWebSocket = () => {
 
-    const token =
-      localStorage.getItem("access");
 
-    if (!token) {
-      return;
-    }
+
 
     socketRef.current =
+      // new WebSocket(
+      //   `ws://127.0.0.1:8000/ws/chat/complaint/${complaintId}/?role=citizen`
+      // );
+
       new WebSocket(
-        `ws://127.0.0.1:8000/ws/chat/complaint/${complaintId}/?token=${token}`
-      );
+        `${WS_BASE_URL}/ws/chat/complaint/${complaintId}/?role=citizen`
+      )
 
     socketRef.current.onopen = () => {
 
@@ -415,6 +433,15 @@ const CitizenComplaintChatPage = () => {
           Number(
             localStorage.getItem("user_id")
           );
+
+
+        console.log(
+          "WS MESSAGE CHECK =>",
+          "LOCAL USER =", loggedInUserId,
+          typeof loggedInUserId,
+          "MSG SENDER =", msg.sender,
+          typeof msg.sender
+        );
 
 
         console.log(

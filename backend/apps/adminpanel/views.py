@@ -100,7 +100,7 @@ class AdminLoginView(TokenObtainPairView):
                 samesite="Lax"
             )
             
-            print(response.cookies)
+            
 
             response.set_cookie(
                 key="admin_refresh_token",

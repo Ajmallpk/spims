@@ -297,8 +297,7 @@ class EmailLoginView(TokenObtainPairView):
             ##
             
         
-            print("ROLE =", role)
-            print("COOKIE PREFIX =", cookie_prefix)
+            
 
             response.set_cookie(
                 key=f"{cookie_prefix}_access_token",
@@ -309,7 +308,7 @@ class EmailLoginView(TokenObtainPairView):
             )
             
             
-            print(response.cookies)
+            
 
             response.set_cookie(
                 key=f"{cookie_prefix}_refresh_token",

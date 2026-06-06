@@ -72,13 +72,10 @@ const CitizenLayout = () => {
 
 
 
-      const token =
-        localStorage.getItem(
-          "access"
-        )
+
 
       const WS_URL =
-        `${WS_BASE_URL}/ws/notifications/?token=${token}`
+        `${WS_BASE_URL}/ws/notifications/?role=citizen`
 
       console.log(
         "CONNECTING TO:",

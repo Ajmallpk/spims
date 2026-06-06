@@ -63,17 +63,14 @@ const LoginForm = () => {
       }
 
       // Store tokens and session data
-      localStorage.setItem(
-        "access",
-        data.data.access
-      )
 
-      localStorage.setItem(
-        "refresh",
-        data.data.refresh
-      )
       localStorage.setItem("role", data.data.role);
       localStorage.setItem("status", data.data.status);
+
+      sessionStorage.setItem(
+        "role",
+        "admin"
+      );
 
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {

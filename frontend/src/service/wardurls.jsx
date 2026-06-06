@@ -1,15 +1,15 @@
-// import axiosInstance from "@/api/axiosInstance";
+// import wardAxios from "@/api/wardAxios";
 
 // const wardapi = {
-//   profile: () => axiosInstance.get("/ward/profile/"),
-//   verificationStatus: () => {return axiosInstance.get("/ward/verification-status/")},
-//   submitVerification: (formData) => {return axiosInstance.post("/ward/submit-verification/", formData, {headers: { "Content-Type": "multipart/form-data" },})},
-//   dashboard: () => {return axiosInstance.get("/ward/dashboard/")},
-//   citizenVerificationRequests: () =>{return axiosInstance.get("/ward/citizen-verifications/")},
-//   approveCitizen: (id) =>{return axiosInstance.post(`/ward/approve-citizen/${id}/`)},
-//   rejectCitizen: (id, reason) =>{return axiosInstance.post(`/ward/reject-citzen/${id}`, { reason })},
-//   citizens: (params) =>{return axiosInstance.get("/ward/citizens/", { params })},
-//   citizenDetails: (id) =>{return axiosInstance.get(`/ward/citizen/${id}/details/`)},
+//   profile: () => wardAxios.get("/ward/profile/"),
+//   verificationStatus: () => {return wardAxios.get("/ward/verification-status/")},
+//   submitVerification: (formData) => {return wardAxios.post("/ward/submit-verification/", formData, {headers: { "Content-Type": "multipart/form-data" },})},
+//   dashboard: () => {return wardAxios.get("/ward/dashboard/")},
+//   citizenVerificationRequests: () =>{return wardAxios.get("/ward/citizen-verifications/")},
+//   approveCitizen: (id) =>{return wardAxios.post(`/ward/approve-citizen/${id}/`)},
+//   rejectCitizen: (id, reason) =>{return wardAxios.post(`/ward/reject-citzen/${id}`, { reason })},
+//   citizens: (params) =>{return wardAxios.get("/ward/citizens/", { params })},
+//   citizenDetails: (id) =>{return wardAxios.get(`/ward/citizen/${id}/details/`)},
 
 // };
 
@@ -18,17 +18,18 @@
 
 
 
-import axiosInstance from "@/api/axiosInstance";
-import axios from "axios";
+
+
+import wardAxios from "@/api/wardAxios";
 
 const wardapi = {
-    dashboard: () => axiosInstance.get("/ward/dashboard/"),
+    dashboard: () => wardAxios.get("/ward/dashboard/"),
 
     recentVerifications: () =>
-        axiosInstance.get("/ward/recent-citizen-verifications/"),
+        wardAxios.get("/ward/recent-citizen-verifications/"),
 
     getCitizens: (page, search) =>
-        axiosInstance.get("/ward/citizens/", {
+        wardAxios.get("/ward/citizens/", {
             params: {
                 page,
                 ...(search ? { search } : {}),
@@ -36,16 +37,16 @@ const wardapi = {
         }),
 
     getCitizenDetails: (id) =>
-        axiosInstance.get(`/ward/citizen/${id}/full-details/`),
+        wardAxios.get(`/ward/citizen/${id}/full-details/`),
 
     approveCitizen: (id) =>
-        axiosInstance.post(`/ward/approve-citizen/${id}/`),
+        wardAxios.post(`/ward/approve-citizen/${id}/`),
 
     rejectCitizen: (id, reason) =>
-        axiosInstance.post(`/ward/reject-citizen/${id}/`, { reason }),
+        wardAxios.post(`/ward/reject-citizen/${id}/`, { reason }),
 
     submitWardVerification: (data) => {
-        return axiosInstance.post(
+        return wardAxios.post(
             "/ward/submit-verification/",
             data,
             {
@@ -56,38 +57,38 @@ const wardapi = {
         );
     },
 
-    profile: () => axiosInstance.get("/ward/profile/"),
-    getPanchayathDropdown: () => { return axiosInstance.get("ward/panchayath-dropdown/"); },
-    verificationStatus: () => axiosInstance.get("/ward/verification-status/"),
-    getverificationList: () => axiosInstance.get("/ward/citizen-verifications/"),
+    profile: () => wardAxios.get("/ward/profile/"),
+    getPanchayathDropdown: () => { return wardAxios.get("ward/panchayath-dropdown/"); },
+    verificationStatus: () => wardAxios.get("/ward/verification-status/"),
+    getverificationList: () => wardAxios.get("/ward/citizen-verifications/"),
     changePassword: (data) => {
-        return axiosInstance.post("/ward/change-password/", data);
+        return wardAxios.post("/ward/change-password/", data);
     },
 
     changeEmail: (data) => {
-        return axiosInstance.post("/ward/change-email/", data);
+        return wardAxios.post("/ward/change-email/", data);
     },
 
     verifyEmailChange: (token) => {
-        return axiosInstance.get(`/ward/change-email/verify/${token}/`);
+        return wardAxios.get(`/ward/change-email/verify/${token}/`);
     },
     verifyEmailChange: (token) => {
         return axios.get(`http://127.0.0.1:8000/api/ward/change-email/verify/${token}/`);
     },
     // getComplaintDetail: (id) => {
-    //     return axiosInstance.get(`/complaints/${id}/`);
+    //     return wardAxios.get(`/complaints/${id}/`);
     // },
 
     getComplaintDetail: (id) => {
-        return axiosInstance.get(`/ward/complaint/${id}/details/`);
+        return wardAxios.get(`/ward/complaint/${id}/details/`);
     },
 
     getComplaints: (params) => {
-        return axiosInstance.get("/ward/complaints/", { params });
+        return wardAxios.get("/ward/complaints/", { params });
     },
 
     escalateComplaint: (complaintId, data) => {
-        return axiosInstance.post(
+        return wardAxios.post(
             `/ward/complaint/${complaintId}/escalate/`,
             data
         );
@@ -96,15 +97,15 @@ const wardapi = {
 
 
     getReassignedComplaints: (params) => {
-        return axiosInstance.get("/ward/reassigned-complaints/", { params });
+        return wardAxios.get("/ward/reassigned-complaints/", { params });
     },
 
     getReassignedComplaintDetail: (id) => {
-        return axiosInstance.get(`/ward/reassigned-complaints/${id}/`);
+        return wardAxios.get(`/ward/reassigned-complaints/${id}/`);
     },
 
     resolveReassignedComplaint: (id, formData) => {
-        return axiosInstance.post(
+        return wardAxios.post(
             `/ward/resolve-complaint/${id}/`,
             formData,
             {
@@ -117,31 +118,31 @@ const wardapi = {
 
 
     getNotifications: (page = 1) => {
-        return axiosInstance.get(
+        return wardAxios.get(
             `/notification/notifications/?page=${page}`
         )
     },
 
     getUnreadCount: () => {
-        return axiosInstance.get(
+        return wardAxios.get(
             "/notification/notifications/unread-count/"
         )
     },
 
     markNotificationRead: (id) => {
-        return axiosInstance.post(
+        return wardAxios.post(
             `/notification/notifications/read/${id}/`
         )
     },
 
     markAllNotificationsRead: () => {
-        return axiosInstance.post(
+        return wardAxios.post(
             "/notification/notifications/read-all/"
         )
     },
 
     me: () => {
-        return axiosInstance.get("/ward/auth/me/");
+        return wardAxios.get("/ward/auth/me/");
     },
 
 };

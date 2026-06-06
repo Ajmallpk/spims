@@ -21,13 +21,8 @@ const AdminLayout = () => {
 
     const connectSocket = () => {
 
-      const token =
-        localStorage.getItem(
-          "access"
-        )
-
       socket = new WebSocket(
-        `${WS_BASE_URL}/ws/notifications/?token=${token}`
+        `${WS_BASE_URL}/ws/notifications/?role=admin`
       )
 
       socket.onopen = () => {

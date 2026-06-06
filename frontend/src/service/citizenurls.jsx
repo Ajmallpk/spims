@@ -1,91 +1,91 @@
-import axiosInstance from "@/api/axiosInstance";
+import citizenAxios from "@/api/citizenAxios";
 
 
 
 const citizenapi = {
 
   // AUTH
-  // login: (data) => { return axiosInstance.post("auth/login/citizen/") },
-  register: (data) => { return axiosInstance.post("/auth/signup/citizen/", data); },
-  verifyOTP: (data) => { return axiosInstance.post("auth/verify-otp/", data); },
-  // resendOTP: (data) => { return axiosInstance.post("auth/resend-otp/", data); },
-  login: (data) => { return axiosInstance.post("auth/login/citizen/", data) },
+  // login: (data) => { return citizenAxios.post("auth/login/citizen/") },
+  register: (data) => { return citizenAxios.post("/auth/signup/citizen/", data); },
+  verifyOTP: (data) => { return citizenAxios.post("auth/verify-otp/", data); },
+  // resendOTP: (data) => { return citizenAxios.post("auth/resend-otp/", data); },
+  login: (data) => { return citizenAxios.post("auth/login/citizen/", data) },
   logout: () => {
-    return axiosInstance.post("auth/logout/");
+    return citizenAxios.post("auth/logout/");
   },
-  resendOTP: (data) => { return axiosInstance.post("auth/resend-otp/", data) },
-  getProfile: () => { return axiosInstance.get("citizen/profile/") },
-  updateProfile: (data) => { return axiosInstance.patch("citizen/profile/update/", data) },
+  resendOTP: (data) => { return citizenAxios.post("auth/resend-otp/", data) },
+  getProfile: () => { return citizenAxios.get("citizen/profile/") },
+  updateProfile: (data) => { return citizenAxios.patch("citizen/profile/update/", data) },
   // submitVerification: (formData) => {
-  //   return axiosInstance.post("citizen/verification/submit/", formData, {
+  //   return citizenAxios.post("citizen/verification/submit/", formData, {
   //     headers: {
   //       "Content-Type": "multipart/form-data"
   //     }
   //   });
   // },
-  getVerificationStatus: () => { return axiosInstance.get("citizen/verification/status/") },
+  getVerificationStatus: () => { return citizenAxios.get("citizen/verification/status/") },
   submitVerification: (formData) => {
-    return axiosInstance.post("citizen/verification/submit/", formData, {
+    return citizenAxios.post("citizen/verification/submit/", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
   },
   uploadAvatar: (formData) => {
-    return axiosInstance.post("citizen/upload-avatar/", formData, {
+    return citizenAxios.post("citizen/upload-avatar/", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
   },
   getWards: () => {
-    return axiosInstance.get("citizen/wards/");
+    return citizenAxios.get("citizen/wards/");
   },
 
   changePassword: (data) => {
-    return axiosInstance.post("citizen/change-password/", data);
+    return citizenAxios.post("citizen/change-password/", data);
   },
 
   changeEmail: (data) => {
-    return axiosInstance.post("citizen/change-email/", data);
+    return citizenAxios.post("citizen/change-email/", data);
   },
 
   verifyEmailChange: (token) => {
-    return axiosInstance.get(`/citizen/change-email/verify/${token}/`);
+    return citizenAxios.get(`/citizen/change-email/verify/${token}/`);
   },
 
   forgotPassword: (data) => {
-    return axiosInstance.post("auth/forgot-password/", data);
+    return citizenAxios.post("auth/forgot-password/", data);
   },
 
   verifyResetOtp: (data) => {
-    return axiosInstance.post("auth/verify-reset-otp/", data);
+    return citizenAxios.post("auth/verify-reset-otp/", data);
   },
 
   resetPassword: (data) => {
-    return axiosInstance.post("auth/reset-password/", data);
+    return citizenAxios.post("auth/reset-password/", data);
   },
 
   getNotifications: (page = 1) => {
-    return axiosInstance.get(
+    return citizenAxios.get(
       `notification/notifications/?page=${page}`
     )
   },
 
   getUnreadCount: () => {
-    return axiosInstance.get(
+    return citizenAxios.get(
       "notification/notifications/unread-count/"
     )
   },
 
   markNotificationRead: (id) => {
-    return axiosInstance.post(
+    return citizenAxios.post(
       `notification/notifications/read/${id}/`
     )
   },
 
   markAllNotificationsRead: () => {
-    return axiosInstance.post(
+    return citizenAxios.post(
       "notification/notifications/read-all/"
     )
   },
@@ -94,27 +94,27 @@ const citizenapi = {
   // COMPLAINTS
 
   getComplaints: () => {
-    return axiosInstance.get(
+    return citizenAxios.get(
       "citizen/complaints/"
     );
   },
 
   getComplaintDetail: (id) => {
-    return axiosInstance.get(
+    return citizenAxios.get(
       `complaints/${id}/`
     );
   },
 
 
   getComplaintTimeline: (id) => {
-    return axiosInstance.get(
+    return citizenAxios.get(
       `complaints/complaint/${id}/timeline/`
     );
   },
 
 
   me: () => {
-    return axiosInstance.get("/auth/me/");
+    return citizenAxios.get("/auth/me/");
   },
 
 

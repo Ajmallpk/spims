@@ -28,6 +28,26 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
         self.user = self.scope["user"]
+        
+        
+        print("=" * 50)
+        print("COMPLAINT CHAT CONNECT")
+        print("USER =", self.user)
+
+        if self.user.is_anonymous:
+
+            print("ANONYMOUS USER REJECTED")
+
+            await self.close()
+            return
+
+        self.complaint_id = self.scope["url_route"]["kwargs"]["complaint_id"]
+
+        print("ROLE =", self.user.role)
+        print("ID =", self.user.id)
+        print("COMPLAINT =", self.complaint_id)
+        print("=" * 50)
+
 
         if self.user.is_anonymous:
             await self.close()
@@ -54,12 +74,16 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
 
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-        
-        await self.set_user_offline()
+        if hasattr(self, "room_group_name"):
+
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
+
+        if not self.user.is_anonymous:
+
+            await self.set_user_offline()
         
         
     @database_sync_to_async
@@ -196,6 +220,9 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
 
         try:
+            
+            print("MESSAGE RECEIVED FROM", self.user)
+            print(text_data)
 
             data = json.loads(text_data)
 
@@ -387,6 +414,9 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
 
 
     async def chat_message(self, event):
+        
+        print("BROADCASTING MESSAGE")
+        print(event)
 
         await self.send_event(
             event["event_type"],

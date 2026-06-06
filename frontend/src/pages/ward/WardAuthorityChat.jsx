@@ -206,8 +206,10 @@ const WardAuthorityChat = () => {
 
         }
 
+        
+
         socketRef.current = new WebSocket(
-            `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/`
+            `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/?role=ward`
         );
 
         socketRef.current.onopen = () => {

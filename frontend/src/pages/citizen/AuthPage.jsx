@@ -126,15 +126,7 @@ function LoginForm() {
         response.data.data
       )
 
-      localStorage.setItem(
-        "access",
-        response.data.data.access
-      )
 
-      localStorage.setItem(
-        "refresh",
-        response.data.data.refresh
-      )
 
       localStorage.setItem(
         "role",
@@ -145,6 +137,12 @@ function LoginForm() {
       localStorage.setItem(
         "user_id",
         response.data.data.user_id
+      )
+
+
+      sessionStorage.setItem(
+        "role",
+        "citizen"
       )
 
       window.location.href = "/citizen/home";
