@@ -103,7 +103,7 @@ const ComplaintChatPage = () => {
                 id: msg.id,
 
                 sender:
-                    msg.sender === loggedInUserId
+                    msg.sender_role === "WARD"
                         ? "ward"
                         : "citizen",
 
@@ -255,7 +255,7 @@ const ComplaintChatPage = () => {
                     id: msg.id,
 
                     sender:
-                        msg.sender === loggedInUserId
+                        msg.sender_role === "WARD"
                             ? "ward"
                             : "citizen",
 
@@ -429,33 +429,14 @@ const ComplaintChatPage = () => {
                     localStorage.getItem("role")
                 );
 
-                
 
-                const loggedInUserId =
-                    Number(
-                        localStorage.getItem("user_id")
+
+                if (msg.sender_role !== "WARD") {
+
+                    console.log(
+                        "SENDING DELIVERED",
+                        msg.id
                     );
-
-
-                console.log(
-                    "WS MESSAGE CHECK =>",
-                    "LOCAL USER =", loggedInUserId,
-                    typeof loggedInUserId,
-                    "MSG SENDER =", msg.sender,
-                    typeof msg.sender
-                );
-
-
-                console.log(
-                    "WARD USER ID",
-                    loggedInUserId
-                );
-
-                // const msg = data.data;
-
-                if (
-                    msg.sender !== loggedInUserId
-                ) {
 
                     socketRef.current.send(
                         JSON.stringify({
@@ -463,7 +444,6 @@ const ComplaintChatPage = () => {
                             message_id: msg.id
                         })
                     );
-
                 }
 
 
@@ -474,7 +454,7 @@ const ComplaintChatPage = () => {
                     id: msg.id,
 
                     sender:
-                        msg.sender === loggedInUserId
+                        msg.sender_role === "WARD"
                             ? "ward"
                             : "citizen",
 

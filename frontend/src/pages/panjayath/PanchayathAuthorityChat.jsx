@@ -193,7 +193,7 @@ const PanchayathAuthorityChat = () => {
 
     }
 
-    
+
 
     socketRef.current = new WebSocket(
       `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/?role=panchayath`
@@ -242,7 +242,7 @@ const PanchayathAuthorityChat = () => {
         });
 
         if (
-          data.sender_name !== currentUser?.name
+          data.sender_role !== "PANCHAYATH"
         ) {
 
           socketRef.current.send(

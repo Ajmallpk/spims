@@ -206,7 +206,7 @@ const WardAuthorityChat = () => {
 
         }
 
-        
+
 
         socketRef.current = new WebSocket(
             `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/?role=ward`
@@ -255,7 +255,7 @@ const WardAuthorityChat = () => {
                 });
 
                 if (
-                    data.sender_name !== currentUser?.name
+                    data.sender_role !== "WARD"
                 ) {
 
                     socketRef.current.send(

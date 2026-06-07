@@ -20,8 +20,8 @@ const ComplaintChatMessage = ({ message, onReply, messageRefs, onDelete, current
   const [previewOpen, setPreviewOpen] = useState(false);
 
 
-  console.log("FILE TYPE =", fileType);
-  console.log("FULL MESSAGE =", message);
+  // console.log("FILE TYPE =", fileType);
+  // console.log("FULL MESSAGE =", message);
 
   return (
     <div

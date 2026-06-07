@@ -9,17 +9,26 @@ class MessageSerializer(serializers.ModelSerializer):
         read_only=True
     )
     sender_name = serializers.CharField(source="sender.username", read_only=True)
+    
+    sender_role = serializers.CharField(
+        source="sender.role",
+        read_only=True
+    )
+    
+    
     file_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     reply_data = serializers.SerializerMethodField()
     display_message = serializers.SerializerMethodField()
     forwarded_from = serializers.SerializerMethodField()
+    
     class Meta:
         model = Message
         fields = [
             "id",
             "sender",
             "sender_name",
+            "sender_role",
             "display_message",
             "reply_data",
             "file",
@@ -125,6 +134,9 @@ class MessageSerializer(serializers.ModelSerializer):
             return None
 
         return obj.forwarded_from.username
+    
+    
+    
         
         
         
