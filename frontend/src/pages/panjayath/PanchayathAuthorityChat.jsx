@@ -263,6 +263,27 @@ const PanchayathAuthorityChat = () => {
 
       }
 
+
+      setContacts(prev =>
+        prev.map(contact =>
+          contact.id === selectedContact.id
+            ? {
+              ...contact,
+              lastMessage:
+                data.display_message ||
+                data.message ||
+                "Attachment",
+
+              unreadCount:
+                data.sender_role !== "PANCHAYATH"
+                  ? (contact.unreadCount || 0) + 1
+                  : contact.unreadCount
+            }
+            : contact
+        )
+      );
+
+
       // TYPING
       if (eventType === "typing") {
 
@@ -482,7 +503,18 @@ const PanchayathAuthorityChat = () => {
             formData
           );
 
-
+        setContacts(prev =>
+          prev.map(c =>
+            c.id === selectedContact.id
+              ? {
+                ...c,
+                lastMessage:
+                  text ||
+                  "Attachment"
+              }
+              : c
+          )
+        );
 
         return;
       }

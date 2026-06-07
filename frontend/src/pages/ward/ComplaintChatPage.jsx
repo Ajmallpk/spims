@@ -519,6 +519,22 @@ const ComplaintChatPage = () => {
                     return updated;
 
                 });
+
+
+                if (msg.sender_role !== "WARD") {
+
+                    setTimeout(() => {
+
+                        socketRef.current?.send(
+                            JSON.stringify({
+                                type: "seen",
+                                message_id: msg.id
+                            })
+                        );
+
+                    }, 500);
+
+                }
             }
 
 

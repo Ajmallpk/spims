@@ -59,6 +59,14 @@ def send_notification_task(
     )
 
     channel_layer = get_channel_layer()
+    
+    
+    print("CHANNEL LAYER =", channel_layer)
+
+    print(
+        "SENDING TO GROUP =",
+        f"notifications_{user.id}"
+    )
 
     async_to_sync(
         channel_layer.group_send
@@ -71,6 +79,8 @@ def send_notification_task(
             "notification_type": n_type,
         }
     )
+    
+    print("GROUP SEND FINISHED")
 
     send_push_notification(
         user=user,

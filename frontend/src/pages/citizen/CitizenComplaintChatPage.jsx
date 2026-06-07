@@ -538,6 +538,22 @@ const CitizenComplaintChatPage = () => {
           return updated;
 
         });
+
+
+        if (msg.sender_role !== "CITIZEN") {
+
+          setTimeout(() => {
+
+            socketRef.current?.send(
+              JSON.stringify({
+                type: "seen",
+                message_id: msg.id
+              })
+            );
+
+          }, 500);
+
+        }
       }
 
 

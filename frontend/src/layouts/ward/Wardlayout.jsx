@@ -120,6 +120,8 @@ export default function WardLayout() {
 
     let socket = null
 
+    let reconnectTimer = null
+
     const connectSocket = () => {
 
 
@@ -139,6 +141,9 @@ export default function WardLayout() {
       socket.onmessage = (
         event
       ) => {
+
+
+        console.log("🔥 NOTIFICATION RECEIVED", event.data)
 
         const data =
           JSON.parse(
@@ -188,23 +193,23 @@ export default function WardLayout() {
 
       }
 
-      socket.onclose = () => {
+      socket.onclose = (event) => {
 
         console.log(
-          "WARD SOCKET CLOSED"
+          "WARD SOCKET CLOSED",
+          event.code,
+          event.reason
         )
 
-        setTimeout(
+        if (!event.wasClean) {
 
-          () => {
+          reconnectTimer = setTimeout(() => {
 
             connectSocket()
 
-          },
+          }, 3000)
 
-          3000
-
-        )
+        }
 
       }
 
@@ -222,6 +227,8 @@ export default function WardLayout() {
     connectSocket()
 
     return () => {
+
+      clearTimeout(reconnectTimer)
 
       socket?.close()
 
