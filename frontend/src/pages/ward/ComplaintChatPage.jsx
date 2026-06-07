@@ -45,6 +45,14 @@ const ComplaintChatPage = () => {
 
 
 
+    console.log(
+        "WARD PAGE RENDER",
+        localStorage.getItem("user_id"),
+        localStorage.getItem("role")
+    );
+
+
+
 
     const loadMore = async () => {
 
@@ -75,6 +83,9 @@ const ComplaintChatPage = () => {
 
         const results =
             res.data.results || [];
+
+
+
 
         const loggedInUserId =
             Number(
@@ -403,7 +414,22 @@ const ComplaintChatPage = () => {
 
                 const msg = data.data;
 
-                console.log("MESSAGE DATA", msg);
+
+                console.log(
+                    "WARD WS RAW MESSAGE",
+                    JSON.stringify(msg, null, 2)
+                );
+
+                // console.log("MESSAGE DATA", msg);
+
+
+                console.log(
+                    "WS READ LOCALSTORAGE",
+                    localStorage.getItem("user_id"),
+                    localStorage.getItem("role")
+                );
+
+                
 
                 const loggedInUserId =
                     Number(

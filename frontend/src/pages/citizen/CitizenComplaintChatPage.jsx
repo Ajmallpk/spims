@@ -46,6 +46,14 @@ const CitizenComplaintChatPage = () => {
 
 
 
+  console.log(
+    "CITIZEN PAGE RENDER",
+    localStorage.getItem("user_id"),
+    localStorage.getItem("role")
+  );
+
+
+
 
   const loadMore = async () => {
 
@@ -427,7 +435,19 @@ const CitizenComplaintChatPage = () => {
 
         const msg = data.data;
 
-        console.log("MESSAGE DATA", msg);
+        console.log(
+          "CITIZEN WS RAW MESSAGE",
+          JSON.stringify(msg, null, 2)
+        );
+
+        // console.log("MESSAGE DATA", msg);
+
+
+        console.log(
+          "WS READ LOCALSTORAGE",
+          localStorage.getItem("user_id"),
+          localStorage.getItem("role")
+        );
 
         const loggedInUserId =
           Number(
