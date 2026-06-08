@@ -186,9 +186,28 @@ class ChatListSerializer(serializers.ModelSerializer):
         if not last_msg:
             return None
 
+        display_message = last_msg.message
+
+        if not display_message:
+
+            if last_msg.file_type == "IMAGE":
+                display_message = "📷 Image"
+
+            elif last_msg.file_type == "VIDEO":
+                display_message = "🎥 Video"
+
+            elif last_msg.file_type == "AUDIO":
+                display_message = "🎤 Voice Message"
+
+            elif last_msg.file_type == "PDF":
+                display_message = "📄 PDF"
+
+            elif last_msg.file:
+                display_message = "📎 Attachment"
+
         return {
             "sender": last_msg.sender.username,
-            "message": last_msg.message,
+            "message": display_message,
             "created_at": last_msg.created_at
         }
         

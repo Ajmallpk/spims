@@ -743,10 +743,10 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         
         
         
-        await self.channel_layer.group_add(
-            f"user_inbox_{self.user.id}",
-            self.channel_name
-        )
+        # await self.channel_layer.group_add(
+        #     f"authority_inbox_{self.user.id}",
+        #     self.channel_name
+        # )
         
         
         # await self.send(text_data=json.dumps({
@@ -766,10 +766,10 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         
-        await self.channel_layer.group_discard(
-            f"user_inbox_{self.user.id}",
-            self.channel_name
-        )
+        # await self.channel_layer.group_discard(
+        #     f"authority_inbox_{self.user.id}",
+        #     self.channel_name
+        # )
 
         if hasattr(self, "room_group_name"):
 
@@ -1429,17 +1429,34 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
             serializer = MessageSerializer(message_obj)
             
+            
+            display_message = message_obj.message
+
+            if not display_message:
+
+                if message_obj.file_type == "IMAGE":
+                    display_message = "📷 Image"
+
+                elif message_obj.file_type == "VIDEO":
+                    display_message = "🎥 Video"
+
+                elif message_obj.file_type == "AUDIO":
+                    display_message = "🎤 Voice Message"
+
+                elif message_obj.file_type == "PDF":
+                    display_message = "📄 PDF"
+
+                else:
+                    display_message = "📎 Attachment"
+            
             async_to_sync(
                 self.channel_layer.group_send
             )(
-                f"user_inbox_{receiver.id}",
+                f"authority_inbox_{receiver.id}",
                 {
                     "type": "sidebar_update",
                     "chat_id": chat.id,
-                    "last_message": (
-                        message_obj.message
-                        or "Attachment"
-                    ),
+                    "last_message":display_message,
                     "sender": self.user.username,
                 }
             )

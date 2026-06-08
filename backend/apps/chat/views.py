@@ -620,6 +620,27 @@ class SendMessageview(APIView):
             else:
 
                 receiver = complaint.citizen
+                
+            
+            
+            display_message = message.message    
+                
+            if not display_message:
+
+                if message.file_type == "IMAGE":
+                    display_message = "📷 Image"
+
+                elif message.file_type == "VIDEO":
+                    display_message = "🎥 Video"
+
+                elif message.file_type == "AUDIO":
+                    display_message = "🎤 Voice Message"
+
+                elif message.file_type == "PDF":
+                    display_message = "📄 PDF"
+
+                else:
+                    display_message = "📎 Attachment"
 
 
             async_to_sync(
@@ -629,10 +650,7 @@ class SendMessageview(APIView):
                 {
                     "type": "sidebar_update",
                     "chat_id": complaint.id,
-                    "last_message": (
-                        message.message
-                        or "Attachment"
-                    ),
+                    "last_message":display_message,
                     "sender": user.username,
                 }
             )
@@ -887,8 +905,10 @@ class ChatInboxView(ListAPIView):
                         queryset=Message.objects.select_related(
                             "sender"
                         ).only(
-                            "id",
+                             "id",
                             "message",
+                            "file",
+                            "file_type",
                             "created_at",
                             "sender__username"
                         ).order_by("-created_at")[:1],
@@ -979,6 +999,8 @@ class AuthorityInboxView(ListAPIView):
                         ).only(
                             "id",
                             "message",
+                            "file",
+                            "file_type",
                             "created_at",
                             "sender__username"
                         ).order_by("-created_at")[:1],
@@ -1327,6 +1349,25 @@ class SendAuthorityMessageView(APIView):
                 }
             )
             
+            display_message = message.message
+
+            if not display_message:
+
+                if message.file_type == "IMAGE":
+                    display_message = "📷 Image"
+
+                elif message.file_type == "VIDEO":
+                    display_message = "🎥 Video"
+
+                elif message.file_type == "AUDIO":
+                    display_message = "🎤 Voice Message"
+
+                elif message.file_type == "PDF":
+                    display_message = "📄 PDF"
+
+                else:
+                    display_message = "📎 Attachment"
+            
             
             if message.file_type == "IMAGE":
                 generate_thumbnail_task.delay(
@@ -1334,6 +1375,25 @@ class SendAuthorityMessageView(APIView):
                 )
                         
             channel_layer = get_channel_layer()
+            
+            
+            receiver = (
+                chat.receiver_authority
+                if user == chat.sender_authority
+                else chat.sender_authority
+            )
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"authority_inbox_{receiver.id}",
+                {
+                    "type": "sidebar_update",
+                    "chat_id": chat.id,
+                    "last_message": display_message,
+                    "sender": user.username,
+                }
+            )
 
             async_to_sync(
                 channel_layer.group_send
