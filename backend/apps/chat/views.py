@@ -610,7 +610,34 @@ class SendMessageview(APIView):
                 context={"request": request}
             )
             
+            
             channel_layer = get_channel_layer()
+            
+            if user == complaint.citizen:
+
+                receiver = chat.authority
+
+            else:
+
+                receiver = complaint.citizen
+
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"authority_inbox_{receiver.id}",
+                {
+                    "type": "sidebar_update",
+                    "chat_id": complaint.id,
+                    "last_message": (
+                        message.message
+                        or "Attachment"
+                    ),
+                    "sender": user.username,
+                }
+            )
+            
+            
 
             async_to_sync(
                 channel_layer.group_send
@@ -1412,6 +1439,51 @@ class DeleteAuthorityMessageView(APIView):
                 message="Something went wrong",
                 status=500
             )
+            
+            
+            
+            
+            
+class MarkAuthorityChatReadView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(
+        self,
+        request,
+        chat_id
+    ):
+
+        chat = Chat.objects.filter(
+            id=chat_id,
+            chat_type="AUTHORITY"
+        ).first()
+
+        if not chat:
+
+            return Response(
+                {
+                    "message":
+                    "Chat not found"
+                },
+                status=404
+            )
+
+        Message.objects.filter(
+            chat=chat
+        ).exclude(
+            sender=request.user
+        ).update(
+            is_read=True
+        )
+
+        return Response(
+            {
+                "message":
+                "Messages marked as read"
+            }
+        )
+
             
             
             

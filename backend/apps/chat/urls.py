@@ -13,6 +13,7 @@ from .views import (
     StartAuthorityChatView,
     SendAuthorityMessageView,
     DeleteAuthorityMessageView,
+    MarkAuthorityChatReadView
 )
 
 urlpatterns = [
@@ -75,5 +76,11 @@ urlpatterns = [
     path(
         "authority/delete-message/<int:message_id>/",
         DeleteAuthorityMessageView.as_view(),
+    ),
+    
+    
+    path(
+        "authority/<int:chat_id>/mark-read/",
+        MarkAuthorityChatReadView.as_view()
     ),
 ]

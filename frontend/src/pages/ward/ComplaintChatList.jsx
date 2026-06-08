@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import ComplaintChatHeader from "@/components/ward/ComplaintChatListHeader";
 import ComplaintChatSearch from "@/components/ward/ComplaintChatSearch";
 import ComplaintChatCard from "@/components/ward/ComplaintChatCard";
@@ -99,6 +99,8 @@ const ComplaintChatList = () => {
 
     const navigate = useNavigate();
 
+    const socketRef = useRef(null);
+
     // Navigate helper — swap with react-router useNavigate in real project
 
     useEffect(() => {
@@ -179,7 +181,72 @@ const ComplaintChatList = () => {
 
 
 
-    
+    useEffect(() => {
+
+        socketRef.current = new WebSocket(
+            "ws://localhost:8000/ws/inbox/?role=ward"
+        );
+
+        socketRef.current.onopen = () => {
+
+            console.log("COMPLAINT INBOX WS CONNECTED");
+
+        };
+
+        socketRef.current.onmessage = (event) => {
+
+            const response = JSON.parse(event.data);
+
+            console.log(
+                "COMPLAINT SIDEBAR UPDATE",
+                response
+            );
+
+            if (
+                response.type === "sidebar_update"
+            ) {
+
+                const data = response.data;
+
+                setChats(prev =>
+                    prev.map(chat =>
+                        chat.id === data.chat_id
+                            ? {
+                                ...chat,
+                                lastMessage:
+                                    data.last_message,
+
+                                unreadCount:
+                                    (chat.unreadCount || 0) + 1
+                            }
+                            : chat
+                    )
+                );
+
+            }
+
+        };
+
+        socketRef.current.onclose = () => {
+
+            console.log(
+                "COMPLAINT INBOX WS CLOSED"
+            );
+
+        };
+
+        return () => {
+
+            socketRef.current?.close();
+
+        };
+
+    }, []);
+
+
+
+
+
 
     const handleCardClick = (complaintId) => {
         navigate(`/ward/complaint-chats/${complaintId}`);

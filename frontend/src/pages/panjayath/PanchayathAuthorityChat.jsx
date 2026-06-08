@@ -90,13 +90,33 @@ const PanchayathAuthorityChat = () => {
 
 
 
-  const handleSelectContact = (contact) => {
+  const handleSelectContact = async (contact) => {
+
     setSelectedContact(contact);
-    setContacts((prev) =>
-      prev.map((c) =>
-        c.id === contact.id ? { ...c, unreadCount: 0 } : c
+
+    setContacts(prev =>
+      prev.map(c =>
+        c.id === contact.id
+          ? {
+            ...c,
+            unreadCount: 0
+          }
+          : c
       )
     );
+
+    try {
+
+      await authoritychatapi.markChatRead(
+        contact.id
+      )
+
+    } catch (error) {
+
+      console.log(error)
+
+    }
+
     fetchMessages(
       contact.id,
       1,
@@ -226,6 +246,41 @@ const PanchayathAuthorityChat = () => {
 
       const data = response.data;
 
+
+      if (eventType === "sidebar_update") {
+
+        console.log(
+          "SIDEBAR UPDATE RECEIVED",
+          data
+        )
+
+        setContacts(prev => {
+
+          const updated = prev.map(contact => {
+
+            if (contact.id !== data.chat_id) {
+              return contact
+            }
+
+            return {
+              ...contact,
+              lastMessage: data.last_message,
+
+              unreadCount:
+                selectedContact?.id === data.chat_id
+                  ? 0
+                  : (contact.unreadCount || 0) + 1
+            }
+
+          })
+
+          return updated
+
+        })
+
+        return
+      }
+
       // NEW MESSAGE
       if (eventType === "message") {
 
@@ -240,6 +295,23 @@ const PanchayathAuthorityChat = () => {
           return [...prev, data];
 
         });
+
+
+        setContacts(prev =>
+          prev.map(contact =>
+            contact.id === selectedContact.id
+              ? {
+                ...contact,
+                lastMessage:
+                  data.display_message ||
+                  data.message ||
+                  "Attachment",
+
+                unreadCount: 0
+              }
+              : contact
+          )
+        );
 
         if (
           data.sender_role !== "PANCHAYATH"
@@ -263,25 +335,6 @@ const PanchayathAuthorityChat = () => {
 
       }
 
-
-      setContacts(prev =>
-        prev.map(contact =>
-          contact.id === selectedContact.id
-            ? {
-              ...contact,
-              lastMessage:
-                data.display_message ||
-                data.message ||
-                "Attachment",
-
-              unreadCount:
-                data.sender_role !== "PANCHAYATH"
-                  ? (contact.unreadCount || 0) + 1
-                  : contact.unreadCount
-            }
-            : contact
-        )
-      );
 
 
       // TYPING

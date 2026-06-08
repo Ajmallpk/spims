@@ -8,7 +8,7 @@ const authoritychatapi = {
   },
 
   // GET CHAT MESSAGES
-  getMessages: async (chatId,page=1) => {
+  getMessages: async (chatId, page = 1) => {
     return await axiosInstance.get(
       `chat/authority/${chatId}/messages/?page=${page}`
     );
@@ -35,6 +35,13 @@ const authoritychatapi = {
       `chat/authority/delete-message/${messageId}/`
     );
   },
+
+
+  markChatRead(chatId) {
+    return axiosInstance.post(
+      `/chat/authority/${chatId}/mark-read/`
+    )
+  }
 
 };
 

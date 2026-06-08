@@ -665,7 +665,44 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
 
             serializer = MessageSerializer(message_obj)
 
+
+            if self.user == complaint.citizen:
+
+                async_to_sync(
+                    self.channel_layer.group_send
+                )(
+                    f"authority_inbox_{receiver.id}",
+                    {
+                        "type": "sidebar_update",
+                        "chat_id": complaint.id,
+                        "last_message": (
+                            message_obj.message
+                            or "Attachment"
+                        ),
+                        "sender": self.user.username,
+                    }
+                )
+
+            else:
+
+                async_to_sync(
+                    self.channel_layer.group_send
+                )(
+                    f"authority_inbox_{complaint.citizen.id}",
+                    {
+                        "type": "sidebar_update",
+                        "chat_id": complaint.id,
+                        "last_message": (
+                            message_obj.message
+                            or "Attachment"
+                        ),
+                        "sender": self.user.username,
+                    }
+                )
+
             return serializer.data
+        
+        
 
         except Exception as e:
             return {
@@ -705,6 +742,13 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         
         
+        
+        await self.channel_layer.group_add(
+            f"user_inbox_{self.user.id}",
+            self.channel_name
+        )
+        
+        
         # await self.send(text_data=json.dumps({
         #     "type": "presence",
         #     "data": {
@@ -721,6 +765,11 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
 
     async def disconnect(self, close_code):
+        
+        await self.channel_layer.group_discard(
+            f"user_inbox_{self.user.id}",
+            self.channel_name
+        )
 
         if hasattr(self, "room_group_name"):
 
@@ -1195,6 +1244,25 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         
         
         
+    async def sidebar_update(self, event):
+        
+        print(
+            "SIDEBAR UPDATE EVENT",
+            self.user.username,
+            event
+        )
+
+        await self.send_event(
+            "sidebar_update",
+            {
+                "chat_id": event["chat_id"],
+                "last_message": event["last_message"],
+                "sender": event["sender"],
+            }
+        )
+        
+        
+        
     async def message_deleted(self, event):
         await self.send_event(
             event["event_type"],
@@ -1360,6 +1428,27 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
             )
 
             serializer = MessageSerializer(message_obj)
+            
+            async_to_sync(
+                self.channel_layer.group_send
+            )(
+                f"user_inbox_{receiver.id}",
+                {
+                    "type": "sidebar_update",
+                    "chat_id": chat.id,
+                    "last_message": (
+                        message_obj.message
+                        or "Attachment"
+                    ),
+                    "sender": self.user.username,
+                }
+            )
+            
+            print(
+                "SIDEBAR SENT TO",
+                receiver.id,
+                chat.id
+            )
 
             return serializer.data
 
