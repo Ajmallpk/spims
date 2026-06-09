@@ -25,6 +25,8 @@ const PanchayathAuthorityChat = () => {
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
 
+  const inboxSocketRef = useRef(null);
+
 
 
   useEffect(() => {
@@ -83,7 +85,51 @@ const PanchayathAuthorityChat = () => {
 
     setCurrentUser(storedUser);
 
+
+    inboxSocketRef.current = new WebSocket(
+      "ws://localhost:8000/ws/inbox/?role=panchayath"
+    );
+
+    inboxSocketRef.current.onopen = () => {
+      console.log("AUTHORITY INBOX CONNECTED");
+    };
+
+    inboxSocketRef.current.onmessage = (event) => {
+
+      const response = JSON.parse(event.data);
+
+      console.log(
+        "AUTHORITY INBOX EVENT",
+        response
+      );
+
+      if (response.type === "sidebar_update") {
+
+        const data = response.data;
+
+        setContacts(prev =>
+          prev.map(contact =>
+            contact.id === data.chat_id
+              ? {
+                ...contact,
+                lastMessage: data.last_message,
+
+                unreadCount:
+                  selectedContact?.id === data.chat_id
+                    ? 0
+                    : (contact.unreadCount || 0) + 1
+              }
+              : contact
+          )
+        );
+      }
+    };
+
     fetchInbox();
+
+    return () => {
+      inboxSocketRef.current?.close();
+    };
 
   }, []);
 

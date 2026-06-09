@@ -120,38 +120,38 @@ const CitizenComplaintChatList = () => {
         );
 
         const formattedChats =
-          res.data.map(chat => ({
+          res.data.map(chat => {
 
-            id: chat.complaint,
+            console.log(
+              "LAST MESSAGE =",
+              chat.last_message
+            );
 
-            title:
-              chat.complaint_title,
+            return {
 
-            authority:
-              chat.chat_user,
+              id: chat.complaint,
 
-            lastMessage:
-              chat.last_message?.message ||
-              "No messages yet",
+              title: chat.complaint_title,
 
-            unreadCount:
-              chat.unread_count,
+              authority: chat.chat_user,
 
-            isClosed:
-              chat.is_closed,
+              lastMessage:
+                chat.last_message?.message ||
+                "No messages yet",
 
-            time:
-              new Date(
-                chat.created_at
-              ).toLocaleTimeString(
-                [],
-                {
+              unreadCount: chat.unread_count,
+
+              isClosed: chat.is_closed,
+
+              time: new Date(chat.created_at)
+                .toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit"
-                }
-              )
+                })
 
-          }));
+            };
+
+          });
 
         setChats(
           formattedChats
