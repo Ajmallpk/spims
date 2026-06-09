@@ -1529,13 +1529,39 @@ class MarkAuthorityChatReadView(APIView):
                 status=404
             )
 
-        Message.objects.filter(
-            chat=chat
+        unread_messages = Message.objects.filter(
+            chat=chat,
+            is_read=False
         ).exclude(
             sender=request.user
-        ).update(
-            is_read=True
         )
+
+        message_ids = list(
+            unread_messages.values_list(
+                "id",
+                flat=True
+            )
+        )
+
+        unread_messages.update(
+            is_read=True,
+            read_at=now()
+        )
+
+        channel_layer = get_channel_layer()
+
+        for message_id in message_ids:
+
+            async_to_sync(
+                channel_layer.group_send
+            )(
+                f"authority_chat_{chat.id}",
+                {
+                    "type": "seen_update",
+                    "event_type": "seen_update",
+                    "message_id": message_id
+                }
+            )
 
         return Response(
             {

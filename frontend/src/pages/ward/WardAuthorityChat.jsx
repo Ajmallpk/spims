@@ -172,9 +172,9 @@ const WardAuthorityChat = () => {
 
         try {
 
-            await authoritychatapi.markChatRead(
-                contact.id
-            )
+            // await authoritychatapi.markChatRead(
+            //     contact.id
+            // )
 
         } catch (error) {
 
@@ -291,14 +291,25 @@ const WardAuthorityChat = () => {
 
             reconnectAttemptsRef.current = 0;
 
+
+           
+
         };
 
         socketRef.current.onmessage = (
             event
         ) => {
 
+
+
+
             const response = JSON.parse(
                 event.data
+            );
+
+            console.log(
+                "FULL WS EVENT",
+                response
             );
 
             console.log(
@@ -437,6 +448,12 @@ const WardAuthorityChat = () => {
                 eventType ===
                 "seen_update"
             ) {
+
+
+                console.log(
+                    "SEEN UPDATE RECEIVED",
+                    data.message_id
+                );
 
                 setMessages((prev) =>
                     prev.map((msg) =>

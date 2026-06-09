@@ -1205,6 +1205,12 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         )
         
     async def seen_update(self, event):
+        
+        
+        print(
+            "SEEN EVENT BROADCAST",
+            event
+        )
 
         await self.send_event(
             event["event_type"],
@@ -1309,6 +1315,15 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
         
     @database_sync_to_async
     def mark_message_seen(self, message_id):
+        
+        
+        print(
+            "SEEN RECEIVED",
+            self.user.username,
+            message_id
+        )
+
+        
 
         from django.utils.timezone import now
 
@@ -1323,6 +1338,13 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
 
         if message.is_read:
             return None
+        
+        
+        
+        print(
+            "MESSAGE OWNER",
+            message.sender.username
+        )
 
         message.is_read = True
 
