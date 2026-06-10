@@ -156,8 +156,8 @@ class CitizenComplaintFeedView(ListAPIView):
     ).prefetch_related(
         "resolution__media"
     ).annotate(
-        upvotes_count=Count("upvotes"),
-        comments_count=Count("comments")
+        upvotes_count=Count("upvotes",distinct=True),
+        comments_count=Count("comments",distinct=True)
     ).order_by("-created_at")
     
     def get_queryset(self):
@@ -599,8 +599,8 @@ class CitizenMyComplaintsView(ListAPIView):
         ).select_related(
             "ward"
         ).annotate(
-            upvotes_count=Count("upvotes"),
-            comments_count=Count("comments")
+            upvotes_count=Count("upvotes",distinct=True),
+            comments_count=Count("comments",distinct=True)
         ).order_by("-created_at")
         
    
