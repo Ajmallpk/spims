@@ -7,8 +7,8 @@ from apps.complaints.utils import can_change_status
 
 class PanchayathVerificationSerializer(serializers.ModelSerializer):
     
-    aadhaar_image = serializers.SerializerMethodField()
-    selfie_image = serializers.SerializerMethodField()
+    aadhaar_image = serializers.ImageField(required=True)
+    selfie_image = serializers.ImageField(required=True)
 
     class Meta:
         model = PanchayathVerification
@@ -22,20 +22,6 @@ class PanchayathVerificationSerializer(serializers.ModelSerializer):
             "selfie_image",
         ]
         
-    def get_aadhaar_image(self,obj):
-
-        if obj.aadhaar_image:
-            return obj.aadhaar_image.url
-
-        return None
-
-
-    def get_selfie_image(self,obj):
-
-        if obj.selfie_image:
-            return obj.selfie_image.url
-
-        return None
     
 
     def validate_aadhaar_image(self, file):
