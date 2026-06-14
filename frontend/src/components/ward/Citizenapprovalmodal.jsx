@@ -62,7 +62,10 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
       }
 
       if (confirmAction === "reject") {
-        await wardapi.rejectCitizen(citizen?.id, rejectReason);
+        await wardapi.rejectCitizen(
+          citizen?.verification_id,
+          rejectReason
+        );
         citizen.status = "REJECTED";
       }
 

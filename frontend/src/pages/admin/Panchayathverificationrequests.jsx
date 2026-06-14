@@ -6,6 +6,8 @@ import { ClipboardCheck, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
+import { useNavigate } from "react-router-dom";
+
 
 
 
@@ -17,23 +19,28 @@ const PanchayathVerificationRequests = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const [toast, setToast] = useState(null); // { message, type }
 
+  const [statusFilter, setStatusFilter] = useState("PENDING");
+
+  const navigate = useNavigate();
+
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await adminapi.panchayathVerificationList()
+      // const { data } = await adminapi.panchayathVerificationList()
+      const { data } = await adminapi.panchayathVerificationList(statusFilter)
       setRequests(Array.isArray(data) ? data : data.results || []);
     } catch (err) {
       // toast.error("Error fetching panchayath verifications");
       handleApiError(err, "Error fetching panchayath verifications");
-      
+
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [statusFilter]);
 
   useEffect(() => {
     fetchRequests();
-  }, [fetchRequests]);
+  }, [fetchRequests, statusFilter]);
 
   const handleView = async (req) => {
     try {
@@ -43,7 +50,7 @@ const PanchayathVerificationRequests = () => {
     } catch (error) {
       // toast.error("Error fetching verification detail");
       handleApiError(error, "Error fetching verification detail");
-      
+
     }
   };
 
@@ -53,7 +60,7 @@ const PanchayathVerificationRequests = () => {
   };
 
   const handleActionSuccess = (message) => {
-    
+
     fetchRequests();
   };
 
@@ -113,6 +120,38 @@ const PanchayathVerificationRequests = () => {
           </div>
         </div>
       )}
+
+
+
+      <div className="flex gap-3">
+        <button
+          onClick={() => setStatusFilter("PENDING")}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${statusFilter === "PENDING"
+            ? "bg-yellow-500 text-white"
+            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+        >
+          Pending Requests
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("REJECTED")}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${statusFilter === "REJECTED"
+            ? "bg-red-600 text-white"
+            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+        >
+          Rejected Requests
+        </button>
+
+
+        <button
+          onClick={() => navigate("/admin/panchayaths")}
+          className="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all"
+        >
+          Approved Panchayaths
+        </button>
+      </div>
 
       {/* Table */}
       <VerificationTable

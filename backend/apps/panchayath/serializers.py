@@ -22,7 +22,35 @@ class PanchayathVerificationSerializer(serializers.ModelSerializer):
             "selfie_image",
         ]
         
+        
+        extra_kwargs = {
+            "email": {"validators": []},
+            "phone": {"validators": []},
+        }
+        
     
+    
+    def validate(self, attrs):
+        email = attrs.get("email")
+        phone = attrs.get("phone")
+
+        queryset = PanchayathVerification.objects.all()
+
+        # Ignore the current record when resubmitting
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.filter(email=email).exists():
+            raise serializers.ValidationError({
+                "email": "This email is already used by another Panchayath."
+            })
+
+        if queryset.filter(phone=phone).exists():
+            raise serializers.ValidationError({
+                "phone": "This phone number is already used by another Panchayath."
+            })
+
+        return attrs
 
     def validate_aadhaar_image(self, file):
         allowed_types = ["image/jpeg", "image/png", "image/jpg"]

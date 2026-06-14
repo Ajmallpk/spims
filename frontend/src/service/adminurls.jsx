@@ -15,7 +15,12 @@ export const adminapi = {
     dashboard: () => { return adminAxios.get("/admin/dashboard/") },
     recentVerification: () => { return adminAxios.get("/admin/recent-verifications/") },
     criticalAlert: () => { return adminAxios.get("/admin/critical-alerts/") },
-    panchayathVerificationList: () => { return adminAxios.get("/admin/panchayath-verifications/") },
+    // panchayathVerificationList: () => { return adminAxios.get("/admin/panchayath-verifications/") },
+    panchayathVerificationList: (status = "PENDING") => {
+        return adminAxios.get(
+            `/admin/panchayath-verifications/?status=${status}`
+        );
+    },
     approvePanchayath: (id) => { return adminAxios.post(`/admin/panchayath/approve/${id}/`) },
     rejectPanchayath: (id, reason) => { return adminAxios.post(`/admin/panchayath/reject/${id}/`, { reason }) },
     // getPanchayaths: (status, page = 1, search = "") => {return adminAxios.get("/admin/panchayaths/", {params: { status, page, search }});},

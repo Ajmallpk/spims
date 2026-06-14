@@ -89,10 +89,20 @@ class SubmitPanchayathVerificationView(APIView):
     def post(self, request):
         try:
             user = request.user
+            # verification = getattr(user, "panchayath_verification", None)
+
+            # serializer = PanchayathVerificationSerializer(data=request.data)
+            
+            
             verification = getattr(user, "panchayath_verification", None)
 
-            serializer = PanchayathVerificationSerializer(data=request.data)
-
+            serializer = PanchayathVerificationSerializer(
+                instance=verification,
+                data=request.data,
+                context={"request": request}
+            )
+            
+            
             if not serializer.is_valid():
                 return error_response(
                     message="Validation failed",

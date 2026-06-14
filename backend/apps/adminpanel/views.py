@@ -231,8 +231,10 @@ class PanchayathVerificationListView(APIView):
 
     def get(self, request):
         try:
+            status = request.GET.get("status", "PENDING").upper()
+
             verifications = PanchayathVerification.objects.filter(
-                status="PENDING"
+                status=status
             ).select_related("user").order_by("-submitted_at")
 
             paginator = PageNumberPagination()
@@ -382,9 +384,10 @@ class RejectPanchayathView(APIView):
                 verification.save()
 
                 user = verification.user
-                user.status = User.Status.SUSPENDED
+                # user.status = User.Status.SUSPENDED
                 user.is_verified = False
-                user.save()
+                # user.save()
+                user.save(update_fields=["is_verified"])
 
                 logger.warning(f"Admin {request.user.id} rejected Panchayath {verification.id}")
 
