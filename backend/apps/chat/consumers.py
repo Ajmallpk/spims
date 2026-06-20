@@ -30,7 +30,7 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
         self.user = self.scope["user"]
         
         
-        print("=" * 50)
+        
         print("COMPLAINT CHAT CONNECT")
         print("USER =", self.user)
 
@@ -291,6 +291,7 @@ class ComplaintChatConsumer(AsyncWebsocketConsumer):
             )
 
             return
+        
         message = data.get("message", "")
 
         reply_to_id = data.get("reply_to")
@@ -778,7 +779,7 @@ class AuthorityChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
             
-        # await asyncio.sleep(3)
+        
 
         await self.set_user_offline()
         

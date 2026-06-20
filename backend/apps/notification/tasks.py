@@ -75,6 +75,7 @@ def send_notification_task(
         {
             "type": "send_notification",
             "title": title,
+            "id": notification.id,
             "message": message,
             "notification_type": n_type,
         }

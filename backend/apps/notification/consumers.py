@@ -113,6 +113,8 @@ class NotificationConsumer(
 
         await self.send(
             text_data=json.dumps({
+                
+                "id": event["id"],
 
                 "title":
                 event["title"],

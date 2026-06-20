@@ -157,7 +157,7 @@ export default function WardLayout() {
 
         const newNotification = {
 
-          id: Date.now(),
+          id: data.id,
 
           title:
             data.title,
