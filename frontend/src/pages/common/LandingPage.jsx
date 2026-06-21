@@ -192,6 +192,8 @@ import { Link } from "react-router-dom"
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom"
+// import MeanFixLogo from "./MeanFixLogo";
+import FixItLogo from "./FixItLogo";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -497,9 +499,19 @@ function Navbar() {
   }, []);
   return (
     <nav className={`nav${solid ? " solid" : ""}`}>
-      <div className="nav-brand">
+      {/* <div className="nav-brand">
         <div className="nav-emblem"><Ico d={I.shield} s={18} c="white" w={2} /></div>
         <span className="nav-name">Jan<span>Seva</span></span>
+      </div> */}
+      <div className="nav-brand">
+        <FixItLogo
+          iconWidth={75}
+          title="FIX IT"
+          tagline="BETTER PLACES. BETTER FUTURE"
+          showTagline={true}
+          layout="row"
+          iconClassName="animate-bounce"
+        />
       </div>
       <ul className="nav-links">
         {[["#how-it-works", "How It Works"], ["#hierarchy", "Hierarchy"], ["#roles", "Roles"], ["#features", "Features"]].map(([h, l]) => (
@@ -507,14 +519,14 @@ function Navbar() {
         ))}
       </ul>
       <div className="nav-actions">
-       
+
         <a href="#roles"> <button className="role-btn" style={{ background: 'green' }}>Are you Authority?<Ico d={I.arrow} s={14} c="white" /></button> </a>
-        <Link to="/login">
+        {/* <Link to="/login">
           <button className="btn-ghost">Sign In</button>
-        </Link>
+        </Link> */}
 
         <Link to="/citizen/registration">
-          <button className="btn-fill">Register →</button>
+          <button className="btn-fill">Register As Citizen →</button>
         </Link>
       </div>
     </nav>
@@ -529,13 +541,13 @@ function Hero() {
         <div className="hero-badge"><div className="badge-dot" />Government of India · Digital India Initiative</div>
         <h1>Governance that<br /><span className="ac">Listens</span> to Every<br /><span className="gr">Citizen</span></h1>
         <p className="hero-sub">A structured complaint workflow empowering citizens to raise public issues, enabling ward members to resolve them, and giving authorities real-time accountability at every level of governance.</p>
-        <div className="hero-btns">
+        {/* <div className="hero-btns">
           <button className="hbtn-p">Login to Portal <Ico d={I.arrow} s={16} c="white" /></button>
           <button className="hbtn-s">Register as Citizen</button>
-        </div>
+        </div> */}
         <div>
 
-      
+
         </div>
         <div className="hero-trust">
           {[[I.verify, "Government Certified", "var(--green-light)", "var(--green)"], [I.lock, "End-to-End Encrypted", "var(--blue-light)", "var(--blue)"], [I.clock, "24/7 Available", "#fff8e6", "var(--gold)"]].map(([ic, lb, bg, co]) => (
@@ -657,10 +669,10 @@ function Hierarchy() {
 }
 
 const rdata = [
-  { icon: I.users, title: "Citizen", desc: "File complaints about public issues, track resolution status in real time, and communicate directly with your ward representative. Your voice drives real change.", tag: "Public Access", tc: "var(--saffron-light)", tt: "var(--saffron)", ib: "var(--saffron-light)", ic: "var(--saffron)" },
+  // { icon: I.users, title: "Citizen", desc: "File complaints about public issues, track resolution status in real time, and communicate directly with your ward representative. Your voice drives real change.", tag: "Public Access", tc: "var(--saffron-light)", tt: "var(--saffron)", ib: "var(--saffron-light)", ic: "var(--saffron)" },
   { icon: I.userchk, title: "Ward Member", desc: "Review citizen complaints assigned to your ward, investigate issues on the ground, and resolve or escalate within defined SLA windows to panchayath authority.", tag: "Ward Login", tc: "var(--blue-light)", tt: "var(--blue)", ib: "var(--blue-light)", ic: "var(--blue)" },
   { icon: I.landmark, title: "Panchayath Authority", desc: "Oversee all wards in your panchayath, manage escalated complaints, monitor ward-level resolution metrics, and ensure timely action from ward members.", tag: "Panchayath Login", tc: "var(--green-light)", tt: "var(--green)", ib: "var(--green-light)", ic: "var(--green)" },
-  { icon: I.building, title: "Block Authority", desc: "Manage multiple panchayaths, review high-priority escalations, deliver final administrative decisions, and access comprehensive analytics dashboards.", tag: "Block Login", tc: "#f8f0ff", tt: "#8b5cf6", ib: "#f8f0ff", ic: "#8b5cf6" },
+  // { icon: I.building, title: "Block Authority", desc: "Manage multiple panchayaths, review high-priority escalations, deliver final administrative decisions, and access comprehensive analytics dashboards.", tag: "Block Login", tc: "#f8f0ff", tt: "#8b5cf6", ib: "#f8f0ff", ic: "#8b5cf6" },
 ];
 function Roles() {
   const navigate = useNavigate()
@@ -736,10 +748,10 @@ function CTA() {
             <div className="eyebrow"><div className="eyebrow-line" />Join JanSeva Today</div>
             <h2 className="sh" style={{ color: "white", fontSize: "2.2rem" }}>Make Your Voice<br /><em style={{ fontStyle: "italic", color: "var(--saffron2)" }}>Count</em></h2>
             <p className="sp" style={{ color: "rgba(255,255,255,0.5)" }}>Join thousands of citizens already using JanSeva to resolve civic issues, hold officials accountable, and build better communities.</p>
-            <div className="cta-btns">
+            {/* <div className="cta-btns">
               <button className="cta-btn-p">Register as Citizen <Ico d={I.arrow} s={16} c="white" /></button>
               <button className="cta-btn-o">View Demo</button>
-            </div>
+            </div> */}
           </div>
           <div className="cta-right">
             <div className="cta-orb orb1" /><div className="cta-orb orb2" />
@@ -759,9 +771,9 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="footer-i">
-        <div className="footer-brand">JanSeva Portal</div>
+        <div className="footer-brand">Voice up' and Just fix it your arounds</div>
         <div className="footer-links">{["About", "Privacy", "Terms", "Contact", "Accessibility"].map(l => <a key={l} href="#">{l}</a>)}</div>
-        <div className="footer-copy">© 2025 Ministry of Panchayati Raj, Govt. of India</div>
+        <div className="footer-copy">© 2026 Govt. of India</div>
       </div>
     </footer>
   );

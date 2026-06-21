@@ -205,6 +205,16 @@ const complaintapi = {
     return axiosInstance.get("/auth/me/");
   },
 
+
+  getExploreIssues: (params = {}) => {
+    return axiosInstance.get(
+      "/complaints/explore/",
+      {
+        params
+      }
+    );
+  },
+
 };
 
 export default complaintapi;

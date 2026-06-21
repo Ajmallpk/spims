@@ -111,6 +111,10 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(read_only=True)
     media = ComplaintMediaSerializer(many=True, read_only=True)
     resolution = ComplaintResolutionSerializer(read_only=True)
+    panchayath_name = serializers.CharField(
+        source="panchayath.username",
+        read_only=True
+    )
 
     class Meta:
         model = Complaint
@@ -125,6 +129,7 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "status",
             "citizen_name",
             "ward_name",
+            "panchayath_name",
             "ward",
             "upvotes_count",
             "comments_count",

@@ -20,6 +20,7 @@ from apps.notification.utils import send_notification
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.db.models.functions import Random
 
 from apps.notification.models import Notification
 import re
@@ -985,3 +986,69 @@ class SearchUsersView(APIView):
         ]
 
         return Response(data)
+    
+    
+    
+
+class ExploreComplaintView(ListAPIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = ComplaintFeedSerializer
+    pagination_class = ComplaintFeedPagination
+
+    def get_queryset(self):
+
+        queryset = (
+            Complaint.objects
+            .select_related(
+                "citizen",
+                "ward",
+                "panchayath",
+                "resolution"
+            )
+            .prefetch_related(
+                "media",
+                "resolution__media"
+            )
+            .annotate(
+                upvotes_count=Count("upvotes", distinct=True),
+                comments_count=Count("comments", distinct=True)
+            )
+        )
+
+        search = self.request.query_params.get("search")
+        ward = self.request.query_params.get("ward")
+        panchayath = self.request.query_params.get("panchayath")
+        category = self.request.query_params.get("category")
+        status = self.request.query_params.get("status")
+
+        if search:
+            queryset = queryset.filter(
+                citizen__username__icontains=search
+            )
+
+        if ward:
+            queryset = queryset.filter(
+                ward_id=ward
+            )
+
+        if panchayath:
+            queryset = queryset.filter(
+                panchayath_id=panchayath
+            )
+
+        if category:
+            queryset = queryset.filter(
+                category=category
+            )
+
+        if status:
+            queryset = queryset.filter(
+                status=status
+            )
+
+        
+        if not any([search, ward, panchayath, category, status]):
+            queryset = queryset.order_by(Random())
+
+        return queryset

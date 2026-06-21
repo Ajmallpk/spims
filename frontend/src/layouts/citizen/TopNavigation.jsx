@@ -3,6 +3,7 @@ import Avatar from "@/components/ui/Avatar";
 import { useNavigate, useLocation } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
 import NotificationBell from "@/components/citizen/NotificationBell";
+import FixItLogo from "@/pages/common/FixItLogo";
 
 
 
@@ -27,16 +28,16 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    id: "notifications",
-    label: "Notifications",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      </svg>
-    ),
-  },
+  // {
+  //   id: "notifications",
+  //   label: "Notifications",
+  //   icon: (
+  //     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+  //       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+  //       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  //     </svg>
+  //   ),
+  // },
   {
     id: "messages",
     label: "Messages",
@@ -46,17 +47,17 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    id: "insights",
-    label: "Insights",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-        <line x1="18" y1="20" x2="18" y2="10" />
-        <line x1="12" y1="20" x2="12" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="14" />
-      </svg>
-    ),
-  },
+  // {
+  //   id: "insights",
+  //   label: "Insights",
+  //   icon: (
+  //     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+  //       <line x1="18" y1="20" x2="18" y2="10" />
+  //       <line x1="12" y1="20" x2="12" y2="4" />
+  //       <line x1="6" y1="20" x2="6" y2="14" />
+  //     </svg>
+  //   ),
+  // },
   {
     id: "profile",
     label: "Profile",
@@ -258,13 +259,27 @@ const TopNavigation = ({
       <div className="max-w-5xl mx-auto px-4 flex items-center justify-between mb-3">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-teal-500 rounded-xl flex items-center justify-center shadow-md">
-            <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-          </div>
-          <span className="font-bold text-gray-800 text-sm tracking-wide">SPIMS</span>
+          
+            <FixItLogo
+              iconWidth={55}
+              showTagline={false}
+              primaryColor="black"
+              accentColor="green"
+              logoColor="#22b382"
+
+            />
+          
+          {/* <span className="font-bold text-gray-800 text-sm tracking-wide">FIX IT</span> */}
         </div>
+
+        {/* <FixItLogo
+          iconWidth={55}
+          showTagline={false}
+          primaryColor="black"
+          accentColor="green"
+          logoColor="#22b382"
+
+        /> */}
 
         {/* Search */}
         <div className="flex-1 max-w-sm mx-6">

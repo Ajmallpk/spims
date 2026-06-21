@@ -2,6 +2,7 @@
 import citizenapi from "@/service/citizenurls";
 import { useState, useEffect } from "react";
 import { triggerSuspension } from "@/utils/suspensionHandler";
+import FixItLogo from "../common/FixItLogo";
 // ── SVG Icons ──────────────────────────────────────────────────────
 const Shield = ({ size = 20, color = "currentColor" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
 const MailIcon = ({ size = 15 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>;
@@ -485,14 +486,13 @@ function LeftLogin() {
   return (
     <div className="flex flex-col h-full" style={{ animation: "fadeUp 0.38s ease both" }}>
       {/* Brand */}
-      <div className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ background: "rgba(255,255,255,0.15)", borderColor: "rgba(255,255,255,0.22)" }}>
-          <Shield size={20} color="white" />
-        </div>
-        <div>
-          <div className="text-white font-bold text-base leading-tight">Fixit</div>
-          <div className="text-xs" style={{ color: "rgba(255,255,255,0.65)" }}>Verified Community Platform</div>
-        </div>
+      <div className="mb-10">
+        <FixItLogo
+          iconWidth={130}
+          primaryColor="#ffffff"
+          accentColor="#7dd3fc"
+          tagline="Verified Community Platform"
+        />
       </div>
 
       <h1 className="text-white font-extrabold text-3xl leading-tight mb-3">Welcome Back</h1>
@@ -556,14 +556,14 @@ function LeftSignUp() {
   return (
     <div className="flex flex-col h-full" style={{ animation: "fadeUp 0.38s ease both" }}>
       {/* Brand */}
-      <div className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={{ background: "rgba(255,255,255,0.15)", borderColor: "rgba(255,255,255,0.22)" }}>
-          <Shield size={20} color="white" />
-        </div>
-        <div>
-          <div className="text-white font-bold text-base leading-tight">Fixit</div>
-          <div className="text-xs" style={{ color: "rgba(255,255,255,0.65)" }}>Your Community, Your Voice</div>
-        </div>
+      <div className="mb-10">
+        <FixItLogo
+          iconWidth={130}
+          primaryColor="#ffffff"
+          accentColor="#7dd3fc"
+          tagline="Your Community, Your Voice"
+          iconClassName="animate-bounce"
+        />
       </div>
 
       <h1 className="text-white font-extrabold text-3xl leading-tight mb-3">Join Your Verified Community</h1>
@@ -653,8 +653,12 @@ export default function AuthPage() {
           <div className="w-full bg-white rounded-3xl" style={{ maxWidth: 460, padding: "2.5rem 2.25rem 2rem", boxShadow: "0 8px 40px rgba(37,99,235,0.09), 0 1px 4px rgba(0,0,0,0.04)" }}>
 
             {/* Top icon */}
-            <div className="flex items-center justify-center w-14 h-14 rounded-2xl mx-auto mb-5" style={{ background: "#111827" }}>
-              <Shield size={26} color="white" />
+            <div className="flex justify-center mb-5">
+              <FixItLogo
+                iconWidth={90}
+                showTagline={false}
+                
+              />
             </div>
 
             {/* Title */}

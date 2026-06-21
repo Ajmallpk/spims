@@ -81,6 +81,8 @@ import ResetPassword from "@/pages/citizen/ResetPassword"
 import CitizenComplaintChatList from "./pages/citizen/CitizenComplaintChatList";
 import CitizenComplaintChatPage from "./pages/citizen/CitizenComplaintChatPage";
 import CitizenComplaintDetailPage from "./pages/citizen/CitizenComplaintDetailPage";
+import ExploreIssuesPage from "@/pages/citizen/ExploreIssuesPage";
+import IssueDetailPage from "./pages/citizen/IssueDetailPage";
 
 
 
@@ -149,6 +151,18 @@ export default function App() {
           <Route index element={<CitizenHome />} />
 
           <Route path="home" element={<CitizenHome />} />
+
+
+          <Route
+            path="explore"
+            element={<ExploreIssuesPage />}
+          />
+
+
+          <Route
+            path="explore/:id"
+            element={<IssueDetailPage />}
+          />
 
           {/* <Route path="explore" element={<ExploreIssues />} /> */}
 

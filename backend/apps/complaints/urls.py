@@ -20,4 +20,5 @@ urlpatterns = [
     path("complaint/<int:complaint_id>/timeline/", views.ComplaintTimelineView.as_view()),
     path("<int:complaint_id>/update/", views.UpdateComplaintView.as_view()),
     path("<int:complaint_id>/delete/", views.DeleteComplaintView.as_view()),
+    path("explore/",views.ExploreComplaintView.as_view()),
 ]
