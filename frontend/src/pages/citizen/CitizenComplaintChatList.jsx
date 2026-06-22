@@ -316,6 +316,7 @@ const CitizenComplaintChatList = () => {
           onChange={setQuery}
           onClear={() => setQuery("")}
           resultCount={filtered.length}
+          placeholder="Search by complaint title or ward name..."
         />
 
         {/* Card list or states */}

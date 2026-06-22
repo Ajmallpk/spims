@@ -1,7 +1,7 @@
 import React from "react";
 import { Search, X } from "lucide-react";
 
-const ComplaintChatSearch = ({ value, onChange, onClear, resultCount }) => {
+const ComplaintChatSearch = ({ value, onChange, onClear, resultCount,placeholder = "Search..." }) => {
   return (
     <div className="mb-5">
       <div className="relative">
@@ -13,7 +13,7 @@ const ComplaintChatSearch = ({ value, onChange, onClear, resultCount }) => {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Search by complaint title or citizen name…"
+          placeholder={placeholder}
           className="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
         />
 
