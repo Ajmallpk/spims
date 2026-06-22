@@ -14,7 +14,9 @@ const InfoRow = ({ icon, label, value }) => (
     </div>
     <div className="flex-1 min-w-0">
       <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</p>
-      <p className="text-sm text-gray-800 font-medium mt-0.5 break-words">{value || "—"}</p>
+      <p className="text-sm text-gray-800 font-medium mt-0.5 break-all">
+        {value || "—"}
+      </p>
     </div>
   </div>
 );

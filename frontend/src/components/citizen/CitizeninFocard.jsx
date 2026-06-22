@@ -7,9 +7,14 @@
  */
 
 const Field = ({ label, value }) => (
-  <div className="space-y-0.5">
-    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{label}</p>
-    <p className="text-sm text-gray-800 font-medium">{value || "—"}</p>
+  <div className="space-y-0.5 min-w-0">
+    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+      {label}
+    </p>
+
+    <p className="text-sm text-gray-800 font-medium break-all">
+      {value || "—"}
+    </p>
   </div>
 );
 
@@ -27,10 +32,10 @@ const CitizenInfoCard = ({ profile, loading }) => {
 
   const registrationDate = profile?.registrationDate
     ? new Date(profile.registrationDate).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
     : null;
 
   return (
@@ -73,7 +78,7 @@ const CitizenInfoCard = ({ profile, loading }) => {
             [1, 2, 3].map((n) => <SkeletonField key={n} />)
           ) : (
             <>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-teal-500">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -82,7 +87,7 @@ const CitizenInfoCard = ({ profile, loading }) => {
                 </div>
                 <Field label="Email" value={profile?.email} />
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0"> 
                 <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-teal-500">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.06 6.06l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 16.92z" />
