@@ -62,6 +62,9 @@ const VerificationStatusCard = ({ verificationStatus, loading }) => {
   const status = verificationStatus?.status ?? "NOT_SUBMITTED";
   const meta = STATUS_META[status] ?? STATUS_META.NOT_SUBMITTED;
 
+  console.log("verificationStatus =", verificationStatus);
+  console.log("status =", status);
+
   const formatDate = (dateStr) => {
     if (!dateStr) return null;
     return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -73,10 +76,9 @@ const VerificationStatusCard = ({ verificationStatus, loading }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-md p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-gray-800">Verification Status</h3>
-        {!loading && <StatusBadge status={status} />}
-      </div>
+      <h3 className="text-sm font-bold text-gray-800">
+        Verification Status
+      </h3>
 
       {loading ? (
         <div className="space-y-3">
@@ -100,7 +102,7 @@ const VerificationStatusCard = ({ verificationStatus, loading }) => {
             <div className="bg-red-50 border border-red-100 rounded-xl p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-red-500">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
                 <p className="text-xs font-semibold text-red-700 uppercase tracking-wide">Rejection Reason</p>
               </div>

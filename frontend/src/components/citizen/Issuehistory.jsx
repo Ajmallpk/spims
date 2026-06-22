@@ -50,11 +50,12 @@ const IssueCard = ({ issue }) => {
       </div>
 
       {/* Description */}
+      <p>#ID:{issue.id}</p>
       <p
         className={`text-sm text-gray-600 leading-relaxed ${expanded ? "" : "line-clamp-2"
           }`}
       >
-        {issue.description}
+        Description:{issue.description}
       </p>
       {issue.description?.length > 120 && (
         <button
@@ -75,7 +76,7 @@ const IssueCard = ({ issue }) => {
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            {new Date(issue.createdAt).toLocaleDateString("en-IN", {
+            {new Date(issue.created_at).toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
               year: "numeric",

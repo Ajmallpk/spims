@@ -221,6 +221,7 @@ const CitizenComplaintDetailPage = () => {
     const { complaintId } = useParams();
     const navigate = useNavigate();
     const [complaint, setComplaint] = useState(null);
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
     useEffect(() => {
         loadComplaint();
@@ -294,7 +295,19 @@ const CitizenComplaintDetailPage = () => {
                         </h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {complaint.media.map((item) => (
-                                <div key={item.id} className="rounded-xl overflow-hidden bg-gray-100 aspect-video">
+                                <div
+                                    key={item.id}
+                                    onClick={() => setSelectedMedia(item)}
+                                    className="
+                                        rounded-xl
+                                        overflow-hidden
+                                        bg-gray-100
+                                        aspect-video
+                                        cursor-pointer
+                                        hover:scale-105
+                                        transition
+                                    "
+                                >
                                     {item.file_type === "IMAGE" ? (
                                         <img
                                             src={item.file}
@@ -328,6 +341,71 @@ const CitizenComplaintDetailPage = () => {
                 )}
 
             </div>
+
+            {
+                selectedMedia && (
+
+                    <div
+                        className="
+        fixed
+        inset-0
+        bg-black/80
+        flex
+        items-center
+        justify-center
+        z-50
+      "
+                    >
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setSelectedMedia(null)}
+                            className="
+          absolute
+          top-5
+          right-5
+          text-white
+          text-4xl
+          font-bold
+        "
+                        >
+                            ×
+                        </button>
+
+                        {
+                            selectedMedia.file_type === "IMAGE" ? (
+
+                                <img
+                                    src={selectedMedia.file}
+                                    alt=""
+                                    className="
+              max-w-[90vw]
+              max-h-[90vh]
+              rounded-xl
+            "
+                                />
+
+                            ) : (
+
+                                <video
+                                    controls
+                                    autoPlay
+                                    className="
+                                    max-w-[90vw]
+                                    max-h-[90vh]
+                                    rounded-xl
+                                    "
+                                >
+                                    <source src={selectedMedia.file} />
+                                </video>
+
+                            )
+                        }
+
+                    </div>
+
+                )
+            }
         </div>
     );
 };

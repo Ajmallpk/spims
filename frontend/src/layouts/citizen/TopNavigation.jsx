@@ -259,16 +259,16 @@ const TopNavigation = ({
       <div className="max-w-5xl mx-auto px-4 flex items-center justify-between mb-3">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          
-            <FixItLogo
-              iconWidth={55}
-              showTagline={false}
-              primaryColor="black"
-              accentColor="green"
-              logoColor="#22b382"
 
-            />
-          
+          <FixItLogo
+            iconWidth={55}
+            showTagline={false}
+            primaryColor="black"
+            accentColor="green"
+            logoColor="#22b382"
+
+          />
+
           {/* <span className="font-bold text-gray-800 text-sm tracking-wide">FIX IT</span> */}
         </div>
 
@@ -282,7 +282,7 @@ const TopNavigation = ({
         /> */}
 
         {/* Search */}
-        <div className="flex-1 max-w-sm mx-6">
+        {/* <div className="flex-1 max-w-sm mx-6">
           <div className="bg-white rounded-full px-4 py-2 flex items-center gap-2 shadow-sm border border-gray-200">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-gray-400">
               <circle cx="11" cy="11" r="8" />
@@ -293,6 +293,46 @@ const TopNavigation = ({
               placeholder="Search wards, issues, authorities..."
               className="bg-transparent text-sm text-gray-600 placeholder-gray-400 outline-none flex-1"
             />
+          </div>
+        </div> */}
+
+
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-white rounded-full shadow-md px-3 py-1.5 flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    navigate(item.id === "home" ? "/citizen" : `/citizen/${item.id}`);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${location.pathname === (item.id === "home" ? "/citizen" : `/citizen/${item.id}`)
+                    ? "bg-teal-500 text-white shadow-sm"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Verified badge */}
+            <div
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border
+  ${verificationStatus === "APPROVED"
+                  ? "bg-teal-50 text-teal-700 border-teal-100"
+                  : "bg-red-50 text-red-700 border-red-100"
+                }`}
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+
+              {verificationStatus === "APPROVED"
+                ? "Verified Citizen"
+                : "Not Verified"}
+            </div>
           </div>
         </div>
 
@@ -314,7 +354,7 @@ const TopNavigation = ({
       </div>
 
       {/* Floating pill nav */}
-      <div className="max-w-5xl mx-auto px-4">
+      {/* <div className="max-w-5xl mx-auto px-4">
         <div className="bg-white rounded-full shadow-md px-3 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-1">
             {navItems.map((item) => (
@@ -334,7 +374,7 @@ const TopNavigation = ({
             ))}
           </div>
 
-          {/* Verified badge */}
+          
           <div
             className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border
   ${verificationStatus === "APPROVED"
@@ -351,7 +391,7 @@ const TopNavigation = ({
               : "Not Verified"}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -222,8 +222,14 @@ class ComplaintUpvoteView(APIView):
                 logger.info(f"Citizen {user.id} removed upvote from {complaint.id}")
 
                 return success_response(
-                    message="Upvote removed"
+                    message="Upvote removed",
+                    data={
+                        "upvotes_count": complaint.upvotes.count(),
+                        "is_upvoted": False
+                    }
                 )
+                
+                
 
             if complaint.citizen != user:
                 send_notification(
@@ -239,7 +245,11 @@ class ComplaintUpvoteView(APIView):
 
             return success_response(
                 message="Complaint upvoted",
-                status=201
+                status=201,
+                data={
+                    "upvotes_count": complaint.upvotes.count(),
+                    "is_upvoted": True
+                }
             )
 
         except Exception as e:
@@ -510,11 +520,11 @@ class ComplaintDetailView(APIView):
 
             user = request.user
 
-            if user not in [complaint.citizen, complaint.ward, complaint.panchayath]:
-                return error_response(
-                    message="You are not allowed to view this complaint",
-                    status=403
-                )
+            # if user not in [complaint.citizen, complaint.ward, complaint.panchayath]:
+            #     return error_response(
+            #         message="You are not allowed to view this complaint",
+            #         status=403
+            #     )
 
             serializer = ComplaintDetailSerializer(complaint)
 

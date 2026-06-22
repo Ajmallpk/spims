@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   ChevronDown,
   X,
+  ArrowUp,
 } from "lucide-react";
 import complaintapi from "@/service/complaintsurls";
 import { useNavigate } from "react-router-dom";
@@ -304,7 +305,7 @@ border-gray-100
 py-1.5
 max-h-64
 overflow-y-auto
-z-[99999]
+z-20
 "
         >
           {filter.options.map((option) => (
@@ -345,6 +346,7 @@ const ExploreIssuesPage = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [nextPage, setNextPage] = useState(null);
+  const [showTopButton, setShowTopButton] = useState(false);
 
   const sentinelRef = useRef(null);
   const filterBarRef = useRef(null);
@@ -380,6 +382,40 @@ const ExploreIssuesPage = () => {
     };
 
     fetchIssues();
+
+  }, []);
+
+
+
+  useEffect(() => {
+
+    const handleScroll = () => {
+
+      if (window.scrollY > 400) {
+
+        setShowTopButton(true);
+
+      } else {
+
+        setShowTopButton(false);
+
+      }
+
+    };
+
+    window.addEventListener(
+      "scroll",
+      handleScroll
+    );
+
+    return () => {
+
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+
+    };
 
   }, []);
 
@@ -566,6 +602,20 @@ const ExploreIssuesPage = () => {
     return () => observer.disconnect();
   }, [loadMore]);
 
+
+
+  const scrollToTop = () => {
+
+    window.scrollTo({
+
+      top: 0,
+
+      behavior: "smooth"
+
+    });
+
+  };
+
   return (
     <div className="min-h-screen bg-[#f3f4f6] pb-16">
       <div className="max-w-5xl mx-auto px-4 pt-8 overflow-visible">
@@ -592,7 +642,7 @@ const ExploreIssuesPage = () => {
         {/* Filter Buttons Row */}
         <div
           ref={filterBarRef}
-          className="flex items-center gap-2 mb-7  relative z-50"
+          className="flex items-center gap-2 mb-7  relative z-10"
         >
           {FILTERS.map((filter) => (
             <FilterButton
@@ -656,6 +706,33 @@ const ExploreIssuesPage = () => {
           </>
         )}
       </div>
+
+      {
+        showTopButton && (
+
+          <button
+            onClick={scrollToTop}
+            className="
+      fixed
+      bottom-8
+      right-8
+      bg-teal-500
+      text-white
+      p-3
+      rounded-full
+      shadow-lg
+      hover:bg-teal-600
+      transition
+      z-50
+      "
+          >
+
+            <ArrowUp className="w-5 h-5" />
+
+          </button>
+
+        )
+      }
     </div>
   );
 };
