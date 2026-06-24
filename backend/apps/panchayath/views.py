@@ -197,12 +197,42 @@ class PanchayathDashboardView(APIView):
                 is_verified=True,
                 ward_verification__panchayath=user
             ).count()
+            
+            
+            total_complaints = Complaint.objects.filter(
+                ward__ward_verification__panchayath=user
+            ).count()
+            
+            
+            
+            escalated_complaints = Complaint.objects.filter(
+                ward__ward_verification__panchayath=user,
+                status="ESCALATED"
+            ).count()
+
+            in_progress_complaints = Complaint.objects.filter(
+                ward__ward_verification__panchayath=user,
+                status="IN_PROGRESS"
+            ).count()
+
+            resolved_complaints = Complaint.objects.filter(
+                ward__ward_verification__panchayath=user,
+                status="RESOLVED"
+            ).count()
+
+            reassigned_complaints = Complaint.objects.filter(
+                ward__ward_verification__panchayath=user,
+                is_reassigned=True
+            ).count()
 
             total_wards = (
                 approved_wards +
                 (verification_stats.get("pending") or 0) +
                 (verification_stats.get("rejected") or 0)
             )
+            
+            
+            
 
             verification = getattr(user, "panchayath_verification", None)
 
@@ -217,6 +247,12 @@ class PanchayathDashboardView(APIView):
                     "approved_wards": approved_wards,
                     "pending_wards": verification_stats.get("pending", 0),
                     "rejected_wards": verification_stats.get("rejected", 0),
+                    
+                    "total_complaints": total_complaints,
+                    "escalated_complaints": escalated_complaints,
+                    "in_progress_complaints": in_progress_complaints,
+                    "resolved_complaints": resolved_complaints,
+                    "reassigned_complaints": reassigned_complaints,
                 }
             )
 
