@@ -409,10 +409,35 @@ export default function ReassignedComplaints() {
 
           {!loading && !error && (
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="inline-flex items-center gap-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs font-semibold px-3 py-1.5 rounded-full">
-                <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border
+    ${statusFilter === "resolved"
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : statusFilter === "all"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                  }
+  `}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full animate-pulse
+      ${statusFilter === "resolved"
+                      ? "bg-green-500"
+                      : statusFilter === "all"
+                        ? "bg-blue-500"
+                        : "bg-yellow-500"
+                    }
+    `}
+                />
+
                 {complaints.length}{" "}
-                {complaints.length === 1 ? "Complaint" : "Complaints"} Pending
+                {complaints.length === 1 ? "Complaint" : "Complaints"}{" "}
+
+                {statusFilter === "resolved"
+                  ? "Resolved"
+                  : statusFilter === "all"
+                    ? "Total"
+                    : "Pending"}
               </span>
             </div>
           )}

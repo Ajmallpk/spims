@@ -114,6 +114,20 @@ const panchayathApi = {
     )
   },
 
+  wardComplaints: (id) => {
+    return panchayathAxios.get(
+      `/panchayath/ward/${id}/complaints/`
+    )
+  },
+
+
+
+  getComplaintFullDetail: (id) => {
+    return panchayathAxios.get(
+      `/panchayath/complaint/${id}/full-details/`
+    )
+  },
+
 };
 
 

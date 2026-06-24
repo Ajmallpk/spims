@@ -15,53 +15,6 @@ import toast from "react-hot-toast";
 
 
 
-const RECENT_ACTIVITY = [
-  {
-    id: 1,
-    title: "Ward 07 – Verification Submitted",
-    desc: "Officer submitted documents for annual ward verification.",
-    time: "10 min ago",
-    badge: "Pending",
-    badgeCls: "bg-amber-100 text-amber-700 border-amber-200",
-    dotCls: "bg-amber-400",
-  },
-  {
-    id: 2,
-    title: "Complaint #C-2041 Escalated",
-    desc: "Road repair complaint in Ward 12 exceeded SLA — auto-escalated.",
-    time: "45 min ago",
-    badge: "Escalated",
-    badgeCls: "bg-rose-100 text-rose-700 border-rose-200",
-    dotCls: "bg-rose-500",
-  },
-  {
-    id: 3,
-    title: "Ward 24 – New Ward Registered",
-    desc: "Muthuvara North registered and pending first verification.",
-    time: "2 hrs ago",
-    badge: "New",
-    badgeCls: "bg-blue-100 text-blue-700 border-blue-200",
-    dotCls: "bg-blue-500",
-  },
-  {
-    id: 4,
-    title: "Ward 03 – Verification Approved",
-    desc: "Annual verification approved by District Collector office.",
-    time: "Yesterday",
-    badge: "Approved",
-    badgeCls: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    dotCls: "bg-emerald-500",
-  },
-  {
-    id: 5,
-    title: "Complaint #C-2039 Resolved",
-    desc: "Street light outage in Ward 09 resolved by field officer.",
-    time: "Yesterday",
-    badge: "Resolved",
-    badgeCls: "bg-teal-100 text-teal-700 border-teal-200",
-    dotCls: "bg-teal-500",
-  },
-];
 
 const WARD_PROGRESS = [
   { label: "Approved", count: 19, total: 24, barCls: "bg-emerald-500" },
@@ -126,6 +79,68 @@ function ActivityRow({ item }) {
   );
 }
 
+
+
+function ComplaintAnalytics({ data }) {
+  const cards = [
+    {
+      label: "Total Complaints",
+      value: data?.total_complaints || 0,
+      color: "bg-blue-50 border-blue-200 text-blue-700",
+    },
+    {
+      label: "Escalated",
+      value: data?.escalated_complaints || 0,
+      color: "bg-red-50 border-red-200 text-red-700",
+    },
+    {
+      label: "In Progress",
+      value: data?.in_progress_complaints || 0,
+      color: "bg-amber-50 border-amber-200 text-amber-700",
+    },
+    {
+      label: "Resolved",
+      value: data?.resolved_complaints || 0,
+      color: "bg-green-50 border-green-200 text-green-700",
+    },
+    {
+      label: "Reassigned",
+      value: data?.reassigned_complaints || 0,
+      color: "bg-purple-50 border-purple-200 text-purple-700",
+    },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-100">
+        <h3 className="text-sm font-bold text-slate-800">
+          Complaint Analytics
+        </h3>
+        <p className="text-xs text-slate-400 mt-0.5">
+          Complaints across all wards
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 p-5">
+        {cards.map((card) => (
+          <div
+            key={card.label}
+            className={`p-4 rounded-xl border ${card.color}`}
+          >
+            <p className="text-xs font-semibold">
+              {card.label}
+            </p>
+
+            <p className="text-2xl font-black mt-1">
+              {card.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -140,7 +155,7 @@ export default function Dashboard() {
       id: 1,
       label: "Total Wards",
       value: dashboardData?.total_wards ?? "—",
-      change: "+2 this month",
+
       positive: true,
       gradient: "from-blue-600 to-blue-400",
       bg: "from-blue-50 to-blue-100/70",
@@ -180,7 +195,6 @@ export default function Dashboard() {
       id: 3,
       label: "Approved Wards",
       value: dashboardData?.approved_wards ?? "—",
-      change: "79% completion",
       positive: true,
       gradient: "from-emerald-600 to-green-400",
       bg: "from-emerald-50 to-green-100/70",
@@ -199,8 +213,7 @@ export default function Dashboard() {
     {
       id: 4,
       label: "Total Complaints",
-      value: "312",
-      change: "+14 this week",
+      value: dashboardData?.total_complaints ?? 0,
       positive: null,
       gradient: "from-violet-600 to-purple-400",
       bg: "from-violet-50 to-purple-100/70",
@@ -289,12 +302,12 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="text-center px-4 py-2.5 bg-white/15 rounded-xl backdrop-blur-sm border border-white/20">
+            {/* <div className="text-center px-4 py-2.5 bg-white/15 rounded-xl backdrop-blur-sm border border-white/20">
               <p className="text-2xl font-black leading-none">
                 {verificationProgress}%
               </p>
               <p className="text-[10px] text-blue-100 font-semibold mt-0.5">Verification</p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -315,22 +328,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
         <section className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-full">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-slate-800">Recent Activity</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Latest ward and complaint events</p>
-              </div>
-              <button className="text-xs text-blue-600 font-semibold hover:underline">
-                View all
-              </button>
-            </div>
-            <div className="px-4 py-2 max-h-80 overflow-y-auto divide-y divide-slate-50">
-              {RECENT_ACTIVITY.map((item) => (
-                <ActivityRow key={item.id} item={item} />
-              ))}
-            </div>
-          </div>
+          <ComplaintAnalytics
+            data={dashboardData}
+          />
         </section>
 
         {/* Ward Verification Progress */}
@@ -379,9 +379,9 @@ export default function Dashboard() {
               </div>
 
               {/* Quick action */}
-              <button className="mt-2 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors duration-150 shadow-sm">
+              {/* <button className="mt-2 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors duration-150 shadow-sm">
                 Review Pending Verifications →
-              </button>
+              </button> */}
             </div>
           </div>
         </section>

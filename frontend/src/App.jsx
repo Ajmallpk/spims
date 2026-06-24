@@ -45,6 +45,7 @@ import PanchayathEmailChangeConfirm from "./components/panjayath/PanchayathEmail
 import EscalatedComplaints from "./pages/panjayath/EscalatedComplaints";
 import PanchayathComplaintDetail from "./pages/panjayath/PanchayathComplaintDetail";
 import PanchayathAuthorityChat from "@/pages/panjayath/PanchayathAuthorityChat";
+import ComplaintDetail from "./pages/panjayath/ComplaintDetail";
 
 
 /* ───────── WARD MODULE ───────── */
@@ -257,6 +258,14 @@ export default function App() {
               </VerificationGuard>
             }
           />
+
+
+
+          <Route
+            path="/panchayath/complaint/:id"
+            element={<ComplaintDetail />}
+          />
+
 
           <Route
             path="escalated-complaints"

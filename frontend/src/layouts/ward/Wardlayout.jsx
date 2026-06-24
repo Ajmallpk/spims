@@ -33,6 +33,10 @@ export default function WardLayout() {
     useState(false);
 
 
+  const [verificationLoaded, setVerificationLoaded] =
+    useState(false);
+
+
   const WS_BASE_URL =
     "ws://localhost:8000";
 
@@ -51,10 +55,7 @@ export default function WardLayout() {
 
         setUser(res.data);
 
-        setIsVerified(
-          res.data.is_verified
-        );
-
+      
       }
 
       catch (error) {
@@ -240,26 +241,32 @@ export default function WardLayout() {
     const syncVerification = async () => {
       try {
 
-
-        const res = await axiosInstance.get("/ward/profile/");
+        const res =
+          await axiosInstance.get("/ward/profile/");
 
         const status =
           res.data.data.verification_status;
 
-        const isApproved =
-          status === "APPROVED";
+        setIsVerified(
+          status === "APPROVED"
+        );
 
-        const submitted =
+        setVerificationSubmitted(
           status === "PENDING" ||
-          status === "APPROVED";
-
-        setIsVerified(isApproved);
-
-        setVerificationSubmitted(submitted);
-
+          status === "APPROVED"
+        );
 
       } catch (err) {
-        console.error("Verification sync failed:", err);
+
+        console.error(
+          "Verification sync failed:",
+          err
+        );
+
+      } finally {
+
+        setVerificationLoaded(true);
+
       }
     };
 
@@ -267,27 +274,45 @@ export default function WardLayout() {
   }, []);
 
   useEffect(() => {
+
+    if (!verificationLoaded) return;
+
     if (
       user &&
       user.role !== "WARD"
     ) {
-      navigate("/login", { replace: true });
+      navigate("/login", {
+        replace: true
+      });
+
       return;
     }
 
-    const isProtectedRoute = PROTECTED_PATHS.some((path) =>
-      location.pathname.startsWith(path)
-    );
+    const isProtectedRoute =
+      PROTECTED_PATHS.some((path) =>
+        location.pathname.startsWith(path)
+      );
 
     if (!isVerified && isProtectedRoute) {
+
       if (verificationSubmitted) {
+
         setShowPendingModal(true);
+
       } else {
+
         setShowRequiredModal(true);
+
       }
-      navigate("/ward/profile", { replace: true });
+
+      navigate(
+        "/ward/profile",
+        { replace: true }
+      );
     }
+
   }, [
+    verificationLoaded,
     location.pathname,
     user?.role,
     isVerified,

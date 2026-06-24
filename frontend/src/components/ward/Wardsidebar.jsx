@@ -32,6 +32,7 @@ const NAV_ITEMS = [
     label: "Complaint Chats",
     path: "/ward/complaint-chats",
     icon: MessageSquare,
+    protected:true
   },
 
   {
