@@ -427,6 +427,59 @@ class WardVerificationDetailView(APIView):
 
 
 
+class WardComplaintListView(APIView):
+    permission_classes = [IsActivePanchayath]
+
+    def get(self, request, pk):
+        
+        
+        print("WARD PK =", pk)
+        print("USER =", request.user)
+
+        ward = WardVerification.objects.filter(
+            pk=pk,
+            panchayath=request.user
+        ).first()
+        
+        
+        print("WARD =", ward)
+
+        if not ward:
+            return error_response(
+                message="Ward not found",
+                status=404
+            )
+
+        complaints = Complaint.objects.filter(
+            ward=ward.user
+        ).select_related(
+            "citizen"
+        ).order_by("-created_at")
+        
+        
+        print(
+            "COMPLAINT COUNT =",
+            complaints.count()
+        )
+
+        data = [
+            {
+                "id": c.id,
+                "title": c.title,
+                "status": c.status,
+                "category": c.category,
+                "citizen_name": c.citizen.username,
+                "created_at": c.created_at,
+            }
+            for c in complaints
+        ]
+
+        return success_response(
+            message="Ward complaints fetched",
+            data=data
+        )
+
+
 
 
 class ApproveWardView(APIView):
@@ -1046,8 +1099,123 @@ class PanchayathComplaintDetailView(APIView):
                 status=500
             )
     
-    
-    
+
+
+
+class PanchayathComplaintFullDetailView(APIView):
+    permission_classes = [IsActivePanchayath]
+
+    def get(self, request, complaint_id):
+
+        try:
+
+            complaint = Complaint.objects.select_related(
+                "citizen",
+                "resolution"
+            ).get(
+                id=complaint_id,
+                panchayath=request.user
+            )
+
+            data = {
+                "id": complaint.id,
+                "title": complaint.title,
+                "description": complaint.description,
+                "status": complaint.status,
+                "category": complaint.category,
+                "location": complaint.location,
+
+                "citizen_name":
+                    complaint.citizen.username,
+
+                "citizen_email":
+                    complaint.citizen.email,
+
+                "created_at":
+                    complaint.created_at,
+
+                "image_proof":
+                    complaint.image_proof.url
+                    if complaint.image_proof
+                    else None,
+
+                "video_proof":
+                    complaint.video_proof.url
+                    if complaint.video_proof
+                    else None,
+                    
+                    
+                "upvotes_count":
+                    complaint.upvotes.count(),
+
+                "comments_count":
+                    complaint.comments.count(),
+
+                "resolved_at":
+                    complaint.resolved_at,
+
+                "is_reassigned":
+                    complaint.is_reassigned,
+
+                "reassign_note":
+                    complaint.reassign_note,
+
+                "escalation_reason":
+                    complaint.escalation_reason,
+
+                "updated_at":
+                    complaint.updated_at,
+                    
+                    
+                "complaint_media": [
+                    {
+                        "file": media.file.url,
+                        "file_type": media.file_type
+                    }
+                    for media in complaint.media.all()
+                ],
+            }
+
+            if hasattr(
+                complaint,
+                "resolution"
+            ):
+
+                data["resolution"] = {
+
+                    "message":
+                        complaint.resolution.message,
+
+                    "proof_image":
+                        complaint.resolution.proof_image.url
+                        if complaint.resolution.proof_image
+                        else None,
+
+                    "proof_video":
+                        complaint.resolution.proof_video.url
+                        if complaint.resolution.proof_video
+                        else None,
+
+                    "media": [
+                        {
+                            "file": media.file.url,
+                            "file_type": media.file_type
+                        }
+                        for media in complaint.resolution.media.all()
+                    ]
+                }
+
+            return success_response(
+                message="Complaint detail fetched",
+                data=data
+            )
+
+        except Complaint.DoesNotExist:
+
+            return error_response(
+                message="Complaint not found",
+                status=404
+            )
     
     
 
