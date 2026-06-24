@@ -15,9 +15,14 @@ const CATEGORY_ICONS = {
 };
 
 export default function ComplaintInfoCard({ complaint }) {
+
+
+
+
   if (!complaint) return null;
   const catKey = (complaint.category ?? "other").toLowerCase();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [previewMedia, setPreviewMedia] = useState(null);
   console.log("CARD STATUS 👉", complaint?.status);
 
   return (
@@ -55,13 +60,15 @@ export default function ComplaintInfoCard({ complaint }) {
               {complaint.media[currentIndex].type === "IMAGE" ? (
                 <img
                   src={complaint.media[currentIndex].file}
-                  className="w-full max-h-64 object-cover rounded-xl"
+                  onClick={() => setPreviewMedia(complaint.media[currentIndex])}
+                  className="w-full max-h-64 object-cover rounded-xl cursor-pointer"
                 />
               ) : (
                 <video
                   src={complaint.media[currentIndex].file}
                   controls
-                  className="w-full max-h-64 rounded-xl"
+                  onClick={() => setPreviewMedia(complaint.media[currentIndex])}
+                  className="w-full max-h-64 rounded-xl cursor-pointer"
                 />
               )}
 
@@ -90,7 +97,7 @@ export default function ComplaintInfoCard({ complaint }) {
             <div className="flex justify-center gap-1 mt-2">
               {complaint.media.map((_, i) => (
                 <div
-                  key={i} 
+                  key={i}
                   className={`h-2 w-2 rounded-full ${i === currentIndex ? "bg-blue-500" : "bg-gray-300"
                     }`}
                 />
@@ -111,6 +118,46 @@ export default function ComplaintInfoCard({ complaint }) {
           </div>
         )}
       </div>
+
+      {
+        previewMedia && (
+          <div
+            className="fixed inset-0 z-[999] bg-black/80 flex items-center justify-center p-4"
+            onClick={() => setPreviewMedia(null)}
+          >
+            <div
+              className="relative max-w-5xl w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+
+              {/* Close Button */}
+              <button
+                onClick={() => setPreviewMedia(null)}
+                className="absolute top-3 right-3 z-10 bg-white rounded-full w-10 h-10 shadow-lg flex items-center justify-center hover:bg-gray-100"
+              >
+                ✕
+              </button>
+
+              {/* Image */}
+              {previewMedia.type === "IMAGE" ? (
+                <img
+                  src={previewMedia.file}
+                  alt=""
+                  className="w-full max-h-[90vh] object-contain rounded-xl"
+                />
+              ) : (
+                <video
+                  src={previewMedia.file}
+                  controls
+                  autoPlay
+                  className="w-full max-h-[90vh] rounded-xl"
+                />
+              )}
+
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 }

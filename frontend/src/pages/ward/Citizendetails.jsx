@@ -16,11 +16,14 @@ export default function CitizenDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    if (!id) return;
-    fetchCitizenDetails();
-  }, [id]);
+    if (id) {
+      fetchCitizenDetails();
+    }
+  }, [id, currentPage]);
 
   const fetchCitizenDetails = async () => {
 
@@ -29,9 +32,16 @@ export default function CitizenDetails() {
       setIsLoading(true);
       setNotFound(false);
 
-      const res = await wardapi.getCitizenDetails(id);
+      const res = await wardapi.getCitizenDetails(id, currentPage);
       console.log("Citizen Full API Response:", res.data);
       setCitizenData(res.data.data);
+
+
+      setTotalPages(
+        Math.ceil(
+          (res.data.data.complaints?.count || 0) / 5
+        )
+      );
 
     } catch (err) {
 
@@ -74,7 +84,7 @@ export default function CitizenDetails() {
 
   const stats = citizenData?.stats;
   const citizen = citizenData?.citizen;
-  const complaints = citizenData?.complaints || [];
+  const complaints = citizenData?.complaints?.results || [];
   const verification = citizenData?.verification;
 
   return (
@@ -168,7 +178,13 @@ export default function CitizenDetails() {
 
         {/* Complaint History — 2 cols */}
         <div className="xl:col-span-2">
-          <ComplaintHistoryTable complaints={complaints} isLoading={isLoading} />
+          <ComplaintHistoryTable
+            complaints={complaints}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
       {/* Verification Modal */}

@@ -1,5 +1,6 @@
 import StatusBadge from "@/components/ward/StatusBadge";
 import { useNavigate } from "react-router-dom";
+import Pagination from "@/components/panjayath/Pagination";
 function formatDate(dateStr) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -21,7 +22,7 @@ function SkeletonRow() {
   );
 }
 
-export default function ComplaintHistoryTable({ complaints, isLoading }) {
+export default function ComplaintHistoryTable({ complaints, isLoading, currentPage, totalPages, onPageChange }) {
   const navigate = useNavigate();
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
@@ -122,6 +123,15 @@ export default function ComplaintHistoryTable({ complaints, isLoading }) {
           </tbody>
         </table>
       </div>
+      {!isLoading && complaints.length > 0 && (
+        <div className="px-5 py-4 border-t border-gray-100">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
     </div>
   );
 }

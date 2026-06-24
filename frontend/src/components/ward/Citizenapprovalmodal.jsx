@@ -154,6 +154,17 @@ export default function CitizenApprovalModal({ citizen, onClose, onSuccess }) {
                 value={`${citizen?.house_number ?? ""}, ${citizen?.street_name ?? ""}`}
               />
             </div>
+
+            {
+              citizen?.status === "REJECTED" && (
+                <div className="col-span-2">
+                  <DetailRow
+                    label="Reject Reason"
+                    value={citizen?.reject_reason || "No reason provided"}
+                  />
+                </div>
+              )
+            }
           </div>
 
           {/* ID Proof */}

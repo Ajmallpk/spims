@@ -112,7 +112,15 @@ export default function WardInfoCard({ profile, isLoading }) {
           <InfoRow icon="📍" label="Address" value={profile.address} /> */}
           <InfoRow icon="📱" label="Phone" value={profile.official_contact} />
           <InfoRow icon="📍" label="Address" value={profile.office_address} />
-          <InfoRow icon="📅" label="Registered On" value={formatDate(profile.created_at ?? profile.registered_at)} />
+          <InfoRow
+            icon="📅"
+            label="Verified On"
+            value={
+              profile.verification_status === "APPROVED"
+                ? formatDate(profile.reviewed_at)
+                : "Pending Approval"
+            }
+          />
         </div>
       </div>
     </div>

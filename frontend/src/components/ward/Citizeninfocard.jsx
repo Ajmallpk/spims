@@ -44,7 +44,7 @@ export default function CitizenInfoCard({ citizen }) {
             <h3 className="text-lg font-bold text-gray-900 truncate">{name}</h3>
             <p className="text-sm text-gray-500 truncate">{citizen.email ?? "—"}</p>
             <div className="mt-1.5">
-              <StatusBadge status={citizen.status ?? "approved"} />
+              {/* <StatusBadge status={citizen.status ?? "approved"} /> */}
             </div>
           </div>
         </div>

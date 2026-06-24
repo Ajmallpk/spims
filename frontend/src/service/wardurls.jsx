@@ -36,8 +36,8 @@ const wardapi = {
             },
         }),
 
-    getCitizenDetails: (id) =>
-        wardAxios.get(`/ward/citizen/${id}/full-details/`),
+    getCitizenDetails: (id, page = 1) =>
+        wardAxios.get(`/ward/citizen/${id}/full-details/?page=${page}`),
 
     approveCitizen: (id) =>
         wardAxios.post(`/ward/approve-citizen/${id}/`),
@@ -60,7 +60,13 @@ const wardapi = {
     profile: () => wardAxios.get("/ward/profile/"),
     getPanchayathDropdown: () => { return wardAxios.get("ward/panchayath-dropdown/"); },
     verificationStatus: () => wardAxios.get("/ward/verification-status/"),
-    getverificationList: () => wardAxios.get("/ward/citizen-verifications/"),
+    getverificationList: (status) =>
+        wardAxios.get(
+            "/ward/citizen-verifications/",
+            {
+                params: { status }
+            }
+        ),
     changePassword: (data) => {
         return wardAxios.post("/ward/change-password/", data);
     },

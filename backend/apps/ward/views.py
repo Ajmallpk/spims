@@ -82,6 +82,8 @@ class WardProfile(APIView):
                     "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
                     "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
                     "supporting_document": verification.supporting_document.url if verification.supporting_document else None,
+                    
+                    "reviewed_at": verification.reviewed_at,
                 }
             )
 
@@ -298,9 +300,23 @@ class CitizenVerificationListView(APIView):
 
     def get(self, request):
         try:
+            status = request.GET.get("status")
+
             citizens = CitizenVerification.objects.filter(
                 ward=request.user
-            ).select_related("user").order_by("-submitted_at")
+            )
+
+            if status:
+                citizens = citizens.filter(status=status.upper())
+            else:
+                citizens = citizens.filter(
+                    status__in=["PENDING", "REJECTED"]
+                )
+
+            citizens = citizens.select_related(
+                "user"
+            ).order_by("-submitted_at")
+            
 
             data = [
                 {
@@ -314,11 +330,31 @@ class CitizenVerificationListView(APIView):
                 for citizen in citizens
             ]
 
+            
+
+            pending_count = CitizenVerification.objects.filter(
+                ward=request.user,
+                status="PENDING"
+            ).count()
+
+            rejected_count = CitizenVerification.objects.filter(
+                ward=request.user,
+                status="REJECTED"
+            ).count()
+            
+            
             logger.info(f"Ward {request.user.id} fetched citizen verification list")
 
             return success_response(
                 message="Citizen verification list fetched",
-                data=data
+                data={
+                    "requests": data,
+                    "counts": {
+                        "pending": pending_count,
+                        "rejected": rejected_count,
+                        "total": pending_count + rejected_count
+                    }
+                }
             )
 
         except Exception as e:
@@ -478,7 +514,8 @@ class RejectCitizenView(APIView):
             citizen.reject_reason = reason
             citizen.reviewed_at = timezone.now()
             citizen.save()
-            citizen.user.status = User.Status.SUSPENDED
+            
+            citizen.user.is_verified = False
             citizen.user.save()
 
             logger.warning(f"Ward {user.id} rejected citizen {citizen.user.id}")
@@ -534,6 +571,7 @@ class ApprovedCitizenListView(APIView):
                     "phone": citizen.phone,
                     "house_number": citizen.house_number,
                     "street_name": citizen.street_name,
+                    "joined_at": citizen.user.date_joined,
                 }
                 for citizen in paginated_qs
             ]
@@ -800,6 +838,10 @@ class WardChangeEmailVerifyView(APIView):
             )
         
         
+        
+class ComplaintHistoryPagination(PageNumberPagination):
+    page_size = 5
+        
 
 class CitizenFullDetailView(APIView):
     permission_classes = [IsActiveWard]
@@ -832,6 +874,11 @@ class CitizenFullDetailView(APIView):
             ).values(
                 "id", "title", "category", "status", "created_at"
             ).order_by("-created_at")
+            
+            
+            
+            paginator = ComplaintHistoryPagination()
+            page = paginator.paginate_queryset(complaints, request)
 
             data = {
                 "id": verification.id,
@@ -848,12 +895,16 @@ class CitizenFullDetailView(APIView):
                 },
                 "verification": {
                     "status": verification.status,
+                    "reject_reason": verification.reject_reason,
                     "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,
                     "selfie_image": verification.selfie_image.url if verification.selfie_image else None,
                     "submitted_at": verification.submitted_at, 
                 },
                 "stats": stats,
-                "complaints": list(complaints)
+                "complaints": {
+                    "count": complaints.count(),
+                    "results": list(page)
+                }
             }
 
             logger.info(f"Ward {request.user.id} viewed full citizen detail")
@@ -888,6 +939,10 @@ class ComplaintDetailView(APIView):
                 )
 
             profile = getattr(complaint.citizen, "citizen_profile", None)
+            
+            verification = CitizenVerification.objects.filter(
+                user=complaint.citizen
+            ).first()
 
             data = {
                 "id": complaint.id,
@@ -897,7 +952,8 @@ class ComplaintDetailView(APIView):
                 "status": complaint.status,
                 "created_at": complaint.created_at,
                 "citizen": {
-                    "id": complaint.citizen.id,
+                    "id": verification.id if verification else None,
+                    "user_id": complaint.citizen.id,
                     "full_name": complaint.citizen.username,
                     "email": complaint.citizen.email,
                     "phone": profile.phone if profile else None,

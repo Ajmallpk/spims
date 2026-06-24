@@ -1427,7 +1427,7 @@ class AdminCitizenListView(APIView):
             citizens = User.objects.filter(
                 role=User.Role.CITIZEN,
                 citizen_verification__status="APPROVED"
-            ).select_related("citizen_verification")
+            ).select_related("citizen_verification").order_by("-citizen_verification__submitted_at")
             if search:
                 citizens = citizens.filter(
                     Q(username__icontains=search) |

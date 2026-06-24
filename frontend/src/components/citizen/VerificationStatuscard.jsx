@@ -7,7 +7,7 @@
  */
 
 import StatusBadge from "@/components/citizen/Statusbadge";
-
+import { useNavigate } from "react-router-dom";
 const STATUS_META = {
   NOT_SUBMITTED: {
     icon: (
@@ -61,6 +61,7 @@ const STATUS_META = {
 const VerificationStatusCard = ({ verificationStatus, loading }) => {
   const status = verificationStatus?.status ?? "NOT_SUBMITTED";
   const meta = STATUS_META[status] ?? STATUS_META.NOT_SUBMITTED;
+  const navigate = useNavigate()
 
   console.log("verificationStatus =", verificationStatus);
   console.log("status =", status);
@@ -98,7 +99,7 @@ const VerificationStatusCard = ({ verificationStatus, loading }) => {
           </div>
 
           {/* Rejection reason */}
-          {status === "REJECTED" && verificationStatus?.rejectionReason && (
+          {status === "REJECTED" && verificationStatus?.reject_reason && (
             <div className="bg-red-50 border border-red-100 rounded-xl p-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-red-500">
@@ -107,8 +108,26 @@ const VerificationStatusCard = ({ verificationStatus, loading }) => {
                 <p className="text-xs font-semibold text-red-700 uppercase tracking-wide">Rejection Reason</p>
               </div>
               <p className="text-sm text-red-700 leading-relaxed">
-                {verificationStatus.rejectionReason}
+                {verificationStatus.reject_reason}
               </p>
+
+
+              <button
+                onClick={() => navigate("/citizen/verification")}
+                className="
+    mt-4
+    bg-red-600
+    hover:bg-red-700
+    text-white
+    px-4
+    py-2
+    rounded-lg
+    text-sm
+    font-medium
+  "
+              >
+                Resubmit Verification
+              </button>
             </div>
           )}
 

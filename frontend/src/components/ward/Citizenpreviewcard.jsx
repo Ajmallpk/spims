@@ -21,7 +21,7 @@ export default function CitizenPreviewCard({ citizen }) {
       <div className="space-y-2 pt-1 border-t border-gray-50">
         {[
           { label: "Phone", value: citizen.phone ?? citizen.mobile ?? "—" },
-          { label: "Ward",  value: citizen.ward_name ?? citizen.ward ?? "—" },
+          // { label: "Ward",  value: citizen.ward_name ?? citizen.ward ?? "—" },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center justify-between">
             <span className="text-xs text-gray-400 font-medium">{label}</span>
@@ -30,7 +30,7 @@ export default function CitizenPreviewCard({ citizen }) {
         ))}
       </div>
       {citizen.id && (
-        <button onClick={() => navigate("/ward/citizens/" + citizen.id)}
+        <button onClick={() => navigate(`/ward/citizens/${citizen.id}`)}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-xl transition-colors">
           View Full Profile
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

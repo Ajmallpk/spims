@@ -14,22 +14,36 @@ export default function CitizenVerificationRequests() {
   const token = localStorage.getItem("access");
 
   const [requests, setRequests] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    rejected: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCitizen, setSelectedCitizen] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("PENDING");
 
   const fetchVerifications = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await wardapi.getverificationList();
-      setRequests(Array.isArray(res.data.data) ? res.data.data : []);
+      const res = await wardapi.getverificationList(selectedStatus);
+      setRequests(
+        Array.isArray(res.data.data.requests)
+          ? res.data.data.requests
+          : []
+      );
+
+      setStats(
+        res.data.data.counts
+      );
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, selectedStatus]);
 
   useEffect(() => {
     fetchVerifications();
@@ -48,6 +62,7 @@ export default function CitizenVerificationRequests() {
 
       const res = await wardapi.getCitizenDetails(citizen.id);
       console.log("FULL RESPONSE:", res);
+      console.log("resultdata=", res.data.data);
 
       const data = res.data.data;
 
@@ -56,6 +71,7 @@ export default function CitizenVerificationRequests() {
         ...data.verification,
         verification_id: data.id
       });
+      
       setIsModalOpen(true);
 
     } catch (err) {
@@ -90,20 +106,7 @@ export default function CitizenVerificationRequests() {
   // };
 
 
-  const safeRequests = Array.isArray(requests) ? requests : [];
 
-  const stats = {
-    total: safeRequests.length,
-    pending: safeRequests.filter(
-      (r) => (r.status ?? "pending").toLowerCase() === "pending"
-    ).length,
-    approved: safeRequests.filter(
-      (r) => (r.status ?? "").toLowerCase() === "approved"
-    ).length,
-    rejected: safeRequests.filter(
-      (r) => (r.status ?? "").toLowerCase() === "rejected"
-    ).length,
-  };
 
   return (
     <div className="space-y-6">
@@ -156,17 +159,29 @@ export default function CitizenVerificationRequests() {
       )}
 
       {/* Quick Stats Bar */}
-      {!isLoading && requests.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {!isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { label: "Total", value: stats.total, color: "text-gray-700", bg: "bg-gray-50 border-gray-200" },
-            { label: "Pending", value: stats.pending, color: "text-amber-700", bg: "bg-amber-50 border-amber-200" },
-            { label: "Approved", value: stats.approved, color: "text-green-700", bg: "bg-green-50 border-green-200" },
-            { label: "Rejected", value: stats.rejected, color: "text-red-700", bg: "bg-red-50 border-red-200" },
+            { label: "Total", value: stats.total, color: "text-gray-700", bg: "bg-gray-50 border-gray-200", onClick: () => setSelectedStatus("") },
+            {
+              label: "Pending",
+              value: stats.pending,
+              color: "text-amber-700",
+              bg: "bg-amber-50 border-amber-200",
+              onClick: () => setSelectedStatus("PENDING")
+            },
+            {
+              label: "Rejected",
+              value: stats.rejected,
+              color: "text-red-700",
+              bg: "bg-red-50 border-red-200",
+              onClick: () => setSelectedStatus("REJECTED")
+            },
           ].map((s) => (
             <div
               key={s.label}
-              className={`${s.bg} border rounded-xl px-4 py-3 flex items-center justify-between`}
+              onClick={s.onClick}
+              className={`${s.bg} border rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer`}
             >
               <span className={`text-xs font-semibold ${s.color} opacity-70`}>{s.label}</span>
               <span className={`text-xl font-extrabold ${s.color}`}>{s.value}</span>
