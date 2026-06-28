@@ -248,22 +248,21 @@ export default function PanchayathLayout() {
 
         const newNotification = {
 
-          id: Date.now(),
+          id: data.id,
 
-          title:
-            data.title,
+          title: data.title,
 
-          message:
-            data.message,
+          message: data.message,
 
-          notification_type:
-            data.notification_type,
+          notification_type: data.notification_type,
+
+          complaint_id: data.complaint_id,
+
+          extra_data: data.extra_data || {},
 
           is_read: false,
 
-          created_at:
-            new Date()
-              .toISOString()
+          created_at: new Date().toISOString()
 
         }
 

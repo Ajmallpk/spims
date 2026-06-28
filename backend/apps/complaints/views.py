@@ -78,14 +78,7 @@ class CitizenCreateComplaintView(APIView):
                 panchayath=ward_verification.panchayath
             )
             
-            send_notification(
-                user=ward,
-                title="New Complaint",
-                message=f"A new complaint has been submitted: {complaint.title}",
-                n_type="NEW_COMPLAINT",
-                complaint=complaint,
-                sender=user
-            )
+            
             
 
             files = request.FILES.getlist("media_files")
@@ -117,12 +110,13 @@ class CitizenCreateComplaintView(APIView):
             
             
             send_notification(
-                user = complaint.ward,
-                title= "New Complaint",
-                message = "A new complaint has been assigned to you",
-                n_type="COMPLAINT_STATUS",
+                user=ward,
+                title="New Complaint",
+                message=f"A new complaint has been submitted: {complaint.title}",
+                n_type="NEW_COMPLAINT",
                 complaint=complaint,
-                sender=request.user
+                sender=user,
+                
             )
 
             logger.info(f"Citizen {user.id} created complaint {complaint.id}")
@@ -473,11 +467,13 @@ class ComplaintResolutionCreateView(APIView):
                 note="Complaint resolved"
             )
 
-            Notification.objects.create(
+            send_notification(
                 user=complaint.citizen,
+                title="Complaint Resolved",
+                message="Your complaint has been resolved.",
+                n_type="RESOLUTION",
                 complaint=complaint,
-                message="Your complaint has been resolved",
-                notification_type="RESOLUTION"
+                sender=user,
             )
 
             logger.info(f"Complaint {complaint.id} resolved by user {user.id}")
@@ -769,6 +765,15 @@ class UpdateComplaintView(APIView):
                 action="UPDATED",
                 performed_by=request.user,
                 note="Complaint updated"
+            )
+            
+            send_notification(
+                user=complaint.ward,
+                title="Complaint Updated",
+                message=f"{request.user.username} updated a complaint.",
+                n_type="COMPLAINT_STATUS",
+                complaint=complaint,
+                sender=request.user,
             )
 
             logger.info(f"Complaint {complaint.id} updated by {request.user.id}")

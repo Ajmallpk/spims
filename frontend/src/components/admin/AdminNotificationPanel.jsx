@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { adminapi } from "@/service/adminurls"
+import { getNotificationRoute } from "@/utils/notificationRouter";
 
 export default function AdminNotificationPanel({
 
@@ -18,6 +20,7 @@ export default function AdminNotificationPanel({
 }) {
 
     const panelRef = useRef(null)
+    const navigate = useNavigate()
 
     const [filter, setFilter] = useState("all")
 
@@ -190,6 +193,54 @@ export default function AdminNotificationPanel({
         }
 
     }
+
+
+    const handleNotificationClick = async (notification) => {
+
+        // Mark notification as read
+        if (!notification.is_read) {
+
+            try {
+
+                await adminapi.markNotificationRead(notification.id);
+
+                setNotifications(prev =>
+                    prev.map(n =>
+                        n.id === notification.id
+                            ? { ...n, is_read: true }
+                            : n
+                    )
+                );
+
+                setUnreadCount(prev => prev > 0 ? prev - 1 : 0);
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+
+        }
+
+        // Get route from notification target
+        const route = getNotificationRoute(notification);
+
+
+        console.log(route);
+        console.log(notification);
+
+        if (route) {
+
+            navigate(route);
+
+            return;
+
+        }
+
+        // Fallback
+        navigate("/admin/dashboard");
+
+    };
 
     const displayed =
 
@@ -429,7 +480,7 @@ export default function AdminNotificationPanel({
                                     key={item.id}
 
                                     onClick={() =>
-                                        handleMarkOne(item)
+                                        handleNotificationClick(item)
                                     }
 
                                     className={`

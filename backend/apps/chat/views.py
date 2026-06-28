@@ -611,6 +611,25 @@ class SendMessageview(APIView):
             )
             
             
+            
+            if user == complaint.citizen:
+
+                receiver = chat.authority
+
+            else:
+
+                receiver = complaint.citizen
+
+            send_notification(
+                user=receiver,
+                title="New Chat Message",
+                message=f"{user.username} sent a message",
+                n_type="CHAT",
+                complaint=complaint,
+                sender=user,
+            )
+            
+            
             channel_layer = get_channel_layer()
             
             if user == complaint.citizen:
@@ -1207,6 +1226,15 @@ class StartAuthorityChatView(APIView):
                     sender_authority=user,
                     receiver_authority=receiver
                 )
+                
+                
+                send_notification(
+                    user=receiver,
+                    title="Authority Chat Started",
+                    message=f"{user.username} started a conversation.",
+                    n_type="CHAT",
+                    sender=user,
+                )
 
             logger.info(
                 f"Authority chat started between {user.id} and {receiver.id}"
@@ -1347,6 +1375,21 @@ class SendAuthorityMessageView(APIView):
                 context={
                     "request": request
                 }
+            )
+            
+            
+            receiver = (
+                chat.receiver_authority
+                if user == chat.sender_authority
+                else chat.sender_authority
+            )
+
+            send_notification(
+                user=receiver,
+                title="New Authority Message",
+                message=f"{user.username} sent a message",
+                n_type="CHAT",
+                sender=user,
             )
             
             display_message = message.message

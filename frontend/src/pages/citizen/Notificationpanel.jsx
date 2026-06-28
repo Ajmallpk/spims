@@ -10,8 +10,10 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
+import { getNotificationRoute } from "@/utils/notificationRouter";
 
 // ─── Types & config ───────────────────────────────────────────────────────────
 const NOTIF_CONFIG = {
@@ -93,7 +95,11 @@ const NotificationItem = ({ notif, onMarkRead, onAction }) => {
 
     return (
         <div
-            onClick={() => { onMarkRead(notif.id); onAction?.(notif); }}
+            onClick={() => {
+
+                onAction?.(notif);
+
+            }}
             className={`group relative flex items-start gap-3 px-4 py-3.5 cursor-pointer transition-colors border-b border-gray-50 last:border-0 ${notif.is_read ? "bg-white hover:bg-gray-50" : "bg-teal-50/30 hover:bg-teal-50/60"
                 }`}
         >
@@ -186,6 +192,7 @@ const NotificationPanel = ({
 }) => {
     const panelRef = useRef(null);
     // const [notifications, setNotifications] = useState([]);
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState("All");
     const [markingAll, setMarkingAll] = useState(false);
@@ -301,6 +308,24 @@ const NotificationPanel = ({
         }
 
     }, [])
+
+    const handleNotificationClick = async (notification) => {
+
+        if (!notification.is_read) {
+            await markRead(notification.id);
+        }
+
+        onClose?.();
+
+        const route = getNotificationRoute(notification);
+
+        if (route) {
+            navigate(route);
+            return;
+        }
+
+        navigate("/citizen");
+    };
 
     // Mark all as read
     const markAllRead = useCallback(async () => {
@@ -439,7 +464,7 @@ const NotificationPanel = ({
                                 key={n.id}
                                 notif={n}
                                 onMarkRead={markRead}
-                                onAction={() => { }}
+                                onAction={handleNotificationClick}
                             />
                         ))
                     )}

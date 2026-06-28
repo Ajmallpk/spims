@@ -131,12 +131,30 @@ class SubmitPanchayathVerificationView(APIView):
                 verification.reject_reason = None
                 verification.reviewed_at = None
                 verification.save()
+                
+                
+                admin_user = User.objects.filter(
+                    is_superuser=True
+                ).first()
+
+                if admin_user:
+
+                    send_notification(
+                        user=admin_user,
+                        title="Panchayath Verification Resubmitted",
+                        message=f"{user.username} resubmitted verification request.",
+                        n_type="PANCHAYATH_VERIFICATION",
+                        sender=user,
+                        extra_data={
+                            "verification_id": verification.id
+                        }
+                    )
 
                 logger.info(f"Panchayath {user.id} resubmitted verification")
                 return success_response(
                     message="Verification resubmitted successfully"
                 )
-            PanchayathVerification.objects.create(
+            verification = PanchayathVerification.objects.create(
                 user=user,
                 **serializer.validated_data
             )
@@ -155,7 +173,10 @@ class SubmitPanchayathVerificationView(APIView):
                     title="New Panchayath Verification",
                     message=f"{user.username} submitted verification request",
                     n_type="PANCHAYATH_VERIFICATION",
-                    sender=user
+                    sender=user,
+                    extra_data={
+                        "verification_id": verification.id
+                    }
                 )
 
             logger.info(f"Panchayath {user.id} submitted verification")
@@ -515,6 +536,16 @@ class ApproveWardView(APIView):
                 ward.user.status = User.Status.ACTIVE
                 ward.user.is_verified = True
                 ward.user.save()
+                
+                
+                
+                send_notification(
+                    user=ward.user,
+                    title="Ward Verification Approved",
+                    message="Your ward verification has been approved.",
+                    n_type="WARD_VERIFICATION",
+                    sender=request.user,
+                )
 
                 logger.info(f"Panchayath {user.id} approved ward {ward.id}")
 
@@ -574,6 +605,18 @@ class RejectWardView(APIView):
                 ward.user.status = User.Status.SUSPENDED
                 ward.user.is_verified = False
                 ward.user.save()
+                
+                
+                
+                send_notification(
+                    user=ward.user,
+                    title="Ward Verification Rejected",
+                    message=f"Your ward verification was rejected. Reason: {reason}",
+                    n_type="WARD_VERIFICATION",
+                    sender=request.user,
+                )
+                
+                
 
                 logger.warning(f"Panchayath {user.id} rejected ward {ward.id}")
 
@@ -945,6 +988,17 @@ class ReassignComplaintView(APIView):
                 complaint = complaint,
                 sender=request.user
             )
+            
+            
+            
+            send_notification(
+                user=complaint.citizen,
+                title="Complaint Reassigned",
+                message="Your complaint has been reassigned to another Ward Officer.",
+                n_type="REASSIGN",
+                complaint=complaint,
+                sender=request.user
+            )
 
             logger.info(f"Panchayath {user.id} reassigned complaint {complaint.id}")
 
@@ -1073,6 +1127,26 @@ class PanchayathComplaintDetailView(APIView):
 
                 complaint.status = "IN_PROGRESS"
                 complaint.save()
+                
+                
+                send_notification(
+                    user=complaint.citizen,
+                    title="Complaint In Progress",
+                    message="Panchayath has started working on your complaint.",
+                    n_type="COMPLAINT_STATUS",
+                    complaint=complaint,
+                    sender=request.user,
+                )
+                
+                
+                send_notification(
+                    user=complaint.ward,
+                    title="Complaint Started",
+                    message="Panchayath has started working on the escalated complaint.",
+                    n_type="COMPLAINT_STATUS",
+                    complaint=complaint,
+                    sender=request.user,
+                )
                 
                 ComplaintHistory.objects.create(
                     complaint=complaint,

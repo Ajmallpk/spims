@@ -56,13 +56,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
+
 def send_notification(
     user,
     title,
     message,
     n_type,
     complaint=None,
-    sender=None
+    sender=None,
+    extra_data=None
 ):
 
     logger.info(
@@ -85,5 +88,6 @@ def send_notification(
             sender.id
             if sender
             else None
-        )
+        ),
+        extra_data=extra_data or {}
     )

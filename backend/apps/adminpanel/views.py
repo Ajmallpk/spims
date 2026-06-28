@@ -41,6 +41,7 @@ from rest_framework.response import Response
 from django.conf import settings
 from .utils.responses import success_response,error_response
 from apps.complaints.serializers import ComplaintDetailSerializer
+from apps.notification.utils import send_notification
 
 
 logger = logging.getLogger(__name__)
@@ -337,6 +338,17 @@ class ApprovePanchayathView(APIView):
                 user.status = User.Status.ACTIVE
                 user.is_verified = True
                 user.save()
+                
+                
+                
+                send_notification(
+                    user=user,
+                    title="Verification Approved",
+                    message="Your Panchayath verification has been approved.",
+                    n_type="PANCHAYATH_VERIFICATION",
+                )
+                
+                
 
                 logger.info(f"Admin {request.user.id} approved Panchayath {verification.id}")
 
@@ -388,6 +400,15 @@ class RejectPanchayathView(APIView):
                 user.is_verified = False
                 # user.save()
                 user.save(update_fields=["is_verified"])
+                
+                
+                
+                send_notification(
+                    user=user,
+                    title="Verification Rejected",
+                    message=f"Your Panchayath verification was rejected. Reason: {reason}",
+                    n_type="PANCHAYATH_VERIFICATION",
+                )
 
                 logger.warning(f"Admin {request.user.id} rejected Panchayath {verification.id}")
 
@@ -534,6 +555,16 @@ class SuspendPanchayathView(APIView):
                 user.status = User.Status.SUSPENDED
                 user.is_verified = False
                 user.save(update_fields=["status", "is_verified"])
+                
+                
+                
+                
+                send_notification(
+                    user=user,
+                    title="Account Suspended",
+                    message="Your Panchayath account has been suspended by the administrator.",
+                    n_type="ALERT",
+                )
 
                 ward_verifications = WardVerification.objects.filter(
                     panchayath=user
@@ -587,6 +618,14 @@ class ActivatePanchayathView(APIView):
                 user.status = User.Status.ACTIVE
                 user.is_verified = True
                 user.save(update_fields=["status", "is_verified"])
+                
+                
+                send_notification(
+                    user=user,
+                    title="Account Activated",
+                    message="Your Panchayath account has been activated by the administrator.",
+                    n_type="ALERT",
+                )
 
             logger.info(f"Admin {request.user.id} activated Panchayath {user.id}")
 
@@ -828,6 +867,14 @@ class SuspendWardView(APIView):
                 user.status = User.Status.SUSPENDED
                 user.is_verified = False
                 user.save(update_fields=["status", "is_verified"])
+                
+                
+                send_notification(
+                    user=user,
+                    title="Account Suspended",
+                    message="Your Ward account has been suspended by the administrator.",
+                    n_type="ALERT",
+                )
 
             logger.warning(f"Admin {request.user.id} suspended Ward {user.id}")
 
@@ -868,6 +915,14 @@ class ActivateWardView(APIView):
                 user.status = User.Status.ACTIVE
                 user.is_verified = True
                 user.save(update_fields=["status", "is_verified"])
+                
+                
+                send_notification(
+                    user=user,
+                    title="Account Activated",
+                    message="Your Ward account has been activated by the administrator.",
+                    n_type="ALERT",
+                )
 
             logger.info(f"Admin {request.user.id} activated Ward {user.id}")
 
@@ -1597,6 +1652,15 @@ class SuspendCitizenView(APIView):
             user.status = User.Status.SUSPENDED
             user.is_verified = False
             user.save()
+            
+            
+            
+            send_notification(
+                user=user,
+                title="Account Suspended",
+                message="Your account has been suspended by the administrator.",
+                n_type="ALERT",
+            )
 
             logger.warning(f"Admin {request.user.id} suspended Citizen {user.id}")
 
@@ -1640,6 +1704,17 @@ class ActivateCitizenView(APIView):
             user.status = User.Status.ACTIVE
             user.is_verified = True
             user.save()
+            
+            
+            
+            
+            send_notification(
+                user=user,
+                title="Account Activated",
+                message="Your account has been activated by the administrator.",
+                n_type="ALERT",
+            )
+            
 
             logger.info(f"Admin {request.user.id} activated Citizen {user.id}")
 

@@ -19,4 +19,5 @@ class NotificationSerializer(serializers.ModelSerializer):
             "created_at",
             "sender_name",
             "complaint",
+            "extra_data",
         ]

@@ -312,7 +312,7 @@ export default function WardDetail() {
                     </span>
 
                   </div>
-
+                          
                 </div>
 
               ))}

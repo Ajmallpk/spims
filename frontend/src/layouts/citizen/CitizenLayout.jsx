@@ -116,25 +116,27 @@ const CitizenLayout = () => {
 
         const newNotification = {
 
-          id: Date.now(),
+          id: data.id,
 
           title: data.title,
 
           message: data.message,
 
-          type:
-            data.notification_type,
+          type: data.notification_type,
 
-          notification_type:
-            data.notification_type,
+          notification_type: data.notification_type,
+
+          complaint: data.complaint_id,
+
+          complaint_id: data.complaint_id,
+
+          extra_data: data.extra_data || {},
 
           is_read: false,
 
-          createdAt:
-            new Date().toISOString(),
+          createdAt: new Date().toISOString(),
 
-          created_at:
-            new Date().toISOString()
+          created_at: new Date().toISOString()
 
         }
 

@@ -123,7 +123,12 @@ class NotificationConsumer(
                 event["message"],
 
                 "notification_type":
-                event["notification_type"]
+                event["notification_type"],
+                
+                "complaint_id":
+                event.get("complaint_id"),
+                
+                "extra_data": event.get("extra_data", {})
 
             })
         )

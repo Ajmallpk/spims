@@ -55,7 +55,7 @@ export default function WardLayout() {
 
         setUser(res.data);
 
-      
+
       }
 
       catch (error) {
@@ -160,20 +160,21 @@ export default function WardLayout() {
 
           id: data.id,
 
-          title:
-            data.title,
+          title: data.title,
 
-          message:
-            data.message,
+          message: data.message,
 
-          notification_type:
-            data.notification_type,
+          notification_type: data.notification_type,
+
+          complaint: data.complaint_id,
+
+          complaint_id: data.complaint_id,
+
+          extra_data: data.extra_data || {},
 
           is_read: false,
 
-          created_at:
-            new Date()
-              .toISOString()
+          created_at: new Date().toISOString()
 
         }
 

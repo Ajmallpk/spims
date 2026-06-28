@@ -66,6 +66,11 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     extra_data = models.JSONField(null=True, blank=True)
+    
+    target = models.JSONField(
+        default=dict,
+        blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

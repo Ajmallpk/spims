@@ -164,9 +164,12 @@ class SubmitWardVerificationView(APIView):
                 send_notification(
                     user=panchayath_user,
                     title="Ward Verification Resubmitted",
-                    message="A ward officer resubmitted verification",
+                     message=f"{request.user.username} submitted verification",
                     n_type="WARD_VERIFICATION",
-                    sender=user
+                    sender=request.user,
+                    extra_data={
+                        "verification_id": verification.id
+                    }
                 )
                 
 
@@ -463,6 +466,15 @@ class ApproveCitizenView(APIView):
                 profile.ward_name = ward_verification.ward_name
 
             profile.save()
+            
+            
+            
+            send_notification(
+                user=citizen.user,
+                title="Verification Approved",
+                message="Your citizen verification has been approved.",
+                n_type="CITIZEN_VERIFICATION",
+            )
 
             logger.info(f"Ward {request.user.id} approved citizen {citizen.user.id}")
 
@@ -517,6 +529,13 @@ class RejectCitizenView(APIView):
             
             citizen.user.is_verified = False
             citizen.user.save()
+            
+            send_notification(
+                user=citizen.user,
+                title="Verification Rejected",
+                message=f"Your citizen verification was rejected. Reason: {reason}",
+                n_type="CITIZEN_VERIFICATION",
+            )
 
             logger.warning(f"Ward {user.id} rejected citizen {citizen.user.id}")
 
@@ -1275,14 +1294,6 @@ class WardResolveComplaintView(APIView):
                     file_type=file_type
                 )
             complaint.status = "RESOLVED"
-            send_notification(
-                user=complaint.citizen,
-                title="Complaint Resolved",
-                message="Your complaint has been resolved by Ward",
-                n_type="RESOLUTION",
-                complaint=complaint,
-                sender=user
-            )
             complaint.resolved_at = timezone.now()
             complaint.save()
             
@@ -1294,6 +1305,17 @@ class WardResolveComplaintView(APIView):
                 complaint=complaint,
                 sender=request.user
             )
+            
+            if complaint.panchayath:
+
+                send_notification(
+                    user=complaint.panchayath,
+                    title="Complaint Resolved",
+                    message=f"{complaint.title} has been resolved by Ward.",
+                    n_type="RESOLUTION",
+                    complaint=complaint,
+                    sender=request.user
+                )
 
             ComplaintHistory.objects.create(
                 complaint=complaint,

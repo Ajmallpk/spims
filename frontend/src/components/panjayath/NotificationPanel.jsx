@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import panchayathapi from "@/service/panchayathurls"
+import { getNotificationRoute } from "@/utils/notificationRouter";
 
 export default function NotificationPanel({
   isOpen,
@@ -10,6 +12,7 @@ export default function NotificationPanel({
   anchorRef
 }) {
   const panelRef = useRef(null)
+  const navigate = useNavigate()
   const [filter, setFilter] = useState("all")
 
   useEffect(() => {
@@ -52,6 +55,51 @@ export default function NotificationPanel({
     }
   }
 
+  const handleNotificationClick = async (notification) => {
+
+    // Mark as read
+    if (!notification.is_read) {
+
+      try {
+
+        await panchayathapi.markNotificationRead(notification.id);
+
+        setNotifications(prev =>
+          prev.map(n =>
+            n.id === notification.id
+              ? { ...n, is_read: true }
+              : n
+          )
+        );
+
+        setUnreadCount(prev =>
+          prev > 0 ? prev - 1 : 0
+        );
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    }
+
+    // Redirect using notification target
+    const route = getNotificationRoute(notification);
+
+    if (route) {
+
+      navigate(route);
+
+      return;
+
+    }
+
+    // Default page
+    navigate("/panchayath/dashboard");
+
+  };
+
   const displayed = filter === "unread"
     ? notifications.filter(n => !n.is_read)
     : notifications
@@ -89,21 +137,19 @@ export default function NotificationPanel({
         <div className="flex gap-1 bg-gray-100 rounded-xl p-0.5">
           <button
             onClick={() => setFilter("all")}
-            className={`flex-1 py-1.5 text-xs rounded-lg transition-all ${
-              filter === "all"
-                ? "bg-white text-blue-700 font-medium border border-gray-200"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex-1 py-1.5 text-xs rounded-lg transition-all ${filter === "all"
+              ? "bg-white text-blue-700 font-medium border border-gray-200"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
             All
           </button>
           <button
             onClick={() => setFilter("unread")}
-            className={`flex-1 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-              filter === "unread"
-                ? "bg-white text-blue-700 font-medium border border-gray-200"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex-1 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${filter === "unread"
+              ? "bg-white text-blue-700 font-medium border border-gray-200"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
             Unread
             {unreadCount > 0 && (
@@ -130,15 +176,13 @@ export default function NotificationPanel({
           displayed.map(item => (
             <div
               key={item.id}
-              onClick={() => handleMarkOne(item)}
-              className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 ${
-                item.is_read ? "bg-white" : "bg-blue-50"
-              }`}
+              onClick={() => handleNotificationClick(item)}
+              className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 ${item.is_read ? "bg-white" : "bg-blue-50"
+                }`}
             >
               {/* Icon avatar */}
-              <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                item.is_read ? "bg-gray-100 text-gray-400" : "bg-blue-100 text-blue-600"
-              }`}>
+              <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${item.is_read ? "bg-gray-100 text-gray-400" : "bg-blue-100 text-blue-600"
+                }`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z" />
                 </svg>

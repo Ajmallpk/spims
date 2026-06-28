@@ -167,9 +167,12 @@ class CitizenVerificationSubmitView(APIView):
             send_notification(
                 user=verification.ward,
                 title="New Citizen Verification",
-                message="A citizen has submitted verification",
+                message=f"{request.user.username} submitted verification",
                 n_type="CITIZEN_VERIFICATION",
-                sender=user
+                sender=request.user,
+                extra_data={
+                    "verification_id": verification.id
+                }
             )
 
             logger.info(f"Citizen {user.id} submitted verification")
