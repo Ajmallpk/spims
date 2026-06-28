@@ -9,6 +9,7 @@
 
 import { NavLink, useNavigate } from "react-router-dom";
 import axiosInstance from "@/api/axiosInstance";
+import FixItLogo from "@/pages/common/FixItLogo";
 
 // ─── Nav menu config ───────────────────────────────────────────────────────
 const NAV_ITEMS = [
@@ -146,26 +147,39 @@ export default function PanchayathSidebar({
         `}
       >
         {/* ── Brand / Logo ── */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-100">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-700 to-blue-500 flex items-center justify-center shadow-sm flex-shrink-0">
-            <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-              <path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.06l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.061l8.69-8.69Z" />
-              <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-black text-slate-900 leading-none tracking-tight">SPIMS</p>
-            <p className="text-[10px] text-slate-400 leading-none mt-0.5 font-medium">Panchayath Portal</p>
-          </div>
+        {/* ── Brand / Logo ── */}
+        <div className="flex items-center justify-between px-5 py-5 border-b border-slate-100">
+
+          <FixItLogo
+            iconWidth={60}
+            showTagline={true}
+            title="InfraCare"
+            logoColor="#13858f"
+            primaryColor="#1f2937"
+            accentColor="#2563eb"
+            layout="row"
+          />
+
           {/* Mobile close button */}
           <button
             onClick={onClose}
-            className="ml-auto p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors lg:hidden"
+            className="ml-2 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors lg:hidden"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18 18 6M6 6l12 12"
+              />
             </svg>
           </button>
+
         </div>
 
         {/* ── Verification Status Banner ── */}

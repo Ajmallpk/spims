@@ -492,6 +492,7 @@ function LeftLogin() {
           primaryColor="#ffffff"
           accentColor="#7dd3fc"
           tagline="Verified Community Platform"
+          iconClassName="animate-bounce"
         />
       </div>
 

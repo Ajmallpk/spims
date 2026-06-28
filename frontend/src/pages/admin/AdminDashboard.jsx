@@ -133,7 +133,7 @@ const AdminDashboard = () => {
       <StatsGrid stats={stats} isLoading={loadingStats} />
       <ComplaintStatusChart data={stats?.complaint_status_chart} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <VerificationAlertSection
           verifications={verifications}
           isLoading={loadingVerifications}
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
           alerts={criticalAlerts}
           isLoading={loadingAlerts}
         />
-      </div>
+      </div> */}
     </div>
   );
 };

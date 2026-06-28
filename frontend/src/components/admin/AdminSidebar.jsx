@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import FixItLogo from "@/pages/common/FixItLogo";
 
 const navItems = [
   {
@@ -63,18 +64,16 @@ const AdminSidebar = () => {
   return (
     <aside className="w-64 bg-gray-900 flex flex-col h-full shadow-2xl flex-shrink-0">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
-        <div className="flex items-center justify-center w-9 h-9 bg-emerald-500 rounded-lg shadow-lg">
-          <ShieldCheck className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <p className="text-white text-sm font-bold tracking-wide leading-tight">
-            SPIMS
-          </p>
-          <p className="text-gray-400 text-xs tracking-widest uppercase">
-            Admin Panel
-          </p>
-        </div>
+      <div className="flex justify-center items-center px-4 py-6 border-b border-gray-700">
+        <FixItLogo
+          iconWidth={58}
+          layout="row"
+          
+          showTagline={true}
+          logoColor="#13858f"
+          primaryColor="#ffffff"
+          accentColor="#10b981"
+        />
       </div>
 
       {/* Navigation */}

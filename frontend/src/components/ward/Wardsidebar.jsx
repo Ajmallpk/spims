@@ -14,6 +14,7 @@ import {
   MessageCircle,
   MessageSquare,
 } from "lucide-react";
+import FixItLogo from "@/pages/common/FixItLogo";
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/ward/dashboard", icon: LayoutDashboard, protected: true },
@@ -32,7 +33,7 @@ const NAV_ITEMS = [
     label: "Complaint Chats",
     path: "/ward/complaint-chats",
     icon: MessageSquare,
-    protected:true
+    protected: true
   },
 
   {
@@ -70,16 +71,17 @@ export default function WardSidebar({
         }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-100">
-        <div className="flex-shrink-0 w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
-          <ShieldCheck className="w-5 h-5 text-white" />
-        </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <p className="text-sm font-bold text-gray-800 leading-tight truncate">SPIMS</p>
-            <p className="text-xs text-gray-400 truncate">Ward Portal</p>
-          </div>
-        )}
+      
+      <div className="border-b border-gray-100 py-5 flex justify-center">
+        <FixItLogo
+          iconWidth={70}
+            showTagline={false}
+            
+            
+            logoColor="#13858f"
+          primaryColor="#1f2937"
+          accentColor="#2563eb"
+        />
       </div>
 
       {/* Navigation */}

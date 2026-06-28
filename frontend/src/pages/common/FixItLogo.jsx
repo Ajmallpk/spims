@@ -14,7 +14,7 @@ import LogoIcon from "../../assets/fixit-icon.svg?react";
  */
 export default function FixItLogo({
     iconWidth = 200,
-    title = "FIX IT",
+    title = "InfraCare",
     tagline = "BETTER PLACES. BETTER FUTURE.",
     showTagline = true,
     primaryColor = "#13278F",

@@ -353,7 +353,18 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            refresh_token = request.COOKIES.get("refresh_token")
+            role = request.user.role.lower()
+
+            refresh_token = request.COOKIES.get(
+                f"{role}_refresh_token"
+            )
+            
+            
+            print("ROLE =", role)
+            print("ALL COOKIES =", request.COOKIES)
+            print("LOOKING FOR =", f"{role}_refresh_token")
+            
+            print("REFRESH TOKEN =", refresh_token)
 
             if not refresh_token:
                 return error_response(
@@ -376,8 +387,13 @@ class LogoutView(APIView):
                 message="Logged out successfully"
             )
 
-            response.delete_cookie("access_token")
-            response.delete_cookie("refresh_token")
+            response.delete_cookie(
+                f"{role}_access_token"
+            )
+
+            response.delete_cookie(
+                f"{role}_refresh_token"
+            )
 
             logger.info(f"User logged out: {request.user.email}")
 

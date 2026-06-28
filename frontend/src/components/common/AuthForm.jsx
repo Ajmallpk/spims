@@ -14,6 +14,7 @@ import {
   resetPassword
 } from "@/service/auth"
 import { replace, useNavigate } from "react-router-dom"
+import FixItLogo from "@/pages/common/FixItLogo"
 
 import {
   Card,
@@ -663,8 +664,15 @@ export function AuthForm() {
   return (
     <Card className="w-full max-w-md border-border shadow-md">
       <CardHeader className="text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-          <Shield className="h-6 w-6 text-primary-foreground" />
+        <div className="flex justify-center mb-5">
+          <FixItLogo
+            iconWidth={90}
+            showTagline={false}
+            primaryColor="#056433"
+            accentColor="#036273"
+            logoColor="#13858f"
+            iconClassName="animate-pulse"
+          />
         </div>
         <CardTitle className="text-xl font-bold text-foreground">
           {mode === "login" ? "Welcome Back" : "Create Account"}

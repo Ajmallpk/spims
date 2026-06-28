@@ -506,7 +506,7 @@ function Navbar() {
       <div className="nav-brand">
         <FixItLogo
           iconWidth={75}
-          title="FIX IT"
+          title="InfraCare"
           tagline="BETTER PLACES. BETTER FUTURE"
           showTagline={true}
           layout="row"

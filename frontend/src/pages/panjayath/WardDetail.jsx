@@ -37,6 +37,10 @@ export default function WardDetail() {
 
         console.log("FULL RESPONSE", complaintRes.data);
 
+        console.log("DATA =", complaintRes.data.data);
+        console.log("IS ARRAY =", Array.isArray(complaintRes.data.data));
+        console.log("TYPE =", typeof complaintRes.data.data);
+
         setComplaints(
           complaintRes.data.data
         );
@@ -312,7 +316,7 @@ export default function WardDetail() {
                     </span>
 
                   </div>
-                          
+
                 </div>
 
               ))}

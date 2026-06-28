@@ -57,38 +57,7 @@ export default function AuthPage() {
         backdropFilter: "blur(12px)",
         background: "rgba(10,15,30,0.4)",
       }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: "10px",
-        }}>
-          {/* Logo mark */}
-          <div style={{
-            width: 34, height: 34,
-            background: "linear-gradient(135deg, #00a3ff, #00d2b4)",
-            borderRadius: 8,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 0 16px rgba(0,163,255,0.4)",
-          }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 13, letterSpacing: "-0.5px" }}>SP</span>
-          </div>
-          <div>
-            <div style={{
-              color: "#e8f0ff",
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}>
-              SPIMS
-            </div>
-            <div style={{
-              color: "rgba(255,255,255,0.38)",
-              fontSize: 10,
-              letterSpacing: "0.05em",
-            }}>
-              Smart Panchayath Issue Mgmt
-            </div>
-          </div>
-        </div>
+        
 
         <Link
           to="/"

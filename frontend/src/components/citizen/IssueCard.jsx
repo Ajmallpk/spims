@@ -250,7 +250,7 @@ const IssueCard = ({ issue }) => {
         </div>
 
         {/* Share */}
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+        {/* <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
             <circle cx="18" cy="5" r="3" />
             <circle cx="6" cy="12" r="3" />
@@ -259,7 +259,7 @@ const IssueCard = ({ issue }) => {
             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
           </svg>
           <span>Share</span>
-        </button>
+        </button> */}
       </div>
 
       {/* Authority Response */}
