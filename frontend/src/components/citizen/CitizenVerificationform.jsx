@@ -12,7 +12,8 @@ import { useState, useEffect } from "react";
 import DocumentUploadField from "@/components/citizen/Documentuploadfield";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
-
+import SearchableSelect from "@/components/common/SearchableSelect";
+import toast from "react-hot-toast";
 ;
 
 const InputField = ({ label, required, error, children }) => (
@@ -56,7 +57,11 @@ const CitizenVerificationForm = ({
     fullName: "",
     email: "",
     phone: "",
+
+    district: "",
+    panchayath: "",
     ward: "",
+
     houseNumber: "",
     streetName: "",
     address: "",
@@ -67,7 +72,22 @@ const CitizenVerificationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [districts, setDistricts] = useState([]);
+  const [panchayaths, setPanchayaths] = useState([]);
   const [wards, setWards] = useState([]);
+  const [showLocationRequest, setShowLocationRequest] = useState(false);
+
+  const [locationRequest, setLocationRequest] = useState({
+    request_type: "",
+    district_name: "",
+    panchayath_name: "",
+    ward_number: "",
+    ward_name: "",
+    message: "",
+  });
+
+  const [requestLoading, setRequestLoading] = useState(false);
+
 
   // Pre-fill from profile
   useEffect(() => {
@@ -81,18 +101,78 @@ const CitizenVerificationForm = ({
     }
   }, [profile]);
 
+
+
   useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const res = await citizenapi.getDistricts();
+        setDistricts(res.data.data);
+      } catch (error) {
+        console.error("Failed to load districts", error);
+      }
+    };
+
+    fetchDistricts();
+  }, []);
+
+
+
+  useEffect(() => {
+    if (!form.district) {
+      setPanchayaths([]);
+      return;
+    }
+
+    const fetchPanchayaths = async () => {
+      try {
+        const res = await citizenapi.getPanchayaths(form.district);
+        setPanchayaths(res.data.data);
+      } catch (error) {
+        console.error("Failed to load panchayaths", error);
+      }
+    };
+
+    fetchPanchayaths();
+  }, [form.district]);
+
+
+
+
+  useEffect(() => {
+    if (!form.panchayath) {
+      setWards([]);
+      return;
+    }
+
     const fetchWards = async () => {
       try {
-        const res = await citizenapi.getWards();
+        const res = await citizenapi.getWards(form.panchayath);
+
+        console.log("WARD API RESPONSE", res.data);
+
         setWards(res.data.data);
+
       } catch (error) {
-        console.error("Failed to load wards", error);
+        console.error(error.response?.data);
       }
     };
 
     fetchWards();
-  }, []);
+  }, [form.panchayath]);
+
+  // useEffect(() => {
+  //   const fetchWards = async () => {
+  //     try {
+  //       const res = await citizenapi.getWards();
+  //       setWards(res.data.data);
+  //     } catch (error) {
+  //       console.error("Failed to load wards", error);
+  //     }
+  //   };
+
+  //   fetchWards();
+  // }, []);
 
   const validate = () => {
     const newErrors = {};
@@ -109,8 +189,37 @@ const CitizenVerificationForm = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
+
+    setForm((prev) => {
+      if (name === "district") {
+        return {
+          ...prev,
+          district: value,
+          panchayath: "",
+          ward: "",
+        };
+      }
+
+      if (name === "panchayath") {
+        return {
+          ...prev,
+          panchayath: value,
+          ward: "",
+        };
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: null,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -163,6 +272,85 @@ const CitizenVerificationForm = ({
 
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+
+
+
+  // const handleLocationRequest = async () => {
+  //   try {
+  //     setRequestLoading(true);
+
+  //     await citizenapi.createLocationRequest(locationRequest);
+
+  //     handleApiError(
+  //       null,
+  //       "Location request submitted successfully",
+  //       "success"
+  //     );
+
+  //     setShowLocationRequest(false);
+
+  //     setLocationRequest({
+  //       request_type: "",
+  //       district_name: "",
+  //       panchayath_name: "",
+  //       ward_number: "",
+  //       ward_name: "",
+  //       message: "",
+  //     });
+
+  //   } catch (err) {
+
+  //     handleApiError(
+  //       err,
+  //       "Failed to submit location request"
+  //     );
+
+  //   } finally {
+  //     setRequestLoading(false);
+  //   }
+  // };
+
+
+
+  const handleLocationRequest = async () => {
+    try {
+      setRequestLoading(true);
+
+      const payload = {
+        ...locationRequest,
+      };
+
+      if (payload.request_type !== "WARD") {
+        delete payload.ward_number;
+        delete payload.ward_name;
+      }
+
+      if (payload.request_type === "DISTRICT") {
+        delete payload.panchayath_name;
+      }
+
+      await citizenapi.createLocationRequest(payload);
+
+      toast.success("Location request submitted successfully");
+
+      setShowLocationRequest(false);
+
+      setLocationRequest({
+        request_type: "",
+        district_name: "",
+        panchayath_name: "",
+        ward_number: "",
+        ward_name: "",
+        message: "",
+      });
+
+    } catch (err) {
+      handleApiError(err, "Failed to submit location request");
+    } finally {
+      setRequestLoading(false);
     }
   };
 
@@ -325,24 +513,210 @@ const CitizenVerificationForm = ({
           <h3 className="text-sm font-bold text-gray-700">Address Details</h3>
         </div>
 
-        <div id="field-ward">
-          <InputField label="Ward" required error={errors.ward}>
-            <select
-              name="ward"
-              value={form.ward}
-              onChange={handleChange}
-              className={inputClass(!!errors.ward)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <div id="field-district">
+            <InputField label="District" required>
+
+              <SearchableSelect
+                placeholder="Search District..."
+                options={districts.map((district) => ({
+                  value: district.id,
+                  label: district.name,
+                }))}
+
+                value={
+                  districts
+                    .map((district) => ({
+                      value: district.id,
+                      label: district.name,
+                    }))
+                    .find(
+                      (option) =>
+                        String(option.value) === String(form.district)
+                    ) || null
+                }
+
+                onChange={(selected) =>
+                  handleChange({
+                    target: {
+                      name: "district",
+                      value: selected ? selected.value : "",
+                    },
+                  })
+                }
+              />
+
+
+              <p className="mt-2 text-xs text-gray-500">
+                Can't find your district?{" "}
+                <button
+                  type="button"
+                  className="text-teal-600 hover:underline"
+                  onClick={() => {
+                    setLocationRequest({
+                      request_type: "DISTRICT",
+                      district_name: "",
+                      panchayath_name: "",
+                      ward_number: "",
+                      ward_name: "",
+                      message: "",
+                    });
+                    setShowLocationRequest(true);
+                  }}
+                >
+                  Request District
+                </button>
+              </p>
+
+            </InputField>
+          </div>
+
+          <div id="field-panchayath">
+            <InputField label="Panchayath" required>
+
+              <SearchableSelect
+                placeholder="Search Panchayath..."
+                isDisabled={!form.district}
+
+                options={panchayaths.map((panchayath) => ({
+                  value: panchayath.id,
+                  label: panchayath.name,
+                }))}
+
+                value={
+                  panchayaths
+                    .map((panchayath) => ({
+                      value: panchayath.id,
+                      label: panchayath.name,
+                    }))
+                    .find(
+                      (option) =>
+                        String(option.value) === String(form.panchayath)
+                    ) || null
+                }
+
+                onChange={(selected) =>
+                  handleChange({
+                    target: {
+                      name: "panchayath",
+                      value: selected ? selected.value : "",
+                    },
+                  })
+                }
+              />
+
+
+              <p className="mt-2 text-xs text-gray-500">
+                Can't find your panchayath?{" "}
+                <button
+                  type="button"
+                  className="text-teal-600 hover:underline"
+                  onClick={() => {
+                    setLocationRequest({
+                      request_type: "PANCHAYATH",
+                      district_name:
+                        districts.find(
+                          d => String(d.id) === String(form.district)
+                        )?.name || "",
+                      panchayath_name: "",
+                      ward_number: "",
+                      ward_name: "",
+                      message: "",
+                    });
+
+                    setShowLocationRequest(true);
+                  }}
+                >
+                  Request Panchayath
+                </button>
+              </p>
+
+            </InputField>
+          </div>
+
+          <div id="field-ward">
+            <InputField
+              label="Ward"
+              required
+              error={errors.ward}
             >
-              <option value="">Select your ward</option>
 
-              {wards.map((ward) => (
-                <option key={ward.id} value={ward.id}>
-                  {ward.name}
-                </option>
-              ))}
+              <SearchableSelect
+                placeholder="Search Ward..."
+                isDisabled={!form.panchayath}
 
-            </select>
-          </InputField>
+                options={wards.map((ward) => ({
+                  value: ward.id,
+                  label: `Ward ${ward.ward_number}${ward.ward_name
+                    ? ` - ${ward.ward_name}`
+                    : ""
+                    }`,
+                }))}
+
+                value={
+                  wards
+                    .map((ward) => ({
+                      value: ward.id,
+                      label: `Ward ${ward.ward_number}${ward.ward_name
+                        ? ` - ${ward.ward_name}`
+                        : ""
+                        }`,
+                    }))
+                    .find(
+                      (option) =>
+                        String(option.value) === String(form.ward)
+                    ) || null
+                }
+
+                onChange={(selected) =>
+                  handleChange({
+                    target: {
+                      name: "ward",
+                      value: selected ? selected.value : "",
+                    },
+                  })
+                }
+              />
+
+
+
+              <p className="mt-2 text-xs text-gray-500">
+                Can't find your ward?{" "}
+                <button
+                  type="button"
+                  className="text-teal-600 hover:underline"
+                  onClick={() => {
+
+                    const district =
+                      districts.find(
+                        d => String(d.id) === String(form.district)
+                      );
+
+                    const panchayath =
+                      panchayaths.find(
+                        p => String(p.id) === String(form.panchayath)
+                      );
+
+                    setLocationRequest({
+                      request_type: "WARD",
+                      district_name: district?.name || "",
+                      panchayath_name: panchayath?.name || "",
+                      ward_number: "",
+                      ward_name: "",
+                      message: "",
+                    });
+
+                    setShowLocationRequest(true);
+                  }}
+                >
+                  Request Ward
+                </button>
+              </p>
+
+            </InputField>
+          </div>
+
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -467,6 +841,127 @@ const CitizenVerificationForm = ({
           )}
         </button>
       </div>
+
+
+      {showLocationRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl w-full max-w-lg p-6">
+
+            <h2 className="text-lg font-bold mb-4">
+              Request Missing Location
+            </h2>
+
+            <div className="space-y-4">
+
+              <select
+                className="w-full border rounded-lg p-2"
+                value={locationRequest.request_type}
+                onChange={(e) =>
+                  setLocationRequest({
+                    ...locationRequest,
+                    request_type: e.target.value,
+                  })
+                }
+              >
+                <option value="">Select Request Type</option>
+                <option value="DISTRICT">District</option>
+                <option value="PANCHAYATH">Panchayath</option>
+                <option value="WARD">Ward</option>
+              </select>
+
+              <input
+                className="w-full border rounded-lg p-2"
+                placeholder="District Name"
+                value={locationRequest.district_name}
+                onChange={(e) =>
+                  setLocationRequest({
+                    ...locationRequest,
+                    district_name: e.target.value,
+                  })
+                }
+              />
+
+              {(locationRequest.request_type === "PANCHAYATH" ||
+                locationRequest.request_type === "WARD") && (
+                  <input
+                    className="w-full border rounded-lg p-2"
+                    placeholder="Panchayath Name"
+                    value={locationRequest.panchayath_name}
+                    onChange={(e) =>
+                      setLocationRequest({
+                        ...locationRequest,
+                        panchayath_name: e.target.value,
+                      })
+                    }
+                  />
+                )}
+
+              {locationRequest.request_type === "WARD" && (
+                <>
+                  <input
+                    type="number"
+                    className="w-full border rounded-lg p-2"
+                    placeholder="Ward Number"
+                    value={locationRequest.ward_number}
+                    onChange={(e) =>
+                      setLocationRequest({
+                        ...locationRequest,
+                        ward_number: e.target.value,
+                      })
+                    }
+                  />
+
+                  <input
+                    className="w-full border rounded-lg p-2"
+                    placeholder="Ward Name"
+                    value={locationRequest.ward_name}
+                    onChange={(e) =>
+                      setLocationRequest({
+                        ...locationRequest,
+                        ward_name: e.target.value,
+                      })
+                    }
+                  />
+                </>
+              )}
+
+              <textarea
+                rows={4}
+                className="w-full border rounded-lg p-2"
+                placeholder="Describe the issue..."
+                value={locationRequest.message}
+                onChange={(e) =>
+                  setLocationRequest({
+                    ...locationRequest,
+                    message: e.target.value,
+                  })
+                }
+              />
+
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+
+              <button
+                onClick={() => setShowLocationRequest(false)}
+                className="px-4 py-2 rounded-lg border"
+              >
+                Cancel
+              </button>
+
+              <button
+                disabled={requestLoading}
+                onClick={handleLocationRequest}
+                className="bg-teal-600 text-white px-4 py-2 rounded-lg"
+              >
+                {requestLoading ? "Submitting..." : "Submit"}
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

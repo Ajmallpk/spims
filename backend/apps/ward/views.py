@@ -26,8 +26,13 @@ import mimetypes
 import logging
 from apps.notification.utils import send_notification
 from .utils.responses import success_response,error_response
-
-
+from apps.accounts.models import (
+    User,
+    District,
+    Panchayath,
+    Ward,
+)
+from apps.panchayath.models import PanchayathVerification
 
 logger = logging.getLogger(__name__)
 
@@ -105,24 +110,58 @@ class SubmitWardVerificationView(APIView):
     def post(self, request):
         try:
             user = request.user
-            panchayath_id = request.data.get("panchayath_id")
+            district_id = request.data.get("district")
 
-            if not panchayath_id:
+            panchayath_master_id = request.data.get("panchayath_master")
+
+            ward_master_id = request.data.get("ward_master")
+
+            if not district_id or not panchayath_master_id or not ward_master_id:
+
                 return error_response(
-                    message="Panchayath selection is required",
+                    message="District, Panchayath and Ward are required",
                     status=400
                 )
 
-            panchayath_user = User.objects.filter(
-                id=panchayath_id,
-                role=User.Role.PANCHAYATH
+
+            district = District.objects.filter(
+                id=district_id
             ).first()
 
-            if not panchayath_user:
+            panchayath_master = Panchayath.objects.filter(
+                id=panchayath_master_id
+            ).first()
+
+            ward_master = Ward.objects.filter(
+                id=ward_master_id
+            ).first()
+
+
+            if not district or not panchayath_master or not ward_master:
+
                 return error_response(
-                    message="Invalid Panchayath selected",
+                    message="Invalid location selected",
                     status=400
                 )
+                
+                
+            panchayath_verification = (
+                PanchayathVerification.objects
+                .select_related("user")
+                .filter(
+                    panchayath_name=panchayath_master.name,
+                    status="APPROVED"
+                )
+                .first()
+            )
+
+            if not panchayath_verification:
+                return error_response(
+                    message="No verified Panchayath Officer is assigned to this Panchayath.",
+                    status=400
+                )
+
+            panchayath_user = panchayath_verification.user
 
             verification = WardVerification.objects.filter(user=user).first()
 
@@ -130,7 +169,13 @@ class SubmitWardVerificationView(APIView):
                 "officer_full_name": request.data.get("officer_full_name"),
                 "official_email": request.data.get("official_email"),
                 "official_contact": request.data.get("official_contact"),
-                "ward_name": request.data.get("ward_name"),
+                "district": district,
+
+                "panchayath_master": panchayath_master,
+
+                "ward_master": ward_master,
+
+                "ward_name": ward_master.ward_name or f"Ward {ward_master.ward_number}",
                 "office_address": request.data.get("office_address"),
                 "aadhaar_image": request.FILES.get("aadhaar_image"),
                 "selfie_image": request.FILES.get("selfie_image"),
@@ -156,6 +201,9 @@ class SubmitWardVerificationView(APIView):
                         setattr(verification, key, value)
 
                 verification.panchayath = panchayath_user
+                verification.district = district
+                verification.panchayath_master = panchayath_master
+                verification.ward_master = ward_master
                 verification.status = "PENDING"
                 verification.reject_reason = None
                 verification.reviewed_at = None
@@ -182,7 +230,13 @@ class SubmitWardVerificationView(APIView):
             WardVerification.objects.create(
                 user=user,
                 panchayath=panchayath_user,
+
+                district=district,
+                panchayath_master=panchayath_master,
+                ward_master=ward_master,
+
                 status="PENDING",
+
                 **data
             )
             

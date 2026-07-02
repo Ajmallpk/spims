@@ -82,4 +82,77 @@ export const adminapi = {
             "notification/notifications/read-all/"
         )
     },
+
+    createDistrict: (data) => {
+        return adminAxios.post(
+            "/admin/locations/create/",
+            {
+                location_type: "DISTRICT",
+                ...data,
+            }
+        );
+    },
+
+    createPanchayath: (data) => {
+        return adminAxios.post(
+            "/admin/locations/create/",
+            {
+                location_type: "PANCHAYATH",
+                ...data,
+            }
+        );
+    },
+
+    createWard: (data) => {
+        return adminAxios.post(
+            "/admin/locations/create/",
+            {
+                location_type: "WARD",
+                ...data,
+            }
+        );
+    },
+
+    getLocationDistricts: () => {
+        return adminAxios.get(
+            "auth/districts/"
+        );
+    },
+
+    getLocationPanchayaths: (districtId) => {
+        return adminAxios.get(
+            `auth/panchayaths/?district=${districtId}`
+        );
+    },
+
+
+    getLocationRequests: (status = "") => {
+        return adminAxios.get(
+            "/admin/location-requests/",
+            {
+                params: { status }
+            }
+        );
+    },
+
+    completeLocationRequest: (id, data) => {
+        return adminAxios.post(
+            `/admin/location-request/${id}/complete/`,
+            data
+        );
+    },
+
+    holdLocationRequest: (id, data) => {
+        return adminAxios.post(
+            `/admin/location-request/${id}/hold/`,
+            data
+        );
+    },
+
+    rejectLocationRequest: (id, data) => {
+        return adminAxios.post(
+            `/admin/location-request/${id}/reject/`,
+            data
+        );
+    },
 }

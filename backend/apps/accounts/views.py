@@ -18,6 +18,16 @@ from django.utils.decorators import method_decorator
 from .utils.responses import success_response,error_response
 from rest_framework import serializers
 
+from .serializers import (
+    SignupSerializer,
+    DistrictSerializer,
+    PanchayathSerializer,
+    WardSerializer,
+    LocationRequestSerializer,
+)
+
+from .models import District, Panchayath, Ward,LocationRequest
+
 
 
 
@@ -590,3 +600,114 @@ class MeView(APIView):
     
     
     
+# ===================================================
+# Kerala Location APIs
+# ===================================================
+
+class DistrictListAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+
+        districts = District.objects.all()
+
+        serializer = DistrictSerializer(
+            districts,
+            many=True
+        )
+
+        return success_response(
+            message="Districts fetched successfully",
+            data=serializer.data
+        )
+
+
+class PanchayathListAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+
+        district_id = request.GET.get("district")
+
+        queryset = Panchayath.objects.all()
+
+        if district_id:
+            queryset = queryset.filter(
+                district_id=district_id
+            )
+
+        serializer = PanchayathSerializer(
+            queryset,
+            many=True
+        )
+
+        return success_response(
+            message="Panchayaths fetched successfully",
+            data=serializer.data
+        )
+
+
+class WardListAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+
+        panchayath_id = request.GET.get("panchayath")
+
+        queryset = Ward.objects.all()
+
+        if panchayath_id:
+            queryset = queryset.filter(
+                panchayath_id=panchayath_id
+            )
+
+        serializer = WardSerializer(
+            queryset,
+            many=True
+        )
+
+        return success_response(
+            message="Wards fetched successfully",
+            data=serializer.data
+        )
+    
+    
+    
+    
+class SubmitLocationRequestAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        serializer = LocationRequestSerializer(
+            data=request.data
+        )
+
+        if not serializer.is_valid():
+
+            return error_response(
+                message="Validation failed",
+                errors=serializer.errors,
+                status=400
+            )
+            
+        
+        existing = LocationRequest.objects.filter(
+            requested_by=request.user,
+            request_type=serializer.validated_data["request_type"],
+            status__in=["PENDING", "HOLD"]
+        ).exists()
+
+        if existing:
+            return error_response(
+                message="You already have a pending request for this location.",
+                status=400
+            )
+
+        serializer.save(
+            requested_by=request.user
+        )
+
+        return success_response(
+            message="Location request submitted successfully"
+        )

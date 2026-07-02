@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from apps.complaints.models import Complaint
 from cloudinary.models import CloudinaryField
+from apps.accounts.models import District, Panchayath, Ward
 
 User = get_user_model()
 
@@ -27,6 +28,32 @@ class WardVerification(models.Model):
         on_delete=models.CASCADE,
         related_name="assigned_wards",
         limit_choices_to={"role": User.Role.PANCHAYATH},
+    )
+    
+    
+    
+    district = models.ForeignKey(
+        District,
+        on_delete=models.PROTECT,
+        related_name="ward_verifications",
+        null=True,
+        blank=True
+    )
+
+    panchayath_master = models.ForeignKey(
+        Panchayath,
+        on_delete=models.PROTECT,
+        related_name="ward_verifications",
+        null=True,
+        blank=True
+    )
+
+    ward_master = models.ForeignKey(
+        Ward,
+        on_delete=models.PROTECT,
+        related_name="ward_verifications",
+        null=True,
+        blank=True
     )
 
     officer_full_name = models.CharField(max_length=255)

@@ -7,6 +7,8 @@ import {
   UserCircle,
   ShieldCheck,
   Users,
+  Map,
+  MapPinned
 } from "lucide-react";
 import FixItLogo from "@/pages/common/FixItLogo";
 
@@ -31,6 +33,20 @@ const navItems = [
     path: "/admin/wards",
     icon: MapPin,
   },
+
+
+  {
+    label: "Location Requests",
+    path: "/admin/location-requests",
+    icon: MapPinned,
+  },
+
+  {
+    label: "Location Management",
+    path: "/admin/location-management",
+    icon: Map,
+  },
+
   {
     label: "Citizen List",
     path: "/admin/citizens",
@@ -68,7 +84,7 @@ const AdminSidebar = () => {
         <FixItLogo
           iconWidth={58}
           layout="row"
-          
+
           showTagline={true}
           logoColor="#13858f"
           primaryColor="#ffffff"

@@ -128,6 +128,26 @@ const panchayathApi = {
     )
   },
 
+
+  getDistricts: () => {
+    return panchayathAxios.get(
+      "/auth/districts/"
+    );
+  },
+
+  getPanchayaths: (districtId) => {
+    return panchayathAxios.get(
+      `/auth/panchayaths/?district=${districtId}`
+    );
+  },
+
+  createLocationRequest: (data) => {
+    return panchayathAxios.post(
+      "/auth/location-request/",
+      data
+    );
+  },
+
 };
 
 

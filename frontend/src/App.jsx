@@ -30,7 +30,8 @@ import PanchayathDetails from "./pages/admin/Panchayathdetails";
 import AdminCitizenList from "@/pages/admin/CitizenList";
 import AdminCitizenDetail from "@/pages/admin/CitizenDetail";
 import ComplaintDetailPage from "./pages/admin/ComplaintDetailPage";
-
+import LocationManagement from "@/pages/admin/LocationManagement";
+import LocationRequests from "@/pages/admin/LocationRequests";
 
 
 
@@ -320,6 +321,14 @@ export default function App() {
           <Route path="profile" element={<AdminProfile />} />
           <Route path="panchayaths/:id" element={<PanchayathDetails />} />
           <Route path="wards/:id" element={<WardDetailsPage />} />
+          <Route
+            path="location-requests"
+            element={<LocationRequests />}
+          />
+          <Route
+            path="location-management"
+            element={<LocationManagement />}
+          />
           <Route path="citizens" element={<AdminCitizenList />} />
           <Route path="citizens/:id" element={<AdminCitizenDetail />} />
           <Route path="/admin/complaints/:id" element={<ComplaintDetailPage />} />

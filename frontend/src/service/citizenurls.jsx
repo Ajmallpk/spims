@@ -38,8 +38,10 @@ const citizenapi = {
       },
     });
   },
-  getWards: () => {
-    return citizenAxios.get("citizen/wards/");
+  getWards: (panchayathId) => {
+    return citizenAxios.get(
+      `auth/wards/?panchayath=${panchayathId}`
+    );
   },
 
   changePassword: (data) => {
@@ -117,6 +119,23 @@ const citizenapi = {
     return citizenAxios.get("/auth/me/");
   },
 
+
+  getDistricts: () => {
+    return citizenAxios.get("auth/districts/");
+  },
+
+  getPanchayaths: (districtId) => {
+    return citizenAxios.get(
+      `auth/panchayaths/?district=${districtId}`
+    );
+  },
+
+  createLocationRequest: (data) => {
+    return citizenAxios.post(
+      "auth/location-request/",
+      data
+    );
+  },
 
 };
 

@@ -151,6 +151,29 @@ const wardapi = {
         return wardAxios.get("/ward/auth/me/");
     },
 
+    getDistricts: () => {
+        return wardAxios.get("/auth/districts/");
+    },
+
+    getPanchayaths: (districtId) => {
+        return wardAxios.get(
+            `/auth/panchayaths/?district=${districtId}`
+        );
+    },
+
+    getWards: (panchayathId) => {
+        return wardAxios.get(
+            `/auth/wards/?panchayath=${panchayathId}`
+        );
+    },
+
+    createLocationRequest: (data) => {
+        return wardAxios.post(
+            "/auth/location-request/",
+            data
+        );
+    },
+
 };
 
 export default wardapi;

@@ -17,4 +17,25 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view()),
     path("csrf/", views.SetCSRFTokenView.as_view()),
     path("me/", views.MeView.as_view()),
+    path(
+    "districts/",
+    views.DistrictListAPIView.as_view(),
+    ),
+
+    path(
+        "panchayaths/",
+        views.PanchayathListAPIView.as_view(),
+    ),
+
+    path(
+        "wards/",
+        views.WardListAPIView.as_view(),
+    ),
+    
+    
+    path(
+        "location-request/",
+        views.SubmitLocationRequestAPIView.as_view()
+    ),
+
 ]

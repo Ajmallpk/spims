@@ -29,7 +29,7 @@ from apps.complaints.models import ComplaintResolution, ResolutionMedia
 from .utils import success_response,error_response
 import mimetypes
 from apps.notification.utils import send_notification
-
+from apps.accounts.models import District, Panchayath
 
 
 logger = logging.getLogger(__name__)
@@ -96,9 +96,36 @@ class SubmitPanchayathVerificationView(APIView):
             
             verification = getattr(user, "panchayath_verification", None)
 
+            district_id = request.data.get("district")
+            panchayath_master_id = request.data.get("panchayath_master")
+
+            if not district_id or not panchayath_master_id:
+                return error_response(
+                    message="District and Panchayath are required.",
+                    status=400
+                )
+
+            district = District.objects.filter(
+                id=district_id
+            ).first()
+
+            panchayath_master = Panchayath.objects.filter(
+                id=panchayath_master_id
+            ).first()
+
+            if not district or not panchayath_master:
+                return error_response(
+                    message="Invalid location selected.",
+                    status=400
+                )
+                
+                
+            data = request.data.copy()
+            data["district"] = district.name
+            data["panchayath_name"] = panchayath_master.name
             serializer = PanchayathVerificationSerializer(
                 instance=verification,
-                data=request.data,
+                data=data,
                 context={"request": request}
             )
             
@@ -130,6 +157,8 @@ class SubmitPanchayathVerificationView(APIView):
                 verification.status = "PENDING"
                 verification.reject_reason = None
                 verification.reviewed_at = None
+                verification.district_master = district
+                verification.panchayath_master = panchayath_master
                 verification.save()
                 
                 
@@ -156,6 +185,8 @@ class SubmitPanchayathVerificationView(APIView):
                 )
             verification = PanchayathVerification.objects.create(
                 user=user,
+                district_master=district,
+                panchayath_master=panchayath_master,
                 **serializer.validated_data
             )
             

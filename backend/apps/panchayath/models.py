@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from cloudinary.models import CloudinaryField
-
+from apps.accounts.models import District, Panchayath
 User = get_user_model()
 
 
@@ -18,6 +18,21 @@ class PanchayathVerification(models.Model):
         related_name="panchayath_verification"
     )
     
+    district_master = models.ForeignKey(
+        District,
+        on_delete=models.PROTECT,
+        related_name="panchayath_verifications",
+        null=True,
+        blank=True
+    )
+
+    panchayath_master = models.ForeignKey(
+        Panchayath,
+        on_delete=models.PROTECT,
+        related_name="verification_requests",
+        null=True,
+        blank=True
+    )
     panchayath_name = models.CharField(max_length=50)
     full_name = models.CharField(max_length=50)
     phone = models.CharField(max_length=15,unique=True)

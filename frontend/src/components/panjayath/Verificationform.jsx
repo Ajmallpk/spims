@@ -9,11 +9,12 @@
 //   onSuccess    {Function}  - Called after successful submission (triggers status refresh)
 //   isRejected   {boolean}   - If true, show "resubmit" context messaging
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import DocumentUploadField from "@/components/panjayath/Documentuploadfield";
 import panchayathapi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
 import { handleApiError } from "@/utils/handleApiError";
+import LocationRequestModal from "@/components/common/LocationRequestModal";
 
 // ─── Field component ─────────────────────────────────────────────────────────
 
@@ -87,8 +88,12 @@ function FormField({
 
 const INITIAL_FIELDS = {
   full_name: "",
-  panchayath_name: "",
+
   district: "",
+  panchayath_master: "",
+
+  panchayath_name: "",
+
   official_contact: "",
   email: "",
 };
@@ -169,13 +174,41 @@ function validateFields(fields, aadhaarImage, selfieImage) {
  */
 export default function VerificationForm({ onSuccess, isRejected = false }) {
   const [fields, setFields] = useState(INITIAL_FIELDS);
+  const [districts, setDistricts] = useState([]);
+  const [panchayaths, setPanchayaths] = useState([]);
+  const [showLocationRequest, setShowLocationRequest] = useState(false);
   const [aadhaarImage, setAadhaarImage] = useState(null);
   const [selfieImage, setSelfieImage] = useState(null);
   const [errors, setErrors] = useState(INITIAL_ERRORS);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  // ── Field change handler ────────────────────────────────────────────────
+
+
+  useEffect(() => {
+    loadDistricts();
+  }, []);
+
+  const loadDistricts = async () => {
+
+    try {
+
+      const res = await panchayathapi.getDistricts();
+
+      setDistricts(res.data.data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
+
+
+
+
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
     setFields((prev) => ({ ...prev, [name]: value }));
@@ -215,7 +248,15 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
       const formData = new FormData();
       formData.append("full_name", fields.full_name.trim());
       formData.append("panchayath_name", fields.panchayath_name.trim());
-      formData.append("district", fields.district.trim());
+      formData.append(
+        "district",
+        fields.district
+      );
+
+      formData.append(
+        "panchayath_master",
+        fields.panchayath_master
+      );
       formData.append("phone", fields.official_contact.trim());
       formData.append("email", fields.email.trim());
       formData.append("aadhaar_image", aadhaarImage);
@@ -236,6 +277,47 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+
+  const handleDistrictChange = async (e) => {
+
+    const districtId = e.target.value;
+
+    setFields(prev => ({
+      ...prev,
+      district: districtId,
+      panchayath_master: "",
+      panchayath_name: "",
+    }));
+
+    setPanchayaths([]);
+
+    if (!districtId) return;
+
+    const res = await panchayathapi.getPanchayaths(
+      districtId
+    );
+
+    setPanchayaths(res.data.data);
+
+  };
+
+
+  const handlePanchayathChange = (e) => {
+
+    const id = e.target.value;
+
+    const selected = panchayaths.find(
+      p => p.id == id
+    );
+
+    setFields(prev => ({
+      ...prev,
+      panchayath_master: id,
+      panchayath_name: selected?.name || "",
+    }));
+
   };
 
   return (
@@ -287,27 +369,80 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
           {/* Two-column row for License + Contact */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FormField
-              label="Panchayath Name"
-              name="panchayath_name"
-              value={fields.panchayath_name}
-              onChange={handleFieldChange}
-              error={errors.panchayath_name}
-              placeholder="e.g. Koyilandy Grama Panchayath"
-              required
-              disabled={isSubmitting}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-            <FormField
-              label="District"
-              name="district"
-              value={fields.district}
-              onChange={handleFieldChange}
-              error={errors.district}
-              placeholder="e.g. Kozhikode"
-              required
-              disabled={isSubmitting}
-            />
+              <div>
+                <label className="block text-sm font-semibold text-slate-700">
+                  District <span className="text-red-500">*</span>
+                </label>
+
+                <select
+                  value={fields.district}
+                  onChange={handleDistrictChange}
+                  className="w-full mt-2 px-4 py-2.5 rounded-xl border border-slate-300"
+                >
+                  <option value="">
+                    Select District
+                  </option>
+
+                  {districts.map((district) => (
+
+                    <option
+                      key={district.id}
+                      value={district.id}
+                    >
+                      {district.name}
+                    </option>
+
+                  ))}
+
+                </select>
+              </div>
+
+              <div>
+
+                <label className="block text-sm font-semibold text-slate-700">
+                  Panchayath <span className="text-red-500">*</span>
+                </label>
+
+                <select
+                  value={fields.panchayath_master}
+                  onChange={handlePanchayathChange}
+                  className="w-full mt-2 px-4 py-2.5 rounded-xl border border-slate-300"
+                >
+
+                  <option value="">
+                    Select Panchayath
+                  </option>
+
+                  {panchayaths.map((p) => (
+
+                    <option
+                      key={p.id}
+                      value={p.id}
+                    >
+                      {p.name}
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </div>
+
+            </div>
+
+            <div className="flex justify-end">
+
+              <button
+                type="button"
+                onClick={() => setShowLocationRequest(true)}
+                className="text-blue-600 text-sm hover:underline"
+              >
+                Can't find your Panchayath?
+              </button>
+
+            </div>
             <FormField
               label="Official Email"
               name="email"
@@ -429,6 +564,12 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
           </p>
         </div>
       </form>
+
+      <LocationRequestModal
+        open={showLocationRequest}
+        onClose={() => setShowLocationRequest(false)}
+        api={panchayathapi}
+      />
     </div>
   );
 }

@@ -31,6 +31,31 @@ urlpatterns = [
     path("citizen/<int:user_id>/", views.AdminCitizenDetailView.as_view()),
     path("auth/me/", views.MeView.as_view()),
     path("complaints/<int:complaint_id>/",views.AdminComplaintDetailView.as_view()),
+    path(
+        "location-requests/",
+        views.LocationRequestListView.as_view()
+    ),
+    
+    path(
+        "locations/create/",
+        views.CreateLocationView.as_view()
+    ),
+    
+    
+    path(
+        "location-request/<int:pk>/complete/",
+        views.CompleteLocationRequestView.as_view()
+    ),
+
+    path(
+        "location-request/<int:pk>/hold/",
+        views.HoldLocationRequestView.as_view()
+    ),
+
+    path(
+        "location-request/<int:pk>/reject/",
+        views.RejectLocationRequestView.as_view()
+    ),
 ]
 
 

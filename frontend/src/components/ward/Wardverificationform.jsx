@@ -2,14 +2,21 @@ import { useState, useEffect } from "react";
 import DocumentUploadField from "@/components/ward/Documentuploadfield";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
+import LocationRequestModal from "@/components/common/LocationRequestModal";
 
 
 const INITIAL_FIELDS = {
   officer_full_name: "",
+
+  district: "",
+  panchayath_master: "",
+  ward_master: "",
+
   ward_name: "",
-  panchayath_id: "",
+
   official_email: "",
   official_contact: "",
+
   office_address: "",
 };
 
@@ -98,6 +105,11 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
   const [fields, setFields] = useState({
     ...INITIAL_FIELDS,
+
+    district: "",
+    panchayath_master: "",
+    ward_master: "",
+
     ward_name: prefillData?.ward_name ?? "",
     official_email: prefillData?.email ?? "",
     official_contact: prefillData?.phone ?? prefillData?.mobile ?? "",
@@ -112,24 +124,93 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [districts, setDistricts] = useState([]);
   const [panchayaths, setPanchayaths] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [showLocationRequest, setShowLocationRequest] = useState(false);
+
 
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const fetchPanchayaths = async () => {
-      try {
-        const res = await wardapi.getPanchayathDropdown();
-        setPanchayaths(res.data?.data || []);
-      } catch (error) {
-        // interceptor will show toast
-      }
-    };
-
-    fetchPanchayaths();
+    loadDistricts();
   }, []);
 
+  const loadDistricts = async () => {
+    try {
+
+      const res = await wardapi.getDistricts();
+
+      setDistricts(res.data.data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+  };
+
+
+  const handleDistrictChange = async (e) => {
+
+    const districtId = e.target.value;
+
+    setFields(prev => ({
+      ...prev,
+      district: districtId,
+      panchayath_master: "",
+      ward_master: "",
+    }));
+
+    setPanchayaths([]);
+    setWards([]);
+
+    if (!districtId) return;
+
+    const res = await wardapi.getPanchayaths(districtId);
+
+    setPanchayaths(res.data.data);
+  };
+
+
+
+  const handlePanchayathChange = async (e) => {
+
+    const id = e.target.value;
+
+    setFields(prev => ({
+      ...prev,
+      panchayath_master: id,
+      ward_master: "",
+    }));
+
+    setWards([]);
+
+    if (!id) return;
+
+    const res = await wardapi.getWards(id);
+
+    setWards(res.data.data);
+  };
+
+
+
+  const handleWardChange = (e) => {
+
+    const id = e.target.value;
+
+    const ward = wards.find(w => w.id == id);
+
+    setFields(prev => ({
+      ...prev,
+      ward_master: id,
+      ward_name: ward
+        ? ward.ward_name || `Ward ${ward.ward_number}`
+        : "",
+    }));
+
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFields((prev) => ({ ...prev, [name]: value }));
@@ -203,7 +284,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
       onSuccess();
 
-      
+
     } catch (err) {
       // interceptor will show toast
       console.error(err);
@@ -288,49 +369,120 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
         {/* Section: Ward & Panchayath */}
         <div className="space-y-4">
-          <SectionDivider label="Ward & Panchayath" />
+          <SectionDivider label="Location" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="Ward Name"
-              name="ward_name"
-              value={fields.ward_name}
-              onChange={handleChange}
-              required
-              placeholder="e.g. Ward No. 7"
-              error={errors.ward_name}
-            />
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                Select Panchayath <span className="text-red-500">*</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <div>
+
+              <label className="text-xs font-semibold">
+                District
               </label>
 
               <select
-                name="panchayath_id"
-                value={fields.panchayath_id}
-                onChange={handleChange}
-                className={`w-full px-4 py-2.5 text-sm border rounded-xl outline-none transition-all duration-150
-      ${errors.panchayath_id
-                    ? "border-red-400 focus:ring-2 focus:ring-red-100 bg-red-50"
-                    : "border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  }`}
+                value={fields.district}
+                onChange={handleDistrictChange}
+                className="w-full border rounded-xl px-4 py-2 mt-2"
               >
-                <option value="">-- Select Panchayath --</option>
 
-                {Array.isArray(panchayaths) && panchayaths.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.panchayath_name}
+                <option value="">
+                  Select District
+                </option>
+
+                {districts.map(d => (
+
+                  <option
+                    key={d.id}
+                    value={d.id}
+                  >
+                    {d.name}
                   </option>
+
                 ))}
+
               </select>
 
-              {errors.panchayath_id && (
-                <p className="text-xs text-red-600 font-medium">
-                  {errors.panchayath_id}
-                </p>
-              )}
             </div>
+
+
+            <div>
+
+              <label className="text-xs font-semibold">
+                Panchayath
+              </label>
+
+              <select
+                value={fields.panchayath_master}
+                onChange={handlePanchayathChange}
+                className="w-full border rounded-xl px-4 py-2 mt-2"
+              >
+
+                <option value="">
+                  Select Panchayath
+                </option>
+
+                {panchayaths.map(p => (
+
+                  <option
+                    key={p.id}
+                    value={p.id}
+                  >
+                    {p.name}
+                  </option>
+
+                ))}
+
+              </select>
+
+            </div>
+
+
+
+            <div>
+
+              <label className="text-xs font-semibold">
+                Ward
+              </label>
+
+              <select
+                value={fields.ward_master}
+                onChange={handleWardChange}
+                className="w-full border rounded-xl px-4 py-2 mt-2"
+              >
+
+                <option value="">
+                  Select Ward
+                </option>
+
+                {wards.map(w => (
+
+                  <option
+                    key={w.id}
+                    value={w.id}
+                  >
+                    Ward {w.ward_number}
+                    {w.ward_name ? ` - ${w.ward_name}` : ""}
+                  </option>
+
+                ))}
+
+              </select>
+
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:underline"
+                  onClick={() => setShowLocationRequest(true)}
+                >
+                  Can't find your District / Panchayath / Ward?
+                </button>
+              </div>
+
+            </div>
+
           </div>
+
 
           <FormTextArea
             label="Office Address"
@@ -411,6 +563,11 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
           </p>
         </div>
       </div>
+      <LocationRequestModal
+        open={showLocationRequest}
+        onClose={() => setShowLocationRequest(false)}
+        api={wardapi}
+      />
     </div>
   );
 }

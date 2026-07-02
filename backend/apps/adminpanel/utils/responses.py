@@ -4,7 +4,7 @@ def success_response(message="", data=None, status=200):
     return Response({
         "success": True,
         "message": message,
-        "data": data or {}
+        "data": data if data is not None else {}
     }, status=status)
 
 

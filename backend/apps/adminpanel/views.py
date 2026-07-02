@@ -9,7 +9,7 @@ from apps.ward.models import WardVerification
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
-from .serializers import AdminLoginSerializer
+from .serializers import AdminLoginSerializer,LocationRequestListSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import PageNumberPagination
 from apps.ward.models import WardVerification
@@ -42,7 +42,13 @@ from django.conf import settings
 from .utils.responses import success_response,error_response
 from apps.complaints.serializers import ComplaintDetailSerializer
 from apps.notification.utils import send_notification
-
+from apps.accounts.models import (
+    LocationRequest,
+    District,
+    Panchayath,
+    Ward,
+)
+from apps.accounts.models import LocationRequest
 
 logger = logging.getLogger(__name__)
 
@@ -1745,5 +1751,264 @@ class MeView(APIView):
     })
         
         
+class LocationRequestListView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+
+        status = request.GET.get("status")
+
+        queryset = LocationRequest.objects.all()
+
+        if status:
+            queryset = queryset.filter(
+                status=status
+            )
+
+        queryset = queryset.order_by(
+            "-created_at"
+        )
+
+        serializer = LocationRequestListSerializer(
+            queryset,
+            many=True
+        )
+
+        return success_response(
+            message="Location requests fetched successfully",
+            data=serializer.data
+        )
         
         
+        
+class CreateLocationView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request):
+
+        location_type = request.data.get("location_type")
+
+        if location_type == "DISTRICT":
+
+            name = request.data.get("name")
+
+            if District.objects.filter(
+                name__iexact=name
+            ).exists():
+
+                return error_response(
+                    message="District already exists",
+                    status=400
+                )
+
+            district = District.objects.create(
+                name=name
+            )
+
+            return success_response(
+                message="District created successfully",
+                data={
+                    "id": district.id
+                }
+            )
+
+        elif location_type == "PANCHAYATH":
+
+            district_id = request.data.get("district")
+
+            name = request.data.get("name")
+            
+            code = request.data.get("code")
+
+            district = get_object_or_404(
+                District,
+                id=district_id
+            )
+
+            if Panchayath.objects.filter(
+                district=district,
+                name__iexact=name
+            ).exists():
+
+                return error_response(
+                    message="Panchayath already exists",
+                    status=400
+                )
+
+            panchayath = Panchayath.objects.create(
+                district=district,
+                name=name,
+                code = code
+            )
+
+            return success_response(
+                message="Panchayath created successfully",
+                data={
+                    "id": panchayath.id
+                }
+            )
+
+        elif location_type == "WARD":
+
+            panchayath_id = request.data.get("panchayath")
+
+            ward_number = request.data.get("ward_number")
+
+            ward_name = request.data.get("ward_name")
+            
+            code = request.data.get("code")
+
+            panchayath = get_object_or_404(
+                Panchayath,
+                id=panchayath_id
+            )
+
+            if Ward.objects.filter(
+                panchayath=panchayath,
+                ward_number=ward_number
+            ).exists():
+
+                return error_response(
+                    message="Ward already exists",
+                    status=400
+                )
+
+            ward = Ward.objects.create(
+                panchayath=panchayath,
+                ward_number=ward_number,
+                ward_name=ward_name,
+                code=code
+            )
+
+            return success_response(
+                message="Ward created successfully",
+                data={
+                    "id": ward.id
+                }
+            )
+
+        return error_response(
+            message="Invalid location type",
+            status=400
+        )
+        
+        
+        
+class CompleteLocationRequestView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request, pk):
+
+        req = get_object_or_404(
+            LocationRequest,
+            id=pk
+        )
+
+        if req.status != "PENDING":
+
+            return error_response(
+                message="Request already processed",
+                status=400
+            )
+
+        message = request.data.get(
+            "message",
+            "Your requested location has been created."
+        )
+
+        req.status = "COMPLETED"
+        req.admin_note = message
+        req.save()
+
+        send_notification(
+            user=req.requested_by,
+            title="Location Request Completed",
+            message=message,
+            n_type="ALERT"
+        )
+
+        return success_response(
+            message="Request completed successfully"
+        )
+        
+        
+        
+class HoldLocationRequestView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request, pk):
+
+        req = get_object_or_404(
+            LocationRequest,
+            id=pk
+        )
+
+        if req.status != "PENDING":
+
+            return error_response(
+                message="Request already processed",
+                status=400
+            )
+
+        message = request.data.get(
+            "message",
+            "Your request is under review."
+        )
+
+        req.status = "HOLD"
+        req.admin_note = message
+        req.save()
+
+        send_notification(
+            user=req.requested_by,
+            title="Location Request On Hold",
+            message=message,
+            n_type="ALERT"
+        )
+
+        return success_response(
+            message="Request moved to hold"
+        )
+        
+        
+        
+class RejectLocationRequestView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request, pk):
+
+        req = get_object_or_404(
+            LocationRequest,
+            id=pk
+        )
+
+        if req.status != "PENDING":
+
+            return error_response(
+                message="Request already processed",
+                status=400
+            )
+
+        reason = request.data.get("reason")
+
+        if not reason:
+
+            return error_response(
+                message="Reason is required",
+                status=400
+            )
+
+        req.status = "REJECTED"
+        req.admin_note = reason
+        req.save()
+
+        send_notification(
+            user=req.requested_by,
+            title="Location Request Rejected",
+            message=reason,
+            n_type="ALERT"
+        )
+
+        return success_response(
+            message="Request rejected"
+        ) 
