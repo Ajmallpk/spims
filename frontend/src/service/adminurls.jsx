@@ -126,13 +126,21 @@ export const adminapi = {
     },
 
 
-    getLocationRequests: (status = "") => {
+    getLocationRequests: (
+        status = "",
+        request_type = ""
+    ) => {
+
         return adminAxios.get(
             "/admin/location-requests/",
             {
-                params: { status }
+                params: {
+                    status,
+                    request_type,
+                }
             }
         );
+
     },
 
     completeLocationRequest: (id, data) => {

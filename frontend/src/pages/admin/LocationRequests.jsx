@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
+import {
+    MapPin,
+    Building2,
+    Flag,
+} from "lucide-react";
 import { adminapi } from "@/service/adminurls";
-
+import LocationRequestDetailModal from "@/components/admin/LocationRequestDetailModal";
+import LocationActionModal from "@/components/admin/LocationActionModal";
 const filters = [
     "PENDING",
     "HOLD",
@@ -11,19 +17,40 @@ const filters = [
 export default function LocationRequests() {
 
     const [status, setStatus] = useState("PENDING");
+    const [requestType, setRequestType] = useState("");
     const [requests, setRequests] = useState([]);
+    const [counts, setCounts] = useState({
+        pending: 0,
+        hold: 0,
+        completed: 0,
+        rejected: 0,
+    });
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const [modalType, setModalType] = useState("");
+
+    const [selectedId, setSelectedId] = useState(null);
+
+    const [loadingAction, setLoadingAction] = useState(false);
+    const [search, setSearch] = useState("");
 
     const loadData = async () => {
 
         try {
 
-            const res = await adminapi.getLocationRequests(status);
+            const res = await adminapi.getLocationRequests(
+                status,
+                requestType
+            );
 
 
             console.log(res.data);
             console.log(res.data.data);
 
-            setRequests(res.data.data);
+            setRequests(res.data.data.requests);
+            setCounts(res.data.data.counts);
 
         } catch (err) {
 
@@ -34,84 +61,128 @@ export default function LocationRequests() {
     };
 
 
-    const completeRequest = async (id) => {
+    const completeRequest = async (id, admin_note) => {
 
-        const admin_note = prompt(
-            "Enter completion message"
+        await adminapi.completeLocationRequest(
+            id,
+            {
+                admin_note
+            }
         );
 
-        if (admin_note === null) return;
-
-        try {
-
-            await adminapi.completeLocationRequest(
-                id,
-                {
-                    admin_note
-                }
-            );
-
-            loadData();
-
-        } catch (err) {
-
-            console.log(err);
-
-        }
+        loadData();
 
     };
 
 
-    const holdRequest = async (id) => {
+    const holdRequest = async (id, admin_note) => {
 
-        const admin_note = prompt(
-            "Reason for Hold"
+        await adminapi.holdLocationRequest(
+            id,
+            {
+                admin_note
+            }
         );
 
-        if (admin_note === null) return;
-
-        try {
-
-            await adminapi.holdLocationRequest(
-                id,
-                {
-                    admin_note
-                }
-            );
-
-            loadData();
-
-        } catch (err) {
-
-            console.log(err);
-
-        }
+        loadData();
 
     };
 
 
-    const rejectRequest = async (id) => {
+    const rejectRequest = async (id, admin_note) => {
 
-        const admin_note = prompt(
-            "Reason for Reject"
+        await adminapi.rejectLocationRequest(
+            id,
+            {
+                admin_note
+            }
         );
 
-        if (admin_note === null) return;
+        loadData();
+
+    };
+
+
+    const openRequest = (request) => {
+
+        setSelectedRequest(request);
+
+        setShowModal(true);
+
+    };
+
+    const closeModal = () => {
+
+        setShowModal(false);
+
+        setSelectedRequest(null);
+
+    };
+
+
+    const openActionModal = (type, id) => {
+
+        setModalType(type);
+
+        setSelectedId(id);
+
+        setModalOpen(true);
+
+    };
+
+    const closeActionModal = () => {
+
+        setModalOpen(false);
+
+        setModalType("");
+
+        setSelectedId(null);
+
+    };
+
+
+    const submitAction = async (note) => {
 
         try {
 
-            await adminapi.rejectLocationRequest(
-                id,
-                {
-                    admin_note
-                }
-            );
+            setLoadingAction(true);
 
-            loadData();
+            if (modalType === "COMPLETE") {
+
+                await completeRequest(
+                    selectedId,
+                    note
+                );
+
+            }
+
+            if (modalType === "HOLD") {
+
+                await holdRequest(
+                    selectedId,
+                    note
+                );
+
+            }
+
+            if (modalType === "REJECT") {
+
+                await rejectRequest(
+                    selectedId,
+                    note
+                );
+
+            }
+
+            closeActionModal();
 
         } catch (err) {
 
             console.log(err);
+
+        } finally {
+
+            setLoadingAction(false);
 
         }
 
@@ -121,42 +192,131 @@ export default function LocationRequests() {
 
         loadData();
 
-    }, [status]);
+    }, [status, requestType]);
 
     return (
 
         <div className="p-6">
 
-            <h1 className="text-2xl font-bold mb-6">
+            <h1 className="text-3xl font-bold">
                 Location Requests
             </h1>
 
-            <div className="flex gap-3 mb-6">
+            <p className="text-gray-500 mb-6">
+                Manage district, panchayath and ward location requests.
+            </p>
 
-                {
-                    filters.map((item) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+                <div className="bg-white rounded-xl shadow border p-4">
+
+                    <p className="text-gray-500 text-sm">
+                        Pending
+                    </p>
+
+                    <h2 className="text-3xl font-bold text-yellow-600">
+                        {counts.pending}
+                    </h2>
+
+                </div>
+
+                <div className="bg-white rounded-xl shadow border p-4">
+
+                    <p className="text-gray-500 text-sm">
+                        Hold
+                    </p>
+
+                    <h2 className="text-3xl font-bold text-orange-600">
+                        {counts.hold}
+                    </h2>
+
+                </div>
+
+                <div className="bg-white rounded-xl shadow border p-4">
+
+                    <p className="text-gray-500 text-sm">
+                        Completed
+                    </p>
+
+                    <h2 className="text-3xl font-bold text-green-600">
+                        {counts.completed}
+                    </h2>
+
+                </div>
+
+                <div className="bg-white rounded-xl shadow border p-4">
+
+                    <p className="text-gray-500 text-sm">
+                        Rejected
+                    </p>
+
+                    <h2 className="text-3xl font-bold text-red-600">
+                        {counts.rejected}
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+
+                <div className="flex flex-wrap gap-3">
+
+                    {filters.map((item) => (
 
                         <button
                             key={item}
                             onClick={() => setStatus(item)}
-                            className={`px-5 py-2 rounded-lg
+                            className={`px-5 py-2 rounded-lg transition
 
-                            ${status === item
-                                    ? "bg-emerald-500 text-white"
-                                    : "bg-gray-200"
-                                }
-
-                            `}
+                ${status === item
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-gray-200 hover:bg-gray-300"
+                                }`}
                         >
                             {item}
                         </button>
 
-                    ))
-                }
+                    ))}
+
+                </div>
+
+
+                <select
+                    value={requestType}
+                    onChange={(e) => setRequestType(e.target.value)}
+                    className="border rounded-lg px-4 py-2"
+                >
+
+                    <option value="">
+                        All Types
+                    </option>
+
+                    <option value="DISTRICT">
+                        District
+                    </option>
+
+                    <option value="PANCHAYATH">
+                        Panchayath
+                    </option>
+
+                    <option value="WARD">
+                        Ward
+                    </option>
+
+                </select>
+
+                <input
+                    type="text"
+                    placeholder="Search user..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full md:w-72 rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
 
             </div>
 
-            <div className="bg-white rounded-xl shadow border">
+            <div className="bg-white rounded-xl shadow border overflow-x-auto">
 
                 <table className="w-full">
 
@@ -197,96 +357,168 @@ export default function LocationRequests() {
 
                         {
 
-                            requests.map((item) => (
+                            requests
+                                .filter((item) => {
 
-                                <tr
-                                    key={item.id}
-                                    className="border-b"
-                                >
+                                    if (!search) return true;
 
-                                    <td className="p-3">
-                                        {item.requested_by}
-                                    </td>
+                                    return (
+                                        item.requested_by
+                                            .toLowerCase()
+                                            .includes(search.toLowerCase())
+                                    );
 
-                                    <td className="p-3">
-                                        {item.role}
-                                    </td>
+                                })
+                                .map((item) => (
 
-                                    <td className="p-3">
-                                        {item.request_type}
-                                    </td>
+                                    <tr
+                                        key={item.id}
+                                        className="border-b hover:bg-gray-50 transition"
+                                    >
 
-                                    <td className="p-3">
+                                        <td className="p-3">
 
-                                        {item.district_name}
+                                            <div>
 
-                                        <br />
+                                                <p className="font-semibold">
 
-                                        {item.panchayath_name}
+                                                    {item.requested_by}
 
-                                        <br />
+                                                </p>
 
-                                        Ward {item.ward_number}
+                                                <p className="text-xs text-gray-500">
 
-                                        {item.ward_name &&
-                                            ` - ${item.ward_name}`
-                                        }
+                                                    {item.role}
 
-                                    </td>
+                                                </p>
 
-                                    <td className="p-3">
+                                            </div>
 
-                                        {item.status}
+                                        </td>
 
-                                    </td>
+                                        <td className="p-3">
+                                            {item.role}
+                                        </td>
 
+                                        <td className="p-3">
 
-                                    <td className="p-3">
+                                            <span
+                                                className="px-2 py-1 rounded-md bg-gray-100 font-medium"
+                                            >
 
-                                        {
+                                                {item.request_type === "DISTRICT" && "📍 District"}
 
-                                            item.status === "PENDING" && (
+                                                {item.request_type === "PANCHAYATH" && "🏛 Panchayath"}
 
-                                                <div className="flex gap-2">
+                                                {item.request_type === "WARD" && "🏘 Ward"}
 
-                                                    <button
-                                                        onClick={() =>
-                                                            completeRequest(item.id)
-                                                        }
-                                                        className="bg-green-600 text-white px-3 py-1 rounded"
-                                                    >
-                                                        Complete
-                                                    </button>
+                                            </span>
 
-                                                    <button
-                                                        onClick={() =>
-                                                            holdRequest(item.id)
-                                                        }
-                                                        className="bg-yellow-500 text-white px-3 py-1 rounded"
-                                                    >
-                                                        Hold
-                                                    </button>
+                                        </td>
 
-                                                    <button
-                                                        onClick={() =>
-                                                            rejectRequest(item.id)
-                                                        }
-                                                        className="bg-red-600 text-white px-3 py-1 rounded"
-                                                    >
-                                                        Reject
-                                                    </button>
+                                        <td className="p-3">
+
+                                            <div className="space-y-2 text-sm">
+
+                                                <div className="flex items-center gap-2">
+
+                                                    <MapPin
+                                                        size={15}
+                                                        className="text-blue-600"
+                                                    />
+
+                                                    <span>
+
+                                                        {item.district_name || "-"}
+
+                                                    </span>
 
                                                 </div>
 
-                                            )
+                                                <div className="flex items-center gap-2">
 
-                                        }
+                                                    <Building2
+                                                        size={15}
+                                                        className="text-emerald-600"
+                                                    />
 
-                                    </td>
+                                                    <span>
 
-                                </tr>
+                                                        {item.panchayath_name || "-"}
 
-                            ))
+                                                    </span>
+
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+
+                                                    <Flag
+                                                        size={15}
+                                                        className="text-orange-500"
+                                                    />
+
+                                                    <span>
+
+                                                        {item.ward_number
+                                                            ? `Ward ${item.ward_number}`
+                                                            : "-"}
+
+                                                        {item.ward_name &&
+                                                            ` (${item.ward_name})`}
+
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+                                        <td className="p-3">
+
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-semibold
+
+        ${item.status === "PENDING"
+                                                        ? "bg-yellow-100 text-yellow-700"
+
+                                                        : item.status === "COMPLETED"
+                                                            ? "bg-green-100 text-green-700"
+
+                                                            : item.status === "HOLD"
+                                                                ? "bg-orange-100 text-orange-700"
+
+                                                                : "bg-red-100 text-red-700"
+
+                                                    }`}
+                                            >
+
+                                                {item.status}
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <td className="p-3">
+
+                                            <button
+
+                                                onClick={() => openRequest(item)}
+
+                                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+
+                                            >
+
+                                                View
+
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+
+                                ))
 
                         }
 
@@ -295,6 +527,84 @@ export default function LocationRequests() {
                 </table>
 
             </div>
+
+
+            <LocationRequestDetailModal
+
+                open={showModal}
+
+                onClose={closeModal}
+
+                request={selectedRequest}
+
+                onComplete={(id) => {
+
+                    closeModal();
+
+                    openActionModal("COMPLETE", id);
+
+                }}
+
+                onHold={(id) => {
+
+                    closeModal();
+
+                    openActionModal("HOLD", id);
+
+                }}
+
+                onReject={(id) => {
+
+                    closeModal();
+
+                    openActionModal("REJECT", id);
+
+                }}
+
+            />
+
+
+            <LocationActionModal
+
+                open={modalOpen}
+
+                loading={loadingAction}
+
+                onClose={closeActionModal}
+
+                onSubmit={submitAction}
+
+                title={
+                    modalType === "COMPLETE"
+                        ? "Complete Request"
+
+                        : modalType === "HOLD"
+                            ? "Put Request On Hold"
+
+                            : "Reject Request"
+                }
+
+                actionLabel={
+                    modalType === "COMPLETE"
+                        ? "Complete"
+
+                        : modalType === "HOLD"
+                            ? "Hold"
+
+                            : "Reject"
+                }
+
+                buttonColor={
+                    modalType === "COMPLETE"
+                        ? "bg-green-600"
+
+                        : modalType === "HOLD"
+                            ? "bg-yellow-500"
+
+                            : "bg-red-600"
+                }
+
+            />
 
         </div>
 

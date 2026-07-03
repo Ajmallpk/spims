@@ -1844,17 +1844,26 @@ class LocationRequestListView(APIView):
     def get(self, request):
 
         status = request.GET.get("status")
+        request_type = request.GET.get("request_type")
 
-        queryset = LocationRequest.objects.all()
+        all_requests = LocationRequest.objects.all()
+
+        counts = {
+            "pending": all_requests.filter(status="PENDING").count(),
+            "hold": all_requests.filter(status="HOLD").count(),
+            "completed": all_requests.filter(status="COMPLETED").count(),
+            "rejected": all_requests.filter(status="REJECTED").count(),
+        }
+
+        queryset = all_requests
 
         if status:
-            queryset = queryset.filter(
-                status=status
-            )
+            queryset = queryset.filter(status=status)
 
-        queryset = queryset.order_by(
-            "-created_at"
-        )
+        if request_type:
+            queryset = queryset.filter(request_type=request_type)
+
+        queryset = queryset.order_by("-created_at")
 
         serializer = LocationRequestListSerializer(
             queryset,
@@ -1863,7 +1872,10 @@ class LocationRequestListView(APIView):
 
         return success_response(
             message="Location requests fetched successfully",
-            data=serializer.data
+            data={
+                "requests": serializer.data,
+                "counts": counts
+            }
         )
         
         
@@ -1999,7 +2011,7 @@ class CompleteLocationRequestView(APIView):
             )
 
         message = request.data.get(
-            "message",
+            "admin_note",
             "Your requested location has been created."
         )
 
@@ -2038,8 +2050,8 @@ class HoldLocationRequestView(APIView):
             )
 
         message = request.data.get(
-            "message",
-            "Your request is under review."
+            "admin_note",
+            "Your request for location is under review."
         )
 
         req.status = "HOLD"
@@ -2076,7 +2088,7 @@ class RejectLocationRequestView(APIView):
                 status=400
             )
 
-        reason = request.data.get("reason")
+        reason = request.data.get("admin_note")
 
         if not reason:
 
