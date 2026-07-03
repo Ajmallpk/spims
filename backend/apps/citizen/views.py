@@ -160,20 +160,33 @@ class CitizenVerificationSubmitView(APIView):
                 )
 
             # serializer.save(user=user)
-            serializer.save(user=user, status="PENDING")
+            verification = serializer.save(user=user)
 
-            verification = CitizenVerification.objects.get(user=user)
+            ward_verification = WardVerification.objects.filter(
+                ward_master=verification.ward,
+                status="APPROVED"
+            ).first()
 
-            send_notification(
-                user=verification.ward,
-                title="New Citizen Verification",
-                message=f"{request.user.username} submitted verification",
-                n_type="CITIZEN_VERIFICATION",
-                sender=request.user,
-                extra_data={
-                    "verification_id": verification.id
-                }
-            )
+            if ward_verification:
+
+                verification.status = "PENDING"
+                verification.save(update_fields=["status"])
+
+                send_notification(
+                    user=ward_verification.user,
+                    title="New Citizen Verification",
+                    message=f"{request.user.username} submitted verification",
+                    n_type="CITIZEN_VERIFICATION",
+                    sender=request.user,
+                    extra_data={
+                        "verification_id": verification.id
+                    }
+                )
+
+            else:
+
+                verification.status = "WAITING_FOR_WARD"
+                verification.save(update_fields=["status"])
 
             logger.info(f"Citizen {user.id} submitted verification")
 
@@ -307,12 +320,15 @@ class WardListView(APIView):
         try:
             wards = WardVerification.objects.filter(
                 status="APPROVED"
-            ).select_related("user")
+            ).select_related("ward_master")
 
             data = [
                 {
-                    "id": ward.user.id,
-                    "name": ward.ward_name
+                    "id": ward.ward_master.id,
+                    "name": (
+                        ward.ward_master.ward_name
+                        or f"Ward {ward.ward_master.ward_number}"
+                    )
                 }
                 for ward in wards
             ]

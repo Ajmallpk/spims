@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { adminapi } from "@/service/adminurls";
+import { useNavigate } from "react-router-dom";
 import StatsGrid from "@/components/admin/Statsgrid";
 import VerificationAlertSection from "@/components/admin/Verificationalertsection";
 import CriticalAlertSection from "@/components/admin/Criticalalertsection";
@@ -10,6 +11,7 @@ import ComplaintStatusChart from "@/components/admin/ComplaintStatusChart";
 import { handleApiError } from "@/utils/handleApiError";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [verifications, setVerifications] = useState([]);
   const [criticalAlerts, setCriticalAlerts] = useState([]);
@@ -132,6 +134,77 @@ const AdminDashboard = () => {
 
       <StatsGrid stats={stats} isLoading={loadingStats} />
       <ComplaintStatusChart data={stats?.complaint_status_chart} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div
+          onClick={() => navigate("/admin/verification-queue")}
+          className="cursor-pointer rounded-xl border border-orange-200 bg-orange-50 p-5 hover:shadow-md transition"
+        >
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <h3 className="text-lg font-semibold text-orange-800">
+                Waiting Citizens
+              </h3>
+
+              <p className="text-sm text-orange-700 mt-1">
+                Citizens waiting for a Ward Officer
+              </p>
+
+            </div>
+
+            <div className="text-3xl font-bold text-orange-600">
+              {stats?.waiting_citizens || 0}
+            </div>
+
+          </div>
+
+          <button
+            className="mt-5 text-sm font-medium text-orange-700 hover:underline"
+          >
+            View Queue →
+          </button>
+
+        </div>
+
+
+
+        <div
+          onClick={() => navigate("/admin/verification-queue")}
+          className="cursor-pointer rounded-xl border border-orange-200 bg-orange-50 p-5 hover:shadow-md transition"
+        >
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <h3 className="text-lg font-semibold text-orange-800">
+                Waiting Wards
+              </h3>
+
+              <p className="text-sm text-orange-700 mt-1">
+                Wards waiting for a Panchayath Officer
+              </p>
+
+            </div>
+
+            <div className="text-3xl font-bold text-orange-600">
+              {stats?.waiting_wards || 0}
+            </div>
+
+          </div>
+
+          <button
+            className="mt-5 text-sm font-medium text-orange-700 hover:underline"
+          >
+            View Queue →
+          </button>
+
+        </div>
+
+      </div>
 
       {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <VerificationAlertSection

@@ -32,7 +32,7 @@ import AdminCitizenDetail from "@/pages/admin/CitizenDetail";
 import ComplaintDetailPage from "./pages/admin/ComplaintDetailPage";
 import LocationManagement from "@/pages/admin/LocationManagement";
 import LocationRequests from "@/pages/admin/LocationRequests";
-
+import VerificationQueue from "@/pages/admin/VerificationQueue";
 
 
 /* ───────── PANCHAYATH MODULE ───────── */
@@ -328,6 +328,10 @@ export default function App() {
           <Route
             path="location-management"
             element={<LocationManagement />}
+          />
+          <Route
+            path="verification-queue"
+            element={<VerificationQueue />}
           />
           <Route path="citizens" element={<AdminCitizenList />} />
           <Route path="citizens/:id" element={<AdminCitizenDetail />} />

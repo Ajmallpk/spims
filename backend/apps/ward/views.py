@@ -149,17 +149,17 @@ class SubmitWardVerificationView(APIView):
                 PanchayathVerification.objects
                 .select_related("user")
                 .filter(
-                    panchayath_name=panchayath_master.name,
+                    panchayath_master=panchayath_master,
                     status="APPROVED"
                 )
                 .first()
             )
 
-            if not panchayath_verification:
-                return error_response(
-                    message="No verified Panchayath Officer is assigned to this Panchayath.",
-                    status=400
-                )
+            panchayath_user = (
+                panchayath_verification.user
+                if panchayath_verification
+                else None
+            )
 
             panchayath_user = panchayath_verification.user
 
@@ -201,25 +201,32 @@ class SubmitWardVerificationView(APIView):
                         setattr(verification, key, value)
 
                 verification.panchayath = panchayath_user
+
+                verification.status = (
+                    "PENDING"
+                    if panchayath_user
+                    else "WAITING_FOR_PANCHAYATH"
+                )
                 verification.district = district
                 verification.panchayath_master = panchayath_master
                 verification.ward_master = ward_master
-                verification.status = "PENDING"
                 verification.reject_reason = None
                 verification.reviewed_at = None
                 verification.save()
                 
-                send_notification(
-                    user=panchayath_user,
-                    title="Ward Verification Resubmitted",
-                     message=f"{request.user.username} submitted verification",
-                    n_type="WARD_VERIFICATION",
-                    sender=request.user,
-                    extra_data={
-                        "verification_id": verification.id
-                    }
-                )
-                
+                if panchayath_user:
+
+                    send_notification(
+                        user=panchayath_user,
+                        title="Ward Verification Resubmitted",
+                        message=f"{request.user.username} submitted verification",
+                        n_type="WARD_VERIFICATION",
+                        sender=request.user,
+                        extra_data={
+                            "verification_id": verification.id
+                        }
+                    )
+                            
 
                 logger.info(f"Ward {user.id} resubmitted verification")
 
@@ -227,7 +234,7 @@ class SubmitWardVerificationView(APIView):
                     message="Verification resubmitted successfully"
                 )
 
-            WardVerification.objects.create(
+            verification = WardVerification.objects.create(
                 user=user,
                 panchayath=panchayath_user,
 
@@ -235,18 +242,27 @@ class SubmitWardVerificationView(APIView):
                 panchayath_master=panchayath_master,
                 ward_master=ward_master,
 
-                status="PENDING",
+                status=(
+                    "PENDING"
+                    if panchayath_user
+                    else "WAITING_FOR_PANCHAYATH"
+                ),
 
                 **data
             )
             
-            send_notification(
-                user=panchayath_user,
-                title="New Ward Verification",
-                message="A ward officer submitted verification request",
-                n_type="WARD_VERIFICATION",
-                sender=user
-            )
+            if panchayath_user:
+
+                send_notification(
+                    user=panchayath_user,
+                    title="New Ward Verification",
+                    message="A ward officer submitted verification request",
+                    n_type="WARD_VERIFICATION",
+                    sender=user,
+                    extra_data={
+                        "verification_id": verification.id
+                    }
+                )
             
             logger.info(f"Ward {user.id} submitted verification")
 

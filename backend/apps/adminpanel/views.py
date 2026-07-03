@@ -194,6 +194,15 @@ class AdminDashboardView(APIView):
             pending_panchayath_verifications = PanchayathVerification.objects.filter(
                 status = "PENDING"
             ).count()
+            
+            
+            waiting_citizens = CitizenVerification.objects.filter(
+                status="WAITING_FOR_WARD"
+            ).count()
+
+            waiting_wards = WardVerification.objects.filter(
+                status="WAITING_FOR_PANCHAYATH"
+            ).count()
 
             logger.info(f"Admin {request.user.id} accessed dashboard")
 
@@ -209,7 +218,8 @@ class AdminDashboardView(APIView):
                     "pending_citizen_verifications": pending_citizen_verifications,
                     "pending_ward_verifications": pending_ward_verifications,
                     "pending_panchayath_verifications":pending_panchayath_verifications,
-
+                    "waiting_citizens": waiting_citizens,
+                    "waiting_wards": waiting_wards,
                     
                     "complaint_status_chart": [
                         {"status": "Pending", "count": complaint_stats["pending"]},
@@ -344,6 +354,42 @@ class ApprovePanchayathView(APIView):
                 user.status = User.Status.ACTIVE
                 user.is_verified = True
                 user.save()
+                
+            
+                waiting_wards = WardVerification.objects.filter(
+                    panchayath_master=verification.panchayath_master,
+                    status="WAITING_FOR_PANCHAYATH"
+                )
+
+                for ward in waiting_wards:
+
+                    ward.panchayath = verification.user
+                    ward.status = "PENDING"
+                    ward.reject_reason = None
+                    ward.reviewed_at = None
+                    ward.save()
+
+                    send_notification(
+                        user=verification.user,
+                        title="New Ward Verification",
+                        message=f"{ward.officer_full_name} is waiting for verification.",
+                        n_type="WARD_VERIFICATION",
+                        sender=ward.user,
+                        extra_data={
+                            "verification_id": ward.id
+                        }
+                    )
+
+                    send_notification(
+                        user=ward.user,
+                        title="Verification Assigned",
+                        message="A Panchayath Officer has been assigned to review your verification.",
+                        n_type="WARD_VERIFICATION",
+                        sender=verification.user,
+                        extra_data={
+                            "verification_id": ward.id
+                        }
+                    )
                 
                 
                 
@@ -572,18 +618,32 @@ class SuspendPanchayathView(APIView):
                     n_type="ALERT",
                 )
 
-                ward_verifications = WardVerification.objects.filter(
-                    panchayath=user
+                waiting_wards = WardVerification.objects.filter(
+                    panchayath=user,
+                    status="PENDING"
                 )
 
-                ward_users = User.objects.filter(
-                    id__in=ward_verifications.values_list("user_id", flat=True)
-                )
+                for ward in waiting_wards:
 
-                ward_users.update(
-                    status=User.Status.SUSPENDED,
-                    is_verified=False
-                )
+                    ward.panchayath = None
+                    ward.status = "WAITING_FOR_PANCHAYATH"
+                    ward.reviewed_at = None
+                    ward.reject_reason = None
+                    ward.save()
+
+                    send_notification(
+                        user=ward.user,
+                        title="Verification Delayed",
+                        message=(
+                            "Your assigned Panchayath Officer is no longer available. "
+                            "Your verification will automatically continue when a new Panchayath Officer is approved."
+                        ),
+                        n_type="WARD_VERIFICATION",
+                        sender=request.user,
+                        extra_data={
+                            "verification_id": ward.id
+                        }
+                    )
 
             logger.warning(f"Admin {request.user.id} suspended Panchayath {user.id}")
 
@@ -873,6 +933,33 @@ class SuspendWardView(APIView):
                 user.status = User.Status.SUSPENDED
                 user.is_verified = False
                 user.save(update_fields=["status", "is_verified"])
+                
+                waiting_citizens = CitizenVerification.objects.filter(
+                    ward=user,
+                    status="PENDING"
+                )
+
+                for citizen in waiting_citizens:
+
+                    citizen.ward = None
+                    citizen.status = "WAITING_FOR_WARD"
+                    citizen.reviewed_at = None
+                    citizen.reject_reason = None
+                    citizen.save()
+
+                    send_notification(
+                        user=citizen.user,
+                        title="Verification Delayed",
+                        message=(
+                            "Your assigned Ward Officer is no longer available. "
+                            "Your verification will automatically continue when a new Ward Officer is approved."
+                        ),
+                        n_type="CITIZEN_VERIFICATION",
+                        sender=request.user,
+                        extra_data={
+                            "verification_id": citizen.id
+                        }
+                    )
                 
                 
                 send_notification(
@@ -2012,3 +2099,125 @@ class RejectLocationRequestView(APIView):
         return success_response(
             message="Request rejected"
         ) 
+        
+        
+        
+class VerificationQueueView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+
+        waiting_citizens = CitizenVerification.objects.filter(
+            status="WAITING_FOR_WARD"
+        ).select_related(
+            "ward"
+        )
+
+        waiting_wards = WardVerification.objects.filter(
+            status="WAITING_FOR_PANCHAYATH"
+        ).select_related(
+            "panchayath_master"
+        )
+
+        citizen_data = []
+
+        for verification in waiting_citizens:
+
+            citizen_data.append({
+                "id": verification.id,
+                "name": verification.full_name,
+                "district": verification.ward.district.name,
+                "panchayath": verification.ward.panchayath.name,
+                "ward": verification.ward.ward_name or f"Ward {verification.ward.ward_number}",
+                "submitted_at": verification.submitted_at,
+            })
+
+        ward_data = []
+
+        for verification in waiting_wards:
+
+            ward_data.append({
+                "id": verification.id,
+                "officer_name": verification.officer_full_name,
+                "district": verification.district.name,
+                "panchayath": verification.panchayath_master.name,
+                "ward": verification.ward_name,
+                "submitted_at": verification.submitted_at,
+            })
+
+        return success_response(
+            message="Verification queue fetched",
+            data={
+                "waiting_citizens": citizen_data,
+                "waiting_wards": ward_data,
+            }
+        )
+        
+        
+        
+class WaitingCitizenDetailView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, pk):
+
+        verification = get_object_or_404(
+            CitizenVerification,
+            pk=pk,
+            status="WAITING_FOR_WARD"
+        )
+
+        return success_response(
+            data={
+                "id": verification.id,
+                "full_name": verification.full_name,
+                "phone": verification.phone,
+                "house_number": verification.house_number,
+                "street_name": verification.street_name,
+
+                "district": verification.ward_master.panchayath.district.name,
+                "panchayath": verification.ward_master.panchayath.name,
+                "ward": verification.ward_master.ward_number,
+
+                "submitted_at": verification.submitted_at,
+
+                "aadhaar": verification.aadhaar_image.url,
+                "selfie": verification.selfie_image.url,
+            }
+        )
+        
+        
+class WaitingWardDetailView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, pk):
+
+        verification = get_object_or_404(
+            WardVerification,
+            pk=pk,
+            status="WAITING_FOR_PANCHAYATH"
+        )
+
+        return success_response(
+            data={
+                "id": verification.id,
+                "officer_name": verification.officer_full_name,
+
+                "district": verification.district.name,
+
+                "panchayath": verification.panchayath_master.name,
+
+                "ward": verification.ward_master.ward_number,
+
+                "submitted_at": verification.submitted_at,
+
+                "aadhaar": verification.aadhaar_image.url,
+
+                "selfie": verification.selfie_image.url,
+
+                "supporting_document": (
+                    verification.supporting_document.url
+                    if verification.supporting_document
+                    else None
+                ),
+            }
+        )

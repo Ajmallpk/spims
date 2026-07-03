@@ -151,7 +151,11 @@ const CitizenVerificationForm = ({
 
         console.log("WARD API RESPONSE", res.data);
 
-        setWards(res.data.data);
+        setWards(
+          Array.isArray(res.data.data)
+            ? res.data.data
+            : []
+        );
 
       } catch (error) {
         console.error(error.response?.data);
@@ -192,6 +196,10 @@ const CitizenVerificationForm = ({
 
     setForm((prev) => {
       if (name === "district") {
+
+        setPanchayaths([]);
+        setWards([]);
+
         return {
           ...prev,
           district: value,
@@ -201,6 +209,9 @@ const CitizenVerificationForm = ({
       }
 
       if (name === "panchayath") {
+
+        setWards([]);
+
         return {
           ...prev,
           panchayath: value,
@@ -646,7 +657,7 @@ const CitizenVerificationForm = ({
                 placeholder="Search Ward..."
                 isDisabled={!form.panchayath}
 
-                options={wards.map((ward) => ({
+                options={(Array.isArray(wards) ? wards : []).map((ward) => ({
                   value: ward.id,
                   label: `Ward ${ward.ward_number}${ward.ward_name
                     ? ` - ${ward.ward_name}`
@@ -655,7 +666,7 @@ const CitizenVerificationForm = ({
                 }))}
 
                 value={
-                  wards
+                  (Array.isArray(wards) ? wards : [])
                     .map((ward) => ({
                       value: ward.id,
                       label: `Ward ${ward.ward_number}${ward.ward_name

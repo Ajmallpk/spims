@@ -56,6 +56,23 @@ urlpatterns = [
         "location-request/<int:pk>/reject/",
         views.RejectLocationRequestView.as_view()
     ),
+    
+    path(
+        "verification-queue/",
+        views.VerificationQueueView.as_view()
+    ),
+    
+    
+    path(
+        "verification-queue/citizen/<int:pk>/",
+        views.WaitingCitizenDetailView.as_view()
+    ),
+
+    path(
+        "verification-queue/ward/<int:pk>/",
+        views.WaitingWardDetailView.as_view()
+    ),
+    
 ]
 
 

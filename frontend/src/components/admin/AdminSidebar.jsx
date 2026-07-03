@@ -8,7 +8,8 @@ import {
   ShieldCheck,
   Users,
   Map,
-  MapPinned
+  MapPinned,
+  Clock3
 } from "lucide-react";
 import FixItLogo from "@/pages/common/FixItLogo";
 
@@ -45,6 +46,12 @@ const navItems = [
     label: "Location Management",
     path: "/admin/location-management",
     icon: Map,
+  },
+
+  {
+    label: "Verification Queue",
+    path: "/admin/verification-queue",
+    icon: Clock3,
   },
 
   {

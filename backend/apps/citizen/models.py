@@ -2,11 +2,13 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField
+from apps.accounts.models import Ward
 
 
 class CitizenVerification(models.Model):
 
     STATUS_CHOICES = [
+        ("WAITING_FOR_WARD", "Waiting for Ward Officer"),
         ("PENDING", "Pending"),
         ("APPROVED", "Approved"),
         ("REJECTED", "Rejected"),
@@ -19,10 +21,11 @@ class CitizenVerification(models.Model):
     )
 
     ward = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="ward_citizens",
-        limit_choices_to={"role": "WARD"}
+        Ward,
+        on_delete=models.PROTECT,
+        related_name="citizen_verifications",
+        null=True,
+        blank=True
     )
 
     full_name = models.CharField(max_length=255)
@@ -59,8 +62,14 @@ class CitizenVerification(models.Model):
         ]
 
     def clean(self):
-        if self.ward.role != "WARD":
-            raise ValidationError("Citizen must belong to a Ward user.")
+
+        if (
+            self.status != "WAITING_FOR_WARD"
+            and not self.ward
+        ):
+            raise ValidationError(
+                "Ward is required."
+            )
 
     def save(self, *args, **kwargs):
         self.clean()

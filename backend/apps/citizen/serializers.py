@@ -64,11 +64,9 @@ class CitizenProfileSerializer(serializers.ModelSerializer):
         ).first()
 
         if verification and verification.ward:
-            ward_verification = WardVerification.objects.filter(
-                user=verification.ward
-            ).first()
-
-            if ward_verification:
-                return ward_verification.ward_name
+            return (
+                verification.ward.ward_name
+                or f"Ward {verification.ward.ward_number}"
+            )
 
         return None

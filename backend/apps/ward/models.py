@@ -12,6 +12,10 @@ User = get_user_model()
 class WardVerification(models.Model):
 
     class Status(models.TextChoices):
+        WAITING_FOR_PANCHAYATH = (
+            "WAITING_FOR_PANCHAYATH",
+            "Waiting for Panchayath Officer"
+        )
         PENDING = "PENDING", "Pending"
         APPROVED = "APPROVED", "Approved"
         REJECTED = "REJECTED", "Rejected"
@@ -28,6 +32,8 @@ class WardVerification(models.Model):
         on_delete=models.CASCADE,
         related_name="assigned_wards",
         limit_choices_to={"role": User.Role.PANCHAYATH},
+        null=True,
+        blank=True
     )
     
     
@@ -92,7 +98,7 @@ class WardVerification(models.Model):
 
 
     status = models.CharField(
-        max_length=20,
+        max_length=50,
         choices=Status.choices,
         default=Status.PENDING
     )
@@ -102,11 +108,27 @@ class WardVerification(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        if self.user.role != User.Role.WARD:
-            raise ValidationError("User must have WARD role.")
 
-        if self.panchayath.role != User.Role.PANCHAYATH:
-            raise ValidationError("Selected user must have PANCHAYATH role.")
+        if self.user.role != User.Role.WARD:
+            raise ValidationError(
+                "User must have WARD role."
+            )
+
+        if (
+            self.status != self.Status.WAITING_FOR_PANCHAYATH
+            and not self.panchayath
+        ):
+            raise ValidationError(
+                "Panchayath Officer is required."
+            )
+
+        if (
+            self.panchayath
+            and self.panchayath.role != User.Role.PANCHAYATH
+        ):
+            raise ValidationError(
+                "Selected user must have PANCHAYATH role."
+            )
         
     def save(self, *args, **kwargs):
         self.full_clean()

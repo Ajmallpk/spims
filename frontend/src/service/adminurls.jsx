@@ -155,4 +155,23 @@ export const adminapi = {
             data
         );
     },
+
+    getVerificationQueue: () => {
+        return adminAxios.get(
+            "/admin/verification-queue/"
+        );
+    },
+
+
+    getWaitingCitizenDetail: (id) => {
+        return adminAxios.get(
+            `/admin/verification-queue/citizen/${id}/`
+        );
+    },
+
+    getWaitingWardDetail: (id) => {
+        return adminAxios.get(
+            `/admin/verification-queue/ward/${id}/`
+        );
+    },
 }
