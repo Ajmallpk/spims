@@ -37,6 +37,11 @@ urlpatterns = [
     ),
     
     path(
+        "locations/existing/",
+        views.ExistingLocationsView.as_view()
+    ),
+    
+    path(
         "locations/create/",
         views.CreateLocationView.as_view()
     ),

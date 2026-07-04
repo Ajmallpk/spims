@@ -49,6 +49,9 @@ from apps.accounts.models import (
     Ward,
 )
 from apps.accounts.models import LocationRequest
+from .pagination import CustomPagination
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -1861,22 +1864,28 @@ class LocationRequestListView(APIView):
             queryset = queryset.filter(status=status)
 
         if request_type:
-            queryset = queryset.filter(request_type=request_type)
+            queryset = queryset.filter(
+                request_type=request_type
+            )
 
         queryset = queryset.order_by("-created_at")
 
-        serializer = LocationRequestListSerializer(
+        paginator = CustomPagination()
+
+        page = paginator.paginate_queryset(
             queryset,
+            request
+        )
+
+        serializer = LocationRequestListSerializer(
+            page,
             many=True
         )
 
-        return success_response(
-            message="Location requests fetched successfully",
-            data={
-                "requests": serializer.data,
-                "counts": counts
-            }
-        )
+        return paginator.get_paginated_response({
+            "requests": serializer.data,
+            "counts": counts,
+        })
         
         
         
@@ -1990,6 +1999,50 @@ class CreateLocationView(APIView):
             message="Invalid location type",
             status=400
         )
+        
+        
+class ExistingLocationsView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+
+        location_type = request.GET.get("type")
+
+        district = request.GET.get("district")
+
+        panchayath = request.GET.get("panchayath")
+
+        if location_type == "DISTRICT":
+
+            data = District.objects.order_by("name").values(
+                "id",
+                "name"
+            )
+
+        elif location_type == "PANCHAYATH":
+
+            data = Panchayath.objects.filter(
+                district_id=district
+            ).order_by("name").values(
+                "id",
+                "name"
+            )
+
+        elif location_type == "WARD":
+
+            data = Ward.objects.filter(
+                panchayath_id=panchayath
+            ).order_by("ward_number").values(
+                "id",
+                "ward_number",
+                "ward_name"
+            )
+
+        else:
+
+            data = []
+
+        return success_response(data=list(data))
         
         
         
@@ -2114,57 +2167,115 @@ class RejectLocationRequestView(APIView):
         
         
         
+# class VerificationQueueView(APIView):
+#     permission_classes = [IsSuperAdmin]
+
+#     def get(self, request):
+
+#         waiting_citizens = CitizenVerification.objects.filter(
+#             status="WAITING_FOR_WARD"
+#         ).select_related(
+#             "ward"
+#         )
+
+#         waiting_wards = WardVerification.objects.filter(
+#             status="WAITING_FOR_PANCHAYATH"
+#         ).select_related(
+#             "panchayath_master"
+#         )
+
+#         citizen_data = []
+
+#         for verification in waiting_citizens:
+
+#             citizen_data.append({
+#                 "id": verification.id,
+#                 "name": verification.full_name,
+#                 "district": verification.ward.district.name,
+#                 "panchayath": verification.ward.panchayath.name,
+#                 "ward": verification.ward.ward_name or f"Ward {verification.ward.ward_number}",
+#                 "submitted_at": verification.submitted_at,
+#             })
+
+#         ward_data = []
+
+#         for verification in waiting_wards:
+
+#             ward_data.append({
+#                 "id": verification.id,
+#                 "officer_name": verification.officer_full_name,
+#                 "district": verification.district.name,
+#                 "panchayath": verification.panchayath_master.name,
+#                 "ward": verification.ward_name,
+#                 "submitted_at": verification.submitted_at,
+#             })
+
+#         return success_response(
+#             message="Verification queue fetched",
+#             data={
+#                 "waiting_citizens": citizen_data,
+#                 "waiting_wards": ward_data,
+#             }
+#         )
+
 class VerificationQueueView(APIView):
     permission_classes = [IsSuperAdmin]
 
     def get(self, request):
+        try:
+            waiting_citizens = CitizenVerification.objects.filter(
+                status="WAITING_FOR_WARD"
+            ).select_related(
+                "ward",
+                "ward__panchayath",
+                "ward__panchayath__district",
+            )
 
-        waiting_citizens = CitizenVerification.objects.filter(
-            status="WAITING_FOR_WARD"
-        ).select_related(
-            "ward"
-        )
+            waiting_wards = WardVerification.objects.filter(
+                status="WAITING_FOR_PANCHAYATH"
+            ).select_related(
+                "district",
+                "panchayath_master",
+            )
 
-        waiting_wards = WardVerification.objects.filter(
-            status="WAITING_FOR_PANCHAYATH"
-        ).select_related(
-            "panchayath_master"
-        )
+            citizen_data = []
 
-        citizen_data = []
+            for verification in waiting_citizens:
 
-        for verification in waiting_citizens:
+                citizen_data.append({
+                    "id": verification.id,
+                    "name": verification.full_name,
+                    "district": verification.ward.panchayath.district.name,
+                    "panchayath": verification.ward.panchayath.name,
+                    "ward": verification.ward.ward_name or f"Ward {verification.ward.ward_number}",
+                    "submitted_at": verification.submitted_at,
+                })
 
-            citizen_data.append({
-                "id": verification.id,
-                "name": verification.full_name,
-                "district": verification.ward.district.name,
-                "panchayath": verification.ward.panchayath.name,
-                "ward": verification.ward.ward_name or f"Ward {verification.ward.ward_number}",
-                "submitted_at": verification.submitted_at,
-            })
+            ward_data = []
 
-        ward_data = []
+            for verification in waiting_wards:
 
-        for verification in waiting_wards:
+                ward_data.append({
+                    "id": verification.id,
+                    "officer_name": verification.officer_full_name,
+                    "district": verification.district.name,
+                    "panchayath": verification.panchayath_master.name,
+                    "ward": verification.ward_name,
+                    "submitted_at": verification.submitted_at,
+                })
 
-            ward_data.append({
-                "id": verification.id,
-                "officer_name": verification.officer_full_name,
-                "district": verification.district.name,
-                "panchayath": verification.panchayath_master.name,
-                "ward": verification.ward_name,
-                "submitted_at": verification.submitted_at,
-            })
+            return success_response(
+                message="Verification queue fetched",
+                data={
+                    "waiting_citizens": citizen_data,
+                    "waiting_wards": ward_data,
+                },
+            )
 
-        return success_response(
-            message="Verification queue fetched",
-            data={
-                "waiting_citizens": citizen_data,
-                "waiting_wards": ward_data,
-            }
-        )
-        
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise
         
         
 class WaitingCitizenDetailView(APIView):
@@ -2186,9 +2297,9 @@ class WaitingCitizenDetailView(APIView):
                 "house_number": verification.house_number,
                 "street_name": verification.street_name,
 
-                "district": verification.ward_master.panchayath.district.name,
-                "panchayath": verification.ward_master.panchayath.name,
-                "ward": verification.ward_master.ward_number,
+                "district": verification.ward.panchayath.district.name,
+                "panchayath": verification.ward.panchayath.name,
+                "ward": verification.ward.ward_number,
 
                 "submitted_at": verification.submitted_at,
 
@@ -2217,7 +2328,9 @@ class WaitingWardDetailView(APIView):
                 "district": verification.district.name,
 
                 "panchayath": verification.panchayath_master.name,
-
+                
+                
+                "phone" : verification.official_contact,
                 "ward": verification.ward_master.ward_number,
 
                 "submitted_at": verification.submitted_at,

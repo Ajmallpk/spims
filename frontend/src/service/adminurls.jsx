@@ -128,7 +128,8 @@ export const adminapi = {
 
     getLocationRequests: (
         status = "",
-        request_type = ""
+        request_type = "",
+        page = 1
     ) => {
 
         return adminAxios.get(
@@ -137,7 +138,8 @@ export const adminapi = {
                 params: {
                     status,
                     request_type,
-                }
+                    page,
+                },
             }
         );
 
@@ -180,6 +182,15 @@ export const adminapi = {
     getWaitingWardDetail: (id) => {
         return adminAxios.get(
             `/admin/verification-queue/ward/${id}/`
+        );
+    },
+
+    getExistingLocations: (params) => {
+        return adminAxios.get(
+            "/admin/locations/existing/",
+            {
+                params,
+            }
         );
     },
 }

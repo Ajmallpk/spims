@@ -224,17 +224,53 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
   // ── Validation ───────────────────────────────────────────────────────────────
 
+  // const validate = () => {
+  //   const errs = {};
+
+  //   if (!fields.officer_full_name.trim() || fields.officer_full_name.trim().length < 3)
+  //     errs.officer_full_name = "Full name must be at least 3 characters.";
+
+  //   if (!fields.ward_name.trim())
+  //     errs.ward_name = "Ward name is required.";
+
+  //   if (!fields.panchayath_id)
+  //     errs.panchayath_id = "Please select a Panchayath.";
+
+  //   if (!fields.official_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.official_email))
+  //     errs.official_email = "Enter a valid official email address.";
+
+  //   if (!fields.official_contact.trim() || fields.official_contact.trim().length < 10)
+  //     errs.official_contact = "Enter a valid 10-digit contact number.";
+
+  //   if (!fields.office_address.trim() || fields.office_address.trim().length < 10)
+  //     errs.office_address = "Office address must be at least 10 characters.";
+
+  //   if (!files.aadhaar_image)
+  //     errs.aadhaar_image = "Aadhaar card image is required.";
+
+  //   if (!files.selfie_image)
+  //     errs.selfie_image = "Selfie image is required.";
+
+  //   setErrors(errs);
+  //   return Object.keys(errs).length === 0;
+  // };
+
+
   const validate = () => {
+
     const errs = {};
 
     if (!fields.officer_full_name.trim() || fields.officer_full_name.trim().length < 3)
       errs.officer_full_name = "Full name must be at least 3 characters.";
 
-    if (!fields.ward_name.trim())
-      errs.ward_name = "Ward name is required.";
+    if (!fields.district)
+      errs.district = "Please select a District.";
 
-    if (!fields.panchayath_id)
-      errs.panchayath_id = "Please select a Panchayath.";
+    if (!fields.panchayath_master)
+      errs.panchayath_master = "Please select a Panchayath.";
+
+    if (!fields.ward_master)
+      errs.ward_master = "Please select a Ward.";
 
     if (!fields.official_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.official_email))
       errs.official_email = "Enter a valid official email address.";
@@ -252,9 +288,9 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
       errs.selfie_image = "Selfie image is required.";
 
     setErrors(errs);
+
     return Object.keys(errs).length === 0;
   };
-
   // ── Submit ───────────────────────────────────────────────────────────────────
 
   const handleSubmit = async () => {

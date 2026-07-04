@@ -31,30 +31,28 @@ const LocationManagement = () => {
     const [districtCode, setDistrictCode] = useState("");
 
     const [districts, setDistricts] = useState([]);
-
+    const [existingDistricts, setExistingDistricts] = useState([]);
+    const [existingPanchayaths, setExistingPanchayaths] = useState([]);
+    const [existingWards, setExistingWards] = useState([]);
     const [selectedDistrict, setSelectedDistrict] = useState("");
-
     const [panchayathName, setPanchayathName] = useState("");
-
     const [panchayathCode, setPanchayathCode] = useState("");
     const [selectedWardDistrict, setSelectedWardDistrict] = useState("");
-
     const [selectedWardPanchayath, setSelectedWardPanchayath] = useState("");
-
     const [wardNumber, setWardNumber] = useState("");
-
     const [wardName, setWardName] = useState("");
-
     const [wardCode, setWardCode] = useState("");
-
     const [wardPanchayaths, setWardPanchayaths] = useState([]);
-
     const [loading, setLoading] = useState(false);
 
 
 
     useEffect(() => {
+
         loadDistricts();
+
+        loadExistingDistricts();
+
     }, []);
 
 
@@ -68,6 +66,20 @@ const LocationManagement = () => {
         loadWardPanchayaths();
 
     }, [selectedWardDistrict]);
+
+
+
+    useEffect(() => {
+
+        loadExistingPanchayaths();
+
+    }, [selectedDistrict]);
+
+    useEffect(() => {
+
+        loadExistingWards();
+
+    }, [selectedWardPanchayath]);
 
     const loadDistricts = async () => {
         try {
@@ -99,6 +111,44 @@ const LocationManagement = () => {
             console.log(err);
 
         }
+
+    };
+
+
+
+    const loadExistingDistricts = async () => {
+
+        const res = await adminapi.getExistingLocations({
+            type: "DISTRICT",
+        });
+
+        setExistingDistricts(res.data.data);
+
+    };
+
+    const loadExistingPanchayaths = async () => {
+
+        if (!selectedDistrict) return;
+
+        const res = await adminapi.getExistingLocations({
+            type: "PANCHAYATH",
+            district: selectedDistrict,
+        });
+
+        setExistingPanchayaths(res.data.data);
+
+    };
+
+    const loadExistingWards = async () => {
+
+        if (!selectedWardPanchayath) return;
+
+        const res = await adminapi.getExistingLocations({
+            type: "WARD",
+            panchayath: selectedWardPanchayath,
+        });
+
+        setExistingWards(res.data.data);
 
     };
 
@@ -299,39 +349,16 @@ const LocationManagement = () => {
 
                         <hr />
 
-                        <div>
+                        <SearchableSelect
+                            placeholder="Search Existing District"
 
-                            <h3 className="text-lg font-semibold mb-3">
-                                Existing Districts
-                            </h3>
+                            options={existingDistricts.map(item => ({
+                                value: item.id,
+                                label: item.name,
+                            }))}
 
-                            <div className="space-y-2">
-
-                                {districts.map((district) => (
-
-                                    <div
-                                        key={district.id}
-                                        className="border rounded-lg px-4 py-3 flex justify-between items-center"
-                                    >
-                                        <div>
-
-                                            <p className="font-medium">
-                                                {district.name}
-                                            </p>
-
-                                            <p className="text-sm text-gray-500">
-                                                {district.code || "No Code"}
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-
-                                ))}
-
-                            </div>
-
-                        </div>
+                            isClearable
+                        />
 
                     </div>
                 )}
@@ -365,6 +392,18 @@ const LocationManagement = () => {
                                     selected ? selected.value : ""
                                 )
                             }
+                        />
+
+
+                        <SearchableSelect
+                            placeholder="Search Existing Panchayath"
+
+                            options={existingPanchayaths.map(item => ({
+                                value: item.id,
+                                label: item.name,
+                            }))}
+
+                            isClearable
                         />
 
                         <input
@@ -463,6 +502,18 @@ const LocationManagement = () => {
                                     selected ? selected.value : ""
                                 )
                             }
+                        />
+
+
+                        <SearchableSelect
+                            placeholder="Search Existing Ward"
+
+                            options={existingWards.map(item => ({
+                                value: item.id,
+                                label: `Ward ${item.ward_number} - ${item.ward_name}`,
+                            }))}
+
+                            isClearable
                         />
 
                         <input

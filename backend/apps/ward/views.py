@@ -161,7 +161,7 @@ class SubmitWardVerificationView(APIView):
                 else None
             )
 
-            panchayath_user = panchayath_verification.user
+            # panchayath_user = panchayath_verification.user
 
             verification = WardVerification.objects.filter(user=user).first()
 
@@ -169,11 +169,11 @@ class SubmitWardVerificationView(APIView):
                 "officer_full_name": request.data.get("officer_full_name"),
                 "official_email": request.data.get("official_email"),
                 "official_contact": request.data.get("official_contact"),
-                "district": district,
+                # "district": district,
 
-                "panchayath_master": panchayath_master,
+                # "panchayath_master": panchayath_master,
 
-                "ward_master": ward_master,
+                # "ward_master": ward_master,
 
                 "ward_name": ward_master.ward_name or f"Ward {ward_master.ward_number}",
                 "office_address": request.data.get("office_address"),
