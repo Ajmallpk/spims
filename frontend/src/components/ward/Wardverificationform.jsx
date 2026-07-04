@@ -3,6 +3,7 @@ import DocumentUploadField from "@/components/ward/Documentuploadfield";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 import LocationRequestModal from "@/components/common/LocationRequestModal";
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 
 const INITIAL_FIELDS = {
@@ -301,7 +302,22 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
       setServerError("");
 
       const fd = new FormData();
-      Object.entries(fields).forEach(([k, v]) => fd.append(k, v.trim()));
+
+      fd.append("officer_full_name", fields.officer_full_name.trim());
+
+      fd.append("district", fields.district);
+
+      fd.append("panchayath_master", fields.panchayath_master);
+
+      fd.append("ward_master", fields.ward_master);
+
+      fd.append("ward_name", fields.ward_name.trim());
+
+      fd.append("official_email", fields.official_email.trim());
+
+      fd.append("official_contact", fields.official_contact.trim());
+
+      fd.append("office_address", fields.office_address.trim());
 
       if (files.aadhaar_image)
         fd.append("aadhaar_image", files.aadhaar_image);
@@ -415,28 +431,28 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 District
               </label>
 
-              <select
-                value={fields.district}
-                onChange={handleDistrictChange}
-                className="w-full border rounded-xl px-4 py-2 mt-2"
-              >
-
-                <option value="">
-                  Select District
-                </option>
-
-                {districts.map(d => (
-
-                  <option
-                    key={d.id}
-                    value={d.id}
-                  >
-                    {d.name}
-                  </option>
-
-                ))}
-
-              </select>
+              <SearchableSelect
+                placeholder="Select District"
+                options={districts.map((d) => ({
+                  value: d.id,
+                  label: d.name,
+                }))}
+                value={
+                  districts
+                    .map((d) => ({
+                      value: d.id,
+                      label: d.name,
+                    }))
+                    .find((option) => option.value == fields.district)
+                }
+                onChange={(selected) =>
+                  handleDistrictChange({
+                    target: {
+                      value: selected?.value || "",
+                    },
+                  })
+                }
+              />
 
             </div>
 
@@ -447,28 +463,29 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 Panchayath
               </label>
 
-              <select
-                value={fields.panchayath_master}
-                onChange={handlePanchayathChange}
-                className="w-full border rounded-xl px-4 py-2 mt-2"
-              >
-
-                <option value="">
-                  Select Panchayath
-                </option>
-
-                {panchayaths.map(p => (
-
-                  <option
-                    key={p.id}
-                    value={p.id}
-                  >
-                    {p.name}
-                  </option>
-
-                ))}
-
-              </select>
+              <SearchableSelect
+                placeholder="Select Panchayath"
+                options={panchayaths.map((p) => ({
+                  value: p.id,
+                  label: p.name,
+                }))}
+                value={
+                  panchayaths
+                    .map((p) => ({
+                      value: p.id,
+                      label: p.name,
+                    }))
+                    .find((option) => option.value == fields.panchayath_master)
+                }
+                onChange={(selected) =>
+                  handlePanchayathChange({
+                    target: {
+                      value: selected?.value || "",
+                    },
+                  })
+                }
+                isDisabled={!fields.district}
+              />
 
             </div>
 
@@ -480,29 +497,29 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 Ward
               </label>
 
-              <select
-                value={fields.ward_master}
-                onChange={handleWardChange}
-                className="w-full border rounded-xl px-4 py-2 mt-2"
-              >
-
-                <option value="">
-                  Select Ward
-                </option>
-
-                {wards.map(w => (
-
-                  <option
-                    key={w.id}
-                    value={w.id}
-                  >
-                    Ward {w.ward_number}
-                    {w.ward_name ? ` - ${w.ward_name}` : ""}
-                  </option>
-
-                ))}
-
-              </select>
+              <SearchableSelect
+                placeholder="Select Ward"
+                options={wards.map((w) => ({
+                  value: w.id,
+                  label: `Ward ${w.ward_number}${w.ward_name ? ` - ${w.ward_name}` : ""}`,
+                }))}
+                value={
+                  wards
+                    .map((w) => ({
+                      value: w.id,
+                      label: `Ward ${w.ward_number}${w.ward_name ? ` - ${w.ward_name}` : ""}`,
+                    }))
+                    .find((option) => option.value == fields.ward_master)
+                }
+                onChange={(selected) =>
+                  handleWardChange({
+                    target: {
+                      value: selected?.value || "",
+                    },
+                  })
+                }
+                isDisabled={!fields.panchayath_master}
+              />
 
 
               <div className="mt-4 flex justify-end">

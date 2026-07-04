@@ -193,4 +193,17 @@ export const adminapi = {
             }
         );
     },
+
+
+    getWaitingCitizens: (page = 1) => {
+        return adminAxios.get(
+            `/admin/verification-queue/citizens/?page=${page}`
+        );
+    },
+
+    getWaitingWards: (page = 1) => {
+        return adminAxios.get(
+            `/admin/verification-queue/wards/?page=${page}`
+        );
+    },
 }

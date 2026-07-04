@@ -78,6 +78,17 @@ urlpatterns = [
         views.WaitingWardDetailView.as_view()
     ),
     
+    
+    path(
+        "verification-queue/citizens/",
+        views.WaitingCitizenListView.as_view()
+    ),
+
+    path(
+        "verification-queue/wards/",
+        views.WaitingWardListView.as_view()
+    ),
+    
 ]
 
 

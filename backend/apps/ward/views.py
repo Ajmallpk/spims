@@ -375,8 +375,10 @@ class CitizenVerificationListView(APIView):
         try:
             status = request.GET.get("status")
 
+            ward_verification = request.user.ward_verification
+
             citizens = CitizenVerification.objects.filter(
-                ward=request.user
+                ward=ward_verification.ward_master
             )
 
             if status:
@@ -406,12 +408,12 @@ class CitizenVerificationListView(APIView):
             
 
             pending_count = CitizenVerification.objects.filter(
-                ward=request.user,
+                ward=ward_verification.ward_master,
                 status="PENDING"
             ).count()
 
             rejected_count = CitizenVerification.objects.filter(
-                ward=request.user,
+                ward=ward_verification.ward_master,
                 status="REJECTED"
             ).count()
             

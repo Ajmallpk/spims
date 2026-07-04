@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
 
@@ -6,9 +6,12 @@ export default function LocationRequestModal({
     open,
     onClose,
     api,
+    allowWardRequest = true,
 }) {
 
-    const [requestType, setRequestType] = useState("WARD");
+    const [requestType, setRequestType] = useState(
+        allowWardRequest ? "WARD" : "DISTRICT"
+    );
 
     const [districtName, setDistrictName] = useState("");
     const [panchayathName, setPanchayathName] = useState("");
@@ -17,6 +20,13 @@ export default function LocationRequestModal({
     const [message, setMessage] = useState("");
 
     const [loading, setLoading] = useState(false);
+
+
+    useEffect(() => {
+        setRequestType(
+            allowWardRequest ? "WARD" : "DISTRICT"
+        );
+    }, [allowWardRequest, open]);
 
     if (!open) return null;
 
@@ -79,49 +89,51 @@ export default function LocationRequestModal({
 
                     <select
                         value={requestType}
-                        onChange={(e)=>setRequestType(e.target.value)}
+                        onChange={(e) => setRequestType(e.target.value)}
                         className="w-full border rounded-lg px-4 py-3"
                     >
                         <option value="DISTRICT">District</option>
 
                         <option value="PANCHAYATH">Panchayath</option>
 
-                        <option value="WARD">Ward</option>
+                        {allowWardRequest && (
+                            <option value="WARD">Ward</option>
+                        )}
 
                     </select>
 
                     <input
                         placeholder="District Name"
                         value={districtName}
-                        onChange={(e)=>setDistrictName(e.target.value)}
+                        onChange={(e) => setDistrictName(e.target.value)}
                         className="w-full border rounded-lg px-4 py-3"
                     />
 
-                    {(requestType==="PANCHAYATH" || requestType==="WARD") && (
+                    {(requestType === "PANCHAYATH" || requestType === "WARD") && (
 
                         <input
                             placeholder="Panchayath Name"
                             value={panchayathName}
-                            onChange={(e)=>setPanchayathName(e.target.value)}
+                            onChange={(e) => setPanchayathName(e.target.value)}
                             className="w-full border rounded-lg px-4 py-3"
                         />
 
                     )}
 
-                    {requestType==="WARD" && (
+                    {allowWardRequest && requestType === "WARD" && (
 
                         <>
                             <input
                                 placeholder="Ward Number"
                                 value={wardNumber}
-                                onChange={(e)=>setWardNumber(e.target.value)}
+                                onChange={(e) => setWardNumber(e.target.value)}
                                 className="w-full border rounded-lg px-4 py-3"
                             />
 
                             <input
                                 placeholder="Ward Name (Optional)"
                                 value={wardName}
-                                onChange={(e)=>setWardName(e.target.value)}
+                                onChange={(e) => setWardName(e.target.value)}
                                 className="w-full border rounded-lg px-4 py-3"
                             />
                         </>
@@ -132,7 +144,7 @@ export default function LocationRequestModal({
                         rows={4}
                         placeholder="Additional Message"
                         value={message}
-                        onChange={(e)=>setMessage(e.target.value)}
+                        onChange={(e) => setMessage(e.target.value)}
                         className="w-full border rounded-lg px-4 py-3"
                     />
 

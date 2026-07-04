@@ -9,12 +9,13 @@
 //   onSuccess    {Function}  - Called after successful submission (triggers status refresh)
 //   isRejected   {boolean}   - If true, show "resubmit" context messaging
 
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import DocumentUploadField from "@/components/panjayath/Documentuploadfield";
 import panchayathapi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
 import { handleApiError } from "@/utils/handleApiError";
 import LocationRequestModal from "@/components/common/LocationRequestModal";
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 // ─── Field component ─────────────────────────────────────────────────────────
 
@@ -128,8 +129,14 @@ function validateFields(fields, aadhaarImage, selfieImage) {
   }
 
   // District
-  if (!fields.district.trim()) {
+  // District
+  if (!fields.district) {
     errors.district = "District is required.";
+    isValid = false;
+  }
+
+  if (!fields.panchayath_master) {
+    errors.panchayath_name = "Panchayath is required.";
     isValid = false;
   }
 
@@ -376,27 +383,33 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
                   District <span className="text-red-500">*</span>
                 </label>
 
-                <select
-                  value={fields.district}
-                  onChange={handleDistrictChange}
-                  className="w-full mt-2 px-4 py-2.5 rounded-xl border border-slate-300"
-                >
-                  <option value="">
-                    Select District
-                  </option>
+                <SearchableSelect
+                  placeholder="Search District..."
+                  options={districts.map((district) => ({
+                    value: district.id,
+                    label: district.name,
+                  }))}
 
-                  {districts.map((district) => (
+                  value={
+                    districts
+                      .map((district) => ({
+                        value: district.id,
+                        label: district.name,
+                      }))
+                      .find(
+                        (option) =>
+                          String(option.value) === String(fields.district)
+                      ) || null
+                  }
 
-                    <option
-                      key={district.id}
-                      value={district.id}
-                    >
-                      {district.name}
-                    </option>
-
-                  ))}
-
-                </select>
+                  onChange={(selected) =>
+                    handleDistrictChange({
+                      target: {
+                        value: selected ? selected.value : "",
+                      },
+                    })
+                  }
+                />
               </div>
 
               <div>
@@ -405,28 +418,35 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
                   Panchayath <span className="text-red-500">*</span>
                 </label>
 
-                <select
-                  value={fields.panchayath_master}
-                  onChange={handlePanchayathChange}
-                  className="w-full mt-2 px-4 py-2.5 rounded-xl border border-slate-300"
-                >
+                <SearchableSelect
+                  placeholder="Search Panchayath..."
+                  isDisabled={!fields.district}
 
-                  <option value="">
-                    Select Panchayath
-                  </option>
+                  options={panchayaths.map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                  }))}
 
-                  {panchayaths.map((p) => (
+                  value={
+                    panchayaths
+                      .map((p) => ({
+                        value: p.id,
+                        label: p.name,
+                      }))
+                      .find(
+                        (option) =>
+                          String(option.value) === String(fields.panchayath_master)
+                      ) || null
+                  }
 
-                    <option
-                      key={p.id}
-                      value={p.id}
-                    >
-                      {p.name}
-                    </option>
-
-                  ))}
-
-                </select>
+                  onChange={(selected) =>
+                    handlePanchayathChange({
+                      target: {
+                        value: selected ? selected.value : "",
+                      },
+                    })
+                  }
+                />
 
               </div>
 
@@ -439,7 +459,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
                 onClick={() => setShowLocationRequest(true)}
                 className="text-blue-600 text-sm hover:underline"
               >
-                Can't find your Panchayath?
+                Can't find your Panchayath or District ?
               </button>
 
             </div>
@@ -569,6 +589,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
         open={showLocationRequest}
         onClose={() => setShowLocationRequest(false)}
         api={panchayathapi}
+        allowWardRequest={false}
       />
     </div>
   );

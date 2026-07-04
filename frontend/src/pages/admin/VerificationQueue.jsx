@@ -356,6 +356,14 @@ import VerificationQueueDetailModal from "@/components/admin/VerificationQueueDe
 export default function VerificationQueue() {
     const [citizens, setCitizens] = useState([]);
     const [wards, setWards] = useState([]);
+
+    const [citizenCount, setCitizenCount] = useState(0);
+    const [wardCount, setWardCount] = useState(0);
+
+    const [citizenPage, setCitizenPage] = useState(1);
+    const [wardPage, setWardPage] = useState(1);
+
+    const PAGE_SIZE = 10;
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -366,28 +374,85 @@ export default function VerificationQueue() {
     const [detail, setDetail] = useState({});
 
     useEffect(() => {
-        fetchQueue();
-    }, []);
+        fetchCitizens();
+    }, [citizenPage]);
 
-    const fetchQueue = async () => {
+    useEffect(() => {
+        fetchWards();
+    }, [wardPage]);
+
+    const fetchCitizens = async () => {
+
         try {
-            const res = await adminapi.getVerificationQueue();
+
+            const res =
+                await adminapi.getWaitingCitizens(
+                    citizenPage
+                );
 
             setCitizens(
-                res.data.data.waiting_citizens || []
+                res.data.results
             );
 
-            setWards(
-                res.data.data.waiting_wards || []
+            setCitizenCount(
+                res.data.count
             );
-        } catch (error) {
+
+        }
+
+        catch (error) {
+
             handleApiError(
                 error,
-                "Failed to load verification queue"
+                "Failed to load citizens"
             );
-        } finally {
-            setLoading(false);
+
         }
+
+        finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+
+
+    const fetchWards = async () => {
+
+        try {
+
+            const res =
+                await adminapi.getWaitingWards(
+                    wardPage
+                );
+
+            setWards(
+                res.data.results
+            );
+
+            setWardCount(
+                res.data.count
+            );
+
+        }
+
+        catch (error) {
+
+            handleApiError(
+                error,
+                "Failed to load wards"
+            );
+
+        }
+
+        finally {
+
+            setLoading(false);
+
+        }
+
     };
 
     const openCitizen = async (id) => {
@@ -520,7 +585,7 @@ export default function VerificationQueue() {
                         </p>
 
                         <h2 className="text-2xl font-bold text-blue-700">
-                            {loading ? "-" : citizens.length}
+                            {loading ? "-" : citizenCount}
                         </h2>
 
                     </div>
@@ -542,7 +607,7 @@ export default function VerificationQueue() {
                         </p>
 
                         <h2 className="text-2xl font-bold text-emerald-700">
-                            {loading ? "-" : wards.length}
+                            {loading ? "-" : wardCount}
                         </h2>
 
                     </div>
@@ -703,6 +768,32 @@ export default function VerificationQueue() {
 
                         </table>
 
+
+
+                        <div className="flex justify-end items-center gap-3 p-4 border-t">
+
+                            <button
+                                disabled={citizenPage === 1}
+                                onClick={() => setCitizenPage(prev => prev - 1)}
+                                className="px-3 py-1 border rounded disabled:opacity-40"
+                            >
+                                Previous
+                            </button>
+
+                            <span className="text-sm font-medium">
+                                Page {citizenPage}
+                            </span>
+
+                            <button
+                                disabled={citizenPage * PAGE_SIZE >= citizenCount}
+                                onClick={() => setCitizenPage(prev => prev + 1)}
+                                className="px-3 py-1 border rounded disabled:opacity-40"
+                            >
+                                Next
+                            </button>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -860,6 +951,31 @@ export default function VerificationQueue() {
                             </tbody>
 
                         </table>
+
+
+                        <div className="flex justify-end items-center gap-3 p-4 border-t">
+
+                            <button
+                                disabled={wardPage === 1}
+                                onClick={() => setWardPage(prev => prev - 1)}
+                                className="px-3 py-1 border rounded disabled:opacity-40"
+                            >
+                                Previous
+                            </button>
+
+                            <span className="text-sm font-medium">
+                                Page {wardPage}
+                            </span>
+
+                            <button
+                                disabled={wardPage * PAGE_SIZE >= wardCount}
+                                onClick={() => setWardPage(prev => prev + 1)}
+                                className="px-3 py-1 border rounded disabled:opacity-40"
+                            >
+                                Next
+                            </button>
+
+                        </div>
 
                     </div>
 

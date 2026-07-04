@@ -572,13 +572,45 @@ class ApproveWardView(APIView):
                 
                 
                 waiting_citizens = CitizenVerification.objects.filter(
-                    ward_master=ward.ward_master,
+                    ward=ward.ward_master,
                     status="WAITING_FOR_WARD"
                 )
 
+                # for citizen in waiting_citizens:
+
+                #     citizen.ward = ward.user
+                #     citizen.status = "PENDING"
+                #     citizen.reject_reason = None
+                #     citizen.reviewed_at = None
+                #     citizen.save()
+
+                #     send_notification(
+                #         user=ward.user,
+                #         title="New Citizen Verification",
+                #         message=f"{citizen.full_name} is waiting for verification.",
+                #         n_type="CITIZEN_VERIFICATION",
+                #         sender=citizen.user,
+                #         extra_data={
+                #             "verification_id": citizen.id
+                #         }
+                #     )
+
+                #     send_notification(
+                #         user=citizen.user,
+                #         title="Verification Assigned",
+                #         message="A Ward Officer has been assigned to review your verification.",
+                #         n_type="CITIZEN_VERIFICATION",
+                #         sender=ward.user,
+                #         extra_data={
+                #             "verification_id": citizen.id
+                #         }
+                #     )
+                
+                
+                
                 for citizen in waiting_citizens:
 
-                    citizen.ward = ward.user
+                    # Already assigned to this ward during registration.
                     citizen.status = "PENDING"
                     citizen.reject_reason = None
                     citizen.reviewed_at = None

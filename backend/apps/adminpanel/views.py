@@ -50,7 +50,7 @@ from apps.accounts.models import (
 )
 from apps.accounts.models import LocationRequest
 from .pagination import CustomPagination
-
+import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -854,10 +854,11 @@ class AdminWardListView(APIView):
             data = []
 
             for ward in paginated_qs:
+
                 ward_user = ward.user
 
                 total_users = CitizenVerification.objects.filter(
-                    ward=ward_user,
+                    ward=ward.ward_master,
                     status="APPROVED"
                 ).count()
 
@@ -903,11 +904,15 @@ class AdminWardListView(APIView):
 
             return paginator.get_paginated_response(data)
 
+        
+
         except Exception as e:
+            traceback.print_exc()
+
             logger.error(f"AdminWardList error: {str(e)}")
 
             return error_response(
-                message="Something went wrong",
+                message=str(e),
                 status=500
             )
 
@@ -937,8 +942,13 @@ class SuspendWardView(APIView):
                 user.is_verified = False
                 user.save(update_fields=["status", "is_verified"])
                 
+                ward_verification = get_object_or_404(
+                    WardVerification,
+                    user=user
+                )
+
                 waiting_citizens = CitizenVerification.objects.filter(
-                    ward=user,
+                    ward=ward_verification.ward_master,
                     status="PENDING"
                 )
 
@@ -1087,7 +1097,7 @@ class AdminPanchayathDetailView(APIView):
                 )
 
                 total_users = CitizenVerification.objects.filter(
-                    ward=ward_user,
+                    ward=ward.ward_master,
                     status="APPROVED"
                 ).count()
 
@@ -1170,9 +1180,22 @@ class AdminWardDetailView(APIView):
             )
 
             citizens = CitizenVerification.objects.filter(
-                ward=ward_user,
+                ward=ward.ward_master,
                 status="APPROVED"
             ).select_related("user")
+            
+            
+            print("Ward Master:", ward.ward_master)
+            print(
+                CitizenVerification.objects.filter(
+                    ward=ward.ward_master
+                ).values(
+                    "id",
+                    "full_name",
+                    "ward_id",
+                    "status"
+                )
+            )
 
             members = [
                 {
@@ -2276,6 +2299,85 @@ class VerificationQueueView(APIView):
             import traceback
             traceback.print_exc()
             raise
+        
+        
+        
+class WaitingCitizenListView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+
+        queryset = (
+            CitizenVerification.objects
+            .filter(status="WAITING_FOR_WARD")
+            .select_related(
+                "ward",
+                "ward__panchayath",
+                "ward__panchayath__district"
+            )
+            .order_by("-submitted_at")
+        )
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+
+        page = paginator.paginate_queryset(
+            queryset,
+            request
+        )
+
+        data = []
+
+        for verification in page:
+            data.append({
+                "id": verification.id,
+                "name": verification.full_name,
+                "district": verification.ward.panchayath.district.name,
+                "panchayath": verification.ward.panchayath.name,
+                "ward": verification.ward.ward_name,
+                "submitted_at": verification.submitted_at,
+            })
+
+        return paginator.get_paginated_response(data)
+    
+    
+class WaitingWardListView(APIView):
+    permission_classes = [IsSuperAdmin]
+
+    def get(self, request):
+
+        queryset = (
+            WardVerification.objects
+            .filter(status="WAITING_FOR_PANCHAYATH")
+            .select_related(
+                "district",
+                "panchayath_master"
+            )
+            .order_by("-submitted_at")
+        )
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+
+        page = paginator.paginate_queryset(
+            queryset,
+            request
+        )
+
+        data = []
+
+        for verification in page:
+
+            data.append({
+                "id": verification.id,
+                "officer_name": verification.officer_full_name,
+                "district": verification.district.name,
+                "panchayath": verification.panchayath_master.name,
+                "ward": verification.ward_name,
+                "submitted_at": verification.submitted_at,
+            })
+
+        return paginator.get_paginated_response(data)
         
         
 class WaitingCitizenDetailView(APIView):
