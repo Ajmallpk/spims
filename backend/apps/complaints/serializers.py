@@ -3,6 +3,7 @@ from .models import Complaint,ComplaintComment,ComplaintResolution,ComplaintHist
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from apps.notification.models import Notification
+from apps.accounts.models import Ward
 
 User = get_user_model()
 
@@ -22,8 +23,8 @@ class ComplaintCreateSerializer(serializers.ModelSerializer):
         ]
 
     def validate_ward(self, value):
-        if value.role != "WARD":
-            raise serializers.ValidationError("Invalid ward selected")
+        if not Ward.objects.filter(id=value.id).exists():
+            raise serializers.ValidationError("Invalid ward.")
         return value
     
 
@@ -104,7 +105,7 @@ class ComplaintResolutionSerializer(serializers.ModelSerializer):
 class ComplaintFeedSerializer(serializers.ModelSerializer):
 
     citizen_name = serializers.CharField(source="citizen.username")
-    ward_name = serializers.CharField(source="ward.username")
+    ward_name = serializers.SerializerMethodField()
     image_proof = serializers.SerializerMethodField()
     video_proof = serializers.SerializerMethodField()
     upvotes_count = serializers.IntegerField(read_only=True)
@@ -154,6 +155,13 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             return obj.video_proof.url
 
         return None
+    
+    
+    def get_ward_name(self, obj):
+        if obj.ward.ward_name:
+            return obj.ward.ward_name
+
+        return f"Ward {obj.ward.ward_number}"
 
     
     
@@ -190,7 +198,7 @@ class ComplaintCommentSerializer(serializers.ModelSerializer):
 class ComplaintDetailSerializer(serializers.ModelSerializer):
 
     citizen_name = serializers.CharField(source="citizen.username", read_only=True)
-    ward_name = serializers.CharField(source="ward.username", read_only=True)
+    ward_name = serializers.SerializerMethodField()
     image_proof = serializers.SerializerMethodField()
     video_proof = serializers.SerializerMethodField()
     upvotes_count = serializers.SerializerMethodField()
@@ -243,6 +251,12 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
 
         return None
     
+    def get_ward_name(self, obj):
+        if obj.ward.ward_name:
+            return obj.ward.ward_name
+
+        return f"Ward {obj.ward.ward_number}"
+    
     
 
         
@@ -290,7 +304,7 @@ class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
 
         
         if user.role == "WARD":
-            if instance.ward != user:
+            if instance.assigned_ward_officer != user:
                 raise serializers.ValidationError("Not your complaint")
 
         elif user.role == "PANCHAYATH":

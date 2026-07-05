@@ -21,6 +21,7 @@ from apps.complaints.models import Complaint,ComplaintHistory,ResolutionMedia,Co
 from .permissions import IsActiveWard
 from django.utils import timezone
 from .serialzers import EscalateComplaintSerializer
+import traceback
 import uuid
 import mimetypes
 import logging
@@ -327,6 +328,18 @@ class WardDashboardView(APIView):
         try:
             user = request.user
 
+            ward_verification = WardVerification.objects.filter(
+                user=user
+            ).first()
+
+            if not ward_verification:
+                return error_response(
+                    message="Ward verification not found",
+                    status=404
+                )
+
+            ward_master = ward_verification.ward_master
+
             complaint_stats = Complaint.objects.filter(
                 ward=user
             ).aggregate(
@@ -336,20 +349,16 @@ class WardDashboardView(APIView):
             )
 
             pending_citizens = CitizenVerification.objects.filter(
-                ward=user,
+                ward=ward_master,
                 status="PENDING"
             ).count()
-
-            verification = WardVerification.objects.filter(user=user).first()
-
-            ward_name = verification.ward_name if verification else None
 
             logger.info(f"Ward {user.id} accessed dashboard")
 
             return success_response(
                 message="Dashboard data fetched",
                 data={
-                    "ward_name": ward_name,
+                    "ward_name": ward_verification.ward_name,
                     "total_complaints": complaint_stats.get("total", 0),
                     "pending_complaints": complaint_stats.get("pending", 0),
                     "resolved_complaints": complaint_stats.get("resolved", 0),
@@ -358,7 +367,7 @@ class WardDashboardView(APIView):
             )
 
         except Exception as e:
-            logger.error(f"WardDashboard error: {str(e)}")
+            logger.exception("WardDashboard error")
 
             return error_response(
                 message="Something went wrong",
@@ -448,9 +457,11 @@ class CitizenVerificationDetailView(APIView):
 
     def get(self, request, pk):
         try:
+            ward_verification = request.user.ward_verification
+
             citizen = CitizenVerification.objects.filter(
                 pk=pk,
-                ward=request.user
+                ward=ward_verification.ward_master
             ).select_related("user").first()
 
             if not citizen:
@@ -497,9 +508,11 @@ class ApproveCitizenView(APIView):
 
     def post(self, request, pk):
         try:
+            ward_verification = request.user.ward_verification
+
             citizen = CitizenVerification.objects.filter(
                 pk=pk,
-                ward=request.user
+                ward=ward_verification.ward_master
             ).select_related("user").first()
 
             if not citizen:
@@ -578,9 +591,11 @@ class RejectCitizenView(APIView):
                     status=400
                 )
 
+            ward_verification = request.user.ward_verification
+
             citizen = CitizenVerification.objects.filter(
                 pk=pk,
-                ward=user
+                ward=ward_verification.ward_master
             ).select_related("user").first()
 
             if not citizen:
@@ -637,8 +652,10 @@ class ApprovedCitizenListView(APIView):
         try:
             search = request.GET.get("search", "").strip()
 
+            ward_verification = request.user.ward_verification
+
             citizens = CitizenVerification.objects.filter(
-                ward=request.user,
+                ward=ward_verification.ward_master,
                 status="APPROVED"
             ).select_related("user")
 
@@ -687,8 +704,10 @@ class RecentCitizenVerificationView(APIView):
 
     def get(self, request):
         try:
+            ward_verification = request.user.ward_verification
+
             citizens = CitizenVerification.objects.filter(
-                ward=request.user
+                ward=ward_verification.ward_master
             ).order_by("-submitted_at")[:5]
 
             data = [
@@ -939,9 +958,11 @@ class CitizenFullDetailView(APIView):
 
     def get(self, request, pk):
         try:
+            ward_verification = request.user.ward_verification
+
             verification = CitizenVerification.objects.filter(
                 pk=pk,
-                ward=request.user
+                ward=ward_verification.ward_master
             ).first()
 
             if not verification:

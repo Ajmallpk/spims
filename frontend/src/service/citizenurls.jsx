@@ -137,6 +137,22 @@ const citizenapi = {
     );
   },
 
+  getDistricts: () => {
+    return citizenAxios.get("/auth/districts/");
+  },
+
+  getPanchayaths: (districtId) => {
+    return citizenAxios.get(
+      `/auth/panchayaths/?district=${districtId}`
+    );
+  },
+
+  getWards: (panchayathId) => {
+    return citizenAxios.get(
+      `/auth/wards/?panchayath=${panchayathId}`
+    );
+  },
+
 };
 
 export default citizenapi;

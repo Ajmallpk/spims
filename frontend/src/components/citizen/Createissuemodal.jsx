@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import citizenapi from "@/service/citizenurls";
 
 const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
+  const [districts, setDistricts] = useState([]);
+  const [panchayaths, setPanchayaths] = useState([]);
   const [wards, setWards] = useState([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
     category: "",
+    district: "",
+    panchayath: "",
     ward: "",
     location: "",
     media: [],
@@ -33,25 +37,73 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     }
   }, [isOpen, initialData]);
 
+  const fetchDistricts = async () => {
+    try {
+      const res = await citizenapi.getDistricts();
+      setDistricts(res.data.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
 
   useEffect(() => {
-    const fetchWards = async () => {
-      try {
-        const res = await citizenapi.getWards();
-        setWards(res.data.data);
-      } catch (error) {
-        console.error("Failed to load wards", error);
-      }
-    };
-
-    fetchWards();
+    fetchDistricts();
   }, []);
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
+
+
+  const fetchPanchayaths = async (districtId) => {
+    try {
+      const res = await citizenapi.getPanchayaths(districtId);
+      setPanchayaths(res.data.data);
+
+      setWards([]);
+
+      setForm((prev) => ({
+        ...prev,
+        panchayath: "",
+        ward: "",
+      }));
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchWards = async (panchayathId) => {
+    try {
+      const res = await citizenapi.getWards(panchayathId);
+
+      setWards(res.data.data);
+
+      setForm((prev) => ({
+        ...prev,
+        ward: "",
+      }));
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleChange = async (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "district") {
+      await fetchPanchayaths(value);
+    }
+
+    if (name === "panchayath") {
+      await fetchWards(value);
+    }
   };
 
   const handleImage = (e) => {
@@ -206,34 +258,100 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
           </div>
 
           {/* Ward + Location */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
+
+            {/* District */}
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-1 block">Ward *</label>
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                District *
+              </label>
+
               <select
-                name="ward"
-                value={form.ward}
+                name="district"
+                value={form.district}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-teal-300 transition-all bg-white"
+                className="w-full border rounded-xl px-4 py-2.5"
               >
-                <option value="">Select ward</option>
-                {wards.map((ward) => (
-                  <option key={ward.id} value={ward.id}>
-                    {ward.name}
+                <option value="">Select District</option>
+
+                {districts.map((district) => (
+                  <option
+                    key={district.id}
+                    value={district.id}
+                  >
+                    {district.name}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Panchayath */}
             <div>
-              <label className="text-xs font-medium text-gray-600 mb-1 block">Location</label>
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                Panchayath *
+              </label>
+
+              <select
+                name="panchayath"
+                value={form.panchayath}
+                onChange={handleChange}
+                className="w-full border rounded-xl px-4 py-2.5"
+              >
+                <option value="">Select Panchayath</option>
+
+                {panchayaths.map((p) => (
+                  <option
+                    key={p.id}
+                    value={p.id}
+                  >
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Ward */}
+            <div>
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                Ward *
+              </label>
+
+              <select
+                name="ward"
+                value={form.ward}
+                onChange={handleChange}
+                className="w-full border rounded-xl px-4 py-2.5"
+              >
+                <option value="">Select Ward</option>
+
+                {wards.map((ward) => (
+                  <option
+                    key={ward.id}
+                    value={ward.id}
+                  >
+                    {ward.ward_name
+                      ? `Ward ${ward.ward_number} - ${ward.ward_name}`
+                      : `Ward ${ward.ward_number}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                Location
+              </label>
+
               <input
                 type="text"
                 name="location"
                 value={form.location}
                 onChange={handleChange}
-                placeholder="Landmark or area"
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-teal-300 transition-all"
+                className="w-full border rounded-xl px-4 py-2.5"
               />
             </div>
+
           </div>
 
           {/* Image upload */}

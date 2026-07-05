@@ -62,22 +62,28 @@ class CitizenCreateComplaintView(APIView):
                     status=400
                 )
 
-            ward = serializer.validated_data["ward"]
+            selected_ward = serializer.validated_data["ward"]
 
-            ward_verification = WardVerification.objects.filter(user=ward).first()
+            ward_verification = WardVerification.objects.filter(
+                ward_master=selected_ward,
+                status="APPROVED"
+            ).first()
 
             if not ward_verification:
                 return error_response(
-                    message="Selected ward is not verified",
+                    message="No verified ward officer for this ward.",
                     status=400
                 )
 
+            ward_officer = ward_verification.user
+
             complaint = serializer.save(
                 citizen=user,
-                ward=ward,
+                ward=selected_ward,
+                assigned_ward_officer=ward_officer,
                 panchayath=ward_verification.panchayath
             )
-            
+                        
             
             
 
@@ -110,7 +116,7 @@ class CitizenCreateComplaintView(APIView):
             
             
             send_notification(
-                user=ward,
+                user=ward_officer,
                 title="New Complaint",
                 message=f"A new complaint has been submitted: {complaint.title}",
                 n_type="NEW_COMPLAINT",
@@ -768,7 +774,7 @@ class UpdateComplaintView(APIView):
             )
             
             send_notification(
-                user=complaint.ward,
+                user=complaint.assigned_ward_officer,
                 title="Complaint Updated",
                 message=f"{request.user.username} updated a complaint.",
                 n_type="COMPLAINT_STATUS",

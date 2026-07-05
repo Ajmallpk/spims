@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from cloudinary.models import CloudinaryField
+from apps.accounts.models import Ward
 
 
 User = get_user_model()
@@ -33,10 +34,19 @@ class Complaint(models.Model):
     )
 
     ward = models.ForeignKey(
+        Ward,
+        on_delete=models.PROTECT,
+        related_name="complaints"
+    )
+    
+    
+    assigned_ward_officer = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="ward_complaints",
-        limit_choices_to={"role": "WARD"}
+        related_name="assigned_complaints",
+        limit_choices_to={"role": "WARD"},
+        null=True,
+        blank=True,
     )
 
     panchayath = models.ForeignKey(
