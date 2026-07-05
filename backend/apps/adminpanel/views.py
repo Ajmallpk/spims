@@ -559,9 +559,10 @@ class AdminPanchayathListView(APIView):
 
                 total_wards = ward_qs.count()
 
-                ward_user_ids = ward_qs.values_list("user_id", flat=True)
+                ward_ids = ward_qs.values_list("ward_master_id", flat=True)
+
                 total_complaints = Complaint.objects.filter(
-                    ward_id__in=ward_user_ids
+                    ward_id__in=ward_ids
                 ).count()
 
                 data.append({
@@ -855,19 +856,22 @@ class AdminWardListView(APIView):
 
             for ward in paginated_qs:
 
+                ward_master = ward.ward_master
+                
+                
                 ward_user = ward.user
 
                 total_users = CitizenVerification.objects.filter(
-                    ward=ward.ward_master,
+                    ward=ward_master,
                     status="APPROVED"
                 ).count()
 
                 total_complaints = Complaint.objects.filter(
-                    ward=ward_user
+                    ward=ward_master
                 ).count()
 
                 pending_complaints = Complaint.objects.filter(
-                    ward=ward_user,
+                    ward=ward_master,
                     status="PENDING"
                 ).count()
 
@@ -1069,10 +1073,10 @@ class AdminPanchayathDetailView(APIView):
 
             total_wards = wards.count()
 
-            ward_user_ids = wards.values_list("user_id", flat=True)
-            
+            ward_ids = wards.values_list("ward_master_id", flat=True)
+
             complaint_stats = Complaint.objects.filter(
-                ward_id__in=ward_user_ids
+                ward_id__in=ward_ids
             ).aggregate(
                 total=Count("id"),
                 pending=Count("id", filter=Q(status="PENDING")),
@@ -1080,17 +1084,17 @@ class AdminPanchayathDetailView(APIView):
             )
 
             total_citizens = CitizenVerification.objects.filter(
-                ward_id__in=ward_user_ids,
+                ward_id__in=ward_ids,
                 status="APPROVED"
             ).count()
 
             ward_list = []
 
             for ward in wards:
+                ward_master = ward.ward_master
                 ward_user = ward.user
-
                 ward_stats = Complaint.objects.filter(
-                    ward=ward_user
+                    ward=ward_master
                 ).aggregate(
                     total=Count("id"),
                     pending=Count("id", filter=Q(status="PENDING"))
@@ -1168,10 +1172,12 @@ class AdminWardDetailView(APIView):
                 user__id=pk
             )
 
+            ward_master = ward.ward_master
+            
             ward_user = ward.user
 
             complaint_stats = Complaint.objects.filter(
-                ward=ward_user
+                ward=ward_master
             ).aggregate(
                 total=Count("id"),
                 pending=Count("id", filter=Q(status="PENDING")),
@@ -1209,7 +1215,7 @@ class AdminWardDetailView(APIView):
             ]
 
             complaints_qs = Complaint.objects.filter(
-                ward=ward_user
+                ward=ward_master
             ).order_by("-created_at")[:10]
 
             complaints = [
@@ -1253,10 +1259,13 @@ class AdminWardDetailView(APIView):
             )
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
+
             logger.error(f"AdminWardDetail error: {str(e)}")
 
             return error_response(
-                message="Something went wrong",
+                message=str(e),
                 status=500
             )
             
@@ -1298,7 +1307,7 @@ class AdminComplaintDetailView(APIView):
             )
 
             ward_verification = WardVerification.objects.filter(
-                user=complaint.ward
+                ward_master=complaint.ward
             ).first()
 
             panchayath_verification = None
@@ -1625,7 +1634,10 @@ class AdminCitizenListView(APIView):
 
                 ward_verification = WardVerification.objects.select_related(
                     "panchayath"
-                ).filter(user=verification.ward).first()
+                ).filter(
+                    ward_master=verification.ward,
+                    status="APPROVED"
+                ).first()
 
                 ward_name = ward_verification.ward_name if ward_verification else None
                 panchayath_name = None
@@ -1659,10 +1671,13 @@ class AdminCitizenListView(APIView):
             return paginator.get_paginated_response(data)
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
+
             logger.error(f"AdminCitizenList error: {str(e)}")
 
             return error_response(
-                message="Something went wrong",
+                message=str(e),
                 status=500
             )
     
@@ -1696,7 +1711,10 @@ class AdminCitizenDetailView(APIView):
 
             ward_verification = WardVerification.objects.select_related(
                 "panchayath"
-            ).filter(user=verification.ward).first()
+            ).filter(
+                ward_master=verification.ward,
+                status="APPROVED"
+            ).first()
 
             ward_name = ward_verification.ward_name if ward_verification else None
             panchayath_name = None

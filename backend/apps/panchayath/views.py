@@ -244,37 +244,35 @@ class PanchayathDashboardView(APIView):
                 rejected=Count("id", filter=Q(status="REJECTED")),
             )
 
-            approved_wards = User.objects.filter(
-                role=User.Role.WARD,
-                status=User.Status.ACTIVE,
-                is_verified=True,
-                ward_verification__panchayath=user
+            approved_wards = WardVerification.objects.filter(
+                panchayath=user,
+                status="APPROVED"
             ).count()
             
             
             total_complaints = Complaint.objects.filter(
-                ward__ward_verification__panchayath=user
+                ward__ward_verifications__panchayath=user
             ).count()
             
             
             
             escalated_complaints = Complaint.objects.filter(
-                ward__ward_verification__panchayath=user,
+                ward__ward_verifications__panchayath=user,
                 status="ESCALATED"
             ).count()
 
             in_progress_complaints = Complaint.objects.filter(
-                ward__ward_verification__panchayath=user,
+                ward__ward_verifications__panchayath=user,
                 status="IN_PROGRESS"
             ).count()
 
             resolved_complaints = Complaint.objects.filter(
-                ward__ward_verification__panchayath=user,
+                ward__ward_verifications__panchayath=user,
                 status="RESOLVED"
             ).count()
 
             reassigned_complaints = Complaint.objects.filter(
-                ward__ward_verification__panchayath=user,
+                ward__ward_verifications__panchayath=user,
                 is_reassigned=True
             ).count()
 
@@ -353,7 +351,7 @@ class PanchayathWardListView(APIView):
                 )
                 .annotate(
                     complaint_count=Count(
-                        "user__ward_complaints"
+                        "user__assigned_complaints"
                     )
                 )
             )
@@ -504,7 +502,7 @@ class WardComplaintListView(APIView):
             )
 
         complaints = Complaint.objects.filter(
-            ward=ward.user
+            ward=ward.ward_master
         ).select_related(
             "citizen"
         ).order_by("-created_at")
@@ -1027,7 +1025,7 @@ class PanchayathComplaintListView(APIView):
 
                     "citizen_name": c.citizen.username,
                     "ward_id": c.ward.id,
-                    "ward_name": c.ward.username,
+                    "ward_name": f"Ward {c.ward.ward_number} - {c.ward.ward_name}",
                 }
                 for c in paginated_qs
             ]
@@ -1081,14 +1079,19 @@ class ReassignComplaintView(APIView):
             serializer.save()
             
             
-            send_notification(
-                user = complaint.ward,
-                title="Complaint Reassigned",
-                message="A complain has been reassigned to you",
-                n_type="REASSIGN",
-                complaint = complaint,
-                sender=request.user
-            )
+            ward_verification = WardVerification.objects.filter(
+                ward_master=complaint.ward
+            ).first()
+
+            if ward_verification:
+                send_notification(
+                    user=ward_verification.user,
+                    title="Complaint Reassigned",
+                    message="A complaint has been reassigned to you",
+                    n_type="REASSIGN",
+                    complaint=complaint,
+                    sender=request.user,
+                )
             
             
             
@@ -1160,6 +1163,10 @@ class PanchayathComplaintDetailView(APIView):
             ]
 
             logger.info(f"Panchayath {user.id} viewed complaint {complaint.id}")
+            
+            ward_verification = WardVerification.objects.filter(
+                ward_master=complaint.ward
+            ).select_related("user").first()
 
             return success_response(
                 message="Complaint detail fetched",
@@ -1184,10 +1191,12 @@ class PanchayathComplaintDetailView(APIView):
 
                     "ward": {
                         "id": complaint.ward.id,
-                        "name": complaint.ward.username,
-                        "officer": complaint.ward.username,
-                        "officerPhone": getattr(complaint.ward, "phone", "Not Available"),
-                        "officerEmail": complaint.ward.email,
+                        "ward_name": complaint.ward.ward_name,
+                        "ward_number": complaint.ward.ward_number,
+
+                        "officer": ward_verification.user.username if ward_verification else None,
+                        "officerEmail": ward_verification.user.email if ward_verification else None,
+                        "officerPhone": ward_verification.official_contact if ward_verification else None,
                     }
                 }
             )
@@ -1240,14 +1249,19 @@ class PanchayathComplaintDetailView(APIView):
                 )
                 
                 
-                send_notification(
-                    user=complaint.ward,
-                    title="Complaint Started",
-                    message="Panchayath has started working on the escalated complaint.",
-                    n_type="COMPLAINT_STATUS",
-                    complaint=complaint,
-                    sender=request.user,
-                )
+                ward_verification = WardVerification.objects.filter(
+                    ward_master=complaint.ward
+                ).first()
+
+                if ward_verification:
+                    send_notification(
+                        user=ward_verification.user,
+                        title="Complaint Started",
+                        message="Panchayath has started working on the escalated complaint.",
+                        n_type="COMPLAINT_STATUS",
+                        complaint=complaint,
+                        sender=request.user,
+                    )
                 
                 ComplaintHistory.objects.create(
                     complaint=complaint,
