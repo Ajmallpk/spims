@@ -28,4 +28,13 @@ urlpatterns = [
     path("auth/me/", views.PanchayathMeView.as_view()),
     path("ward/<int:pk>/complaints/",views.WardComplaintListView.as_view()),
     path("complaint/<int:complaint_id>/full-details/",views.PanchayathComplaintFullDetailView.as_view()),
+    path(
+        "complaints/<int:complaint_id>/hold/",
+        views.HoldComplaintView.as_view(),
+    ),
+    
+    path(
+    "complaints/<int:complaint_id>/resume/",
+    views.ResumeComplaintView.as_view()
+),
 ]

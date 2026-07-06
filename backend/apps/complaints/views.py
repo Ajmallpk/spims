@@ -1073,3 +1073,6 @@ class ExploreComplaintView(ListAPIView):
             queryset = queryset.order_by(Random())
 
         return queryset
+    
+    
+

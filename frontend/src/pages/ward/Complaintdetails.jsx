@@ -5,6 +5,7 @@ import CitizenPreviewCard from "@/components/ward/Citizenpreviewcard";
 import ComplaintActionPanel from "@/components/ward/Complaintactionpanel";
 import ResolveModal from "@/components/ward/Resolvemodal";
 import EscalateModal from "@/components/ward/Escalatemodal";
+import HoldModal from "@/components/ward/HoldModal";
 // import ChatPanel from "@/pages/ward/Chatpanel";
 import wardapi from "@/service/wardurls";
 import complaintapi from "@/service/complaintsurls";
@@ -25,6 +26,7 @@ export default function ComplaintDetails() {
 
   const [showResolveModal, setShowResolveModal] = useState(false);
   const [showEscalateModal, setShowEscalateModal] = useState(false);
+  const [showHoldModal, setShowHoldModal] = useState(false);
   // const [chatOpen, setChatOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -90,6 +92,26 @@ export default function ComplaintDetails() {
       console.log(error);
 
       toast.error("Unable to open chat");
+
+    }
+
+  };
+
+
+
+  const handleResumeComplaint = async () => {
+
+    try {
+
+      await wardapi.resumeComplaint(id);
+
+      toast.success("Complaint resumed");
+
+      fetchDetails();
+
+    } catch (err) {
+
+      toast.error("Failed to resume complaint");
 
     }
 
@@ -205,6 +227,8 @@ export default function ComplaintDetails() {
               // chatOpen={chatOpen}
               onResolve={() => setShowResolveModal(true)}
               onEscalate={() => setShowEscalateModal(true)}
+              onHold={() => setShowHoldModal(true)}
+              onResume={handleResumeComplaint}
               onStartWork={handleStartWork}
               onToggleChat={handleOpenChat}
             />
@@ -239,6 +263,14 @@ export default function ComplaintDetails() {
         <EscalateModal
           complaintId={id}
           onClose={() => setShowEscalateModal(false)}
+          onSuccess={handleSuccess}
+        />
+      )}
+
+      {showHoldModal && (
+        <HoldModal
+          complaintId={id}
+          onClose={() => setShowHoldModal(false)}
           onSuccess={handleSuccess}
         />
       )}

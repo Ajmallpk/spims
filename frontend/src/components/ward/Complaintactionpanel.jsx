@@ -3,6 +3,8 @@ export default function ComplaintActionPanel({
   chatOpen,
   onResolve,
   onEscalate,
+  onHold,
+  onResume,
   onToggleChat,
   onStartWork,
 }) {
@@ -34,7 +36,7 @@ export default function ComplaintActionPanel({
 
       {/* 🔵 IN_PROGRESS */}
 
-      {statusKey === "in_progress" && (
+      {/* {statusKey === "in_progress" && (
         <div className="space-y-2.5">
           <button
             onClick={onResolve}
@@ -50,7 +52,57 @@ export default function ComplaintActionPanel({
             Escalate Complaint
           </button>
         </div>
+      )} */}
+
+
+
+      {statusKey === "in_progress" && (
+        <div className="space-y-2.5">
+
+          <button
+            onClick={onResolve}
+            className="w-full px-4 py-2.5 bg-green-600 text-white rounded-xl"
+          >
+            Mark as Resolved
+          </button>
+
+          <button
+            onClick={onHold}
+            className="w-full px-4 py-2.5 bg-yellow-500 text-white rounded-xl"
+          >
+            Put On Hold
+          </button>
+
+          <button
+            onClick={onEscalate}
+            className="w-full px-4 py-2.5 bg-red-600 text-white rounded-xl"
+          >
+            Escalate Complaint
+          </button>
+
+        </div>
       )}
+
+
+
+      {statusKey === "hold" && (
+        <div className="space-y-3">
+
+          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-700">
+            Complaint is currently on hold.
+          </div>
+
+          <button
+            onClick={onResume}
+            className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+          >
+            Resume Work
+          </button>
+
+        </div>
+      )}
+
+
 
       {/* 🔴 ESCALATED */}
       {statusKey === "escalated" && (

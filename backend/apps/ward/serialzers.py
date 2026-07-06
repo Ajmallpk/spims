@@ -5,7 +5,7 @@ from apps.complaints.utils import can_change_status
 from apps.notification.models import Notification
 from .models import WardVerification
 from apps.accounts.models import District, Panchayath, Ward
-    
+from apps.complaints.serializers import HoldComplaintSerializer
     
 class EscalateComplaintSerializer(serializers.ModelSerializer):
     class Meta:

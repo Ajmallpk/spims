@@ -170,29 +170,61 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
 
+// const StatusBadge = ({ status }) => {
+//     const styles = {
+//         PENDING: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+//         OPEN: "bg-blue-100 text-blue-700 border border-blue-200",
+//         IN_PROGRESS: "bg-purple-100 text-purple-700 border border-purple-200",
+//         RESOLVED: "bg-green-100 text-green-700 border border-green-200",
+//         CLOSED: "bg-gray-100 text-gray-600 border border-gray-200",
+//     };
+//     const labels = {
+//         PENDING: "Pending",
+//         OPEN: "Open",
+//         IN_PROGRESS: "In Progress",
+//         RESOLVED: "Resolved",
+//         CLOSED: "Closed",
+//     };
+//     const cls = styles[status] ?? "bg-gray-100 text-gray-600 border border-gray-200";
+//     return (
+//         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${cls}`}>
+//             {labels[status] ?? status}
+//         </span>
+//     );
+// };
+
+
+
 const StatusBadge = ({ status }) => {
+
     const styles = {
         PENDING: "bg-yellow-100 text-yellow-700 border border-yellow-200",
         OPEN: "bg-blue-100 text-blue-700 border border-blue-200",
         IN_PROGRESS: "bg-purple-100 text-purple-700 border border-purple-200",
+        HOLD: "bg-yellow-100 text-yellow-700 border border-yellow-200",
         RESOLVED: "bg-green-100 text-green-700 border border-green-200",
         CLOSED: "bg-gray-100 text-gray-600 border border-gray-200",
     };
+
     const labels = {
         PENDING: "Pending",
         OPEN: "Open",
         IN_PROGRESS: "In Progress",
+        HOLD: "On Hold",
         RESOLVED: "Resolved",
         CLOSED: "Closed",
     };
-    const cls = styles[status] ?? "bg-gray-100 text-gray-600 border border-gray-200";
+
+    const cls =
+        styles[status] ??
+        "bg-gray-100 text-gray-600 border border-gray-200";
+
     return (
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${cls}`}>
             {labels[status] ?? status}
         </span>
     );
 };
-
 const InfoRow = ({ label, value }) => (
     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 py-3 border-b border-gray-100 last:border-0">
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider w-28 flex-shrink-0">{label}</span>
@@ -265,6 +297,33 @@ const CitizenComplaintDetailPage = () => {
                             </h1>
                         </div>
                         <StatusBadge status={complaint.status} />
+                        {complaint.status === "HOLD" && (
+
+                            <div className="mt-4 rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+
+                                <h3 className="font-semibold text-yellow-800">
+                                    Complaint On Hold
+                                </h3>
+
+                                <p className="mt-2 text-sm text-gray-700">
+                                    {complaint.hold_reason}
+                                </p>
+
+                                {complaint.hold_by_name && (
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        Held by : {complaint.hold_by_name}
+                                    </p>
+                                )}
+
+                                {complaint.hold_at && (
+                                    <p className="text-xs text-gray-500">
+                                        {new Date(complaint.hold_at).toLocaleString()}
+                                    </p>
+                                )}
+
+                            </div>
+
+                        )}
                     </div>
 
                     {complaint.description && (

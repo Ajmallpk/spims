@@ -34,6 +34,29 @@ export default function ComplaintInfoCard({ complaint }) {
             {complaint.title ?? "Untitled Complaint"}
           </h3>
           <StatusBadge status={complaint.status} />
+          {complaint.status === "HOLD" && (
+            <div className="mt-4 rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+              <p className="text-sm font-semibold text-yellow-800">
+                Complaint On Hold
+              </p>
+
+              <p className="mt-2 text-sm text-gray-700">
+                {complaint.hold_reason}
+              </p>
+
+              {complaint.hold_by_name && (
+                <p className="mt-2 text-xs text-gray-500">
+                  Held By : {complaint.hold_by_name}
+                </p>
+              )}
+
+              {complaint.hold_at && (
+                <p className="text-xs text-gray-500">
+                  {new Date(complaint.hold_at).toLocaleString()}
+                </p>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap gap-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg">

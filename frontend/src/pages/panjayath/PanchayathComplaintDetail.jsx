@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import panchayathApi from "@/service/panchayathurls";
 import { handleApiError } from "@/utils/handleApiError";
+import HoldModal from "@/components/panjayath/HoldModal";
 
 
 const CATEGORY_CONFIG = {
@@ -16,7 +17,13 @@ const STATUS_CONFIG = {
     ESCALATED: { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", dot: "bg-red-500", label: "Escalated" },
 
     IN_PROGRESS: { bg: "bg-amber-100", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-500", label: "In Progress" },
-
+    HOLD: {
+        bg: "bg-yellow-100",
+        text: "text-yellow-700",
+        border: "border-yellow-200",
+        dot: "bg-yellow-500",
+        label: "On Hold",
+    },
     RESOLVED: { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500", label: "Resolved" },
 
     // 👉 ADD THIS
@@ -275,6 +282,7 @@ export default function PanchayathComplaintDetail() {
     const [loading, setLoading] = useState(true);
     const [previewImg, setPreviewImg] = useState(null);
     const [modal, setModal] = useState(null);
+    const [showHoldModal, setShowHoldModal] = useState(false);
     const [currentStatus, setCurrentStatus] = useState(null);
 
 
@@ -337,7 +345,7 @@ export default function PanchayathComplaintDetail() {
 
         } catch (err) {
             handleApiError(
-                error,
+                err,
                 type === "resolve"
                     ? "Failed to resolve complaint"
                     : "Failed to reassign complaint"
@@ -357,10 +365,68 @@ export default function PanchayathComplaintDetail() {
 
         } catch (err) {
             handleApiError(
-                error,
+                err,
                 "Failed to update complaint status"
             );
         }
+    };
+
+
+
+    const handleHoldComplaint = async (reason) => {
+
+        try {
+
+            await panchayathApi.holdComplaint(id, {
+                hold_reason: reason,
+            });
+
+            const res = await panchayathApi.getComplaintDetail(id);
+
+            const data = res.data.data;
+
+            setComplaint(data);
+
+            setCurrentStatus(data.status);
+
+            setShowHoldModal(false);
+
+        } catch (err) {
+
+            handleApiError(
+                err,
+                "Failed to hold complaint"
+            );
+
+        }
+
+    };
+
+
+
+    const handleResumeComplaint = async () => {
+
+        try {
+
+            await panchayathApi.resumeComplaint(id);
+
+            const res = await panchayathApi.getComplaintDetail(id);
+
+            const data = res.data.data;
+
+            setComplaint(data);
+
+            setCurrentStatus(data.status);
+
+        } catch (err) {
+
+            handleApiError(
+                err,
+                "Failed to resume complaint"
+            );
+
+        }
+
     };
 
     const showResolve = currentStatus === "ESCALATED" || currentStatus === "IN_PROGRESS";
@@ -416,6 +482,30 @@ export default function PanchayathComplaintDetail() {
                             <span className="text-xs font-mono text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">{complaint.id}</span>
                             <CategoryBadge category={complaint.category} />
                             <StatusBadge status={currentStatus} />
+
+                            {currentStatus === "HOLD" && (
+                                <div className="mt-4 rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+                                    <h3 className="font-semibold text-yellow-800">
+                                        Complaint On Hold
+                                    </h3>
+
+                                    <p className="mt-2 text-sm text-gray-700">
+                                        {complaint.hold_reason}
+                                    </p>
+
+                                    {complaint.hold_by_name && (
+                                        <p className="mt-2 text-xs text-gray-500">
+                                            Held by : {complaint.hold_by_name}
+                                        </p>
+                                    )}
+
+                                    {complaint.hold_at && (
+                                        <p className="text-xs text-gray-500">
+                                            {new Date(complaint.hold_at).toLocaleString()}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Title */}
@@ -594,6 +684,18 @@ export default function PanchayathComplaintDetail() {
                                                 Viewed
                                             </button>
                                         )}
+
+
+                                        {currentStatus === "IN_PROGRESS" && (
+                                            <button
+                                                onClick={() => setShowHoldModal(true)}
+                                                className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold px-4 py-3 rounded-xl"
+                                            >
+                                                Put On Hold
+                                            </button>
+                                        )}
+
+
                                         {showResolve && (
                                             <button
                                                 onClick={() => setModal("resolve")}
@@ -615,6 +717,17 @@ export default function PanchayathComplaintDetail() {
                                                 </svg>
                                                 Reassign Complaint
                                             </button>
+                                        )}
+
+                                        {currentStatus === "HOLD" && (
+
+                                            <button
+                                                onClick={handleResumeComplaint}
+                                                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl"
+                                            >
+                                                Resume Complaint
+                                            </button>
+
                                         )}
                                         <p className="text-xs text-slate-400 text-center pt-1">
                                             {currentStatus === "ESCALATED"
@@ -644,6 +757,14 @@ export default function PanchayathComplaintDetail() {
                     type={modal}
                     onClose={() => setModal(null)}
                     onConfirm={(desc, files) => handleConfirm(modal, desc, files)}
+                />
+            )}
+
+
+            {showHoldModal && (
+                <HoldModal
+                    onClose={() => setShowHoldModal(false)}
+                    onSubmit={handleHoldComplaint}
                 />
             )}
         </div>

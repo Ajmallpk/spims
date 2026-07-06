@@ -67,6 +67,14 @@ const panchayathApi = {
   },
 
 
+  holdComplaint: (id, data) => {
+    return panchayathAxios.post(
+      `/panchayath/complaints/${id}/hold/`,
+      data
+    );
+  },
+
+
   getNotifications: (page = 1) => {
 
     return panchayathAxios.get(
@@ -145,6 +153,12 @@ const panchayathApi = {
     return panchayathAxios.post(
       "/auth/location-request/",
       data
+    );
+  },
+
+  resumeComplaint: (id) => {
+    return panchayathAxios.post(
+      `/panchayath/complaints/${id}/resume/`
     );
   },
 

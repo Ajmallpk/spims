@@ -111,7 +111,7 @@ const Home = () => {
   // };
 
 
-  
+
 
 
   const handleLogout = async () => {
@@ -159,6 +159,11 @@ const Home = () => {
         category: issue.category,
         media: issue.media || [],
         status: issue.status,
+
+        hold_reason: issue.hold_reason,
+        hold_by_name: issue.hold_by_name,
+        hold_at: issue.hold_at,
+        
         upvotes: issue.upvotes_count,
         commentCount: issue.comments_count,
 
@@ -181,7 +186,7 @@ const Home = () => {
       setLoading(false);
     }
   };
-  
+
 
   // Simulate fetch
   useEffect(() => {

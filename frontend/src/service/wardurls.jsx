@@ -100,6 +100,12 @@ const wardapi = {
         );
     },
 
+    holdComplaint: (complaintId, data) => {
+        return wardAxios.post(
+            `/ward/complaint/${complaintId}/hold/`,
+            data
+        );
+    },
 
 
     getReassignedComplaints: (params) => {
@@ -171,6 +177,13 @@ const wardapi = {
         return wardAxios.post(
             "/auth/location-request/",
             data
+        );
+    },
+
+
+    resumeComplaint: (id) => {
+        return wardAxios.post(
+            `/ward/complaint/${id}/resume/`
         );
     },
 

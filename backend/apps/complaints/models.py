@@ -13,6 +13,7 @@ class Complaint(models.Model):
     STATUS_CHOICES = [
         ("PENDING", "Pending"),
         ("IN_PROGRESS", "In Progress"),
+        ("HOLD", "On Hold"),
         ("RESOLVED", "Resolved"),
         ("REJECTED", "Rejected"),
         ("ESCALATED", "Escalated"),
@@ -100,6 +101,25 @@ class Complaint(models.Model):
         default="PENDING"
     )
     
+    
+    hold_reason = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    hold_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="held_complaints"
+    )
+
+    hold_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+        
     
     escalation_reason = models.TextField(null=True, blank=True)
     

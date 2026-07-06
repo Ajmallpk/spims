@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from apps.notification.models import Notification
 from apps.accounts.models import Ward
-
+from apps.notification.utils import send_notification
 User = get_user_model()
 
 
@@ -116,6 +116,11 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
         source="panchayath.username",
         read_only=True
     )
+    
+    hold_by_name = serializers.CharField(
+        source="hold_by.username",
+        read_only=True
+    )
 
     class Meta:
         model = Complaint
@@ -128,6 +133,9 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "image_proof",
             "video_proof",
             "status",
+            "hold_reason",
+            "hold_at",
+            "hold_by_name",
             "citizen_name",
             "ward_name",
             "panchayath_name",
@@ -206,6 +214,10 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
 
     resolution = ComplaintResolutionSerializer(read_only=True)
     media = ComplaintMediaSerializer(many=True, read_only=True)
+    hold_by_name = serializers.CharField(
+        source="hold_by.username",
+        read_only=True
+    )
 
     class Meta:
         model = Complaint
@@ -218,6 +230,9 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
             "image_proof",
             "video_proof",
             "status",
+            "hold_reason",
+            "hold_at",
+            "hold_by_name",
             "citizen_name",
             "ward_name",
             "created_at",
@@ -357,4 +372,144 @@ class ComplaintUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Cannot edit this complaint in the status of 'RESOLVE' or 'ESCALATED' ")
         return data
     
+    
+    
+class HoldComplaintSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Complaint
+        fields = ["hold_reason"]
+
+
+    def validate_hold_reason(self, value):
+
+        if len(value.strip()) < 10:
+            raise serializers.ValidationError(
+                "Minimum 10 characters required."
+            )
+
+        return value
+
+
+    def update(self, instance, validated_data):
+
+        request = self.context["request"]
+        user = request.user
+
+        # Ward can only hold their own complaint
+        if user.role == "WARD":
+
+            if instance.assigned_ward_officer != user:
+                raise serializers.ValidationError(
+                    "Not your complaint."
+                )
+
+        # Panchayath can only hold assigned complaint
+        elif user.role == "PANCHAYATH":
+
+            if instance.panchayath != user:
+                raise serializers.ValidationError(
+                    "Not your complaint."
+                )
+
+        else:
+
+            raise serializers.ValidationError(
+                "Permission denied."
+            )
+
+
+        old_status = instance.status
+
+        instance.status = "HOLD"
+
+        instance.hold_reason = validated_data["hold_reason"]
+
+        instance.hold_by = user
+
+        instance.hold_at = timezone.now()
+
+        instance.save()
+        
+        
+        
+
+
+        ComplaintHistory.objects.create(
+
+            complaint=instance,
+
+            action="HOLD",
+
+            performed_by=user,
+
+            note=instance.hold_reason
+
+        )
+
+        send_notification(
+            user=instance.citizen,
+            sender=user,
+            complaint=instance,
+            title="Complaint On Hold",
+            message=f"Your complaint has been put on hold.\nReason: {instance.hold_reason}",
+            n_type="COMPLAINT_STATUS",
+        )
+
+        return instance
+    
+
+
+
+class ResumeComplaintSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Complaint
+        fields = []
+
+    def update(self, instance, validated_data):
+
+        request = self.context["request"]
+        user = request.user
+
+        if user.role == "WARD":
+
+            if instance.assigned_ward_officer != user:
+                raise serializers.ValidationError("Not your complaint.")
+
+        elif user.role == "PANCHAYATH":
+
+            if instance.panchayath != user:
+                raise serializers.ValidationError("Not your complaint.")
+
+        else:
+            raise serializers.ValidationError("Permission denied.")
+
+        if instance.status != "HOLD":
+            raise serializers.ValidationError("Complaint is not on hold.")
+
+        instance.status = "IN_PROGRESS"
+
+        instance.hold_reason = None
+        instance.hold_by = None
+        instance.hold_at = None
+
+        instance.save()
+
+        ComplaintHistory.objects.create(
+            complaint=instance,
+            action="RESUMED",
+            performed_by=user,
+            note="Complaint resumed."
+        )
+
+        send_notification(
+            user=instance.citizen,
+            sender=user,
+            complaint=instance,
+            title="Complaint Resumed",
+            message="Work on your complaint has resumed.",
+            n_type="COMPLAINT_STATUS",
+        )
+
+        return instance

@@ -13,7 +13,7 @@ from django.db import transaction
 from .serializers import PanchayathVerificationSerializer,WardVerificationSerializer,ReassignComplaintSerializer
 from rest_framework.response import Response
 from .pagination import StandardResultsSetPagination
-from .serializers import WardVerificationSerializer
+from .serializers import WardVerificationSerializer,HoldComplaintSerializer
 from django.contrib.auth.hashers import check_password
 from django.core.signing import TimestampSigner
 from django.core.mail import send_mail
@@ -32,6 +32,9 @@ from apps.notification.utils import send_notification
 from apps.accounts.models import District, Panchayath
 from apps.citizen.models import CitizenVerification
 from apps.notification.utils import send_notification
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from apps.complaints.serializers import ResumeComplaintSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -1118,6 +1121,71 @@ class ReassignComplaintView(APIView):
                 message="Something went wrong",
                 status=500
             )
+            
+            
+            
+class HoldComplaintView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, complaint_id):
+
+        complaint = get_object_or_404(
+            Complaint,
+            id=complaint_id
+        )
+
+        serializer = HoldComplaintSerializer(
+            complaint,
+            data=request.data,
+            partial=True,
+            context={
+                "request": request
+            }
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        serializer.save()
+
+        return Response(
+            {
+                "success": True,
+                "message": "Complaint put on hold."
+            },
+            status=status.HTTP_200_OK
+        )
+        
+        
+class ResumeComplaintView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, complaint_id):
+
+        complaint = get_object_or_404(
+            Complaint,
+            id=complaint_id
+        )
+
+        serializer = ResumeComplaintSerializer(
+            complaint,
+            data={},
+            partial=True,
+            context={"request": request}
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        serializer.save()
+
+        return success_response(
+            "Complaint resumed."
+        )
     
     
     
@@ -1176,6 +1244,9 @@ class PanchayathComplaintDetailView(APIView):
                     "description": complaint.description,
                     "category": complaint.category,
                     "status": complaint.status,
+                    "hold_reason": complaint.hold_reason,
+                    "hold_at": complaint.hold_at,
+                    "hold_by_name": complaint.hold_by.username if complaint.hold_by else None,
                     "location": complaint.location,
                     "created_at": complaint.created_at,
 

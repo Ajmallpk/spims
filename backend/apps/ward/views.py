@@ -20,7 +20,7 @@ from apps.citizen.models import CitizenVerification, CitizenProfile
 from apps.complaints.models import Complaint,ComplaintHistory,ResolutionMedia,ComplaintResolution
 from .permissions import IsActiveWard
 from django.utils import timezone
-from .serialzers import EscalateComplaintSerializer
+from .serialzers import EscalateComplaintSerializer,HoldComplaintSerializer
 import traceback
 import uuid
 import mimetypes
@@ -34,6 +34,8 @@ from apps.accounts.models import (
     Ward,
 )
 from apps.panchayath.models import PanchayathVerification
+from rest_framework import status
+from apps.complaints.serializers import ResumeComplaintSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -1064,6 +1066,9 @@ class ComplaintDetailView(APIView):
                 "description": complaint.description,
                 "category": complaint.category,
                 "status": complaint.status,
+                "hold_reason": complaint.hold_reason,
+                "hold_at": complaint.hold_at,
+                "hold_by_name": complaint.hold_by.username if complaint.hold_by else None,
                 "created_at": complaint.created_at,
                 "citizen": {
                     "id": verification.id if verification else None,
@@ -1269,8 +1274,70 @@ class EscalateComplaintView(APIView):
     
     
     
+class HoldComplaintView(APIView):
 
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, complaint_id):
+
+        complaint = get_object_or_404(
+            Complaint,
+            id=complaint_id
+        )
+
+        serializer = HoldComplaintSerializer(
+            complaint,
+            data=request.data,
+            partial=True,
+            context={
+                "request": request
+            }
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        serializer.save()
+
+        return Response(
+            {
+                "success": True,
+                "message": "Complaint put on hold."
+            },
+            status=status.HTTP_200_OK
+        )
     
+    
+    
+class ResumeComplaintView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, complaint_id):
+
+        complaint = get_object_or_404(
+            Complaint,
+            id=complaint_id
+        )
+
+        serializer = ResumeComplaintSerializer(
+            complaint,
+            data={},
+            partial=True,
+            context={"request": request}
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        serializer.save()
+
+        return success_response(
+            "Complaint resumed."
+        )
+
 
 class WardReassignedComplaintListView(APIView):
     permission_classes = [IsActiveWard]

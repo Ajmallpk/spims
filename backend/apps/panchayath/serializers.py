@@ -4,6 +4,7 @@ from apps.ward.models import WardVerification
 from apps.complaints.models import Complaint,ComplaintHistory
 from django.utils import timezone
 from apps.complaints.utils import can_change_status
+from apps.complaints.serializers import HoldComplaintSerializer
 
 class PanchayathVerificationSerializer(serializers.ModelSerializer):
     

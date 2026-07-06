@@ -93,6 +93,24 @@ const IssueCard = ({ issue }) => {
             <p className="font-semibold text-gray-900 text-sm">{issue.citizenName}</p>
             <div className="mt-1">
               <StatusBadge status={issue.status} />
+
+              {issue.status === "HOLD" && (
+                <div className="mt-3 rounded-lg border border-yellow-300 bg-yellow-50 p-3">
+                  <p className="text-yellow-800 font-semibold">
+                    Complaint On Hold
+                  </p>
+
+                  <p className="text-sm text-gray-700 mt-2">
+                    {issue.hold_reason}
+                  </p>
+
+                  {issue.hold_by_name && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Held by: {issue.hold_by_name}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5 flex-wrap">
               <span className="text-teal-600 font-medium">{issue.wardName}</span>
