@@ -60,7 +60,7 @@ def can_start_authority_chat(user, receiver):
 def can_start_complaint_chat(user, complaint):
 
     if user.role == "WARD":
-        return complaint.ward == user
+        return complaint.assigned_ward_officer == user
 
     if user.role == "PANCHAYATH":
         return complaint.panchayath == user

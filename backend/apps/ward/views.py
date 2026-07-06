@@ -341,7 +341,7 @@ class WardDashboardView(APIView):
             ward_master = ward_verification.ward_master
 
             complaint_stats = Complaint.objects.filter(
-                ward=user
+                ward=ward_master
             ).aggregate(
                 total=Count("id"),
                 pending=Count("id", filter=Q(status="PENDING")),
@@ -1037,11 +1037,13 @@ class ComplaintDetailView(APIView):
 
     def get(self, request, complaint_id):
         try:
+            
+            ward_master = request.user.ward_verification.ward_master
             complaint = Complaint.objects.select_related(
                 "citizen", "ward", "panchayath"
             ).prefetch_related("comments", "upvotes", "media").filter(
                 id=complaint_id,
-                ward=request.user
+                ward=ward_master
             ).first()
 
             if not complaint:
@@ -1108,8 +1110,10 @@ class WardComplaintListView(APIView):
             search = request.GET.get("search", "").strip()
             category = request.GET.get("category")
 
+            ward_master = request.user.ward_verification.ward_master
+
             complaints = Complaint.objects.filter(
-                ward=user
+                ward=ward_master
             ).select_related("citizen").order_by("-created_at")
 
             if status_filter:
@@ -1172,7 +1176,9 @@ class EscalateComplaintView(APIView):
                     status=404
                 )
 
-            if user.role != "WARD" or complaint.ward != user:
+            ward_master = user.ward_verification.ward_master
+
+            if user.role != "WARD" or complaint.ward != ward_master:
                 return error_response(
                     message="Permission denied",
                     status=403
@@ -1275,8 +1281,10 @@ class WardReassignedComplaintListView(APIView):
             search = request.GET.get("search", "").strip()
             category = request.GET.get("category")
 
+            ward_master = request.user.ward_verification.ward_master
+
             complaints = Complaint.objects.filter(
-                ward=request.user,
+                ward=ward_master,
                 is_reassigned=True
             ).select_related("citizen")
 
@@ -1340,7 +1348,9 @@ class WardResolveComplaintView(APIView):
                     status=404
                 )
 
-            if user.role != "WARD" or complaint.ward != user:
+            ward_master = user.ward_verification.ward_master
+
+            if user.role != "WARD" or complaint.ward != ward_master:
                 return error_response(
                     message="Permission denied",
                     status=403
@@ -1438,11 +1448,13 @@ class WardReassignedComplaintDetailView(APIView):
 
     def get(self, request, complaint_id):
         try:
+            
+            ward_master = request.user.ward_verification.ward_master
             complaint = Complaint.objects.select_related(
                 "citizen", "ward"
             ).prefetch_related("media", "history").filter(
                 id=complaint_id,
-                ward=request.user
+                ward=ward_master
             ).first()
 
             if not complaint:
@@ -1472,7 +1484,8 @@ class WardReassignedComplaintDetailView(APIView):
 
                 "location": complaint.location,
                 "ward": {
-                    "name": complaint.ward.username,
+                    "name": complaint.ward.ward_name,
+                    "number": complaint.ward.ward_number,
                 },
                 "reassign_note": complaint.reassign_note,
                 "reassigned_at": complaint.updated_at,

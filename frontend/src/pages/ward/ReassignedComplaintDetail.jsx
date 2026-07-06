@@ -679,7 +679,7 @@ export default function ReassignedComplaintDetail() {
             {/* Supporting Media from Panchayath */}
             <SectionCard
               title="Supporting Media from Panchayath"
-              iconPath="4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              iconPath="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
             >
               <MediaGrid items={panchayathMedia} onPreview={setPreviewImg} />
             </SectionCard>
@@ -687,7 +687,7 @@ export default function ReassignedComplaintDetail() {
             {/* Original Complaint Media */}
             <SectionCard
               title="Original Complaint Media"
-              iconPath="15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+              iconPath="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
             >
               <MediaGrid items={originalMedia} onPreview={setPreviewImg} />
             </SectionCard>
@@ -695,7 +695,7 @@ export default function ReassignedComplaintDetail() {
             {/* Timeline */}
             <SectionCard
               title="Activity Timeline"
-              iconPath="12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              iconPath="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             >
               <Timeline events={timeline} />
             </SectionCard>
@@ -707,7 +707,7 @@ export default function ReassignedComplaintDetail() {
             {/* Citizen Details */}
             <SectionCard
               title="Citizen Details"
-              iconPath="16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             >
               <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
@@ -723,12 +723,12 @@ export default function ReassignedComplaintDetail() {
               <InfoRow
                 label="Email"
                 value={citizen.email}
-                iconPath="3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                iconPath="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
               />
               <InfoRow
                 label="Phone"
                 value={citizen.phone}
-                iconPath="3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                iconPath="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
               />
             </SectionCard>
 
@@ -753,13 +753,13 @@ export default function ReassignedComplaintDetail() {
                   <InfoRow
                     label="Officer Name"
                     value={ward.officer}
-                    iconPath="16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    iconPath="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                   {ward.officer_phone && (
                     <InfoRow
                       label="Phone"
                       value={ward.officer_phone}
-                      iconPath="3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      iconPath="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                     />
                   )}
                 </>

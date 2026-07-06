@@ -292,7 +292,7 @@ export default function PanchayathComplaintDetail() {
 
             } catch (err) {
                 handleApiError(
-                    error,
+                    err,
                     "Failed to load complaint details"
                 );
             } finally {
@@ -455,7 +455,10 @@ export default function PanchayathComplaintDetail() {
                         </SectionCard>
 
                         {/* Media Evidence */}
-                        <SectionCard title="Media Evidence" icon="4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        <SectionCard
+                            title="Media Evidence"
+                            icon="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        >
                             <div className="grid grid-cols-2 gap-3">
                                 {complaint.media?.map((item, i) =>
                                     item.type === "image" ? (
@@ -486,7 +489,10 @@ export default function PanchayathComplaintDetail() {
                         </SectionCard>
 
                         {/* Timeline */}
-                        <SectionCard title="Activity Timeline" icon="12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                        <SectionCard
+                            title="Activity Timeline"
+                            icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        >
                             <div className="relative">
                                 <div className="absolute left-[17px] top-0 bottom-0 w-px bg-slate-100" />
                                 <div className="space-y-4">
@@ -519,7 +525,10 @@ export default function PanchayathComplaintDetail() {
                     <div className="space-y-6">
 
                         {/* Citizen Details */}
-                        <SectionCard title="Citizen Details" icon="16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                        <SectionCard
+                            title="Citizen Details"
+                            icon="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        >
                             <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
                                     <span className="text-white font-bold text-sm">{complaint.citizen?.name?.charAt(0)}</span>
@@ -529,8 +538,12 @@ export default function PanchayathComplaintDetail() {
                                     <p className="text-xs text-slate-400">Complainant</p>
                                 </div>
                             </div>
-                            <InfoRow label="Email Address" value={complaint.citizen?.email} icon="3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            <InfoRow label="Phone Number" value={complaint.citizen?.phone} icon="3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            <InfoRow
+                                label="Email Address"
+                                value={complaint.citizen?.email}
+                                icon="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                            <InfoRow label="Phone Number" value={complaint.citizen?.phone} icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </SectionCard>
 
                         {/* Ward Details */}
@@ -546,9 +559,9 @@ export default function PanchayathComplaintDetail() {
                             {complaint.ward?.officer && (
                                 <>
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Ward Officer</p>
-                                    <InfoRow label="Officer Name" value={complaint.ward?.officer} icon="16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    <InfoRow label="Phone" value={complaint.ward?.officerPhone} icon="3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    <InfoRow label="Email" value={complaint.ward?.officerEmail} icon="3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    <InfoRow label="Officer Name" value={complaint.ward?.officer} icon="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    <InfoRow label="Phone" value={complaint.ward?.officerPhone} icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    <InfoRow label="Email" value={complaint.ward?.officerEmail} icon="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </>
                             )}
                         </SectionCard>
