@@ -387,15 +387,92 @@ const CitizenComplaintDetailPage = () => {
                 {/* Resolution Card */}
                 {complaint.resolution && (
                     <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+                        <div className="flex items-center gap-2 mb-5">
+                            <svg
+                                className="w-5 h-5 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                             </svg>
-                            <h2 className="text-sm font-bold text-green-700 uppercase tracking-wider">Resolution</h2>
+
+                            <h2 className="text-sm font-bold text-green-700 uppercase tracking-wider">
+                                Resolution Details
+                            </h2>
                         </div>
-                        <p className="text-sm text-green-800 leading-relaxed">
-                            {complaint.resolution.message}
-                        </p>
+
+                        <InfoRow
+                            label="Message"
+                            value={complaint.resolution.message}
+                        />
+
+                        <InfoRow
+                            label="Resolved By"
+                            value={complaint.resolution.authority_name}
+                        />
+
+                        <InfoRow
+                            label="Resolved On"
+                            value={new Date(
+                                complaint.resolution.created_at
+                            ).toLocaleString()}
+                        />
+
+                        {/* Resolution Media */}
+
+                        {complaint.resolution.media?.length > 0 && (
+
+                            <div className="mt-6">
+
+                                <h3 className="font-semibold mb-3">
+                                    Resolution Media
+                                </h3>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                                    {complaint.resolution.media.map((item) => (
+
+                                        <div
+                                            key={item.id}
+                                            onClick={() => setSelectedMedia(item)}
+                                            className="rounded-xl overflow-hidden bg-gray-100 aspect-video cursor-pointer hover:scale-105 transition"
+                                        >
+
+                                            {item.file_type === "IMAGE" ? (
+
+                                                <img
+                                                    src={item.file}
+                                                    alt=""
+                                                    className="w-full h-full object-cover"
+                                                />
+
+                                            ) : (
+
+                                                <video
+                                                    className="w-full h-full object-cover"
+                                                >
+                                                    <source src={item.file} />
+                                                </video>
+
+                                            )}
+
+                                        </div>
+
+                                    ))}
+
+                                </div>
+
+                            </div>
+
+                        )}
+
                     </div>
                 )}
 
@@ -408,25 +485,33 @@ const CitizenComplaintDetailPage = () => {
                         className="
         fixed
         inset-0
-        bg-black/80
+        z-50
+        bg-black/90
         flex
         items-center
         justify-center
-        z-50
-      "
+        p-6
+    "
                     >
 
                         {/* Close Button */}
                         <button
                             onClick={() => setSelectedMedia(null)}
                             className="
-          absolute
-          top-5
-          right-5
-          text-white
-          text-4xl
-          font-bold
-        "
+        absolute
+        top-5
+        right-5
+        w-12
+        h-12
+        rounded-full
+        bg-black/40
+        hover:bg-black/70
+        text-white
+        text-3xl
+        flex
+        items-center
+        justify-center
+    "
                         >
                             ×
                         </button>
@@ -436,12 +521,16 @@ const CitizenComplaintDetailPage = () => {
 
                                 <img
                                     src={selectedMedia.file}
-                                    alt=""
+                                    alt="Resolution"
                                     className="
-              max-w-[90vw]
-              max-h-[90vh]
-              rounded-xl
-            "
+        w-auto
+        h-auto
+        max-w-[95vw]
+        max-h-[95vh]
+        object-contain
+        rounded-xl
+        shadow-2xl
+    "
                                 />
 
                             ) : (
@@ -450,10 +539,14 @@ const CitizenComplaintDetailPage = () => {
                                     controls
                                     autoPlay
                                     className="
-                                    max-w-[90vw]
-                                    max-h-[90vh]
-                                    rounded-xl
-                                    "
+        w-auto
+        h-auto
+        max-w-[95vw]
+        max-h-[95vh]
+        object-contain
+        rounded-xl
+        shadow-2xl
+    "
                                 >
                                     <source src={selectedMedia.file} />
                                 </video>

@@ -75,7 +75,7 @@ const ChatSidebar = ({
         <div className="flex gap-1.5 mt-3">
           {[
             { key: "all", label: "All" },
-            { key: "online", label: "Online" },
+            // { key: "online", label: "Online" },
             { key: "unread", label: "Unread" },
           ].map((f) => (
             <button

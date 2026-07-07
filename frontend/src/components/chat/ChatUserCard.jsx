@@ -20,11 +20,11 @@ const ChatUserCard = ({ contact, isSelected, onClick }) => {
         >
           {name?.charAt(0) || "W"}
         </div>
-        <div
+        {/* <div
           className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 ${
             isSelected ? "border-blue-600" : "border-white"
           } ${isOnline ? "bg-emerald-500" : "bg-gray-400"}`}
-        />
+        /> */}
       </div>
 
       <div className="flex-1 min-w-0">
