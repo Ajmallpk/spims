@@ -24,6 +24,12 @@ from django.db.models.functions import Random
 
 from apps.notification.models import Notification
 import re
+from apps.accounts.models import (
+    Ward,
+    District,
+    Panchayath,
+)
+
 
 User = get_user_model()
 
@@ -1042,6 +1048,7 @@ class ExploreComplaintView(ListAPIView):
         panchayath = self.request.query_params.get("panchayath")
         category = self.request.query_params.get("category")
         status = self.request.query_params.get("status")
+        district = self.request.query_params.get("district")
 
         if search:
             queryset = queryset.filter(
@@ -1057,6 +1064,12 @@ class ExploreComplaintView(ListAPIView):
             queryset = queryset.filter(
                 panchayath_id=panchayath
             )
+            
+            
+        if district:
+            queryset = queryset.filter(
+                ward__panchayath__district_id=district
+            )
 
         if category:
             queryset = queryset.filter(
@@ -1069,10 +1082,46 @@ class ExploreComplaintView(ListAPIView):
             )
 
         
-        if not any([search, ward, panchayath, category, status]):
+        if not any([search, district,ward, panchayath, category, status]):
             queryset = queryset.order_by(Random())
 
         return queryset
     
-    
 
+class ExploreFilterDataView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        districts = District.objects.all().values(
+            "id",
+            "name"
+        )
+
+        panchayaths = Panchayath.objects.select_related(
+            "district"
+        ).values(
+            "id",
+            "name",
+            "district_id",
+        )
+
+        wards = Ward.objects.select_related(
+            "panchayath"
+        ).values(
+            "id",
+            "ward_number",
+            "ward_name",
+            "panchayath_id",
+        )
+
+        return Response({
+
+            "districts": list(districts),
+
+            "panchayaths": list(panchayaths),
+
+            "wards": list(wards),
+
+        })

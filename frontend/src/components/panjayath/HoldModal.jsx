@@ -1,11 +1,10 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import wardapi from "@/service/wardurls";
+import panchayathApi from "@/service/panchayathurls";
 
 export default function HoldModal({
-    complaintId,
     onClose,
-    onSuccess,
+    onSubmit,
 }) {
 
     const [reason, setReason] = useState("");
@@ -22,25 +21,15 @@ export default function HoldModal({
 
             setLoading(true);
 
-            await wardapi.holdComplaint(
-                complaintId,
-                {
-                    hold_reason: reason
-                }
-            );
+            await onSubmit(reason);
 
             toast.success("Complaint put on hold.");
-
-            onSuccess("Complaint put on hold.");
 
             onClose();
 
         } catch (err) {
 
-            toast.error(
-                err.response?.data?.detail ||
-                "Unable to put complaint on hold."
-            );
+            toast.error("Unable to put complaint on hold.");
 
         } finally {
 

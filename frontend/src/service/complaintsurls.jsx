@@ -206,6 +206,13 @@ const complaintapi = {
   },
 
 
+  getExploreFilterData: () => {
+    return axiosInstance.get(
+      "/complaints/explore/filter-data/"
+    );
+  },
+
+
   getExploreIssues: (params = {}) => {
     return axiosInstance.get(
       "/complaints/explore/",

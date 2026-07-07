@@ -35,7 +35,10 @@ import { useNavigate } from "react-router-dom";
 const STATUSES = [
   "PENDING",
   "IN_PROGRESS",
-  "RESOLVED"
+  "HOLD",
+  "RESOLVED",
+  "ESCALATED",
+  "REJECTED",
 ];
 
 // const WARDS = [
@@ -336,6 +339,7 @@ const ExploreIssuesPage = () => {
 
 
   const [selections, setSelections] = useState({
+    district: null,
     ward: null,
     panchayath: null,
     category: null,
@@ -343,6 +347,9 @@ const ExploreIssuesPage = () => {
   });
 
   const [allIssues, setAllIssues] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [panchayaths, setPanchayaths] = useState([]);
+  const [wards, setWards] = useState([]);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [nextPage, setNextPage] = useState(null);
@@ -360,12 +367,47 @@ const ExploreIssuesPage = () => {
 
         setInitialLoading(true);
 
-        const res = await complaintapi.getExploreIssues();
+        const selectedDistrict = districts.find(
+          d => d.name === selections.district
+        );
+
+        const selectedPanchayath = panchayaths.find(
+          p => p.name === selections.panchayath
+        );
+
+        const selectedWard = wards.find(
+          w =>
+            (w.ward_name || `Ward ${w.ward_number}`) ===
+            selections.ward
+        );
+
+        const res = await complaintapi.getExploreIssues({
+
+          search: searchQuery || undefined,
+
+          district: selectedDistrict?.id,
+
+          panchayath: selectedPanchayath?.id,
+
+          ward: selectedWard?.id,
+
+          category: selections.category,
+
+          status: selections.status,
+
+        });
 
         console.log(res.data);
 
         setAllIssues(res.data.results || []);
         setNextPage(res.data.next);
+
+        const filterRes =
+          await complaintapi.getExploreFilterData();
+
+        setDistricts(filterRes.data.districts);
+        setPanchayaths(filterRes.data.panchayaths);
+        setWards(filterRes.data.wards);
 
       }
       catch (err) {
@@ -383,7 +425,13 @@ const ExploreIssuesPage = () => {
 
     fetchIssues();
 
-  }, []);
+  }, [
+    searchQuery,
+    selections,
+    districts,
+    panchayaths,
+    wards
+  ]);
 
 
 
@@ -434,7 +482,7 @@ const ExploreIssuesPage = () => {
   const handleFilterToggle = (key) => {
     if (key === "all") {
       // Clear everything
-      setSelections({ ward: null, panchayath: null, category: null, status: null });
+      setSelections({ district: null, ward: null, panchayath: null, category: null, status: null });
       setOpenFilter(null);
       return;
     }
@@ -449,21 +497,73 @@ const ExploreIssuesPage = () => {
   const activeFilterCount = Object.values(selections).filter(Boolean).length;
 
 
-  const wardOptions = [
-    ...new Set(
-      allIssues
-        .map(issue => issue.ward_name)
-        .filter(Boolean)
-    )
-  ];
+  // const districtOptions = [
+  //   ...new Set(
+  //     allIssues
+  //       .map(issue => issue.district_name)
+  //       .filter(Boolean)
+  //   )
+  // ];
 
-  const panchayathOptions = [
-    ...new Set(
-      allIssues
-        .map(issue => issue.panchayath_name)
-        .filter(Boolean)
-    )
-  ];
+
+  // const wardOptions = [
+  //   ...new Set(
+  //     allIssues
+  //       .map(issue => issue.ward_name)
+  //       .filter(Boolean)
+  //   )
+  // ];
+
+  // const panchayathOptions = [
+  //   ...new Set(
+  //     allIssues
+  //       .map(issue => issue.panchayath_name)
+  //       .filter(Boolean)
+  //   )
+  // ];
+
+
+
+  const districtOptions =
+    districts.map(d => d.name);
+
+  const selectedDistrict =
+    districts.find(
+      d => d.name === selections.district
+    );
+
+  const panchayathOptions =
+    panchayaths
+      .filter(p =>
+
+        !selectedDistrict ||
+
+        p.district_id === selectedDistrict.id
+
+      )
+      .map(p => p.name);
+
+  const selectedPanchayath =
+    panchayaths.find(
+      p => p.name === selections.panchayath
+    );
+
+  const wardOptions =
+    wards
+      .filter(w =>
+
+        !selectedPanchayath ||
+
+        w.panchayath_id === selectedPanchayath.id
+
+      )
+      .map(w =>
+
+        w.ward_name ||
+
+        `Ward ${w.ward_number}`
+
+      );
 
   const FILTERS = [
     {
@@ -471,6 +571,14 @@ const ExploreIssuesPage = () => {
       label: "All",
       icon: LayoutGrid,
       options: null,
+    },
+
+
+    {
+      key: "district",
+      label: "District",
+      icon: MapPin,
+      options: districtOptions,
     },
 
     {
@@ -502,38 +610,7 @@ const ExploreIssuesPage = () => {
     },
   ];
   // Filter + search
-  const filteredIssues = useMemo(() => {
-    let result = allIssues;
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter((issue) =>
-        (issue.citizen_name || "")
-          .toLowerCase()
-          .includes(q)
-      );
-    }
-
-    if (selections.ward) {
-      result = result.filter(
-        issue => issue.ward_name === selections.ward
-      );
-    }
-
-    if (selections.panchayath) {
-      result = result.filter(
-        issue => issue.panchayath_name === selections.panchayath
-      );
-    }
-    if (selections.category) {
-      result = result.filter((issue) => issue.category === selections.category);
-    }
-    if (selections.status) {
-      result = result.filter((issue) => issue.status === selections.status);
-    }
-
-    return result;
-  }, [allIssues, searchQuery, selections]);
+  const filteredIssues = allIssues;
 
   const visibleIssues = filteredIssues;
   const hasMore = nextPage !== null;
@@ -657,7 +734,7 @@ const ExploreIssuesPage = () => {
 
           {activeFilterCount > 0 && (
             <button
-              onClick={() => setSelections({ ward: null, panchayath: null, category: null, status: null })}
+              onClick={() => setSelections({ district: null, ward: null, panchayath: null, category: null, status: null })}
               className="text-xs font-semibold text-gray-400 hover:text-gray-600 shrink-0 px-2"
             >
               Clear all

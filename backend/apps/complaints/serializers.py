@@ -106,6 +106,11 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
 
     citizen_name = serializers.CharField(source="citizen.username")
     ward_name = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
+    district = serializers.IntegerField(
+        source="ward.panchayath.district.id",
+        read_only=True
+    )
     image_proof = serializers.SerializerMethodField()
     video_proof = serializers.SerializerMethodField()
     upvotes_count = serializers.IntegerField(read_only=True)
@@ -137,6 +142,8 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             "hold_at",
             "hold_by_name",
             "citizen_name",
+            "district",
+            "district_name",
             "ward_name",
             "panchayath_name",
             "ward",
@@ -170,6 +177,10 @@ class ComplaintFeedSerializer(serializers.ModelSerializer):
             return obj.ward.ward_name
 
         return f"Ward {obj.ward.ward_number}"
+    
+    
+    def get_district_name(self, obj):
+        return obj.ward.panchayath.district.name
 
     
     
