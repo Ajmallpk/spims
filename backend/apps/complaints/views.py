@@ -28,7 +28,11 @@ from apps.accounts.models import (
     Ward,
     District,
     Panchayath,
+    User,
 )
+
+from apps.ward.models import WardVerification
+from apps.panchayath.models import PanchayathVerification
 
 
 User = get_user_model()
@@ -1086,6 +1090,54 @@ class ExploreComplaintView(ListAPIView):
             queryset = queryset.order_by(Random())
 
         return queryset
+    
+    
+    def get(self, request, *args, **kwargs):
+
+        response = super().get(request, *args, **kwargs)
+
+        district = request.query_params.get("district")
+        panchayath = request.query_params.get("panchayath")
+        ward = request.query_params.get("ward")
+
+        authority = {
+            "ward_available": True,
+            "panchayath_available": True,
+        }
+
+        if ward:
+
+            authority["ward_available"] = WardVerification.objects.filter(
+                ward_master_id=ward,
+                status="APPROVED"
+            ).exists()
+
+        if panchayath:
+
+            authority["panchayath_available"] = (
+                PanchayathVerification.objects.filter(
+                    panchayath_master_id=panchayath,
+                    status="APPROVED"
+                ).exists()
+            )
+
+        if district:
+
+            authority["district_has_ward"] = WardVerification.objects.filter(
+                district_id=district,
+                status="APPROVED"
+            ).exists()
+
+            authority["district_has_panchayath"] = (
+                PanchayathVerification.objects.filter(
+                    district_master_id=district,
+                    status="APPROVED"
+                ).exists()
+            )
+
+        response.data["authority"] = authority
+
+        return response
     
 
 class ExploreFilterDataView(APIView):

@@ -25,7 +25,7 @@ const ChatHeader = ({ contact, onBack }) => {
             {contact.chat_user?.charAt(0) || "W"}
           </span>
         </div>
-        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${contact.isOnline ? "bg-emerald-500" : "bg-gray-400"}`} />
+        {/* <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${contact.isOnline ? "bg-emerald-500" : "bg-gray-400"}`} /> */}
       </div>
 
       <div className="flex-1 min-w-0">
@@ -35,11 +35,11 @@ const ChatHeader = ({ contact, onBack }) => {
             {contact.role || "Ward"}
           </span>
         </div>
-        <OnlineStatus
+        {/* <OnlineStatus
           isOnline={contact.isOnline}
           lastSeen={contact.lastSeen}
           showLabel={true}
-        />
+        /> */}
       </div>
 
       <div className="flex items-center gap-1">

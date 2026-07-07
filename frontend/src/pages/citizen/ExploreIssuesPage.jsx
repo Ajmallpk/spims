@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import complaintapi from "@/service/complaintsurls";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
 
 // ----------------------------------------------------------------
 // Mock data
@@ -353,6 +354,7 @@ const ExploreIssuesPage = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [nextPage, setNextPage] = useState(null);
+  const [authority, setAuthority] = useState({});
   const [showTopButton, setShowTopButton] = useState(false);
 
   const sentinelRef = useRef(null);
@@ -401,6 +403,7 @@ const ExploreIssuesPage = () => {
 
         setAllIssues(res.data.results || []);
         setNextPage(res.data.next);
+        setAuthority(res.data.authority || {});
 
         const filterRes =
           await complaintapi.getExploreFilterData();
@@ -428,9 +431,6 @@ const ExploreIssuesPage = () => {
   }, [
     searchQuery,
     selections,
-    districts,
-    panchayaths,
-    wards
   ]);
 
 
@@ -574,26 +574,26 @@ const ExploreIssuesPage = () => {
     },
 
 
-    {
-      key: "district",
-      label: "District",
-      icon: MapPin,
-      options: districtOptions,
-    },
+    // {
+    //   key: "district",
+    //   label: "District",
+    //   icon: MapPin,
+    //   options: districtOptions,
+    // },
 
-    {
-      key: "ward",
-      label: "Ward",
-      icon: Building2,
-      options: wardOptions,
-    },
+    // {
+    //   key: "ward",
+    //   label: "Ward",
+    //   icon: Building2,
+    //   options: wardOptions,
+    // },
 
-    {
-      key: "panchayath",
-      label: "Panchayath",
-      icon: MapPin,
-      options: panchayathOptions,
-    },
+    // {
+    //   key: "panchayath",
+    //   label: "Panchayath",
+    //   icon: MapPin,
+    //   options: panchayathOptions,
+    // },
 
     {
       key: "category",
@@ -721,6 +721,156 @@ const ExploreIssuesPage = () => {
           ref={filterBarRef}
           className="flex items-center gap-2 mb-7  relative z-10"
         >
+
+          <div className="w-64">
+
+            <Select
+
+              placeholder="Select District"
+
+              isClearable
+
+              options={districts.map(d => ({
+                value: d.id,
+                label: d.name,
+              }))}
+
+              value={
+                districts
+                  .filter(d => d.name === selections.district)
+                  .map(d => ({
+                    value: d.id,
+                    label: d.name,
+                  }))[0] || null
+              }
+
+              onChange={(selected) => {
+
+                setSelections(prev => ({
+                  ...prev,
+
+                  district: selected?.label || null,
+
+                  panchayath: null,
+
+                  ward: null,
+                }));
+
+              }}
+
+            />
+
+          </div>
+
+
+          <div className="w-64">
+
+            <Select
+
+              placeholder="Select Panchayath"
+
+              isClearable
+
+              isDisabled={!selections.district}
+
+              options={
+                panchayaths
+                  .filter(p =>
+
+                    !selectedDistrict ||
+
+                    p.district_id === selectedDistrict.id
+
+                  )
+                  .map(p => ({
+                    value: p.id,
+                    label: p.name,
+                  }))
+              }
+
+              value={
+                panchayaths
+                  .filter(
+                    p => p.name === selections.panchayath
+                  )
+                  .map(p => ({
+                    value: p.id,
+                    label: p.name,
+                  }))[0] || null
+              }
+
+              onChange={(selected) => {
+
+                setSelections(prev => ({
+
+                  ...prev,
+
+                  panchayath: selected?.label || null,
+
+                  ward: null,
+
+                }));
+
+              }}
+
+            />
+
+          </div>
+
+
+          <div className="w-64">
+
+            <Select
+
+              placeholder="Select Ward"
+
+              isClearable
+
+              isDisabled={!selections.panchayath}
+
+              options={
+                wards
+                  .filter(w =>
+
+                    !selectedPanchayath ||
+
+                    w.panchayath_id === selectedPanchayath.id
+
+                  )
+                  .map(w => ({
+                    value: w.id,
+                    label: w.ward_name || `Ward ${w.ward_number}`,
+                  }))
+              }
+
+              value={
+                wards
+                  .filter(
+                    w =>
+                      (w.ward_name || `Ward ${w.ward_number}`)
+                      === selections.ward
+                  )
+                  .map(w => ({
+                    value: w.id,
+                    label: w.ward_name || `Ward ${w.ward_number}`,
+                  }))[0] || null
+              }
+
+              onChange={(selected) => {
+
+                setSelections(prev => ({
+
+                  ...prev,
+
+                  ward: selected?.label || null,
+
+                }));
+
+              }}
+
+            />
+
+          </div>
           {FILTERS.map((filter) => (
             <FilterButton
               key={filter.key}
@@ -750,9 +900,68 @@ const ExploreIssuesPage = () => {
             ))}
           </div>
         ) : visibleIssues.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-md p-10 text-center text-gray-500">
-            <p className="text-sm font-medium">No issues found.</p>
-            <p className="text-xs mt-1">Try a different search term or filter.</p>
+          <div className="bg-white rounded-2xl shadow-md p-10 text-center">
+
+            <h2 className="text-lg font-semibold text-gray-700">
+              No complaints found
+            </h2>
+
+            <p className="text-gray-500 mt-2">
+              No complaints are available for the selected filters.
+            </p>
+
+            <div className="mt-6 space-y-3">
+
+              {selections.district && !authority.district_has_ward && (
+
+                <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-3">
+
+                  <p className="font-medium text-yellow-700">
+                    No verified Ward Officer available in this district.
+                  </p>
+
+                </div>
+
+              )}
+
+              {selections.district && !authority.district_has_panchayath && (
+
+                <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-3">
+
+                  <p className="font-medium text-yellow-700">
+                    No verified Panchayath Officer available in this district.
+                  </p>
+
+                </div>
+
+              )}
+
+              {selections.ward && !authority.ward_available && (
+
+                <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+
+                  <p className="font-medium text-red-700">
+                    This ward currently has no verified Ward Officer.
+                  </p>
+
+                </div>
+
+              )}
+
+              {selections.panchayath && !authority.panchayath_available && (
+
+                <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+
+                  <p className="font-medium text-red-700">
+                    This panchayath currently has no verified Panchayath Officer.
+                  </p>
+
+                </div>
+
+              )}
+
+            </div>
+
           </div>
         ) : (
           <>
