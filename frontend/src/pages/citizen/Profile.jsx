@@ -18,6 +18,7 @@ import VerificationStatusCard from "@/components/citizen/Verificationstatuscard"
 import VerificationProgress from "@/components/citizen/Verificationprogress";
 import { handleApiError } from "@/utils/handleApiError";
 
+
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 const getAuthToken = () => localStorage.getItem("spims_token") || "";
 

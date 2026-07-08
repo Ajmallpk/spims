@@ -9,6 +9,7 @@
 
 import { useState,useEffect } from "react";
 import citizenapi from "@/service/citizenurls";
+import toast from "react-hot-toast";
 
 const iCls = (err) =>
   `w-full rounded-xl border px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none transition-all ${err
@@ -67,6 +68,7 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
         password: form.password,
       });
       setSuccess(true);
+      toast.success("Verification email sent");
       setForm({ newEmail: "", password: "" });
       setErrors({});
     } catch (err) {
@@ -75,6 +77,7 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
         err.response?.data?.error ||
         "Failed to change email"
       );
+      toast.error("Failed to change email");
     } finally {
       setSubmitting(false);
     }

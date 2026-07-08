@@ -419,6 +419,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import panchayathApi from "@/service/panchayathurls";
+import toast from "react-hot-toast";
 
 const STATUS_CONFIG = {
     RESOLVED: { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500", label: "Resolved" },
@@ -527,6 +528,10 @@ export default function ComplaintDetail() {
                 setComplaint(res.data.data);
             } catch (err) {
                 console.log(err);
+                toast.error(
+                    err?.response?.data?.message ||
+                    "Failed to load complaint details."
+                );
             } finally {
                 setLoading(false);
             }

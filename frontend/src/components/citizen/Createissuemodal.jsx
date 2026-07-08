@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import citizenapi from "@/service/citizenurls";
+import toast from "react-hot-toast";
 
 const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [districts, setDistricts] = useState([]);
@@ -43,6 +44,7 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
       setDistricts(res.data.data);
     } catch (err) {
       console.log(err);
+      toast.error("Failed to load districts");
     }
   };
 
@@ -70,6 +72,7 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
     } catch (err) {
       console.log(err);
+      toast.error("Failed to load panchayaths");
     }
   };
 
@@ -86,6 +89,7 @@ const CreateIssueModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
     } catch (err) {
       console.log(err);
+      toast.error("Failed to load wards");
     }
   };
 

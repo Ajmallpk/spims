@@ -27,7 +27,7 @@ export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) 
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : (data.results ?? []));
     } catch (err) {
-      toast.error("Fetch messages error:", err);
+      toast.error("Failed to load messages.");
     } finally {
       setIsLoadingMessages(false);
     }
@@ -59,9 +59,11 @@ export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) 
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setInputValue("");
+      toast.success("Message sent successfully.");
       await fetchMessages();
+
     } catch (err) {
-      toast.error("Send message error:", err);
+      toast.error("Failed to send message.");
     } finally {
       setIsSending(false);
     }
@@ -85,8 +87,9 @@ export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setIsChatClosed(true);
       clearInterval(pollRef.current);
+      toast.success("Chat closed successfully.");
     } catch (err) {
-      toast.error("Close chat error:", err);
+      toast.error("Failed to close chat.");
     } finally {
       setIsClosing(false);
     }

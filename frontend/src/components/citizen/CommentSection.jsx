@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Avatar from "@/components/ui/Avatar";
 import complaintapi from "@/service/complaintsurls";
+import toast from "react-hot-toast";
 
 const CommentSection = ({ issueId, onCommentAdded }) => {
   const [commentText, setCommentText] = useState("");
@@ -65,6 +66,7 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
 
     } catch (error) {
       console.error("Failed to load comments:", error);
+      toast.error("Failed to load comments");
     }
   };
 
@@ -220,6 +222,7 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
 
       setCommentText("");
       setReplyingTo(null);
+      toast.success("Comment posted");
       onCommentAdded?.();
 
     } catch (error) {
@@ -338,6 +341,8 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
                             comment: editText,
                           });
 
+                          toast.success("Comment updated");
+
                           setEditingCommentId(null);
                           setEditText("");
 
@@ -390,6 +395,8 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
                           await complaintapi.deleteComment(
                             comment.id
                           );
+
+                          toast.success("Comment deleted");
 
                         } catch (err) {
                           handleApiError(err, "Failed to delete comment");

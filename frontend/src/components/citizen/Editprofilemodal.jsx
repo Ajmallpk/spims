@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from "react";
 import citizenapi from "@/service/citizenurls";
+import toast from "react-hot-toast";
 
 const WARDS = Array.from({ length: 20 }, (_, i) => `Ward ${String(i + 1).padStart(2, "0")}`);
 
@@ -107,6 +108,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
       const response = await citizenapi.updateProfile(payload);
       const updated = response.data.data;
       onUpdateSuccess?.(updated);
+      toast.success("Profile updated successfully");
       setSuccess(true);
       setTimeout(onClose, 800);
     } catch (err) {
@@ -117,6 +119,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
         Object.values(err.response?.data || {})[0] ||
         "Profile update failed"
       );
+      toast.error("Profile update failed");
     } finally {
       setSubmitting(false);
     }

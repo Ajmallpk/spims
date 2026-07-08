@@ -268,6 +268,7 @@ const CitizenVerificationForm = ({
       // onSubmitSuccess?.();
 
       setSubmitSuccess(true);
+      toast.success("Verification submitted successfully.");
       onSubmitSuccess?.();
 
       setTimeout(() => {
@@ -284,6 +285,8 @@ const CitizenVerificationForm = ({
       setSubmitError(
         "Verification submission failed"
       );
+
+      toast.error("Verification submission failed");
 
     } finally {
       setIsSubmitting(false);

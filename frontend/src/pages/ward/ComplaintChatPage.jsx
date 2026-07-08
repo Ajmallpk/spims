@@ -8,6 +8,7 @@ import ComplaintChatPageSkeleton from "@/components/ward/ComplaintChatPageSkelet
 import { useParams, useNavigate } from "react-router-dom";
 import { complaintchatapi } from "@/service/complaintchaturls";
 import wardapi from "@/service/wardurls";
+import toast from "react-hot-toast";
 
 
 
@@ -331,6 +332,7 @@ const ComplaintChatPage = () => {
         } catch (error) {
 
             console.log(error);
+            toast.error("Failed to load messages");
 
         } finally {
 
@@ -377,6 +379,7 @@ const ComplaintChatPage = () => {
         } catch (error) {
 
             console.log(error);
+            toast.error("Failed to load complaint details");
 
         }
 
@@ -699,6 +702,7 @@ const ComplaintChatPage = () => {
             );
 
             setIsClosed(true);
+            toast.success("Chat closed successfully");
 
         } catch (error) {
 
@@ -717,6 +721,7 @@ const ComplaintChatPage = () => {
             );
 
             setIsClosed(false);
+            toast.success("Chat reopened successfully");
 
         } catch (error) {
 
@@ -784,6 +789,9 @@ const ComplaintChatPage = () => {
                 error
             );
 
+
+            toast.error("Failed to send message");
+
         }
 
     };
@@ -811,11 +819,17 @@ const ComplaintChatPage = () => {
                     messageId
                 );
 
+
+                toast.error("Failed to delete message");
+
         }
 
         catch (error) {
 
             console.log(error);
+
+
+            toast.error("Failed to delete message");
 
         }
 

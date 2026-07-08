@@ -1,6 +1,7 @@
 import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { useNavigate, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function VerifyResetOTP() {
 
@@ -21,6 +22,7 @@ export default function VerifyResetOTP() {
         otp
       });
 
+      toast.success("OTP verified successfully");
       navigate("/citizen/reset-password", {
         state: { email }
       });

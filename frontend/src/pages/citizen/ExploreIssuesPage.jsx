@@ -19,6 +19,7 @@ import {
 import complaintapi from "@/service/complaintsurls";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
+import toast from "react-hot-toast";
 
 // ----------------------------------------------------------------
 // Mock data
@@ -414,9 +415,8 @@ const ExploreIssuesPage = () => {
 
       }
       catch (err) {
-
         console.log(err);
-
+        toast.error("Failed to load complaints");
       }
       finally {
 
@@ -649,9 +649,8 @@ const ExploreIssuesPage = () => {
 
     }
     catch (err) {
-
       console.log(err);
-
+      toast.error("Failed to load more complaints");
     }
     finally {
 

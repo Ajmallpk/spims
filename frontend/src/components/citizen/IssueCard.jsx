@@ -6,6 +6,7 @@ import complaintapi from "@/service/complaintsurls";
 import StatusBadge from "../../components/ward/Statusbadge";
 import CreateIssueModal from "@/components/citizen/Createissuemodal";
 import { handleApiError } from "@/utils/handleApiError";
+import toast from "react-hot-toast";
 const IssueCard = ({ issue }) => {
   console.log(issue);
   const [upvoted, setUpvoted] = useState(false);
@@ -37,13 +38,16 @@ const IssueCard = ({ issue }) => {
       if (res.data.message === "Complaint upvoted") {
         setUpvoted(true);
         setUpvoteCount((prev) => prev + 1);
+        toast.success("Complaint upvoted");
       } else {
         setUpvoted(false);
         setUpvoteCount((prev) => prev - 1);
+        toast.success("Upvote removed");
       }
 
     } catch (error) {
       console.error("Upvote failed:", error);
+      toast.error("Failed to update upvote");
     }
   };
 
@@ -73,6 +77,7 @@ const IssueCard = ({ issue }) => {
   const handleDelete = async () => {
     try {
       await complaintapi.deleteComplaint(issue.id);
+      toast.success("Complaint deleted successfully");
       window.location.reload();
     } catch (err) {
       handleApiError(err, "Failed to delete complaint");
@@ -391,7 +396,7 @@ const IssueCard = ({ issue }) => {
             }
 
             await complaintapi.updateComplaint(issue.id, data);
-
+            toast.success("Complaint updated successfully");
             setIsEditOpen(false);
             window.location.reload();
 

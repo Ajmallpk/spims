@@ -701,12 +701,17 @@ const WardAuthorityChat = () => {
                 messageId
             );
 
+            toast.success("Message deleted.");
+
         } catch (error) {
 
             console.error(
                 "Delete failed:",
                 error
             );
+
+
+            toast.error("Failed to delete message.");
 
         }
 

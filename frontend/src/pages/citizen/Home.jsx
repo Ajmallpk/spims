@@ -7,6 +7,7 @@ import VerificationRequiredModal from "@/components/citizen/Verificationrequired
 import complaintapi from "@/service/complaintsurls";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
+import toast from "react-hot-toast";
 
 // Verification status constants
 const VERIFICATION_STATUS = {
@@ -117,8 +118,10 @@ const Home = () => {
   const handleLogout = async () => {
     try {
       await citizenapi.logout();
+      toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout failed", error);
+      toast.error("Logout failed");
     } finally {
 
       localStorage.removeItem("role");
@@ -163,7 +166,7 @@ const Home = () => {
         hold_reason: issue.hold_reason,
         hold_by_name: issue.hold_by_name,
         hold_at: issue.hold_at,
-        
+
         upvotes: issue.upvotes_count,
         commentCount: issue.comments_count,
 
@@ -182,6 +185,7 @@ const Home = () => {
 
     } catch (err) {
       console.error("Failed to load complaints", err);
+      toast.error("Failed to load complaints");
     } finally {
       setLoading(false);
     }
@@ -211,6 +215,7 @@ const Home = () => {
 
       } catch (error) {
         console.error("Failed to fetch verification status", error);
+        toast.error("Failed to load verification status");
       }
     };
 
@@ -224,6 +229,7 @@ const Home = () => {
       setIsVerificationModalOpen(true);
     } else if (citizenVerificationStatus === VERIFICATION_STATUS.PENDING) {
       setPendingMessage(true);
+      toast("Your verification is under review.");
       setTimeout(() => setPendingMessage(false), 3000);
     } else {
       setIsCreateIssueOpen(true);
@@ -250,6 +256,7 @@ const Home = () => {
       }
 
       await complaintapi.createComplaint(data);
+      toast.success("Complaint submitted successfully");
 
       setIsCreateIssueOpen(false);
 
@@ -264,6 +271,7 @@ const Home = () => {
 
   const handleVerifyRedirect = () => {
     // In real app: navigate("/citizen/verification")
+    toast("Redirecting to verification page...");
     window.location.href = "/citizen/verification";
   };
 

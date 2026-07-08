@@ -11,6 +11,7 @@
 import { useRef, useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
+import toast from "react-hot-toast";
 
 const getInitials = (name = "") =>
   name
@@ -52,12 +53,14 @@ const ProfileAvatarUploader = ({ avatarUrl, fullName, onUpload, token }) => {
       const res = await citizenapi.uploadAvatar(formData);
       const data = res.data;
       onUpload?.(data.avatarUrl ?? data.avatar_url ?? preview);
+      toast.success("Profile photo updated");
     } catch (err) {
       handleApiError(
         err,
         "Avatar upload failed"
       )
       setError("Upload failed. Please try again.");
+      toast.error("Avatar upload failed");
       setPreview(null);
     } finally {
       setUploading(false);

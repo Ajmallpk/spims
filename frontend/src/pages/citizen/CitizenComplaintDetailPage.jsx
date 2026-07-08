@@ -265,6 +265,7 @@ const CitizenComplaintDetailPage = () => {
             setComplaint(res.data.data);
         } catch (error) {
             console.log(error);
+            toast.error("Failed to load complaint details");
         }
     };
 

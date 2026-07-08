@@ -8,6 +8,7 @@
 
 import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
+import toast from "react-hot-toast";
 
 const EyeIcon = ({ open }) =>
   open ? (
@@ -102,6 +103,7 @@ const ChangePasswordForm = ({ token }) => {
         confirm_password: form.confirmPassword,
       });
       setSuccess(true);
+      toast.success("Password changed successfully");
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setErrors({});
     } catch (err) {
@@ -112,6 +114,7 @@ const ChangePasswordForm = ({ token }) => {
         Object.values(err.response?.data || {})[0] ||
         "Password change failed"
       );
+      toast.error("Password change failed");
     } finally {
       setSubmitting(false);
     }

@@ -42,6 +42,10 @@ export default function ComplaintList() {
 
     } catch (err) {
       console.error("ERROR:", err);
+      toast.error(
+        err.response?.data?.detail ||
+        "Failed to load complaints"
+      );
     } finally {
       setIsLoading(false);
     }

@@ -9,6 +9,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { complaintchatapi } from "@/service/complaintchaturls";
 import wardapi from "@/service/wardurls";
 import citizenapi from "@/service/citizenurls";
+import toast from "react-hot-toast";
 
 
 
@@ -754,6 +755,8 @@ const CitizenComplaintChatPage = () => {
         formData
       );
 
+      toast.success("Message sent successfully");
+
       // await loadMessages();
 
     } catch (error) {
@@ -762,6 +765,8 @@ const CitizenComplaintChatPage = () => {
         "SEND ERROR",
         error
       );
+
+      toast.error("Failed to send message");
 
     }
 
@@ -790,11 +795,15 @@ const CitizenComplaintChatPage = () => {
           messageId
         );
 
+      toast.success("Message deleted");
+
     }
 
     catch (error) {
 
       console.log(error);
+
+      toast.error("Failed to delete message");
 
     }
 

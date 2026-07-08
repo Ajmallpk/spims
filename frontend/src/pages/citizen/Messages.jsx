@@ -47,6 +47,7 @@ const Messages = () => {
     setFetchError(null);
     try {
       const data = await fetchWithAuth("/api/citizen/messages/", token);
+      
       const list = data?.results ?? data ?? [];
       setConversations(list);
       // Auto-select first if available
@@ -85,6 +86,7 @@ const Messages = () => {
         );
       } catch (err) {
         console.error("Failed to load messages:", err);
+        toast.error("Failed to load messages");
       } finally {
         setMessagesLoading(false);
       }
@@ -119,6 +121,9 @@ const Messages = () => {
         }
       );
 
+
+      toast.success("Message sent");
+
       // Replace optimistic with real message
       setMessages((prev) =>
         prev.map((m) => (m.id === optimisticMsg.id ? { ...optimisticMsg, ...sent } : m))
@@ -139,6 +144,7 @@ const Messages = () => {
         error,
         "Failed to send message"
       );
+      toast.error("Failed to send message");
     } finally {
       setSending(false);
     }

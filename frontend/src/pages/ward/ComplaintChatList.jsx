@@ -6,6 +6,7 @@ import ComplaintChatEmptyState from "@/components/ward/ComplaintChatEmptyState";
 import ComplaintChatSkeleton from "@/components/ward/ComplaintChatListSkeleton";
 import { complaintchatapi } from "@/service/complaintchaturls";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 // ── Dummy data ─────────────────────────────────────────────────────────────
 const DUMMY_CHATS = [
@@ -163,6 +164,7 @@ const ComplaintChatList = () => {
             catch (error) {
 
                 console.log(error);
+                toast.error("Failed to load chats");
 
             }
 

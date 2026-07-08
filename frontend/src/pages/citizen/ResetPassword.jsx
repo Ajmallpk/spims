@@ -1,6 +1,7 @@
 import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function ResetPassword() {
 
@@ -24,6 +25,7 @@ export default function ResetPassword() {
       });
 
       alert("Password reset successful");
+      toast.success("Password reset successful");
 
       navigate("/citizen/registration");
 
@@ -37,6 +39,7 @@ export default function ResetPassword() {
         "Reset failed";
 
       setError(message);
+      toast.error(message);
 
     }
 

@@ -1,5 +1,6 @@
 
 import citizenapi from "@/service/citizenurls";
+import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { triggerSuspension } from "@/utils/suspensionHandler";
 import FixItLogo from "../common/FixItLogo";
@@ -146,6 +147,9 @@ function LoginForm() {
         "citizen"
       )
 
+
+      toast.success("Login successful");
+
       window.location.href = "/citizen/home";
 
     } catch (err) {
@@ -159,11 +163,13 @@ function LoginForm() {
         return
       }
 
-      setError(
+      const message =
         err.response?.data?.error ||
         err.response?.data?.detail ||
-        "Login failed"
-      );
+        "Login failed";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -281,6 +287,8 @@ function CitizenSignUpForm({ onSuccess }) {
         confirm_password: confirmPassword,
       });
 
+      toast.success("OTP sent successfully");
+
       setOtpSent(true);
 
     } catch (err) {
@@ -292,6 +300,7 @@ function CitizenSignUpForm({ onSuccess }) {
         "Registration failed";
 
       setError(message);
+      toast.error(message);
     }
   };
 
@@ -311,12 +320,16 @@ function CitizenSignUpForm({ onSuccess }) {
       });
 
       setOtpVerified(true);
+      toast.success("Registration completed successfully");
 
     } catch (err) {
-      setError(
+      const message =
         err.response?.data?.error ||
-        "Invalid OTP"
-      );
+        err.response?.data?.detail ||
+        "Invalid OTP ";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsVerifying(false);
     }
@@ -332,13 +345,17 @@ function CitizenSignUpForm({ onSuccess }) {
       setRemainingResends(response.data.remaining);
       setTimer(60);
       setCanResend(false);
+      toast.success("OTP resent successfully");
       setError("");
 
     } catch (err) {
-      setError(
+      const message =
         err.response?.data?.error ||
-        "Failed to resend OTP"
-      );
+        err.response?.data?.detail ||
+        "Failed to resend OTP";
+
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -658,7 +675,7 @@ export default function AuthPage() {
               <FixItLogo
                 iconWidth={90}
                 showTagline={false}
-                
+
               />
             </div>
 

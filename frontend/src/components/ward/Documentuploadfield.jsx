@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 const MAX_MB = 10;
 
@@ -18,11 +19,17 @@ export default function DocumentUploadField({
   const processFile = (f) => {
     if (!f) return;
     if (f.size > MAX_MB * 1024 * 1024) {
-      setLocalError(`File exceeds ${MAX_MB}MB limit.`);
+      const message = `File exceeds ${MAX_MB}MB limit.`;
+
+      setLocalError(message);
+
+      toast.error(message);
+
       return;
     }
     setLocalError("");
     setFile(f);
+    toast.success("File selected successfully.");
     onChange(name, f);
   };
 
@@ -37,6 +44,7 @@ export default function DocumentUploadField({
   const clearFile = (e) => {
     e.stopPropagation();
     setFile(null);
+    toast.success("File removed.");
     setLocalError("");
     onChange(name, null);
     if (inputRef.current) inputRef.current.value = "";
@@ -61,10 +69,10 @@ export default function DocumentUploadField({
           ${displayError
             ? "border-red-300 bg-red-50 hover:border-red-400"
             : hasFile
-            ? "border-green-300 bg-green-50"
-            : isDragging
-            ? "border-blue-400 bg-blue-50 scale-[1.01]"
-            : "border-gray-200 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
+              ? "border-green-300 bg-green-50"
+              : isDragging
+                ? "border-blue-400 bg-blue-50 scale-[1.01]"
+                : "border-gray-200 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
           }`}
       >
         {hasFile ? (

@@ -464,6 +464,8 @@ import {
   Pencil, Trash2, CornerDownRight, X, ChevronRight
 } from "lucide-react";
 
+import toast from "react-hot-toast";
+
 const Avatar = ({ name, size = "md" }) => {
   const initials = name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "?";
   const colors = ["bg-blue-400", "bg-indigo-400", "bg-sky-400", "bg-cyan-400", "bg-teal-400"];
@@ -751,7 +753,10 @@ const IssueDetailPage = () => {
         setComments(commentRes.data.results || []);
         const userRes = await complaintapi.getCurrentUser();
         setCurrentUser(userRes.data);
-      } catch (err) { console.log(err); }
+      } catch (err) {
+         console.log(err);
+         toast.error("Failed to load issue details");
+         }
     };
     fetchIssue();
   }, [id]);
@@ -761,7 +766,10 @@ const IssueDetailPage = () => {
       setIsUpvoting(true);
       const res = await complaintapi.toggleUpvote(id);
       setIssue(prev => ({ ...prev, upvotes_count: res.data.data.upvotes_count, is_upvoted: res.data.data.is_upvoted }));
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err); 
+      toast.error("Failed to update upvote");
+    }
     finally { setIsUpvoting(false); }
   };
 
@@ -769,39 +777,55 @@ const IssueDetailPage = () => {
     if (!newComment.trim()) return;
     try {
       await complaintapi.createComment(id, { comment: newComment });
+      toast.success("Comment added");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
       setNewComment("");
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err);
+      toast.error("Failed to add comment");
+     }
   };
 
   const handleDeleteComment = async (commentId) => {
     try {
       await complaintapi.deleteComment(commentId);
+      toast.success("Comment deleted");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err); 
+      toast.error("Failed to delete comment");
+    }
   };
 
   const handleEditComment = async (commentId) => {
     try {
       await complaintapi.editComment(commentId, { comment: editedText });
+      toast.success("Comment updated");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
       setEditingCommentId(null);
       setEditedText("");
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err); 
+      toast.error("Failed to update comment");
+    }
   };
 
   const handleReply = async (parentId) => {
     if (!replyText.trim()) return;
     try {
       await complaintapi.createComment(id, { comment: replyText, parent: parentId });
+      toast.success("Reply added");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
       setReplyText("");
       setReplyingTo(null);
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+      console.log(err); 
+      toast.error("Failed to add reply");
+    }
   };
 
   const sharedCommentProps = {
