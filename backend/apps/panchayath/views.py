@@ -1582,6 +1582,7 @@ class PanchayathMeView(APIView):
     def get(self, request):
         return Response({
             "id": request.user.id,
+            "username": request.user.username,
             "email": request.user.email,
             "role": request.user.role,
             "status": request.user.status,

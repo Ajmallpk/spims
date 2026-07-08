@@ -23,7 +23,7 @@ const INITIAL_FIELDS = {
 
 // ── Reusable sub-components ───────────────────────────────────────────────────
 
-function FormInput({ label, name, value, onChange, type = "text", required, placeholder, error }) {
+function FormInput({ label, name, value, onChange, type = "text", required, placeholder, error,disabled=false }) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
@@ -34,6 +34,7 @@ function FormInput({ label, name, value, onChange, type = "text", required, plac
         name={name}
         value={value}
         onChange={onChange}
+        disabled={disabled}
         placeholder={placeholder}
         autoComplete="off"
         className={`w-full px-4 py-2.5 text-sm border rounded-xl outline-none transition-all duration-150
@@ -136,6 +137,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
   useEffect(() => {
     loadDistricts();
+    loadUser();
   }, []);
 
   const loadDistricts = async () => {
@@ -149,6 +151,22 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
       console.log(err);
 
+    }
+  };
+
+
+
+
+  const loadUser = async () => {
+    try {
+      const res = await wardapi.me();
+
+      setFields((prev) => ({
+        ...prev,
+        officer_full_name: res.data.username || "",
+      }));
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -392,6 +410,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
               name="officer_full_name"
               value={fields.officer_full_name}
               onChange={handleChange}
+              disabled={true}
               required
               placeholder="e.g. Rajan Mathew"
               error={errors.officer_full_name}

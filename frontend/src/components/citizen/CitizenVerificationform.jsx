@@ -94,7 +94,11 @@ const CitizenVerificationForm = ({
     if (profile) {
       setForm((prev) => ({
         ...prev,
-        fullName: profile.fullName || "",
+
+        // First use profile full name.
+        // If empty, use signup username.
+        fullName: profile.full_name || profile.username || "",
+
         email: profile.email || "",
         phone: profile.phone || "",
       }));
@@ -474,6 +478,7 @@ const CitizenVerificationForm = ({
               type="text"
               name="fullName"
               value={form.fullName}
+              disabled={true}
               onChange={handleChange}
               placeholder="As on Aadhaar card"
               className={inputClass(!!errors.fullName)}

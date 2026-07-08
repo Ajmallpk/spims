@@ -61,7 +61,9 @@ function FormField({
           bg-white
           outline-none
           transition-all duration-150
-          disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50
+          disabled:cursor-not-allowed
+          disabled:bg-slate-50
+          disabled:text-slate-800
           ${hasError
             ? "border-rose-400 ring-1 ring-rose-200 focus:border-rose-500 focus:ring-rose-300"
             : "border-slate-300 hover:border-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
@@ -194,6 +196,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
   useEffect(() => {
     loadDistricts();
+    loadUser();
   }, []);
 
   const loadDistricts = async () => {
@@ -213,6 +216,18 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
   };
 
 
+  const loadUser = async () => {
+    try {
+      const res = await panchayathapi.me();
+
+      setFields((prev) => ({
+        ...prev,
+        full_name: res.data.username || "",
+      }));
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
 
 
@@ -367,11 +382,12 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
             label="Full Name (Officer Name)"
             name="full_name"
             value={fields.full_name}
+            disabled={true}
             onChange={handleFieldChange}
             error={errors.full_name}
             placeholder="e.g. Rajeev Kumar"
             required
-            disabled={isSubmitting}
+
           />
 
           {/* Two-column row for License + Contact */}
