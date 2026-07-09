@@ -1,7 +1,7 @@
 import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export default function ResetPassword() {
 

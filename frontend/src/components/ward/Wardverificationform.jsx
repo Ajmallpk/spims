@@ -23,7 +23,7 @@ const INITIAL_FIELDS = {
 
 // ── Reusable sub-components ───────────────────────────────────────────────────
 
-function FormInput({ label, name, value, onChange, type = "text", required, placeholder, error,disabled=false }) {
+function FormInput({ label, name, value, onChange, type = "text", required, placeholder, error, disabled = false }) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
@@ -209,8 +209,11 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
     if (!id) return;
 
     const res = await wardapi.getWards(id);
+    const wardData = Array.isArray(res.data.data)
+      ? res.data.data
+      : [];
 
-    setWards(res.data.data);
+    setWards(wardData);
   };
 
 

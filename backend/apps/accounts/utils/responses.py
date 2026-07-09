@@ -1,11 +1,14 @@
 from rest_framework.response import Response
 
 def success_response(message="", data=None, status=200):
-    return Response({
-        "success": True,
-        "message": message,
-        "data": data or {}
-    }, status=status)
+    return Response(
+        {
+            "success": True,
+            "message": message,
+            "data": {} if data is None else data,
+        },
+        status=status,
+    )
 
 
 def error_response(message="", errors=None, status=400):

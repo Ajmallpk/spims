@@ -482,32 +482,143 @@ class RejectPanchayathView(APIView):
     
 
 
+# class AdminPanchayathListView(APIView):
+#     permission_classes = [IsSuperAdmin]
+
+#     def get(self, request):
+#         try:
+#             status_filter = request.GET.get("status", "").lower()
+#             # search = request.GET.get("search", "").strip()
+            
+            
+#             name = request.GET.get("name", "").strip()
+#             email = request.GET.get("email", "").strip()
+#             complaint_sort = request.GET.get("complaints")
+
+#             users = User.objects.filter(role=User.Role.PANCHAYATH)
+#             if status_filter == "approved":
+#                 users = users.filter(status=User.Status.ACTIVE, is_verified=True)
+#             elif status_filter == "suspended":
+#                 users = users.filter(status=User.Status.SUSPENDED)
+
+#             # if search:
+#             #     users = users.filter(
+#             #         Q(username__icontains=search) |
+#             #         Q(email__icontains=search)
+#             #     )
+            
+            
+#             if name:
+#                 users = users.filter(
+#                     Q(username__icontains=name) |
+#                     Q(
+#                         panchayath_verification__panchayath_name__icontains=name
+#                     )
+#                 )
+
+#             if email:
+#                 users = users.filter(
+#                     email__icontains=email
+#                 )
+
+#             users = users.order_by("-date_joined")
+
+#             paginator = PageNumberPagination()
+#             paginator.page_size = 10
+#             paginated_users = paginator.paginate_queryset(users, request)
+
+#             data = []
+            
+            
+            
+
+#             for user in paginated_users:
+
+#                 verification = getattr(user, "panchayath_verification", None)
+
+#                 panchayath_name = (
+#                     verification.panchayath_name
+#                     if verification and verification.panchayath_name
+#                     else user.username
+#                 )
+#                 ward_qs = WardVerification.objects.filter(
+#                     panchayath=user,
+#                     status="APPROVED"
+#                 )
+
+#                 total_wards = ward_qs.count()
+
+#                 ward_ids = ward_qs.values_list("ward_master_id", flat=True)
+
+#                 total_complaints = Complaint.objects.filter(
+#                     ward_id__in=ward_ids
+#                 ).count()
+
+#                 data.append({
+#                     "id": user.id,
+#                     "panchayath_name": panchayath_name,
+#                     "email": user.email,
+#                     "status": user.status,
+#                     "is_verified": user.is_verified,
+#                     "date_joined": user.date_joined,
+#                     "total_wards": total_wards,
+#                     "total_complaints": total_complaints
+#                 })
+                
+                
+                
+#             if complaint_sort == "high":
+#                 data = sorted(
+#                     data,
+#                     key=lambda x: x["total_complaints"],
+#                     reverse=True
+#                 )
+
+#             elif complaint_sort == "low":
+#                 data = sorted(
+#                     data,
+#                     key=lambda x: x["total_complaints"]
+#                 )
+
+#             logger.info(f"Admin {request.user.id} fetched panchayath list")
+
+#             return paginator.get_paginated_response(data)
+
+#         except Exception as e:
+#             logger.error(f"AdminPanchayathList error: {str(e)}")
+
+#             return error_response(
+#                 message="Something went wrong",
+#                 status=500
+#             )
+
+
+
 class AdminPanchayathListView(APIView):
     permission_classes = [IsSuperAdmin]
 
     def get(self, request):
         try:
             status_filter = request.GET.get("status", "").lower()
-            # search = request.GET.get("search", "").strip()
-            
-            
             name = request.GET.get("name", "").strip()
             email = request.GET.get("email", "").strip()
             complaint_sort = request.GET.get("complaints")
 
-            users = User.objects.filter(role=User.Role.PANCHAYATH)
-            if status_filter == "approved":
-                users = users.filter(status=User.Status.ACTIVE, is_verified=True)
-            elif status_filter == "suspended":
-                users = users.filter(status=User.Status.SUSPENDED)
+            users = User.objects.filter(
+                role=User.Role.PANCHAYATH
+            )
 
-            # if search:
-            #     users = users.filter(
-            #         Q(username__icontains=search) |
-            #         Q(email__icontains=search)
-            #     )
-            
-            
+            if status_filter == "approved":
+                users = users.filter(
+                    status=User.Status.ACTIVE,
+                    is_verified=True
+                )
+
+            elif status_filter == "suspended":
+                users = users.filter(
+                    status=User.Status.SUSPENDED
+                )
+
             if name:
                 users = users.filter(
                     Q(username__icontains=name) |
@@ -521,73 +632,103 @@ class AdminPanchayathListView(APIView):
                     email__icontains=email
                 )
 
-            users = users.order_by("-date_joined")
+            users = users.prefetch_related(
+                "panchayath_verification"
+            ).annotate(
 
-            paginator = PageNumberPagination()
-            paginator.page_size = 10
-            paginated_users = paginator.paginate_queryset(users, request)
+                total_wards=Count(
+                    "assigned_wards",
+                    filter=Q(
+                        assigned_wards__status="APPROVED"
+                    ),
+                    distinct=True,
+                ),
 
-            data = []
-            
-            
+                total_complaints=Count(
+                    "assigned_wards__ward_master__complaints",
+                    filter=Q(
+                        assigned_wards__status="APPROVED"
+                    ),
+                    distinct=True,
+                ),
+
+            )
+
             if complaint_sort == "high":
-                data = sorted(
-                    data,
-                    key=lambda x: x["total_complaints"],
-                    reverse=True
+
+                users = users.order_by(
+                    "-total_complaints",
+                    "-date_joined"
                 )
 
             elif complaint_sort == "low":
-                data = sorted(
-                    data,
-                    key=lambda x: x["total_complaints"]
-    )
+
+                users = users.order_by(
+                    "total_complaints",
+                    "-date_joined"
+                )
+
+            else:
+
+                users = users.order_by(
+                    "-date_joined"
+                )
+
+            paginator = PageNumberPagination()
+            paginator.page_size = 10
+
+            paginated_users = paginator.paginate_queryset(
+                users,
+                request
+            )
+
+            data = []
 
             for user in paginated_users:
 
-                verification = getattr(user, "panchayath_verification", None)
+                verification = getattr(
+                    user,
+                    "panchayath_verification",
+                    None
+                )
 
                 panchayath_name = (
                     verification.panchayath_name
                     if verification and verification.panchayath_name
                     else user.username
                 )
-                ward_qs = WardVerification.objects.filter(
-                    panchayath=user,
-                    status="APPROVED"
-                )
-
-                total_wards = ward_qs.count()
-
-                ward_ids = ward_qs.values_list("ward_master_id", flat=True)
-
-                total_complaints = Complaint.objects.filter(
-                    ward_id__in=ward_ids
-                ).count()
 
                 data.append({
+
                     "id": user.id,
                     "panchayath_name": panchayath_name,
                     "email": user.email,
                     "status": user.status,
                     "is_verified": user.is_verified,
                     "date_joined": user.date_joined,
-                    "total_wards": total_wards,
-                    "total_complaints": total_complaints
+                    "total_wards": user.total_wards,
+                    "total_complaints": user.total_complaints,
+
                 })
 
-            logger.info(f"Admin {request.user.id} fetched panchayath list")
+            logger.info(
+                f"Admin {request.user.id} fetched panchayath list"
+            )
 
-            return paginator.get_paginated_response(data)
+            return paginator.get_paginated_response(
+                data
+            )
 
         except Exception as e:
-            logger.error(f"AdminPanchayathList error: {str(e)}")
+
+            logger.error(
+                f"AdminPanchayathList error: {str(e)}"
+            )
 
             return error_response(
                 message="Something went wrong",
                 status=500
             )
-
 
 
 class SuspendPanchayathView(APIView):

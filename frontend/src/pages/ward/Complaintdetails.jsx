@@ -12,7 +12,7 @@ import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
 import ComplaintTimeline from "@/components/ward/ComplaintTimeline";
 import { complaintchatapi } from "@/service/complaintchaturls";
-import toast from "react-hot-toast";
+
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
