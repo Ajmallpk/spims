@@ -678,6 +678,8 @@ import {
 import { adminapi } from "@/service/adminurls";
 import LocationRequestDetailModal from "@/components/admin/LocationRequestDetailModal";
 import LocationActionModal from "@/components/admin/LocationActionModal";
+import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 const filters = [
     "PENDING",
@@ -750,6 +752,10 @@ export default function LocationRequests() {
         } catch (err) {
 
             console.log(err);
+            handleApiError(
+                err,
+                "Failed to load location requests"
+            );
 
         } finally {
 
@@ -852,8 +858,11 @@ export default function LocationRequests() {
                     selectedId,
                     note
                 );
-
+                toast.success("Location request completed successfully.");
             }
+
+
+
 
             if (modalType === "HOLD") {
 
@@ -861,6 +870,8 @@ export default function LocationRequests() {
                     selectedId,
                     note
                 );
+
+                toast.success("Location request moved to hold successfully.");
 
             }
 
@@ -871,6 +882,8 @@ export default function LocationRequests() {
                     note
                 );
 
+                toast.success("Location request rejected successfully.");
+
             }
 
             closeActionModal();
@@ -878,6 +891,12 @@ export default function LocationRequests() {
         } catch (err) {
 
             console.log(err);
+
+            handleApiError(
+                err,
+                "Failed to update location request"
+            );
+
 
         } finally {
 

@@ -254,7 +254,7 @@ export default function Dashboard() {
       } catch (err) {
         panchayathApi.handleAuthError(err);
         handleApiError(
-          error,
+          err,
           "Failed to load dashboard"
         );
         setError("Failed to load dashboard.");

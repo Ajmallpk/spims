@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
 import SearchableSelect from "@/components/common/SearchableSelect";
+import toast from "react-hot-toast";
 
 const tabs = [
     {
@@ -168,6 +169,9 @@ const LocationManagement = () => {
 
             });
 
+
+            toast.success("District created successfully.");
+
             setDistrictName("");
             setDistrictCode("");
 
@@ -176,6 +180,7 @@ const LocationManagement = () => {
         } catch (err) {
 
             console.log(err);
+            handleApiError(err, "Failed to create district");
 
         } finally {
 
@@ -202,6 +207,8 @@ const LocationManagement = () => {
 
             });
 
+            toast.success("Panchayath created successfully.");
+
             setSelectedDistrict("");
             setPanchayathName("");
             setPanchayathCode("");
@@ -209,7 +216,7 @@ const LocationManagement = () => {
         } catch (err) {
 
             console.log(err);
-
+            handleApiError(err, "Failed to create panchayath");
         } finally {
 
             setLoading(false);
@@ -236,6 +243,8 @@ const LocationManagement = () => {
 
             });
 
+            toast.success("Ward created successfully.");
+
             setSelectedWardDistrict("");
             setSelectedWardPanchayath("");
 
@@ -248,7 +257,7 @@ const LocationManagement = () => {
         } catch (err) {
 
             console.log(err);
-
+            handleApiError(err, "Failed to create ward");
         } finally {
 
             setLoading(false);

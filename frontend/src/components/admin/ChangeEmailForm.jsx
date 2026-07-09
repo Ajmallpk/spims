@@ -43,7 +43,11 @@ const ChangeEmailForm = () => {
         newEmail
       );
 
+
+
       setOtpSent(true);
+
+      toast.success("OTP sent successfully. Please check your email.");
 
     } catch (err) {
 
@@ -77,6 +81,8 @@ const ChangeEmailForm = () => {
       setNewEmail("");
       setOtp("");
       setOtpSent(false);
+
+      toast.success("Email changed successfully.");
 
     } catch (err) {
 

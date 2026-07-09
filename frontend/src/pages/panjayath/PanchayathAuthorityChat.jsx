@@ -7,6 +7,7 @@ import EmptyChatState from "@/components/chat/EmptyChatState";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import authoritychatapi from "@/service/authoritychaturls";
 import { handleApiError } from "@/utils/handleApiError";
+import toast  from "react-hot-toast";
 
 const PanchayathAuthorityChat = () => {
   const [contacts, setContacts] = useState([]);
@@ -617,6 +618,9 @@ const PanchayathAuthorityChat = () => {
             formData
           );
 
+
+          toast.success("File sent successfully");
+
         setContacts(prev =>
           prev.map(c =>
             c.id === selectedContact.id
@@ -677,6 +681,9 @@ const PanchayathAuthorityChat = () => {
       await authoritychatapi.deleteMessage(
         messageId
       );
+
+
+      toast.success("Message deleted successfully");
 
     } catch (error) {
 
