@@ -100,7 +100,7 @@ export default function EscalateModal({ complaintId, onClose, onSuccess }) {
                 }`}
             />
 
-            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-red-400">
+            {/* <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-red-400">
               <input
                 type="file"
                 multiple
@@ -114,7 +114,7 @@ export default function EscalateModal({ complaintId, onClose, onSuccess }) {
               <p className="text-sm text-gray-500">
                 Click to upload images or videos
               </p>
-            </label>
+            </label> */}
             {files.length > 0 && (
               <div className="mt-4 flex flex-col items-center gap-3">
 

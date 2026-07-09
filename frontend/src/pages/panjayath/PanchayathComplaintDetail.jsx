@@ -186,7 +186,7 @@ function ActionModal({ type, onClose, onConfirm }) {
                         />
                     </div>
 
-                    <div>
+                    {/* <div>
                         <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">
                             {isResolve ? "Upload Proof / Media" : "Supporting Documents"}
                         </label>
@@ -210,7 +210,7 @@ function ActionModal({ type, onClose, onConfirm }) {
                                 ))}
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Modal Footer */}

@@ -242,7 +242,7 @@ function CitizenSignUpForm({ onSuccess }) {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [remainingResends, setRemainingResends] = useState(3);
-
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     let interval;
@@ -260,9 +260,55 @@ function CitizenSignUpForm({ onSuccess }) {
     return () => clearInterval(interval);
   }, [otpSent, timer]);
 
+  // const handleRegister = async () => {
+  //   setError("");
+  //   setMessage("");
+  //   if (!username || !email || !password || !confirmPassword) {
+  //     setError("All fields are required");
+  //     return;
+  //   }
+
+  //   const passwordErrors = validatePassword(password);
+
+  //   if (passwordErrors.length > 0) {
+  //     setError(passwordErrors[0]);
+  //     return;
+  //   }
+
+  //   if (password !== confirmPassword) {
+  //     setError("Passwords do not match");
+  //     return;
+  //   }
+  //   try {
+  //     await citizenapi.register({
+  //       username,
+  //       email,
+  //       password,
+  //       confirm_password: confirmPassword,
+  //     });
+
+  //     toast.success("OTP sent successfully");
+
+  //     setOtpSent(true);
+
+  //   } catch (err) {
+  //     const message =
+  //       err.response?.data?.error ||
+  //       err.response?.data?.detail ||
+  //       err.response?.data?.email?.[0] ||
+  //       err.response?.data?.username?.[0] ||
+  //       "Registration failed";
+
+  //     setError(message);
+  //     toast.error(message);
+  //   }
+  // };
+
+
   const handleRegister = async () => {
     setError("");
     setMessage("");
+
     if (!username || !email || !password || !confirmPassword) {
       setError("All fields are required");
       return;
@@ -279,7 +325,10 @@ function CitizenSignUpForm({ onSuccess }) {
       setError("Passwords do not match");
       return;
     }
+
     try {
+      setIsRegistering(true);
+
       await citizenapi.register({
         username,
         email,
@@ -288,7 +337,6 @@ function CitizenSignUpForm({ onSuccess }) {
       });
 
       toast.success("OTP sent successfully");
-
       setOtpSent(true);
 
     } catch (err) {
@@ -301,9 +349,10 @@ function CitizenSignUpForm({ onSuccess }) {
 
       setError(message);
       toast.error(message);
+    } finally {
+      setIsRegistering(false);
     }
   };
-
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
       setError("Enter valid 6 digit OTP");
@@ -486,10 +535,37 @@ function CitizenSignUpForm({ onSuccess }) {
       {!otpSent && (
         <button
           onClick={handleRegister}
-          className="w-full py-3.5 rounded-xl text-sm font-bold text-white"
+          disabled={isRegistering}
+          className="w-full py-3.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ background: "#111827" }}
         >
-          Register as Citizen
+          {isRegistering ? (
+            <>
+              <svg
+                className="w-4 h-4 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+
+              Creating Account...
+            </>
+          ) : (
+            "Register as Citizen"
+          )}
         </button>
       )}
     </div>

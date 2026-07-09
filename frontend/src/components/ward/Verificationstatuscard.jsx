@@ -57,7 +57,10 @@ export default function VerificationStatusCard({ status, rejectionReason }) {
           <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">
             Rejection Reason
           </p>
-          <p className="text-sm text-red-700 leading-relaxed">{rejectionReason}</p>
+
+          <p className="text-sm text-red-700 leading-relaxed break-all max-h-32 overflow-y-auto">
+            {rejectionReason}
+          </p>
         </div>
       )}
     </div>

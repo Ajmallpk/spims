@@ -704,7 +704,7 @@ class RejectWardView(APIView):
                 ward.reviewed_at = timezone.now()
                 ward.save()
 
-                ward.user.status = User.Status.SUSPENDED
+                ward.user.status = User.Status.ACTIVE
                 ward.user.is_verified = False
                 ward.user.save()
                 
