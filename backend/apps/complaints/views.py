@@ -1066,7 +1066,7 @@ class ExploreComplaintView(ListAPIView):
 
         if panchayath:
             queryset = queryset.filter(
-                panchayath_id=panchayath
+                ward__panchayath_id=panchayath
             )
             
             
