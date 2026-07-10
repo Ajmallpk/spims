@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useState } from "react";
 
 export default function VerificationQueueDetailModal({
   open,
@@ -7,6 +8,11 @@ export default function VerificationQueueDetailModal({
   data,
   type,
 }) {
+
+  const [previewImage, setPreviewImage] = useState(null);
+
+
+
   if (!open) return null;
 
   return (
@@ -75,7 +81,9 @@ export default function VerificationQueueDetailModal({
 
             <img
               src={data.aadhaar}
-              className="rounded-lg border"
+              alt="Aadhaar"
+              onClick={() => setPreviewImage(data.aadhaar)}
+              className="rounded-lg border cursor-pointer hover:scale-105 transition"
             />
 
           </div>
@@ -88,7 +96,9 @@ export default function VerificationQueueDetailModal({
 
             <img
               src={data.selfie}
-              className="rounded-lg border"
+              alt="Selfie"
+              onClick={() => setPreviewImage(data.selfie)}
+              className="rounded-lg border cursor-pointer hover:scale-105 transition"
             />
 
           </div>
@@ -114,6 +124,28 @@ export default function VerificationQueueDetailModal({
           )}
 
       </div>
+
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[999]"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-5 right-5 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100"
+          >
+            <X size={24} />
+          </button>
+
+          <img
+            src={previewImage}
+            alt="Preview"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[90vw] max-h-[90vh] rounded-xl shadow-2xl object-contain"
+          />
+        </div>
+      )}
 
     </div>
   );
