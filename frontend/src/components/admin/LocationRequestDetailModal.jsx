@@ -530,27 +530,29 @@ export default function LocationRequestDetailModal({
 
         </div>
 
-        {request.status === "PENDING" && (
+        {(request.status === "PENDING" || request.status === "HOLD") && (
 
-          <div className="border-t border-gray-100 p-5 flex flex-col sm:flex-row justify-end gap-3 shrink-0">
+          <div className="border-t border-gray-100 p-5 flex flex-col sm:flex-row justify-end gap-3">
 
             <button
               onClick={() => onComplete(request.id)}
-              className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+              className="bg-emerald-600 text-white px-5 py-2.5 rounded-lg"
             >
               Complete
             </button>
 
-            <button
-              onClick={() => onHold(request.id)}
-              className="bg-yellow-500 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-yellow-600 transition-colors"
-            >
-              Hold
-            </button>
+            {request.status === "PENDING" && (
+              <button
+                onClick={() => onHold(request.id)}
+                className="bg-yellow-500 text-white px-5 py-2.5 rounded-lg"
+              >
+                Hold
+              </button>
+            )}
 
             <button
               onClick={() => onReject(request.id)}
-              className="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+              className="bg-red-600 text-white px-5 py-2.5 rounded-lg"
             >
               Reject
             </button>

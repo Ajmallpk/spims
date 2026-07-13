@@ -2238,7 +2238,7 @@ class CompleteLocationRequestView(APIView):
             id=pk
         )
 
-        if req.status != "PENDING":
+        if req.status not in ["PENDING", "HOLD"]:
 
             return error_response(
                 message="Request already processed",
@@ -2316,7 +2316,7 @@ class RejectLocationRequestView(APIView):
             id=pk
         )
 
-        if req.status != "PENDING":
+        if req.status not in ["PENDING", "HOLD"]:
 
             return error_response(
                 message="Request already processed",
