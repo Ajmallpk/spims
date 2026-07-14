@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
 
 export default function LocationRequestModal({
@@ -52,15 +53,18 @@ export default function LocationRequestModal({
 
             });
 
-            toast.success(
-                "Location request submitted successfully."
-            );
+            // toast.success(
+            //     "Location request submitted successfully."
+            // );
 
             onClose();
 
         } catch (err) {
 
-            console.log(err);
+            handleApiError(
+                err,
+                "Failed to submit location request"
+            );
 
         } finally {
 

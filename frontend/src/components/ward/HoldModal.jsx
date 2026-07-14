@@ -29,7 +29,7 @@ export default function HoldModal({
                 }
             );
 
-            toast.success("Complaint put on hold.");
+            // toast.success("Complaint put on hold.");
 
             onSuccess("Complaint put on hold.");
 

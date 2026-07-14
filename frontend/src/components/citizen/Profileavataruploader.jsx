@@ -60,7 +60,7 @@ const ProfileAvatarUploader = ({ avatarUrl, fullName, onUpload, token }) => {
         "Avatar upload failed"
       )
       setError("Upload failed. Please try again.");
-      toast.error("Avatar upload failed");
+      // toast.error("Avatar upload failed");
       setPreview(null);
     } finally {
       setUploading(false);

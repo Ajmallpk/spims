@@ -119,7 +119,7 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdateSuccess, token }) 
         Object.values(err.response?.data || {})[0] ||
         "Profile update failed"
       );
-      toast.error("Profile update failed");
+      // toast.error("Profile update failed");
     } finally {
       setSubmitting(false);
     }

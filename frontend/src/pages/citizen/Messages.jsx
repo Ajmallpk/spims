@@ -122,7 +122,7 @@ const Messages = () => {
       );
 
 
-      toast.success("Message sent");
+      // toast.success("Message sent");
 
       // Replace optimistic with real message
       setMessages((prev) =>

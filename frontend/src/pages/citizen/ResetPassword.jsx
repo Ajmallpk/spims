@@ -24,7 +24,7 @@ export default function ResetPassword() {
         confirm_password: confirmPassword
       });
 
-      alert("Password reset successful");
+      // alert("Password reset successful");
       toast.success("Password reset successful");
 
       navigate("/citizen/registration");
@@ -39,7 +39,7 @@ export default function ResetPassword() {
         "Reset failed";
 
       setError(message);
-      toast.error(message);
+      // toast.error(message);
 
     }
 

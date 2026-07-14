@@ -66,10 +66,10 @@ const WardList = () => {
     try {
       if (actionModal.type === "suspend") {
         await adminapi.suspendWard(actionModal.id);
-        toast.success("Ward suspended successfully.");
+        // toast.success("Ward suspended successfully.");
       } else if (actionModal.type === "activate") {
         await adminapi.activateWard(actionModal.id);
-         toast.success("Ward activated successfully.");
+        //  toast.success("Ward activated successfully.");
       }
       setActionModal({ open: false, type: null, id: null });
       fetchWards(currentPage, selectedPanchayath);

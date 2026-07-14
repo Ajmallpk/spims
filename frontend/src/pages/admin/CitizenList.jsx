@@ -463,10 +463,10 @@ const CitizenList = () => {
 
       if (actionModal.type === "suspend") {
         await adminapi.suspendCitizen(actionModal.id);
-         toast.success("Citizen suspended successfully.");
+        //  toast.success("Citizen suspended successfully.");
       } else {
         await adminapi.activateCitizen(actionModal.id);
-        toast.success("Citizen activated successfully.");
+        // toast.success("Citizen activated successfully.");
       }
       setActionModal({ open: false, type: null, id: null });
       fetchCitizens();

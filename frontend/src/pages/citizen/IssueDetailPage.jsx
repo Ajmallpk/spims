@@ -777,7 +777,7 @@ const IssueDetailPage = () => {
     if (!newComment.trim()) return;
     try {
       await complaintapi.createComment(id, { comment: newComment });
-      toast.success("Comment added");
+      // toast.success("Comment added");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
       setNewComment("");
@@ -790,7 +790,7 @@ const IssueDetailPage = () => {
   const handleDeleteComment = async (commentId) => {
     try {
       await complaintapi.deleteComment(commentId);
-      toast.success("Comment deleted");
+      // toast.success("Comment deleted");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
     } catch (err) { 
@@ -802,7 +802,7 @@ const IssueDetailPage = () => {
   const handleEditComment = async (commentId) => {
     try {
       await complaintapi.editComment(commentId, { comment: editedText });
-      toast.success("Comment updated");
+      // toast.success("Comment updated");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
       setEditingCommentId(null);
@@ -817,7 +817,7 @@ const IssueDetailPage = () => {
     if (!replyText.trim()) return;
     try {
       await complaintapi.createComment(id, { comment: replyText, parent: parentId });
-      toast.success("Reply added");
+      // toast.success("Reply added");
       const commentRes = await complaintapi.getComments(id);
       setComments(commentRes.data.results || []);
       setReplyText("");

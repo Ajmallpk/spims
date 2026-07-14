@@ -20,7 +20,7 @@ export default function ForgotPassword() {
 
     try {
       await citizenapi.forgotPassword({ email });
-      toast.success("OTP sent successfully");
+      // toast.success("OTP sent successfully");
       navigate("/citizen/verify-reset-otp", { state: { email } });
     } catch (err) {
 

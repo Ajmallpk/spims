@@ -114,7 +114,7 @@ const ChangePasswordForm = ({ token }) => {
         Object.values(err.response?.data || {})[0] ||
         "Password change failed"
       );
-      toast.error("Password change failed");
+      // toast.error("Password change failed");
     } finally {
       setSubmitting(false);
     }

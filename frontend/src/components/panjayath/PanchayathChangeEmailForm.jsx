@@ -22,7 +22,7 @@ const PanchayathChangeEmailForm = ({ currentEmail }) => {
         password: password
       });
 
-      toast.success("Verification email sent. Please check your inbox.");
+      // toast.success("Verification email sent. Please check your inbox.");
 
       setEmail("");
       setPassword("");

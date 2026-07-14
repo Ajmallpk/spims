@@ -858,7 +858,7 @@ export default function LocationRequests() {
                     selectedId,
                     note
                 );
-                toast.success("Location request completed successfully.");
+                // toast.success("Location request completed successfully.");
             }
 
 
@@ -871,7 +871,7 @@ export default function LocationRequests() {
                     note
                 );
 
-                toast.success("Location request moved to hold successfully.");
+                // toast.success("Location request moved to hold successfully.");
 
             }
 
@@ -882,7 +882,7 @@ export default function LocationRequests() {
                     note
                 );
 
-                toast.success("Location request rejected successfully.");
+                // toast.success("Location request rejected successfully.");
 
             }
 

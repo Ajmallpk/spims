@@ -35,7 +35,7 @@ export default function CitizenDetails() {
       const res = await wardapi.getCitizenDetails(id, currentPage);
       console.log("Citizen Full API Response:", res.data);
       setCitizenData(res.data.data);
-      toast.success("Citizen details refreshed.");
+      // toast.success("Citizen details refreshed.");
 
 
       setTotalPages(

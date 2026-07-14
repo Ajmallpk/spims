@@ -74,7 +74,7 @@ const handleStartWork = async () => {
       status: "IN_PROGRESS"
     });
 
-    toast.success("Marked as In Progress");
+    // toast.success("Marked as In Progress");
 
     fetchDetails(); // refresh UI
   } catch (err) {
@@ -109,7 +109,7 @@ const handleResumeComplaint = async () => {
 
     await wardapi.resumeComplaint(id);
 
-    toast.success("Complaint resumed");
+    // toast.success("Complaint resumed");
 
     fetchDetails();
 

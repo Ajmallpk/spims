@@ -29,7 +29,7 @@ const PanchayathChangePasswordForm = () => {
         new_password: newPassword
       });
 
-      toast.success("Password changed successfully");
+      // toast.success("Password changed successfully");
 
       setCurrentPassword("");
       setNewPassword("");

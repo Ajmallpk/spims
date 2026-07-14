@@ -54,11 +54,11 @@ const IssueCard = ({ issue }) => {
       if (res.data.message === "Complaint upvoted") {
         setUpvoted(true);
         setUpvoteCount((prev) => prev + 1);
-        toast.success("Complaint upvoted");
+        // toast.success("Complaint upvoted");
       } else {
         setUpvoted(false);
         setUpvoteCount((prev) => prev - 1);
-        toast.success("Upvote removed");
+        // toast.success("Upvote removed");
       }
 
     } catch (error) {
@@ -104,7 +104,7 @@ const IssueCard = ({ issue }) => {
       // Tell CommentSection to reload comments
       setRefreshKey((prev) => prev + 1);
 
-      toast.success("Updated");
+      // toast.success("Updated");
     } catch (err) {
       toast.error("Failed to refresh");
     } finally {
@@ -117,7 +117,7 @@ const IssueCard = ({ issue }) => {
   const handleDelete = async () => {
     try {
       await complaintapi.deleteComplaint(issue.id);
-      toast.success("Complaint deleted successfully");
+      // toast.success("Complaint deleted successfully");
       window.location.reload();
     } catch (err) {
       handleApiError(err, "Failed to delete complaint");

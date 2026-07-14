@@ -71,10 +71,10 @@ const PanchayathList = () => {
     try {
       if (actionModal.type === "suspend") {
         await adminapi.suspendPanchayath(actionModal.id);
-        toast.success("Panchayath suspended successfully.");
+        // toast.success("Panchayath suspended successfully.");
       } else if (actionModal.type === "activate") {
         await adminapi.activatePanchayath(actionModal.id);
-        toast.success("Panchayath activated successfully.");
+        // toast.success("Panchayath activated successfully.");
       }
       setActionModal({ open: false, type: null, id: null });
       fetchPanchayaths(currentPage);

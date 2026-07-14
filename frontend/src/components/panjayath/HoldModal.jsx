@@ -23,7 +23,7 @@ export default function HoldModal({
 
             await onSubmit(reason);
 
-            toast.success("Complaint put on hold.");
+            // toast.success("Complaint put on hold.");
 
             onClose();
 

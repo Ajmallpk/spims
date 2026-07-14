@@ -325,7 +325,7 @@ export default function PanchayathComplaintDetail() {
                 });
 
                 await panchayathApi.resolveComplaint(id, formData);
-                toast.success("Complaint resolved successfully.");
+                // toast.success("Complaint resolved successfully.");
             }
 
 
@@ -334,7 +334,7 @@ export default function PanchayathComplaintDetail() {
                 await panchayathApi.reassignComplaint(id, {
                     reassign_note: desc
                 });
-                toast.success("Complaint reassigned successfully.");
+                // toast.success("Complaint reassigned successfully.");
             }
 
 
@@ -359,7 +359,7 @@ export default function PanchayathComplaintDetail() {
         try {
             await panchayathApi.startWork(id);
 
-            toast.success("Complaint marked as In Progress.");
+            // toast.success("Complaint marked as In Progress.");
             const res = await panchayathApi.getComplaintDetail(id);
             const data = res.data.data;
             setComplaint(data);
@@ -411,7 +411,7 @@ export default function PanchayathComplaintDetail() {
         try {
 
             await panchayathApi.resumeComplaint(id);
-            toast.success("Complaint resumed successfully.");
+            // toast.success("Complaint resumed successfully.");
             const res = await panchayathApi.getComplaintDetail(id);
 
             const data = res.data.data;

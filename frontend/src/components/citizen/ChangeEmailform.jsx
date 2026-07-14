@@ -77,7 +77,7 @@ const ChangeEmailForm = ({ currentEmail, token }) => {
         err.response?.data?.error ||
         "Failed to change email"
       );
-      toast.error("Failed to change email");
+      // toast.error("Failed to change email");
     } finally {
       setSubmitting(false);
     }

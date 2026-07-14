@@ -222,7 +222,7 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
 
       setCommentText("");
       setReplyingTo(null);
-      toast.success("Comment posted");
+      // toast.success("Comment posted");
       onCommentAdded?.();
 
     } catch (error) {
@@ -341,7 +341,7 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
                             comment: editText,
                           });
 
-                          toast.success("Comment updated");
+                          // toast.success("Comment updated");
 
                           setEditingCommentId(null);
                           setEditText("");
@@ -396,7 +396,7 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
                             comment.id
                           );
 
-                          toast.success("Comment deleted");
+                          // toast.success("Comment deleted");
 
                         } catch (err) {
                           handleApiError(err, "Failed to delete comment");

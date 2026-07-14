@@ -351,7 +351,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
       await wardapi.submitWardVerification(fd);
 
-      toast.success("Verification submitted successfully");
+      // toast.success("Verification submitted successfully");
 
       localStorage.setItem("verification_submitted", "true");
 

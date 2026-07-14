@@ -47,7 +47,7 @@ const ChangeEmailForm = () => {
 
       setOtpSent(true);
 
-      toast.success("OTP sent successfully. Please check your email.");
+      // toast.success("OTP sent successfully. Please check your email.");
 
     } catch (err) {
 
@@ -82,8 +82,8 @@ const ChangeEmailForm = () => {
       setOtp("");
       setOtpSent(false);
 
-      toast.success("Email changed successfully.");
-
+      // toast.success("Email changed successfully.");
+      
     } catch (err) {
 
       // toast.error(err.response?.data?.error || "Invalid OTP");

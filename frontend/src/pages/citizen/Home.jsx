@@ -119,7 +119,7 @@ const Home = () => {
   const handleLogout = async () => {
     try {
       await citizenapi.logout();
-      toast.success("Logged out successfully");
+      // toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout failed", error);
       toast.error("Logout failed");
@@ -257,7 +257,7 @@ const Home = () => {
       }
 
       await complaintapi.createComplaint(data);
-      toast.success("Complaint submitted successfully");
+      // toast.success("Complaint submitted successfully");
 
       setIsCreateIssueOpen(false);
 

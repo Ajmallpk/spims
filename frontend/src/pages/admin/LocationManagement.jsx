@@ -170,7 +170,7 @@ const LocationManagement = () => {
             });
 
 
-            toast.success("District created successfully.");
+            // toast.success("District created successfully.");
 
             setDistrictName("");
             setDistrictCode("");
@@ -207,7 +207,7 @@ const LocationManagement = () => {
 
             });
 
-            toast.success("Panchayath created successfully.");
+            // toast.success("Panchayath created successfully.");
 
             setSelectedDistrict("");
             setPanchayathName("");
@@ -243,7 +243,7 @@ const LocationManagement = () => {
 
             });
 
-            toast.success("Ward created successfully.");
+            // toast.success("Ward created successfully.");
 
             setSelectedWardDistrict("");
             setSelectedWardPanchayath("");

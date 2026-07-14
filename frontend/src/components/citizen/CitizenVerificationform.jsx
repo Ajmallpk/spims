@@ -286,7 +286,7 @@ const CitizenVerificationForm = ({
         "Verification submission failed"
       );
 
-      toast.error("Verification submission failed");
+      // toast.error("Verification submission failed");
 
     } finally {
       setIsSubmitting(false);

@@ -755,7 +755,7 @@ const CitizenComplaintChatPage = () => {
         formData
       );
 
-      toast.success("Message sent successfully");
+      // toast.success("Message sent successfully");
 
       // await loadMessages();
 
@@ -766,7 +766,7 @@ const CitizenComplaintChatPage = () => {
         error
       );
 
-      toast.error("Failed to send message");
+      // toast.error("Failed to send message");
 
     }
 
@@ -795,7 +795,7 @@ const CitizenComplaintChatPage = () => {
           messageId
         );
 
-      toast.success("Message deleted");
+      // toast.success("Message deleted");
 
     }
 
@@ -803,7 +803,7 @@ const CitizenComplaintChatPage = () => {
 
       console.log(error);
 
-      toast.error("Failed to delete message");
+      // toast.error("Failed to delete message");
 
     }
 

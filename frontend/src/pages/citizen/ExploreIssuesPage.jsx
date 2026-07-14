@@ -416,7 +416,7 @@ const ExploreIssuesPage = () => {
       }
       catch (err) {
         console.log(err);
-        toast.error("Failed to load complaints");
+        // toast.error("Failed to load complaints");
       }
       finally {
 

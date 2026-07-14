@@ -69,7 +69,7 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
 
     try {
       await adminapi.approvePanchayath(request.id)
-      toast.success("Panchayath approved successfully.");
+      // toast.success("Panchayath approved successfully.");
       onSuccess("Panchayath approved successfully.");
       onClose();
     } catch (err) {
@@ -96,7 +96,7 @@ const PanchayathApprovalModal = ({ request, onClose, onSuccess }) => {
 
     try {
       await adminapi.rejectPanchayath(request.id, rejectReason.trim())
-      toast.success("Panchayath registration rejected successfully.");
+      // toast.success("Panchayath registration rejected successfully.");
       onSuccess("Panchayath registration rejected.");
       onClose();
     } catch (err) {
