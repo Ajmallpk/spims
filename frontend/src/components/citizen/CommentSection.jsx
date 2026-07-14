@@ -3,7 +3,7 @@ import Avatar from "@/components/ui/Avatar";
 import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
 
-const CommentSection = ({ issueId, onCommentAdded }) => {
+const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -203,7 +203,7 @@ const CommentSection = ({ issueId, onCommentAdded }) => {
       socketRef.current?.close();
     };
 
-  }, [issueId]);
+  }, [issueId,refreshKey]);
 
 
 

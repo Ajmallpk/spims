@@ -8,6 +8,7 @@ import complaintapi from "@/service/complaintsurls";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
+import { RefreshCw } from "lucide-react";
 
 // Verification status constants
 const VERIFICATION_STATUS = {
@@ -286,6 +287,15 @@ const Home = () => {
 
       {/* Post Issue Button */}
       <PostIssueButton onClick={handlePostIssueClick} />
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={loadFeed}
+          className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg shadow"
+        >
+          <RefreshCw size={18} />
+          Refresh
+        </button>
+      </div>
       <button
         onClick={handleLogout}
         className="fixed bottom-6 right-6 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl shadow-lg text-sm font-semibold z-50"

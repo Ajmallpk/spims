@@ -12,10 +12,26 @@ const IssueCard = ({ issue }) => {
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
   const [commentCount, setCommentCount] = useState(issue.commentCount || 0);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+
+  useEffect(() => {
+    setUpvoteCount(issue.upvotes || 0);
+    setCommentCount(issue.commentCount || 0);
+  }, [issue.upvotes, issue.commentCount]);
+
+
+
+
   const [showComments, setShowComments] = useState(false);
   const [showResponse, setShowResponse] = useState(
     issue.status === "RESOLVED"
   );
+
+
+
+
 
   useEffect(() => {
     if (issue.authorityResponse) {
@@ -70,6 +86,30 @@ const IssueCard = ({ issue }) => {
     }
 
     isDragging.current = false;
+  };
+
+
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+
+      const res = await complaintapi.getComplaintDetail(issue.id);
+
+      const complaint = res.data.data;
+
+      setUpvoteCount(complaint.upvotes_count);
+      setCommentCount(complaint.comments_count);
+
+      // Tell CommentSection to reload comments
+      setRefreshKey((prev) => prev + 1);
+
+      toast.success("Updated");
+    } catch (err) {
+      toast.error("Failed to refresh");
+    } finally {
+      setRefreshing(false);
+    }
   };
 
 
@@ -283,6 +323,14 @@ const IssueCard = ({ issue }) => {
           </svg>
           <span>Share</span>
         </button> */}
+
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="text-sm text-teal-600 hover:text-teal-700 font-medium"
+        >
+          {refreshing ? "Refreshing..." : "🔄 Refresh"}
+        </button>
       </div>
 
       {/* Authority Response */}
@@ -305,6 +353,7 @@ const IssueCard = ({ issue }) => {
       {showComments && (
         <CommentSection
           issueId={issue.id}
+          refreshKey={refreshKey}
           onCommentAdded={() =>
             setCommentCount((prev) => prev + 1)
           }
