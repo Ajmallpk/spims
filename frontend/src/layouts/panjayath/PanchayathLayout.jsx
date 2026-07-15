@@ -228,7 +228,8 @@ export default function PanchayathLayout() {
       socket.onopen = () => {
 
         console.log(
-          "PANCHAYATH WS CONNECTED"
+          "PANCHAYATH WS CONNECTED",
+          socket.url
         )
 
       }
@@ -289,25 +290,44 @@ export default function PanchayathLayout() {
 
       }
 
+      // socket.onclose = () => {
+
+      //   console.log(
+      //     "PANCHAYATH SOCKET CLOSED"
+      //   )
+
+      //   setTimeout(
+
+      //     () => {
+
+      //       connectSocket()
+
+      //     },
+
+      //     3000
+
+      //   )
+
+      // }
+
+
+      let isUnmounting = false;
+
       socket.onclose = () => {
 
         console.log(
           "PANCHAYATH SOCKET CLOSED"
-        )
+        );
 
-        setTimeout(
+        if (isUnmounting) {
+          return;
+        }
 
-          () => {
+        setTimeout(() => {
+          connectSocket();
+        }, 3000);
 
-            connectSocket()
-
-          },
-
-          3000
-
-        )
-
-      }
+      };
 
       socket.onerror = (
         error
@@ -325,6 +345,9 @@ export default function PanchayathLayout() {
     connectSocket()
 
     return () => {
+
+
+      isUnmounting = true;
 
       socket?.close()
 

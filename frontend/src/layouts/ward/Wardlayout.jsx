@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import WardSidebar from "@/components/ward/Wardsidebar";
 import WardHeader from "@/components/ward/Wardheader";
-import VerificationRequiredModal from "@/components/panjayath/VerificationRequiredModal";
+// import VerificationRequiredModal from "@/components/ward/VerificationRequiredModal";
 import VerificationPendingModal from "@/components/panjayath/VerificationPendingModal";
 import axiosInstance from "@/api/axiosInstance";
 import WardNotificationBell from "@/components/ward/WardNotificationBell";
@@ -156,7 +156,7 @@ export default function WardLayout() {
         toast.info(
           data.message
         )
-        
+
         console.log(
           "WARD NOTIFICATION",
           data
