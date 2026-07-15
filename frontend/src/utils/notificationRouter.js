@@ -81,6 +81,17 @@ export function getNotificationRoute(notification) {
         // ---------------- Default ----------------
 
 
+
+        case "WARD_PROFILE":
+            return "/ward/profile";
+
+        case "PANCHAYATH_PROFILE":
+            return "/panchayath/profile";
+
+        case "CITIZEN_VERIFICATION":
+            return "/citizen/verification";
+
+
         case "CITIZEN_DASHBOARD":
             return "/citizen/home";
 

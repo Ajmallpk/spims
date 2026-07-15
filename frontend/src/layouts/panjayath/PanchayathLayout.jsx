@@ -16,6 +16,7 @@ import PanchayathSidebar from "@/components/panjayath/PanchayathSidebar";
 import VerificationRequiredModal from "@/components/panjayath/VerificationRequiredModal";
 import VerificationPendingModal from "@/components/panjayath/VerificationPendingModal";
 import panchayathapi from "@/service/panchayathurls";
+import { toast } from "react-toastify";
 
 
 export default function PanchayathLayout() {
@@ -240,6 +241,11 @@ export default function PanchayathLayout() {
           JSON.parse(
             event.data
           )
+
+
+        toast.info(
+          data.message
+        )
 
         console.log(
           "PANCHAYATH NOTIFICATION:",

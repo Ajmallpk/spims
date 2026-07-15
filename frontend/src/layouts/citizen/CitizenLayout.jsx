@@ -22,6 +22,7 @@
 import TopNavigation from "@/layouts/citizen/TopNavigation"
 import { Outlet } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { toast } from "react-toastify";
 
 const CitizenLayout = () => {
 
@@ -112,6 +113,11 @@ const CitizenLayout = () => {
         console.log(
           "Realtime notification",
           data
+        )
+
+
+        toast.info(
+          data.message
         )
 
         const newNotification = {

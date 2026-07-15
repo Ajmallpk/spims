@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/Adminheader";
+import { toast } from "react-toastify";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -34,6 +35,10 @@ const AdminLayout = () => {
         console.log("MESSAGE RECEIVED", event.data)
 
         const data = JSON.parse(event.data)
+
+        toast.info(
+          data.message
+        )
 
         const newNotification = {
 

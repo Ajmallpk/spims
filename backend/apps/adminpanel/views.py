@@ -2254,11 +2254,28 @@ class CompleteLocationRequestView(APIView):
         req.admin_note = message
         req.save()
 
+        page = "DASHBOARD"
+
+        if req.requested_by.role == User.Role.WARD:
+            page = "WARD_PROFILE"
+
+        elif req.requested_by.role == User.Role.CITIZEN:
+            page = "CITIZEN_VERIFICATION"
+
+        elif req.requested_by.role == User.Role.PANCHAYATH:
+            page = "PANCHAYATH_PROFILE"
+
+
         send_notification(
             user=req.requested_by,
             title="Location Request Completed",
             message=message,
-            n_type="ALERT"
+            n_type="ALERT",
+            extra_data={
+                "target": {
+                    "page": page
+                }
+            }
         )
 
         return success_response(

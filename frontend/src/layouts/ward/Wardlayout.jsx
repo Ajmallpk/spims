@@ -7,6 +7,7 @@ import VerificationPendingModal from "@/components/panjayath/VerificationPending
 import axiosInstance from "@/api/axiosInstance";
 import WardNotificationBell from "@/components/ward/WardNotificationBell";
 import wardapi from "@/service/wardurls";
+import { toast } from "react-toastify";
 const PROTECTED_PATHS = [
   "/ward/dashboard",
   "/ward/citizen-verifications",
@@ -151,6 +152,11 @@ export default function WardLayout() {
             event.data
           )
 
+
+        toast.info(
+          data.message
+        )
+        
         console.log(
           "WARD NOTIFICATION",
           data
