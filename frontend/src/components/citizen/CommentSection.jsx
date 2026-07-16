@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import Avatar from "@/components/ui/Avatar";
 import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
+import { handleApiError } from "@/utils/handleApiError";
 
-const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
+const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -45,6 +46,7 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
           user_id: c.user_id,
           text: c.comment,
           timeAgo: c.created_at,
+          reply_to: c.reply_to,
 
           replies:
             c.replies?.sort(
@@ -159,35 +161,48 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
 
         if (data.parent_id) {
 
-          return prev.map((comment) => {
+          const addReply = (comments) => {
 
-            if (comment.id === data.parent_id) {
+            return comments.map((comment) => {
 
-              setExpandedReplies((prevExpanded) => ({
-                ...prevExpanded,
-                [comment.id]: true
-              }));
+              // Found the parent comment
+              if (comment.id === data.parent_id) {
 
-              return {
+                setExpandedReplies((prev) => ({
+                  ...prev,
+                  [comment.id]: true,
+                }));
 
-                ...comment,
+                return {
+                  ...comment,
+                  replies: [
+                    {
+                      id: data.id,
+                      user_name: data.user_name,
+                      user_id: data.user_id,
+                      comment: data.comment,
+                      created_at: data.created_at,
+                      replies: [],
+                    },
+                    ...(comment.replies || []),
+                  ],
+                };
+              }
 
-                replies: [
-                  {
-                    id: data.id,
-                    user_name: data.user_name,
-                    user_id: data.user_id,
-                    comment: data.comment,
-                    created_at: data.created_at
-                  },
+              // Search inside nested replies
+              if (comment.replies?.length > 0) {
 
-                  ...(comment.replies || [])
-                ]
-              };
-            }
+                return {
+                  ...comment,
+                  replies: addReply(comment.replies),
+                };
+              }
 
-            return comment;
-          });
+              return comment;
+            });
+          };
+
+          return addReply(prev);
         }
 
         return [newComment, ...prev];
@@ -203,7 +218,7 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
       socketRef.current?.close();
     };
 
-  }, [issueId,refreshKey]);
+  }, [issueId, refreshKey]);
 
 
 
@@ -279,6 +294,77 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
 
       return part;
     });
+  };
+
+
+
+  const renderReplies = (replies = []) => {
+    return replies.map((reply) => (
+      <div
+        key={reply.id}
+        className="flex gap-2 mt-3"
+      >
+
+        <div className="flex gap-2">
+
+          <span className="
+                    text-[10px]
+                    bg-teal-50
+                    text-teal-600
+                    px-2
+                    py-1
+                    rounded-full
+                    h-fit
+                ">
+            Reply
+          </span>
+
+          <Avatar alt={reply.user_name} size="sm" />
+
+          <div className="flex-1">
+
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold">
+                {reply.user_name}
+              </span>
+
+              <span className="text-[11px] text-gray-400">
+                {formatTimeAgo(reply.created_at)}
+              </span>
+            </div>
+
+            <p className="text-sm text-gray-600">
+              {reply.reply_to && (
+                <span className="text-blue-500 font-medium">
+                  @{reply.reply_to.user_name}{" "}
+                </span>
+              )}
+
+              {renderCommentText(reply.comment)}
+            </p>
+
+            
+
+            <button
+              onClick={() => {
+                setReplyingTo({
+                  id: reply.id,
+                  authorName: reply.user_name,
+                  commentText: reply.comment,
+                });
+
+                inputRef.current?.focus();
+              }}
+              className="text-xs text-teal-600 mt-1"
+            >
+              Reply
+            </button>
+
+
+          </div>
+        </div>
+      </div>
+    ));
   };
 
   return (
@@ -432,55 +518,8 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
               {/* Replies */}
               {comment.replies?.length > 0 &&
                 expandedReplies[comment.id] && (
-                  <div className="mt-3 ml-6 space-y-3 border-l border-gray-200 pl-4">
-
-                    {comment.replies.map((reply) => (
-
-                      <div key={reply.id} className="flex gap-2">
-
-                        <Avatar alt={reply.user_name} size="sm" />
-
-                        <div className="flex-1">
-
-                          <div className="flex items-center justify-between">
-
-                            <span className="text-xs font-semibold text-gray-800">
-                              {reply.user_name}
-                            </span>
-
-                            <span className="text-[11px] text-gray-400">
-                              {formatTimeAgo(reply.created_at)}
-                            </span>
-
-                          </div>
-
-                          <p className="text-sm text-gray-600">
-                            {renderCommentText(reply.comment)}
-                          </p>
-
-
-
-
-                          <button
-                            onClick={() => {
-                              setReplyingTo({
-                                id: comment.id,
-                                authorName: reply.user_name,
-                              });
-
-                              setTimeout(() => {
-                                inputRef.current?.focus();
-                              }, 0);
-                            }}
-                            className="text-xs text-teal-600 mt-1 hover:underline"
-                          >
-                            Reply
-                          </button>
-
-                        </div>
-                      </div>
-                    ))}
-
+                  <div className="ml-10 mt-2 space-y-2">
+                    {renderReplies(comment.replies)}
                   </div>
                 )}
 
@@ -489,6 +528,7 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
                   setReplyingTo({
                     id: comment.id,
                     authorName: comment.authorName,
+                    commentText: comment.text,
                   });
 
                   setTimeout(() => {
@@ -505,17 +545,35 @@ const CommentSection = ({ issueId, onCommentAdded,refreshKey }) => {
       )}
 
       {replyingTo && (
-        <div className="flex items-center justify-between bg-teal-50 border border-teal-100 rounded-xl px-3 py-2">
-          <div className="text-xs text-teal-700">
-            Replying to <span className="font-semibold">{replyingTo.authorName}</span>
+        <div className="bg-teal-50 border border-teal-100 rounded-xl px-3 py-2">
+
+          <div className="flex items-center justify-between">
+
+            <div className="text-xs text-teal-700">
+              Replying to
+              <span className="font-semibold">
+                {" "}
+                {replyingTo.authorName}
+              </span>
+            </div>
+
+            <p className="text-xs text-gray-600 mt-1">
+              "{replyingTo.commentText}"
+            </p>
+
+            <button
+              onClick={() => setReplyingTo(null)}
+              className="text-gray-500 hover:text-red-500 text-sm"
+            >
+              ✕
+            </button>
+
           </div>
 
-          <button
-            onClick={() => setReplyingTo(null)}
-            className="text-gray-500 hover:text-red-500 text-sm"
-          >
-            ✕
-          </button>
+          <p className="text-xs text-gray-500 mt-2 italic">
+            "{replyingTo.parentText}"
+          </p>
+
         </div>
       )}
 

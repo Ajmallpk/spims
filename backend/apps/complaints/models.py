@@ -202,6 +202,15 @@ class ComplaintComment(models.Model):
         blank=True,
         related_name="replies"
     )
+    
+    
+    reply_to_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comment_mentions"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     
     updated_at = models.DateTimeField(auto_now=True)

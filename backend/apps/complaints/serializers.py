@@ -191,6 +191,7 @@ class ComplaintCommentSerializer(serializers.ModelSerializer):
         source="user.id",
         read_only=True
     )
+    reply_to = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
 
     class Meta:
@@ -202,14 +203,29 @@ class ComplaintCommentSerializer(serializers.ModelSerializer):
             "user_id",
             "created_at",
             "parent",
+            "reply_to",
             "replies",
         ]
 
     def get_replies(self, obj):
-        if obj.parent is None:
-            replies = obj.replies.all().order_by("created_at")
-            return ComplaintCommentSerializer(replies, many=True).data
-        return []
+
+        replies = obj.replies.all().order_by(
+            "created_at"
+        )
+
+        return ComplaintCommentSerializer(
+            replies,
+            many=True
+        ).data
+    
+    def get_reply_to(self, obj):
+
+        if obj.reply_to_user:
+            return {
+                "user_name": obj.reply_to_user.username
+            }
+
+        return None
         
         
           

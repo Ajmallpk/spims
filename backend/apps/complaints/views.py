@@ -286,10 +286,27 @@ class ComplaintCommentCreateView(APIView):
 
             comment_text = request.data.get("comment", "").strip()
             parent_id = request.data.get("parent")
+            
+            
+            parent = None
+            reply_to_user = None
             parent_comment = None
+            
+            
             
             if parent_id:
                 parent_comment = ComplaintComment.objects.filter(id=parent_id).first()
+                
+                if parent_comment:
+
+                    if parent_comment.parent:
+                        parent = parent_comment.parent
+                    else:
+                        parent = parent_comment
+
+                    reply_to_user = parent_comment.user
+                else:
+                    parent = None
 
             if not comment_text:
                 return error_response(
@@ -309,7 +326,8 @@ class ComplaintCommentCreateView(APIView):
                 complaint=complaint,
                 user=user,
                 comment=comment_text,
-                parent = parent_comment
+                parent=parent,
+                reply_to_user=reply_to_user
             )
             
             
@@ -355,11 +373,14 @@ class ComplaintCommentCreateView(APIView):
                         sender=user
                     )
 
-            if complaint.citizen != request.user:
+            if (
+                not parent_comment
+                and complaint.citizen != request.user
+            ):
                 send_notification(
                     user=complaint.citizen,
                     title="New Comment",
-                    message="New commented on your complaint",
+                    message="New comment on your complaint",
                     n_type="COMMENT",
                     complaint=complaint,
                     sender=request.user
@@ -369,7 +390,10 @@ class ComplaintCommentCreateView(APIView):
                 send_notification(
                     user=parent_comment.user,
                     title="New Reply",
-                    message=f"{user.username} replied to your comment",
+                    message=(
+                        f'{user.username} replied to your comment:\n'
+                        f'"{comment.comment}"'
+                    ),
                     n_type="COMMENT",
                     complaint=complaint,
                     sender=user
