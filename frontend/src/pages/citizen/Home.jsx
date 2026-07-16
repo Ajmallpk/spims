@@ -9,6 +9,7 @@ import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
 import { RefreshCw } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 // Verification status constants
 const VERIFICATION_STATUS = {
@@ -111,6 +112,15 @@ const Home = () => {
 
   //   window.location.href = "/citizen/registration";
   // };
+
+
+  const [searchParams] = useSearchParams();
+
+  const complaintId = searchParams.get("complaint");
+  const commentId = searchParams.get("comment");
+
+  console.log("Complaint:", complaintId);
+  console.log("Comment:", commentId);
 
 
 
@@ -336,7 +346,12 @@ const Home = () => {
       ) : (
         <div className="space-y-5">
           {issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} />
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              targetComplaintId={complaintId}
+              targetCommentId={commentId}
+            />
           ))}
         </div>
       )}

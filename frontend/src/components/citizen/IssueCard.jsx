@@ -7,7 +7,7 @@ import StatusBadge from "../../components/ward/Statusbadge";
 import CreateIssueModal from "@/components/citizen/Createissuemodal";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
-const IssueCard = ({ issue }) => {
+const IssueCard = ({ issue, targetComplaintId, targetCommentId, }) => {
   console.log(issue);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoteCount, setUpvoteCount] = useState(issue.upvotes || 0);
@@ -16,10 +16,22 @@ const IssueCard = ({ issue }) => {
   const [refreshing, setRefreshing] = useState(false);
 
 
+
+  useEffect(() => {
+    if (
+      targetComplaintId &&
+      Number(targetComplaintId) === issue.id
+    ) {
+      setShowComments(true);
+    }
+  }, [targetComplaintId, issue.id]);
+
   useEffect(() => {
     setUpvoteCount(issue.upvotes || 0);
     setCommentCount(issue.commentCount || 0);
   }, [issue.upvotes, issue.commentCount]);
+
+
 
 
 
@@ -353,6 +365,7 @@ const IssueCard = ({ issue }) => {
       {showComments && (
         <CommentSection
           issueId={issue.id}
+          targetCommentId={targetCommentId}
           refreshKey={refreshKey}
           onCommentAdded={() =>
             setCommentCount((prev) => prev + 1)

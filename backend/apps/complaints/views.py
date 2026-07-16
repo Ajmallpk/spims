@@ -396,7 +396,10 @@ class ComplaintCommentCreateView(APIView):
                     ),
                     n_type="COMMENT",
                     complaint=complaint,
-                    sender=user
+                    sender=user,
+                    extra_data={
+                        "comment_id": comment.id
+                    }
                 )
 
             logger.info(f"Citizen {user.id} commented on complaint {complaint.id}")

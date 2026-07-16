@@ -18,6 +18,16 @@ export function getNotificationRoute(notification) {
         // ---------------- Citizen ----------------
 
         case "CITIZEN_COMPLAINT_DETAIL":
+
+            console.log(
+                "COMMENT ID:",
+                target.comment_id
+            );
+
+            if (target.comment_id) {
+                return `/citizen/complaints/${target.id}?comment=${target.comment_id}`;
+            }
+
             return `/citizen/complaints/${target.id}`;
 
         case "CITIZEN_COMPLAINT_CHAT":

@@ -4,7 +4,7 @@ import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
 
-const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
+const CommentSection = ({ issueId, onCommentAdded, refreshKey, targetCommentId, }) => {
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
@@ -19,9 +19,54 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
   const [showMentionBox, setShowMentionBox] = useState(false);
   const [mentionUsers, setMentionUsers] = useState([]);
   const [showMentions, setShowMentions] = useState(false);
+  const [highlightedComment, setHighlightedComment] = useState(null);
   const inputRef = useRef(null);
   const socketRef = useRef(null);
+  const commentRefs = useRef({});
 
+
+  useEffect(() => {
+    if (targetCommentId) {
+      console.log(
+        "Target Comment:",
+        targetCommentId
+      );
+    }
+  }, [targetCommentId]);
+
+
+
+
+  useEffect(() => {
+
+    if (!targetCommentId) return;
+
+    setTimeout(() => {
+
+      const element =
+        commentRefs.current[
+        Number(targetCommentId)
+        ];
+
+      if (element) {
+
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        setHighlightedComment(
+          Number(targetCommentId)
+        );
+
+        setTimeout(() => {
+          setHighlightedComment(null);
+        }, 3000);
+      }
+
+    }, 300);
+
+  }, [targetCommentId, localComments]);
 
 
   const loadComments = async () => {
@@ -33,6 +78,11 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
       const res = await complaintapi.getComments(
         issueId,
         page
+      );
+
+      console.log(
+        "RAW COMMENTS:",
+        res.data.results
       );
 
       const formatted = res.data.results
@@ -54,6 +104,37 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
                 new Date(b.created_at) - new Date(a.created_at)
             ) || [],
         }));
+
+
+      console.log(
+        "ALL COMMENT IDS:",
+        formatted.flatMap((comment) => [
+          comment.id,
+          ...(comment.replies || []).map(
+            (reply) => reply.id
+          ),
+        ])
+      );
+
+      if (targetCommentId) {
+
+        formatted.forEach((comment) => {
+
+          const hasReply = comment.replies?.some(
+            (reply) =>
+              reply.id === Number(targetCommentId)
+          );
+
+          if (hasReply) {
+
+            setExpandedReplies((prev) => ({
+              ...prev,
+              [comment.id]: true,
+            }));
+
+          }
+        });
+      }
 
       if (page === 1) {
         setLocalComments(formatted);
@@ -302,7 +383,13 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
     return replies.map((reply) => (
       <div
         key={reply.id}
-        className="flex gap-2 mt-3"
+        ref={(el) => (
+          commentRefs.current[reply.id] = el
+        )}
+        className={`flex gap-2 mt-3 rounded-lg p-2 transition-all duration-500 ${highlightedComment === reply.id
+          ? "bg-yellow-100 border border-yellow-400"
+          : ""
+          }`}
       >
 
         <div className="flex gap-2">
@@ -343,7 +430,7 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
               {renderCommentText(reply.comment)}
             </p>
 
-            
+
 
             <button
               onClick={() => {
@@ -392,7 +479,14 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey }) => {
         </div>
       ) : (
         localComments.map((comment) => (
-          <div key={comment.id} className="flex gap-2.5">
+          <div
+            key={comment.id}
+            ref={(el) => (commentRefs.current[comment.id] = el)}
+            className={`flex gap-2.5 rounded-lg p-2 transition-all duration-500 ${highlightedComment === comment.id
+              ? "bg-yellow-100 border border-yellow-400"
+              : ""
+              }`}
+          >
             <Avatar alt={comment.authorName} size="sm" />
 
             <div className="flex-1">

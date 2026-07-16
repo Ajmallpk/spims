@@ -228,12 +228,17 @@ def send_notification_task(
 
     payload = extra_data or {}
 
-    payload["target"] = build_notification_target(
+    target = build_notification_target(
         user=user,
         notification_type=n_type,
         complaint=complaint,
         verification_id=payload.get("verification_id")
     )
+
+    if payload.get("comment_id"):
+        target["comment_id"] = payload["comment_id"]
+
+    payload["target"] = target
     
     
     print("ROLE =", user.role)
