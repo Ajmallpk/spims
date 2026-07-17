@@ -267,6 +267,8 @@ class ComplaintDetailSerializer(serializers.ModelSerializer):
             "comments_count",
             "resolution",
             "media",
+            "ward_viewed",
+            "panchayath_viewed",
         ]
 
     def get_upvotes_count(self, obj):

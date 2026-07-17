@@ -1047,12 +1047,19 @@ class ComplaintDetailView(APIView):
                 id=complaint_id,
                 ward=ward_master
             ).first()
+            
+            
 
             if not complaint:
                 return error_response(
                     message="Complaint not found",
                     status=404
                 )
+                
+                
+            if not complaint.ward_viewed:
+                complaint.ward_viewed = True
+                complaint.save(update_fields=["ward_viewed"])
 
             profile = getattr(complaint.citizen, "citizen_profile", None)
             

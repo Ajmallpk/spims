@@ -134,6 +134,10 @@ class Complaint(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     is_reassigned = models.BooleanField(default=False)
+    
+    ward_viewed = models.BooleanField(default=False)
+
+    panchayath_viewed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.title} - {self.status}"

@@ -1204,12 +1204,20 @@ class PanchayathComplaintDetailView(APIView):
                 id=complaint_id,
                 panchayath=user
             ).first()
+            
+            
+            
 
             if not complaint:
                 return error_response(
                     message="Complaint not found",
                     status=404
                 )
+                
+                
+            if not complaint.panchayath_viewed:
+                complaint.panchayath_viewed = True
+                complaint.save(update_fields=["panchayath_viewed"])
 
             media = [
                 {

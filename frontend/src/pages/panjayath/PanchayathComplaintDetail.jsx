@@ -286,6 +286,10 @@ export default function PanchayathComplaintDetail() {
     const [currentStatus, setCurrentStatus] = useState(null);
 
 
+    const panchayathViewed =
+        complaint?.panchayath_viewed;
+
+
     useEffect(() => {
         const fetchComplaint = async () => {
             try {
@@ -690,6 +694,7 @@ export default function PanchayathComplaintDetail() {
 
                                         {currentStatus === "IN_PROGRESS" && (
                                             <button
+                                                disabled={!panchayathViewed}
                                                 onClick={() => setShowHoldModal(true)}
                                                 className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold px-4 py-3 rounded-xl"
                                             >
@@ -700,6 +705,7 @@ export default function PanchayathComplaintDetail() {
 
                                         {showResolve && (
                                             <button
+                                                disabled={!panchayathViewed}
                                                 onClick={() => setModal("resolve")}
                                                 className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
                                             >
@@ -711,6 +717,7 @@ export default function PanchayathComplaintDetail() {
                                         )}
                                         {showReassign && (
                                             <button
+                                                disabled={!panchayathViewed}
                                                 onClick={() => setModal("reassign")}
                                                 className="w-full flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 hover:border-blue-400 text-sm font-semibold px-4 py-3 rounded-xl transition-all duration-150"
                                             >
