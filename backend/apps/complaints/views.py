@@ -383,7 +383,10 @@ class ComplaintCommentCreateView(APIView):
                     message="New comment on your complaint",
                     n_type="COMMENT",
                     complaint=complaint,
-                    sender=request.user
+                    sender=request.user,
+                    extra_data={
+                        "comment_id": comment.id
+                    }
                 )
                 
             if parent_comment and parent_comment.user != user:
