@@ -1215,9 +1215,7 @@ class PanchayathComplaintDetailView(APIView):
                 )
                 
                 
-            if not complaint.panchayath_viewed:
-                complaint.panchayath_viewed = True
-                complaint.save(update_fields=["panchayath_viewed"])
+            
 
             media = [
                 {
@@ -1250,6 +1248,8 @@ class PanchayathComplaintDetailView(APIView):
                     "id": complaint.id,
                     "title": complaint.title,
                     "description": complaint.description,
+                    
+                    "panchayath_viewed": complaint.panchayath_viewed,
                     "category": complaint.category,
                     "status": complaint.status,
                     "hold_reason": complaint.hold_reason,
@@ -1315,6 +1315,7 @@ class PanchayathComplaintDetailView(APIView):
                     )
 
                 complaint.status = "IN_PROGRESS"
+                complaint.panchayath_viewed = True
                 complaint.save()
                 
                 

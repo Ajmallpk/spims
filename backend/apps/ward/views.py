@@ -84,7 +84,11 @@ class WardProfile(APIView):
                     "official_contact": verification.official_contact,
 
                     "ward_name": verification.ward_name,
-                    "panchayath_name": verification.panchayath.username,
+                    "panchayath_name": (
+                        verification.panchayath_master.name
+                        if verification.panchayath_master
+                        else None
+                    ),
                     "office_address": verification.office_address,
 
                     "aadhaar_image": verification.aadhaar_image.url if verification.aadhaar_image else None,

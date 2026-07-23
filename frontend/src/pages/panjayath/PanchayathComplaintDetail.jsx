@@ -186,7 +186,7 @@ function ActionModal({ type, onClose, onConfirm }) {
                         />
                     </div>
 
-                    {/* <div>
+                    <div>
                         <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">
                             {isResolve ? "Upload Proof / Media" : "Supporting Documents"}
                         </label>
@@ -210,7 +210,7 @@ function ActionModal({ type, onClose, onConfirm }) {
                                 ))}
                             </div>
                         )}
-                    </div> */}
+                    </div>
                 </div>
 
                 {/* Modal Footer */}
@@ -692,11 +692,21 @@ export default function PanchayathComplaintDetail() {
                                         )}
 
 
+
+                                        
+
                                         {currentStatus === "IN_PROGRESS" && (
                                             <button
                                                 disabled={!panchayathViewed}
                                                 onClick={() => setShowHoldModal(true)}
-                                                className="w-full flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold px-4 py-3 rounded-xl"
+                                                className="
+    w-full flex items-center justify-center gap-2
+    bg-yellow-500 hover:bg-yellow-600
+    text-white text-sm font-semibold
+    px-4 py-3 rounded-xl
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+"
                                             >
                                                 Put On Hold
                                             </button>
@@ -707,7 +717,15 @@ export default function PanchayathComplaintDetail() {
                                             <button
                                                 disabled={!panchayathViewed}
                                                 onClick={() => setModal("resolve")}
-                                                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
+                                                className="
+    w-full flex items-center justify-center gap-2
+    bg-emerald-600 hover:bg-emerald-700
+    text-white text-sm font-semibold
+    px-4 py-3 rounded-xl
+    transition-all duration-150 shadow-sm hover:shadow-md
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -719,7 +737,17 @@ export default function PanchayathComplaintDetail() {
                                             <button
                                                 disabled={!panchayathViewed}
                                                 onClick={() => setModal("reassign")}
-                                                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 hover:border-blue-400 text-sm font-semibold px-4 py-3 rounded-xl transition-all duration-150"
+                                                className="
+    w-full flex items-center justify-center gap-2
+    bg-white hover:bg-blue-50
+    text-blue-600 border border-blue-200
+    hover:border-blue-400
+    text-sm font-semibold
+    px-4 py-3 rounded-xl
+    transition-all duration-150
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
