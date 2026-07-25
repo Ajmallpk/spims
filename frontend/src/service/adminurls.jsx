@@ -206,4 +206,35 @@ export const adminapi = {
             `/admin/verification-queue/wards/?page=${page}`
         );
     },
+
+
+    getAuthorityPanchayaths: async () => {
+        const response = await adminAxios.get(
+            "/admin/authority/panchayaths/"
+        );
+        return response.data;
+    },
+
+    createPanchayathAuthority: async (data) => {
+        const response = await adminAxios.post(
+            "/admin/create-panchayath/",
+            data
+        );
+        return response.data;
+    },
+
+    resetPanchayathPassword: async (userId) => {
+        const response = await adminAxios.post(
+            `/admin/panchayaths/${userId}/reset-password/`
+        );
+        return response.data;
+    },
+
+    updateOfficerEmail: async (userId, data) => {
+        const response = await adminAxios.patch(
+            `/admin/panchayaths/${userId}/update-officer-email/`,
+            data
+        );
+        return response.data;
+    },
 }

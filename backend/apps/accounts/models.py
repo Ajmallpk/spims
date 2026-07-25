@@ -48,6 +48,53 @@ class User(AbstractUser):
     
     failed_attempts = models.IntegerField(default=0)
     lock_until = models.DateTimeField(null=True, blank=True)
+    
+    
+    official_phone = models.CharField(
+        max_length=15,
+        blank=True
+    )
+
+    officer_personal_email = models.EmailField(
+        blank=True
+    )
+
+    must_change_password = models.BooleanField(
+        default=False
+    )
+    
+    set_password_token = models.UUIDField(
+        null=True,
+        blank=True,
+        unique=True
+    )
+    
+    
+    
+    district = models.ForeignKey(
+        "District",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="authority_users",
+    )
+
+    panchayath = models.ForeignKey(
+        "Panchayath",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="authority_users",
+    )
+    
+    
+    ward = models.ForeignKey(
+        "Ward",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="authority_users",
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]

@@ -159,12 +159,33 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
   const loadUser = async () => {
     try {
+
       const res = await wardapi.me();
 
       setFields((prev) => ({
         ...prev,
-        officer_full_name: res.data.username || "",
+
+        officer_full_name: "",
+
+        official_email:
+          res.data.email,
+
+        official_contact:
+          res.data.official_phone,
+
+        district:
+          res.data.district,
+
+        panchayath_master:
+          res.data.panchayath_master,
+
+        ward_master:
+          res.data.ward_master,
+
+        ward_name:
+          res.data.ward_name,
       }));
+
     } catch (err) {
       console.log(err);
     }
@@ -427,6 +448,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
               required
               placeholder="officer@panchayath.gov.in"
               error={errors.official_email}
+              disabled={true}
             />
             <FormInput
               label="Official Contact Number"
@@ -437,6 +459,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
               required
               placeholder="e.g. 9876543210"
               error={errors.official_contact}
+              disabled={true}
             />
           </div>
         </div>
@@ -453,7 +476,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 District
               </label>
 
-              <SearchableSelect
+              {/* <SearchableSelect
                 placeholder="Select District"
                 options={districts.map((d) => ({
                   value: d.id,
@@ -474,7 +497,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                     },
                   })
                 }
-              />
+              /> */}
 
             </div>
 
@@ -485,7 +508,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 Panchayath
               </label>
 
-              <SearchableSelect
+              {/* <SearchableSelect
                 placeholder="Select Panchayath"
                 options={panchayaths.map((p) => ({
                   value: p.id,
@@ -507,7 +530,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                   })
                 }
                 isDisabled={!fields.district}
-              />
+              /> */}
 
             </div>
 
@@ -519,7 +542,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 Ward
               </label>
 
-              <SearchableSelect
+              {/* <SearchableSelect
                 placeholder="Select Ward"
                 options={wards.map((w) => ({
                   value: w.id,
@@ -541,10 +564,10 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                   })
                 }
                 isDisabled={!fields.panchayath_master}
-              />
+              /> */}
 
 
-              <div className="mt-4 flex justify-end">
+              {/* <div className="mt-4 flex justify-end">
                 <button
                   type="button"
                   className="text-sm text-blue-600 hover:underline"
@@ -552,7 +575,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
                 >
                   Can't find your District / Panchayath / Ward?
                 </button>
-              </div>
+              </div> */}
 
             </div>
 

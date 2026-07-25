@@ -89,6 +89,27 @@ urlpatterns = [
         views.WaitingWardListView.as_view()
     ),
     
+    path(
+    "create-panchayath/",
+    views.CreatePanchayathAPIView.as_view(),
+),
+    
+    path(
+    "panchayaths/<int:user_id>/reset-password/",
+    views.ResetPanchayathPasswordAPIView.as_view(),
+),
+    
+    
+    path(
+    "panchayaths/<int:user_id>/update-officer-email/",
+    views.UpdatePanchayathOfficerEmailAPIView.as_view()
+),
+    
+    path(
+    "authority/panchayaths/",
+    views.AuthorityPanchayathListAPIView.as_view(),
+),
+    
 ]
 
 

@@ -51,8 +51,16 @@ from apps.accounts.models import (
 from apps.accounts.models import LocationRequest
 from .pagination import CustomPagination
 import traceback
+from .serializers import (
+    CreatePanchayathSerializer,
+    AuthorityPanchayathListSerializer,
+)
 
+from apps.accounts.otp_utils import (
+    send_set_password_email
+)
 
+import uuid
 logger = logging.getLogger(__name__)
 
 
@@ -2623,4 +2631,253 @@ class WaitingWardDetailView(APIView):
                     else None
                 ),
             }
+        )
+        
+        
+        
+class CreatePanchayathAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        if not request.user.is_superuser:
+
+            return error_response(
+                message="Permission denied",
+                status=403
+            )
+
+        serializer = CreatePanchayathSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        data = serializer.validated_data
+        
+        officer_personal_email = request.data.get(
+            "officer_personal_email"
+        )
+
+        user = User.objects.create(
+            username=data["panchayath"].name,
+            email=data["official_email"],
+            role="PANCHAYATH",
+            district=data["district"],
+            panchayath=data["panchayath"],
+            official_phone=data["official_phone"],
+            officer_personal_email=data["officer_personal_email"],
+            must_change_password=True,
+            is_verified=False,
+            status=User.Status.PENDING,
+        )
+
+        user.set_unusable_password()
+
+        import secrets
+
+        user.set_password_token = secrets.token_urlsafe(32)
+
+        user.save()
+        
+        
+        set_password_link = (
+            f"http://localhost:5173/set-password/{user.set_password_token}"
+        )
+        
+        
+        
+        send_set_password_email(
+            personal_email=user.officer_personal_email,
+            official_email=user.email,
+            link=set_password_link,
+        )
+
+        return success_response(
+            message="Panchayath account created"
+        )
+        
+        
+        
+        
+class ResetPanchayathPasswordAPIView(
+    APIView
+):
+    permission_classes = [
+        IsAuthenticated
+    ]
+
+    def post(
+        self,
+        request,
+        user_id
+    ):
+
+        if not request.user.is_superuser:
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        user = User.objects.filter(
+            id=user_id,
+            role="PANCHAYATH"
+        ).first()
+
+        if not user:
+
+            return error_response(
+                message="Panchayath not found.",
+                status=404
+            )
+            
+        import secrets
+
+        
+        user.set_password_token = secrets.token_urlsafe(32)
+
+        
+        user.must_change_password = True
+
+        user.save()
+        
+        
+        
+        set_password_link = (
+            f"http://localhost:5173/set-password/{user.set_password_token}"
+        )
+
+        send_set_password_email(
+            personal_email=user.officer_personal_email,
+            official_email=user.email,
+            link=set_password_link,
+        )
+        
+        
+        return success_response(
+            message="Password reset email sent successfully."
+        )
+        
+        
+        
+class UpdatePanchayathOfficerEmailAPIView(
+    APIView
+):
+    permission_classes = [
+        IsAuthenticated
+    ]
+
+    def patch(
+        self,
+        request,
+        user_id
+    ):
+
+        if not request.user.is_superuser:
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        user = User.objects.filter(
+            id=user_id,
+            role="PANCHAYATH"
+        ).first()
+
+        if not user:
+
+            return error_response(
+                message="Panchayath not found.",
+                status=404
+            )
+
+        officer_email = request.data.get(
+            "officer_personal_email"
+        )
+
+        if not officer_email:
+
+            return error_response(
+                message=(
+                    "Officer email is required."
+                ),
+                status=400
+            )
+
+        import secrets
+
+        user.officer_personal_email = officer_email
+
+        
+        user.set_unusable_password()
+
+        
+        user.set_password_token = secrets.token_urlsafe(32)
+
+        
+        user.must_change_password = True
+        
+        user.failed_attempts = 0
+        user.lock_until = None
+
+        user.save()
+
+        set_password_link = (
+            f"http://localhost:5173/"
+            f"set-password/{user.set_password_token}"
+        )
+
+        send_set_password_email(
+            personal_email=user.officer_personal_email,
+            official_email=user.email,
+            link=set_password_link,
+        )
+
+        return success_response(
+            message=(
+                "Officer email updated successfully."
+            )
+        )
+        
+        
+        
+class AuthorityPanchayathListAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        if not request.user.is_superuser:
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        users = (
+            User.objects.filter(
+                role=User.Role.PANCHAYATH
+            )
+            .select_related(
+                "district",
+                "panchayath",
+            )
+            .order_by(
+                "district__name",
+                "panchayath__name",
+            )
+        )
+
+        serializer = AuthorityPanchayathListSerializer(
+            users,
+            many=True
+        )
+
+        return success_response(
+            message="Authority accounts fetched successfully.",
+            data=serializer.data,
         )

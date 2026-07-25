@@ -20,6 +20,11 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
+    label: "Authority Management",
+    path: "/admin/authority-management",
+    icon: ShieldCheck,
+  },
+  {
     label: "Panchayath Verification",
     path: "/admin/panchayath-verifications",
     icon: ClipboardCheck,

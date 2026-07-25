@@ -12,7 +12,7 @@ import { useSuspension } from "@/context/SuspensionContext";
 import axiosInstance from "@/api/axiosInstance";
 import WardProtectedRoute from "./routes/WardProtectedRoute";
 import PanchayathProtectedRoute from "./routes/PanchayathProtectedRoute";
-
+import SetPasswordPage from "@/pages/common/SetPasswordPage";
 
 
 
@@ -33,6 +33,7 @@ import ComplaintDetailPage from "./pages/admin/ComplaintDetailPage";
 import LocationManagement from "@/pages/admin/LocationManagement";
 import LocationRequests from "@/pages/admin/LocationRequests";
 import VerificationQueue from "@/pages/admin/VerificationQueue";
+import AuthorityManagement from "@/pages/admin/AuthorityManagement";
 
 
 /* ───────── PANCHAYATH MODULE ───────── */
@@ -122,6 +123,10 @@ export default function App() {
       // PUBLIC ROUTES FOR AUTHORITY //
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Authentication />} />
+        <Route
+          path="/set-password/:token"
+          element={<SetPasswordPage />}
+        />
 
 
 
@@ -332,6 +337,10 @@ export default function App() {
           <Route
             path="verification-queue"
             element={<VerificationQueue />}
+          />
+          <Route
+            path="authority-management"
+            element={<AuthorityManagement />}
           />
           <Route path="citizens" element={<AdminCitizenList />} />
           <Route path="citizens/:id" element={<AdminCitizenDetail />} />

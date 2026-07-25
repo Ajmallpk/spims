@@ -136,4 +136,28 @@ class ReassignComplaintSerializer(serializers.ModelSerializer):
 
         return instance
         
-            
+
+
+
+from rest_framework import serializers
+
+
+class CreateWardSerializer(
+    serializers.Serializer
+):
+
+    ward_id = serializers.IntegerField()
+
+    official_email = (
+        serializers.EmailField()
+    )
+
+    official_phone = (
+        serializers.CharField(
+            max_length=15
+        )
+    )
+
+    officer_personal_email = (
+        serializers.EmailField()
+    )

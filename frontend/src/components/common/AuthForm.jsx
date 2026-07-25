@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  signupUser,
-  verifyOtp,
-  resendOtp,
+  // signupUser,
+  // verifyOtp,
+  // resendOtp,
   loginUser,
   forgotPassword,
   verifyResetOtp,
@@ -42,10 +42,10 @@ import { triggerSuspension } from "@/utils/suspensionHandler";
 
 
 
-const roles = [
-  { value: "WARD", label: "Ward Member" },
-  { value: "PANCHAYATH", label: "Panchayath Authority" },
-]
+// const roles = [
+//   { value: "WARD", label: "Ward Member" },
+//   { value: "PANCHAYATH", label: "Panchayath Authority" },
+// ]
 
 export function AuthForm() {
   const navigate = useNavigate()
@@ -75,7 +75,7 @@ export function AuthForm() {
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
-    role: "WARD",
+    // role: "WARD",
   })
 
   // Signup state
@@ -189,7 +189,7 @@ export function AuthForm() {
       const response = await loginUser({
         email: loginData.email,
         password: loginData.password,
-        role: loginData.role
+        // role: loginData.role
       })
 
 
@@ -215,6 +215,13 @@ export function AuthForm() {
       )
 
 
+      localStorage.setItem(
+        "must_change_password",
+        String(
+          response.data.data.must_change_password
+        )
+      )
+
       sessionStorage.setItem(
         "role",
         response.data.data.role.toLowerCase()
@@ -222,6 +229,17 @@ export function AuthForm() {
 
       const role = response.data.data.role
       const isVerified = response.data.data.is_verified
+      const mustChangePassword =
+        response.data.data.must_change_password
+
+      if (mustChangePassword) {
+
+        navigate(
+          "/set-password-required"
+        )
+
+        return
+      }
 
       if (role === "WARD") {
         if (isVerified === "true") {
@@ -248,25 +266,24 @@ export function AuthForm() {
 
     } catch (error) {
 
-      const data =
-        error.response?.data
+      const data = error.response?.data
 
+      // Suspended account
       if (
-
         data?.error === "ACCOUNT_SUSPENDED" ||
-
-        data?.message?.includes(
-          "suspended"
-        )
-
+        data?.message?.includes("suspended")
       ) {
-
         triggerSuspension()
-
         return
-
       }
 
+      // Password setup required
+      if (data?.error === "PASSWORD_SETUP_REQUIRED") {
+        toast.error(data.message)
+        return
+      }
+
+      // Default error
       handleApiError(
         error,
         "Invalid email or password"
@@ -697,16 +714,8 @@ export function AuthForm() {
           >
             Login
           </button>
-          <button
-            type="button"
-            onClick={() => switchMode("signup")}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${mode === "signup"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Sign Up
-          </button>
+          {/* Removed intentionally.
+   Authority accounts are created internally. */}
         </div>
 
 
@@ -784,7 +793,7 @@ export function AuthForm() {
             </div>
 
             {/* Role Selector */}
-            <div className="flex flex-col gap-2">
+            {/* <div className="flex flex-col gap-2">
               <Label htmlFor="login-role">Role</Label>
               <select
                 id="login-role"
@@ -800,7 +809,7 @@ export function AuthForm() {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
 
             <Button
               type="submit"
@@ -818,311 +827,13 @@ export function AuthForm() {
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
-              {"Don't have an account? "}
-              <button
-                type="button"
-                onClick={() => switchMode("signup")}
-                className="font-semibold text-primary underline-offset-4 hover:underline"
-              >
-                Sign Up
-              </button>
+              Authority accounts are created by the system administrator.
             </p>
           </form>
         )}
 
         {/* Signup Form */}
-        {mode === "signup" && (
-          <form
-            onSubmit={otpSent ? handleVerifyOtp : handleSignup}
-            className="flex flex-col gap-4"
-          >
-            {/* Full Name */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="signup-name">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="signup-name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  className="pl-10"
-                  value={signupData.fullName}
-                  onChange={(e) => {
-                    setSignupData({ ...signupData, fullName: e.target.value })
-                    if (errors.fullName)
-                      setErrors({ ...errors, fullName: undefined })
-                  }}
-                  disabled={otpSent}
-                  aria-invalid={!!errors.fullName}
-                />
-              </div>
-              {errors.fullName && (
-                <p className="text-xs text-destructive">{errors.fullName}</p>
-              )}
-            </div>
 
-            {/* Email */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="signup-email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="signup-email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="pl-10"
-                  value={signupData.email}
-                  onChange={(e) => {
-                    setSignupData({ ...signupData, email: e.target.value })
-                    if (errors.email)
-                      setErrors({ ...errors, email: undefined })
-                  }}
-                  disabled={otpSent}
-                  aria-invalid={!!errors.email}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-
-            {/* Password */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="signup-password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="signup-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Min 8 chars, 1 uppercase, 1 number, 1 special char"
-                  className="pl-10 pr-10"
-                  value={signupData.password}
-                  onChange={(e) => {
-                    setSignupData({ ...signupData, password: e.target.value })
-                    if (errors.password)
-                      setErrors({ ...errors, password: undefined })
-                  }}
-                  disabled={otpSent}
-                  aria-invalid={!!errors.password}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
-              )}
-              {signupData.password && (
-                <div className="mt-1 text-xs font-medium">
-
-                  {passwordStrength === "weak" && (
-                    <span className="text-red-500">Weak 🔴</span>
-                  )}
-
-                  {passwordStrength === "medium" && (
-                    <span className="text-yellow-500">Medium 🟡</span>
-                  )}
-
-                  {passwordStrength === "strong" && (
-                    <span className="text-green-500">Strong 🟢</span>
-                  )}
-
-                </div>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="signup-confirm-password">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="signup-confirm-password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Re-enter your password"
-                  className="pl-10 pr-10"
-                  value={signupData.confirmPassword}
-                  onChange={(e) => {
-                    setSignupData({
-                      ...signupData,
-                      confirmPassword: e.target.value,
-                    })
-                    if (errors.confirmPassword)
-                      setErrors({ ...errors, confirmPassword: undefined })
-                  }}
-                  disabled={otpSent}
-                  aria-invalid={!!errors.confirmPassword}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-xs text-destructive">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Role */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="signup-role">Role</Label>
-              <select
-                id="signup-role"
-                value={signupData.role}
-                onChange={(e) =>
-                  setSignupData({ ...signupData, role: e.target.value })
-                }
-                disabled={otpSent}
-                className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50"
-              >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* OTP Section - animated entry */}
-            {otpSent && (
-              <div className="animate-in fade-in slide-in-from-top-2 duration-300 mt-2 flex flex-col gap-4 rounded-lg border border-accent/20 bg-accent/5 p-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
-                    <Mail className="h-4 w-4 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      Verify Your Email
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {"A 6-digit code has been sent to "}
-                      <span className="font-medium text-foreground">
-                        {signupData.email}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="otp-input">OTP Code</Label>
-                  <Input
-                    id="otp-input"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    placeholder="Enter 6-digit OTP"
-                    className="text-center text-lg tracking-[0.5em] font-semibold"
-                    value={otp}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "").slice(0, 6)
-                      setOtp(val)
-                      if (errors.otp) setErrors({ ...errors, otp: undefined })
-                    }}
-                    aria-invalid={!!errors.otp}
-                    autoFocus
-                  />
-                  {errors.otp && (
-                    <p className="text-xs text-destructive">{errors.otp}</p>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col gap-1 text-xs">
-
-                    {remainingResends > 0 ? (
-                      canResend ? (
-                        <button
-                          type="button"
-                          onClick={handleResendOtp}
-                          disabled={isResending}
-                          className="font-medium text-primary underline-offset-4 hover:underline disabled:opacity-50"
-                        >
-                          {isResending ? "Resending..." : "Resend OTP"}
-                        </button>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Resend OTP in {timer}s
-                        </span>
-                      )
-                    ) : (
-                      <span className="text-destructive">
-                        Resend limit reached
-                      </span>
-                    )}
-
-                    {remainingResends > 0 && (
-                      <span className="text-muted-foreground">
-                        Attempts left: {remainingResends}
-                      </span>
-                    )}
-
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOtpSent(false)
-                      setOtp("")
-                    }}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    <ArrowLeft className="h-3 w-3" />
-                    Edit details
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="mt-2 w-full gap-2 text-sm font-semibold"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {otpSent ? "Verifying..." : "Sending OTP..."}
-                </>
-              ) : otpSent ? (
-                "Verify OTP"
-              ) : (
-                "Register"
-              )}
-            </Button>
-
-            <p className="text-center text-xs text-muted-foreground">
-              {"Already have an account? "}
-              <button
-                type="button"
-                onClick={() => switchMode("login")}
-                className="font-semibold text-primary underline-offset-4 hover:underline"
-              >
-                Login
-              </button>
-            </p>
-          </form>
-        )}
       </CardContent>
     </Card>
   )

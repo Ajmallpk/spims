@@ -222,7 +222,9 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
       setFields((prev) => ({
         ...prev,
-        full_name: res.data.username || "",
+        full_name: "",
+        email: res.data.email,
+        official_contact: res.data.official_phone,
       }));
     } catch (err) {
       console.log(err);
@@ -488,7 +490,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
               error={errors.email}
               placeholder="official@panchayath.gov.in"
               required
-              disabled={isSubmitting}
+              disabled={true}
             />
 
             <FormField
@@ -501,7 +503,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
               placeholder="e.g. 9876543210"
               required
               hint="10-digit official contact number."
-              disabled={isSubmitting}
+              disabled={true}
               maxLength={10}
             />
           </div>

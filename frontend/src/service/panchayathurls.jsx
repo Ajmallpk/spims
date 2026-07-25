@@ -162,6 +162,14 @@ const panchayathApi = {
     );
   },
 
+
+  replaceWardOfficer: (userId, data) => {
+    return panchayathAxios.patch(
+      `/panchayath/wards/${userId}/replace-officer/`,
+      data
+    );
+  },
+
 };
 
 

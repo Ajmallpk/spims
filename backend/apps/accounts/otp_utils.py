@@ -137,3 +137,38 @@ SPIMS Security Team
         [email],
         fail_silently=False,
     )
+    
+    
+    
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+
+def send_set_password_email(
+    personal_email,
+    official_email,
+    link,
+):
+    send_mail(
+        subject="SPIMS Account Created",
+
+        message=f"""
+Your SPIMS account has been created.
+
+Official Email:
+{official_email}
+
+Please click the link below to set your password:
+
+{link}
+        """,
+
+        from_email=settings.DEFAULT_FROM_EMAIL,
+
+        recipient_list=[
+            personal_email
+        ],
+
+        fail_silently=False,
+    )

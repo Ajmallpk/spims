@@ -37,4 +37,21 @@ urlpatterns = [
     "complaints/<int:complaint_id>/resume/",
     views.ResumeComplaintView.as_view()
 ),
+    
+    path(
+    "create-ward/",
+    views.CreateWardAccountAPIView.as_view(),
+),
+    
+    
+    path(
+    "wards/<int:user_id>/reset-password/",
+    views.ResetWardPasswordAPIView.as_view(),
+),
+    
+    
+    path(
+    "wards/<int:user_id>/replace-officer/",
+    views.UpdateWardOfficerEmailAPIView.as_view(),
+),
 ]

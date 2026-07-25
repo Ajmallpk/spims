@@ -87,59 +87,59 @@ class CitizenSignupRequestView(APIView):
         
         
         
-class AuthoritySignupRequestView(APIView):
-    permission_classes = [AllowAny]
+# class AuthoritySignupRequestView(APIView):
+#     permission_classes = [AllowAny]
 
-    def post(self, request):
-        try:
-            role = request.data.get("role")
+#     def post(self, request):
+#         try:
+#             role = request.data.get("role")
 
-            if role not in ["WARD", "PANCHAYATH"]:
-                return error_response(
-                    message="Invalid authority role",
-                    status=400
-                )
+#             if role not in ["WARD", "PANCHAYATH"]:
+#                 return error_response(
+#                     message="Invalid authority role",
+#                     status=400
+#                 )
 
-            serializer = SignupSerializer(data=request.data)
-
-            
-            if not serializer.is_valid():
-                return error_response(
-                    message="Validation failed",
-                    errors=serializer.errors,
-                    status=400
-                )
-
-            email = serializer.validated_data["email"]
+#             serializer = SignupSerializer(data=request.data)
 
             
-            if User.objects.filter(email=email).exists():
-                return error_response(
-                    message="User with this email already exists",
-                    status=400
-                )
+#             if not serializer.is_valid():
+#                 return error_response(
+#                     message="Validation failed",
+#                     errors=serializer.errors,
+#                     status=400
+#                 )
+
+#             email = serializer.validated_data["email"]
 
             
-            otp = generate_otp()
-            username = serializer.validated_data["username"]
+#             if User.objects.filter(email=email).exists():
+#                 return error_response(
+#                     message="User with this email already exists",
+#                     status=400
+#                 )
 
-            store_signup_data(email, serializer.validated_data, role=role)
-            store_otp(email, otp, purpose="signup")
-            send_otp_email(email, otp, username)
+            
+#             otp = generate_otp()
+#             username = serializer.validated_data["username"]
 
-            logger.info(f"{role} signup OTP sent to {email}")
+#             store_signup_data(email, serializer.validated_data, role=role)
+#             store_otp(email, otp, purpose="signup")
+#             send_otp_email(email, otp, username)
 
-            return success_response(
-                message="OTP sent to email"
-            )
+#             logger.info(f"{role} signup OTP sent to {email}")
 
-        except Exception as e:
-            logger.error(f"AuthoritySignup error: {str(e)}")
+#             return success_response(
+#                 message="OTP sent to email"
+#             )
 
-            return error_response(
-                message="Something went wrong",
-                status=500
-            )
+#         except Exception as e:
+#             logger.error(f"AuthoritySignup error: {str(e)}")
+
+#             return error_response(
+#                 message="Something went wrong",
+#                 status=500
+#             )
     
     
     
@@ -284,6 +284,11 @@ class EmailLoginView(TokenObtainPairView):
                     "status": serializer.validated_data.get("status"),
                     "is_superuser": serializer.validated_data.get("is_superuser"),
                     "is_verified": serializer.validated_data.get("is_verified"),
+                    "must_change_password": user.must_change_password,
+                    "set_password_token":
+                    str(user.set_password_token)
+                    if user.set_password_token
+                    else None,
                 }
             )
 
@@ -565,7 +570,76 @@ class ResetPasswordView(APIView):
                 status=500
             )
     
-    
+ 
+ 
+ 
+class SetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, token):
+
+        try:
+
+            password = request.data.get(
+                "password"
+            )
+
+            confirm_password = request.data.get(
+                "confirm_password"
+            )
+
+            if not password or not confirm_password:
+
+                return error_response(
+                    message="All fields are required",
+                    status=400
+                )
+
+            if password != confirm_password:
+
+                return error_response(
+                    message="Passwords do not match",
+                    status=400
+                )
+
+            user = User.objects.filter(
+                set_password_token=token
+            ).first()
+
+            if not user:
+
+                return error_response(
+                    message="Invalid or expired token",
+                    status=400
+                )
+
+            if not user.must_change_password:
+
+                return error_response(
+                    message="This password setup link has already been used.",
+                    status=400
+                )
+
+            user.set_password(password)
+
+            user.must_change_password = False
+
+            user.set_password_token = None
+
+            user.save()
+
+            return success_response(
+                message="Password set successfully"
+            )
+
+        except Exception as e:
+
+            logger.error(str(e))
+
+            return error_response(
+                message="Something went wrong",
+                status=500
+            )   
     
 
 

@@ -117,37 +117,53 @@ class SubmitWardVerificationView(APIView):
     def post(self, request):
         try:
             user = request.user
-            district_id = request.data.get("district")
+            # district_id = request.data.get("district")
 
-            panchayath_master_id = request.data.get("panchayath_master")
+            # panchayath_master_id = request.data.get("panchayath_master")
 
-            ward_master_id = request.data.get("ward_master")
+            # ward_master_id = request.data.get("ward_master")
 
-            if not district_id or not panchayath_master_id or not ward_master_id:
+            # if not district_id or not panchayath_master_id or not ward_master_id:
 
-                return error_response(
-                    message="District, Panchayath and Ward are required",
-                    status=400
-                )
+            #     return error_response(
+            #         message="District, Panchayath and Ward are required",
+            #         status=400
+            #     )
 
 
-            district = District.objects.filter(
-                id=district_id
-            ).first()
+            # district = District.objects.filter(
+            #     id=district_id
+            # ).first()
 
-            panchayath_master = Panchayath.objects.filter(
-                id=panchayath_master_id
-            ).first()
+            # panchayath_master = Panchayath.objects.filter(
+            #     id=panchayath_master_id
+            # ).first()
+
+            # ward_master = Ward.objects.filter(
+            #     id=ward_master_id
+            # ).first()
+
+
+            # if not district or not panchayath_master or not ward_master:
+
+            #     return error_response(
+            #         message="Invalid location selected",
+            #         status=400
+            #     )
+            
+            
+            district = user.district
+
+            panchayath_master = user.panchayath
 
             ward_master = Ward.objects.filter(
-                id=ward_master_id
+                user=user
             ).first()
-
 
             if not district or not panchayath_master or not ward_master:
 
                 return error_response(
-                    message="Invalid location selected",
+                    message="Your Ward account is not properly linked.",
                     status=400
                 )
                 
@@ -172,22 +188,41 @@ class SubmitWardVerificationView(APIView):
 
             verification = WardVerification.objects.filter(user=user).first()
 
+            # data = {
+            #     "officer_full_name": request.data.get("officer_full_name"),
+            #     "official_email": request.data.get("official_email"),
+            #     "official_contact": request.data.get("official_contact"),
+            #     # "district": district,
+
+            #     # "panchayath_master": panchayath_master,
+
+            #     # "ward_master": ward_master,
+
+            #     "ward_name": ward_master.ward_name or f"Ward {ward_master.ward_number}",
+            #     "office_address": request.data.get("office_address"),
+            #     "aadhaar_image": request.FILES.get("aadhaar_image"),
+            #     "selfie_image": request.FILES.get("selfie_image"),
+            #     "supporting_document": request.FILES.get("supporting_document"),
+            # }
+
             data = {
                 "officer_full_name": request.data.get("officer_full_name"),
-                "official_email": request.data.get("official_email"),
-                "official_contact": request.data.get("official_contact"),
-                # "district": district,
 
-                # "panchayath_master": panchayath_master,
+                "official_email": user.email,
 
-                # "ward_master": ward_master,
+                "official_contact": user.official_phone,
 
                 "ward_name": ward_master.ward_name or f"Ward {ward_master.ward_number}",
+
                 "office_address": request.data.get("office_address"),
+
                 "aadhaar_image": request.FILES.get("aadhaar_image"),
+
                 "selfie_image": request.FILES.get("selfie_image"),
+
                 "supporting_document": request.FILES.get("supporting_document"),
             }
+
 
             if verification:
 
@@ -1602,11 +1637,44 @@ class WardMeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
+        verification = WardVerification.objects.filter(
+            user=request.user
+        ).first()
+
         return Response({
             "id": request.user.id,
+
             "username": request.user.username,
+
             "email": request.user.email,
+
+            "official_phone":
+                request.user.official_phone,
+
+            "district":
+                verification.district.id
+                if verification and verification.district
+                else "",
+
+            "panchayath_master":
+                verification.panchayath_master.id
+                if verification and verification.panchayath_master
+                else "",
+
+            "ward_master":
+                verification.ward_master.id
+                if verification and verification.ward_master
+                else "",
+
+            "ward_name":
+                verification.ward_name
+                if verification
+                else "",
+
             "role": request.user.role,
+
             "status": request.user.status,
+
             "is_verified": request.user.is_verified,
         })

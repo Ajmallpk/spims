@@ -44,9 +44,33 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "error": "ACCOUNT_SUSPENDED",
                 "message": "Your account has been suspended."
             })
+            
+            
+        if (
+            user.role in ["PANCHAYATH", "WARD"]
+            and user.must_change_password
+        ):
+            raise serializers.ValidationError({
+                "error": "PASSWORD_SETUP_REQUIRED",
+                "message": (
+                    "Please use the password setup link "
+                    "sent to your personal email."
+                )
+            })
+            
+            
         data["role"] = "ADMIN" if user.is_superuser else user.role
         data["status"] = user.status
         data["is_superuser"] = user.is_superuser
         data["is_verified"] = user.is_verified
+        data["must_change_password"] = (
+            user.must_change_password
+        )
+
+        data["set_password_token"] = (
+            str(user.set_password_token)
+            if user.set_password_token
+            else None
+        )
 
         return data

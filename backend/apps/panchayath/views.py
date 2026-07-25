@@ -35,11 +35,26 @@ from apps.notification.utils import send_notification
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from apps.complaints.serializers import ResumeComplaintSerializer
+from .serializers import (
+    CreateWardSerializer
+)
+
+
+from apps.accounts.otp_utils import (
+    send_set_password_email
+)
+
+
+import uuid
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
 
-
+from apps.accounts.models import Ward
 
 
 
@@ -100,33 +115,47 @@ class SubmitPanchayathVerificationView(APIView):
             
             verification = getattr(user, "panchayath_verification", None)
 
-            district_id = request.data.get("district")
-            panchayath_master_id = request.data.get("panchayath_master")
+            # district_id = request.data.get("district")
+            # panchayath_master_id = request.data.get("panchayath_master")
 
-            if not district_id or not panchayath_master_id:
-                return error_response(
-                    message="District and Panchayath are required.",
-                    status=400
-                )
+            # if not district_id or not panchayath_master_id:
+            #     return error_response(
+            #         message="District and Panchayath are required.",
+            #         status=400
+            #     )
 
-            district = District.objects.filter(
-                id=district_id
-            ).first()
+            # district = District.objects.filter(
+            #     id=district_id
+            # ).first()
 
-            panchayath_master = Panchayath.objects.filter(
-                id=panchayath_master_id
-            ).first()
+            # panchayath_master = Panchayath.objects.filter(
+            #     id=panchayath_master_id
+            # ).first()
+
+            # if not district or not panchayath_master:
+            #     return error_response(
+            #         message="Invalid location selected.",
+            #         status=400
+            #     )
+            
+            
+            district = user.district
+            panchayath_master = user.panchayath
 
             if not district or not panchayath_master:
+
                 return error_response(
-                    message="Invalid location selected.",
+                    message="Your Panchayath account is not linked with a District or Panchayath.",
                     status=400
                 )
                 
                 
             data = request.data.copy()
+
             data["district"] = district.name
             data["panchayath_name"] = panchayath_master.name
+            data["email"] = user.email
+            data["phone"] = user.official_phone
             serializer = PanchayathVerificationSerializer(
                 instance=verification,
                 data=data,
@@ -1593,7 +1622,279 @@ class PanchayathMeView(APIView):
             "id": request.user.id,
             "username": request.user.username,
             "email": request.user.email,
+            "official_phone": request.user.official_phone,
             "role": request.user.role,
             "status": request.user.status,
             "is_verified": request.user.is_verified,
         })
+        
+        
+import uuid
+
+class CreateWardAccountAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        
+        if request.user.role != "PANCHAYATH":
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        serializer = CreateWardSerializer(
+            data=request.data
+        )
+
+        if not serializer.is_valid():
+
+            return error_response(
+                message="Validation failed",
+                errors=serializer.errors,
+                status=400
+            )
+
+        ward_id = serializer.validated_data[
+            "ward_id"
+        ]
+
+        official_email = serializer.validated_data[
+            "official_email"
+        ]
+
+        official_phone = serializer.validated_data[
+            "official_phone"
+        ]
+
+        officer_personal_email = (
+            serializer.validated_data[
+                "officer_personal_email"
+            ]
+        )
+
+        
+        if User.objects.filter(
+            email=official_email
+        ).exists():
+
+            return error_response(
+                message=(
+                    "Official email already exists."
+                ),
+                status=400
+            )
+
+  
+        ward = Ward.objects.filter(
+            id=ward_id,
+            panchayath=request.user.panchayath
+        ).first()
+
+        if not ward:
+
+            return error_response(
+                message=(
+                    "Ward not found or does not belong "
+                    "to your Panchayath."
+                ),
+                status=404
+            )
+
+        
+        if hasattr(ward, "user") and ward.user:
+
+            return error_response(
+                message=(
+                    "This Ward already has an account."
+                ),
+                status=400
+            )
+
+        
+        token = uuid.uuid4()
+
+    
+        user = User.objects.create(
+            username=ward.ward_name or f"Ward {ward.ward_number}",
+            email=official_email,
+            role="WARD",
+            district=request.user.district,
+            panchayath=request.user.panchayath,
+            ward=ward,
+            official_phone=official_phone,
+            officer_personal_email=officer_personal_email,
+            must_change_password=True,
+            is_verified=False,
+            status=User.Status.PENDING,
+        )
+
+        # Link Ward with User
+        
+        user.set_unusable_password()
+        user.save()
+        
+        
+        user.set_password_token = token
+        user.save()
+        
+
+        # Send Set Password Mail
+        set_password_link = (
+            f"http://localhost:5173/"
+            f"set-password/{token}"
+        )
+
+        send_set_password_email(
+            personal_email=(
+                officer_personal_email
+            ),
+
+            official_email=(
+                official_email
+            ),
+
+            link=set_password_link,
+        )
+
+        return success_response(
+            message=(
+                "Ward account created successfully."
+            )
+        )
+        
+        
+        
+import uuid
+
+class ResetWardPasswordAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+
+        if request.user.role != "PANCHAYATH":
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        user = User.objects.filter(
+            id=user_id,
+            role="WARD"
+        ).first()
+
+        if not user:
+
+            return error_response(
+                message="Ward account not found.",
+                status=404
+            )
+
+        
+        import secrets
+
+        token = secrets.token_urlsafe(32)
+
+        user.must_change_password = True
+        user.set_password_token = token
+        user.save()
+
+        set_password_link = (
+            f"http://localhost:5173/set-password/{token}"
+        )
+
+        send_set_password_email(
+            personal_email=user.officer_personal_email,
+            official_email=user.email,
+            link=set_password_link,
+        )
+
+        return success_response(
+            message="Password reset email sent successfully."
+        )
+        
+        
+        
+import secrets
+
+class UpdateWardOfficerEmailAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, user_id):
+
+        if request.user.role != "PANCHAYATH":
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        user = User.objects.filter(
+            id=user_id,
+            role="WARD",
+            panchayath=request.user.panchayath
+        ).first()
+
+        if not user:
+
+            return error_response(
+                message="Ward account not found.",
+                status=404
+            )
+
+        officer_email = request.data.get(
+            "officer_personal_email"
+        )
+
+        if not officer_email:
+
+            return error_response(
+                message="Officer email is required.",
+                status=400
+            )
+
+        # Optional: Prevent duplicate officer personal emails
+        if User.objects.filter(
+            officer_personal_email=officer_email
+        ).exclude(id=user.id).exists():
+
+            return error_response(
+                message="Officer personal email already exists.",
+                status=400
+            )
+
+        user.officer_personal_email = officer_email
+
+        # Revoke old officer access
+        user.set_unusable_password()
+
+        # Generate new password setup token
+        user.set_password_token = secrets.token_urlsafe(32)
+
+        user.must_change_password = True
+
+        # Reset login security
+        user.failed_attempts = 0
+        user.lock_until = None
+
+        user.save()
+
+        set_password_link = (
+            f"http://localhost:5173/"
+            f"set-password/{user.set_password_token}"
+        )
+
+        send_set_password_email(
+            personal_email=user.officer_personal_email,
+            official_email=user.email,
+            link=set_password_link,
+        )
+
+        return success_response(
+            message="Ward officer replaced successfully."
+        )

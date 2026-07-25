@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 urlpatterns = [
     
     path("signup/citizen/", views.CitizenSignupRequestView.as_view()),
-    path("signup/authority/", views.AuthoritySignupRequestView.as_view()),
+    # path("signup/authority/", views.AuthoritySignupRequestView.as_view()),
     path("login/citizen/", views.EmailLoginView.as_view()),
     path("login/authority/", views.EmailLoginView.as_view()),
     path("logout/", views.LogoutView.as_view()),
@@ -37,5 +37,12 @@ urlpatterns = [
         "location-request/",
         views.SubmitLocationRequestAPIView.as_view()
     ),
+    
+    
+    path(
+    "set-password/<uuid:token>/",
+    views.SetPasswordView.as_view(),
+    name="set_password",
+),
 
 ]
