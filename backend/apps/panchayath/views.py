@@ -1740,12 +1740,13 @@ class CreateWardAccountAPIView(APIView):
             )
 
         
-        if hasattr(ward, "user") and ward.user:
+        if User.objects.filter(
+            ward=ward,
+            role="WARD"
+        ).exists():
 
             return error_response(
-                message=(
-                    "This Ward already has an account."
-                ),
+                message="This Ward already has an account.",
                 status=400
             )
 
@@ -2014,8 +2015,7 @@ class AvailableWardListAPIView(APIView):
             )
 
         wards = Ward.objects.filter(
-            panchayath=request.user.panchayath,
-            authority_users__isnull=True
+            panchayath=request.user.panchayath
         ).order_by("ward_number")
 
         data = []

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { adminapi } from "@/service/adminurls";
 import ResetPasswordModal from "./ResetPasswordModal";
-import ChangeOfficerEmailModal from "./ChangeOfficerEmailModal";
+import ReplaceOfficerModal from "./ReplaceOfficerModal";
+import EditOfficeDetailsModal from "./EditOfficeDetailsModal";
 
 const StatusBadge = ({ status }) => {
 
@@ -32,7 +33,9 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
     const [resetModalOpen, setResetModalOpen] = useState(false);
 
-    const [emailModalOpen, setEmailModalOpen] = useState(false);
+    const [replaceOfficerModalOpen, setReplaceOfficerModalOpen] = useState(false);
+
+    const [officeDetailsModalOpen, setOfficeDetailsModalOpen] = useState(false);
 
     const fetchAccounts = async () => {
 
@@ -203,7 +206,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
                                     <td className="p-3">
 
-                                        <div className="flex justify-center gap-2">
+                                        <div className="flex flex-wrap justify-center gap-2">
 
                                             <button
                                                 onClick={() => {
@@ -218,11 +221,21 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                                             <button
                                                 onClick={() => {
                                                     setSelectedAccount(account);
-                                                    setEmailModalOpen(true);
+                                                    setReplaceOfficerModalOpen(true);
                                                 }}
                                                 className="px-3 py-1 rounded-lg bg-amber-500 text-white text-sm"
                                             >
-                                                Change Email
+                                                Replace Officer
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAccount(account);
+                                                    setOfficeDetailsModalOpen(true);
+                                                }}
+                                                className="px-3 py-1 rounded-lg bg-teal-600 text-white text-sm"
+                                            >
+                                                Office Details
                                             </button>
 
                                         </div>
@@ -251,14 +264,30 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                 }}
             />
 
-            <ChangeOfficerEmailModal
-                open={emailModalOpen}
+            <ReplaceOfficerModal
+                open={replaceOfficerModalOpen}
                 userId={selectedAccount?.id}
                 currentEmail={selectedAccount?.officer_personal_email}
                 onClose={() => {
-                    setEmailModalOpen(false);
+                    setReplaceOfficerModalOpen(false);
                     setSelectedAccount(null);
                     fetchAccounts();
+                }}
+            />
+
+            <EditOfficeDetailsModal
+                open={officeDetailsModalOpen}
+                account={selectedAccount}
+                onClose={(refresh = false) => {
+
+                    setOfficeDetailsModalOpen(false);
+
+                    setSelectedAccount(null);
+
+                    if (refresh) {
+                        fetchAccounts();
+                    }
+
                 }}
             />
 

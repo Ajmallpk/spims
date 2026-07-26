@@ -237,4 +237,15 @@ export const adminapi = {
         );
         return response.data;
     },
+
+
+
+    updateOfficeDetails : async (userId, data) => {
+        const response = await adminAxios.patch(
+            `/admin/panchayaths/${userId}/office-details/`,
+            data
+        );
+
+        return response.data;
+    }
 }

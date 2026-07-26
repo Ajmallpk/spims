@@ -60,6 +60,22 @@ from apps.accounts.otp_utils import (
     send_set_password_email
 )
 
+from apps.accounts.email_service import send_account_created_email
+from apps.accounts.auth_helpers import prepare_password_setup
+from apps.accounts.email_service import send_account_created_email
+from apps.accounts.auth_helpers import prepare_password_setup
+from apps.accounts.email_service import send_password_reset_email
+from apps.accounts.auth_helpers import prepare_password_setup
+from apps.accounts.email_service import send_officer_replaced_email
+from .serializers import UpdateOfficeDetailsSerializer
+
+from apps.accounts.auth_helpers import prepare_password_setup
+
+from apps.accounts.email_service import (
+    send_official_email_updated_email,
+    send_official_phone_updated_email,
+)
+
 import uuid
 logger = logging.getLogger(__name__)
 
@@ -2670,30 +2686,19 @@ class CreatePanchayathAPIView(APIView):
             panchayath=data["panchayath"],
             official_phone=data["official_phone"],
             officer_personal_email=data["officer_personal_email"],
-            must_change_password=True,
             is_verified=False,
             status=User.Status.PENDING,
         )
 
         user.set_unusable_password()
 
-        import secrets
-
-        user.set_password_token = secrets.token_urlsafe(32)
-
-        user.save()
+        set_password_link = prepare_password_setup(user)
         
         
-        set_password_link = (
-            f"http://localhost:5173/set-password/{user.set_password_token}"
-        )
-        
-        
-        
-        send_set_password_email(
+        send_account_created_email(
             personal_email=user.officer_personal_email,
             official_email=user.email,
-            link=set_password_link,
+            set_password_link=set_password_link,
         )
 
         return success_response(
@@ -2735,26 +2740,12 @@ class ResetPanchayathPasswordAPIView(
                 status=404
             )
             
-        import secrets
+        set_password_link = prepare_password_setup(user)
 
-        
-        user.set_password_token = secrets.token_urlsafe(32)
-
-        
-        user.must_change_password = True
-
-        user.save()
-        
-        
-        
-        set_password_link = (
-            f"http://localhost:5173/set-password/{user.set_password_token}"
-        )
-
-        send_set_password_email(
+        send_password_reset_email(
             personal_email=user.officer_personal_email,
             official_email=user.email,
-            link=set_password_link,
+            set_password_link=set_password_link,
         )
         
         
@@ -2764,7 +2755,7 @@ class ResetPanchayathPasswordAPIView(
         
         
         
-class UpdatePanchayathOfficerEmailAPIView(
+class ReplacePanchayathOfficerAPIView(
     APIView
 ):
     permission_classes = [
@@ -2809,41 +2800,19 @@ class UpdatePanchayathOfficerEmailAPIView(
                 status=400
             )
 
-        import secrets
-
         user.officer_personal_email = officer_email
 
-        
-        user.set_unusable_password()
+        set_password_link = prepare_password_setup(user)
 
-        
-        user.set_password_token = secrets.token_urlsafe(32)
-
-        
-        user.must_change_password = True
-        
-        user.failed_attempts = 0
-        user.lock_until = None
-
-        user.save()
-
-        set_password_link = (
-            f"http://localhost:5173/"
-            f"set-password/{user.set_password_token}"
-        )
-
-        send_set_password_email(
+        send_officer_replaced_email(
             personal_email=user.officer_personal_email,
             official_email=user.email,
-            link=set_password_link,
+            set_password_link=set_password_link,
         )
 
         return success_response(
-            message=(
-                "Officer email updated successfully."
-            )
+            message="Officer replaced successfully."
         )
-        
         
         
 class AuthorityPanchayathListAPIView(APIView):
@@ -2881,3 +2850,110 @@ class AuthorityPanchayathListAPIView(APIView):
             message="Authority accounts fetched successfully.",
             data=serializer.data,
         )
+        
+        
+class UpdateOfficeDetailsAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, user_id):
+
+        if not request.user.is_superuser:
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        user = User.objects.filter(
+            id=user_id,
+            role="PANCHAYATH"
+        ).first()
+
+        if not user:
+            return error_response(
+                message="Panchayath not found.",
+                status=404
+            )
+
+        serializer = UpdateOfficeDetailsSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        reason = data["reason"]
+
+        email_changed = False
+        phone_changed = False
+
+        old_email = user.email
+        old_phone = user.official_phone
+
+        if "official_email" in data:
+
+            if data["official_email"] != user.email:
+
+                if User.objects.filter(
+                    email=data["official_email"]
+                ).exclude(
+                    id=user.id
+                ).exists():
+
+                    return error_response(
+                        message="Official email already exists.",
+                        status=400
+                    )
+
+                user.email = data["official_email"]
+
+                email_changed = True
+
+        if "official_phone" in data:
+
+            if data["official_phone"] != user.official_phone:
+
+                user.official_phone = data["official_phone"]
+
+                phone_changed = True
+                
+        set_password_link = None
+
+        if email_changed:
+
+            set_password_link = prepare_password_setup(user)
+
+            send_official_email_updated_email(
+                personal_email=user.officer_personal_email,
+                previous_official_email=old_email,
+                new_official_email=user.email,
+                reason=reason,
+                set_password_link=set_password_link,
+            )
+
+        elif phone_changed:
+
+            user.save()
+
+        if phone_changed:
+
+            send_official_phone_updated_email(
+                personal_email=user.officer_personal_email,
+                official_email=user.email,
+                previous_phone=old_phone,
+                new_phone=user.official_phone,
+                reason=reason,
+            )
+
+        if not email_changed and not phone_changed:
+
+            return error_response(
+                message="No changes detected.",
+                status=400
+            )
+
+        return success_response(
+            message="Office details updated successfully."
+        )
+                

@@ -119,7 +119,7 @@ const CreateWardForm = ({ onSuccess }) => {
                 officer_personal_email: "",
             });
 
-            await loadWards();
+            
 
             if (onSuccess) {
                 onSuccess();

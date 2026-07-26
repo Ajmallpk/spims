@@ -7,6 +7,7 @@ from apps.accounts.models import (
     Panchayath,
     User,
 )
+import re
 
 User = get_user_model()
 
@@ -87,49 +88,70 @@ class CreatePanchayathSerializer(
         read_only=True
     )
 
+    
+
     def validate(self, attrs):
+
+        attrs["official_email"] = (
+            attrs["official_email"]
+            .strip()
+            .lower()
+        )
+
+        attrs["officer_personal_email"] = (
+            attrs["officer_personal_email"]
+            .strip()
+            .lower()
+        )
+
+        attrs["official_phone"] = (
+            attrs["official_phone"]
+            .strip()
+        )
 
         district = District.objects.filter(
             id=attrs["district_id"]
         ).first()
 
         if not district:
-            raise serializers.ValidationError(
-                "District not found."
-            )
+            raise serializers.ValidationError({
+                "district_id": "District not found."
+            })
 
         panchayath = Panchayath.objects.filter(
             id=attrs["panchayath_id"],
-            district=district
+            district=district,
         ).first()
 
         if not panchayath:
-            raise serializers.ValidationError(
-                "Invalid Panchayath."
-            )
+            raise serializers.ValidationError({
+                "panchayath_id": "Invalid Panchayath."
+            })
+
+        if not re.fullmatch(r"^[6-9]\d{9}$", attrs["official_phone"]):
+            raise serializers.ValidationError({
+                "official_phone": "Enter a valid 10-digit Indian mobile number."
+            })
 
         if User.objects.filter(
             email=attrs["official_email"]
         ).exists():
-
-            raise serializers.ValidationError(
-                "Official email already exists."
-            )
+            raise serializers.ValidationError({
+                "official_email": "Official email already exists."
+            })
 
         if User.objects.filter(
             role=User.Role.PANCHAYATH,
-            panchayath=panchayath
+            panchayath=panchayath,
         ).exists():
-
-            raise serializers.ValidationError(
-                "This Panchayath already has an office account."
-            )
+            raise serializers.ValidationError({
+                "panchayath_id": "This Panchayath already has an office account."
+            })
 
         attrs["district"] = district
         attrs["panchayath"] = panchayath
 
         return attrs
-    
     
     
 class AuthorityPanchayathListSerializer(serializers.ModelSerializer):
@@ -161,3 +183,58 @@ class AuthorityPanchayathListSerializer(serializers.ModelSerializer):
             "status",
             "is_verified",
         ]
+        
+        
+        
+class UpdateOfficeDetailsSerializer(serializers.Serializer):
+
+    official_email = serializers.EmailField(
+        required=False
+    )
+
+    official_phone = serializers.CharField(
+        required=False,
+        max_length=10
+    )
+
+    reason = serializers.CharField()
+
+    def validate(self, attrs):
+
+        if (
+            "official_email" not in attrs and
+            "official_phone" not in attrs
+        ):
+            raise serializers.ValidationError(
+                "Nothing to update."
+            )
+
+        if "official_email" in attrs:
+
+            attrs["official_email"] = (
+                attrs["official_email"]
+                .strip()
+                .lower()
+            )
+
+        if "official_phone" in attrs:
+
+            attrs["official_phone"] = (
+                attrs["official_phone"]
+                .strip()
+            )
+
+            import re
+
+            if not re.fullmatch(
+                r"^[6-9]\d{9}$",
+                attrs["official_phone"]
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "official_phone":
+                        "Enter a valid 10-digit Indian mobile number."
+                    }
+                )
+
+        return attrs
