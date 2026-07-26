@@ -176,6 +176,26 @@ const panchayathApi = {
     );
   },
 
+
+  getAvailableWards: () => {
+    return panchayathAxios.get(
+      "/panchayath/available-wards/"
+    );
+  },
+
+  createWardAccount: (data) => {
+    return panchayathAxios.post(
+      "/panchayath/create-ward/",
+      data
+    );
+  },
+
+  resetWardPassword: (userId) => {
+  return panchayathAxios.post(
+    `/panchayath/wards/${userId}/reset-password/`
+  );
+},
+
 };
 
 

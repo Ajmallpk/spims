@@ -59,4 +59,11 @@ urlpatterns = [
     "ward-accounts/",
     views.WardAccountListAPIView.as_view(),
 ),
+    
+    path(
+    "available-wards/",
+    views.AvailableWardListAPIView.as_view(),
+),
+    
+    
 ]

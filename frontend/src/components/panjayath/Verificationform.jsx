@@ -90,15 +90,18 @@ function FormField({
 // ─── Initial form state & validators ─────────────────────────────────────────
 
 const INITIAL_FIELDS = {
-  full_name: "",
+    full_name: "",
 
-  district: "",
-  panchayath_master: "",
+    district: "",
+    district_name: "",
 
-  panchayath_name: "",
+    panchayath_master: "",
 
-  official_contact: "",
-  email: "",
+    panchayath_name: "",
+
+    official_contact: "",
+
+    email: "",
 };
 
 const INITIAL_ERRORS = {
@@ -183,8 +186,8 @@ function validateFields(fields, aadhaarImage, selfieImage) {
  */
 export default function VerificationForm({ onSuccess, isRejected = false }) {
   const [fields, setFields] = useState(INITIAL_FIELDS);
-  const [districts, setDistricts] = useState([]);
-  const [panchayaths, setPanchayaths] = useState([]);
+  // const [districts, setDistricts] = useState([]);
+  // const [panchayaths, setPanchayaths] = useState([]);
   const [showLocationRequest, setShowLocationRequest] = useState(false);
   const [aadhaarImage, setAadhaarImage] = useState(null);
   const [selfieImage, setSelfieImage] = useState(null);
@@ -195,25 +198,25 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
 
   useEffect(() => {
-    loadDistricts();
+    // loadDistricts();
     loadUser();
   }, []);
 
-  const loadDistricts = async () => {
+  // const loadDistricts = async () => {
 
-    try {
+  //   try {
 
-      const res = await panchayathapi.getDistricts();
+  //     const res = await panchayathapi.getDistricts();
 
-      setDistricts(res.data.data);
+  //     setDistricts(res.data.data);
 
-    } catch (err) {
+  //   } catch (err) {
 
-      console.log(err);
+  //     console.log(err);
 
-    }
+  //   }
 
-  };
+  // };
 
 
   // const loadUser = async () => {
@@ -249,18 +252,20 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
         district: res.data.district?.id || "",
 
+        district_name: res.data.district?.name || "",
+
         panchayath_master: res.data.panchayath?.id || "",
 
         panchayath_name: res.data.panchayath?.name || "",
       }));
 
-      if (res.data.panchayath) {
+      // if (res.data.panchayath) {
 
-        setPanchayaths([
-          res.data.panchayath,
-        ]);
+      //   setPanchayaths([
+      //     res.data.panchayath,
+      //   ]);
 
-      }
+      // }
 
     } catch (err) {
 
@@ -341,45 +346,45 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
   };
 
 
-  const handleDistrictChange = async (e) => {
+  // const handleDistrictChange = async (e) => {
 
-    const districtId = e.target.value;
+  //   const districtId = e.target.value;
 
-    setFields(prev => ({
-      ...prev,
-      district: districtId,
-      panchayath_master: "",
-      panchayath_name: "",
-    }));
+  //   setFields(prev => ({
+  //     ...prev,
+  //     district: districtId,
+  //     panchayath_master: "",
+  //     panchayath_name: "",
+  //   }));
 
-    setPanchayaths([]);
+  //   setPanchayaths([]);
 
-    if (!districtId) return;
+  //   if (!districtId) return;
 
-    const res = await panchayathapi.getPanchayaths(
-      districtId
-    );
+  //   const res = await panchayathapi.getPanchayaths(
+  //     districtId
+  //   );
 
-    setPanchayaths(res.data.data);
+  //   setPanchayaths(res.data.data);
 
-  };
+  // };
 
 
-  const handlePanchayathChange = (e) => {
+  // const handlePanchayathChange = (e) => {
 
-    const id = e.target.value;
+  //   const id = e.target.value;
 
-    const selected = panchayaths.find(
-      p => p.id == id
-    );
+  //   const selected = panchayaths.find(
+  //     p => p.id == id
+  //   );
 
-    setFields(prev => ({
-      ...prev,
-      panchayath_master: id,
-      panchayath_name: selected?.name || "",
-    }));
+  //   setFields(prev => ({
+  //     ...prev,
+  //     panchayath_master: id,
+  //     panchayath_name: selected?.name || "",
+  //   }));
 
-  };
+  // };
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
@@ -435,77 +440,53 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700">
-                  District <span className="text-red-500">*</span>
+                  District
                 </label>
 
-                <SearchableSelect
-                  placeholder="Search District..."
-                  isDisabled={true}
-
-                  options={districts.map((district) => ({
-                    value: district.id,
-                    label: district.name,
-                  }))}
-
-                  value={
-                    districts
-                      .map((district) => ({
-                        value: district.id,
-                        label: district.name,
-                      }))
-                      .find(
-                        (option) =>
-                          String(option.value) === String(fields.district)
-                      ) || null
-                  }
-
-                  onChange={() => { }}
+                <input
+                  type="text"
+                  value={fields.district_name || ""}
+                  disabled
+                  className="
+            w-full px-4 py-2.5
+            rounded-xl border border-slate-300
+            bg-slate-50
+            text-sm text-slate-800
+            cursor-not-allowed
+        "
                 />
               </div>
 
               <div>
-
                 <label className="block text-sm font-semibold text-slate-700">
-                  Panchayath <span className="text-red-500">*</span>
+                  Panchayath
                 </label>
 
-                <SearchableSelect
-                  placeholder="Search Panchayath..."
-                  isDisabled={true}
-
-                  options={panchayaths.map((p) => ({
-                    value: p.id,
-                    label: p.name,
-                  }))}
-
-                  value={
-                    panchayaths
-                      .map((p) => ({
-                        value: p.id,
-                        label: p.name,
-                      }))
-                      .find(
-                        (option) =>
-                          String(option.value) === String(fields.panchayath_master)
-                      ) || null
-                  }
-
-                  onChange={() => { }}
+                <input
+                  type="text"
+                  value={fields.panchayath_name || ""}
+                  disabled
+                  className="
+            w-full px-4 py-2.5
+            rounded-xl border border-slate-300
+            bg-slate-50
+            text-sm text-slate-800
+            cursor-not-allowed
+        "
                 />
-
               </div>
 
             </div>
 
             <div className="flex justify-end">
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setShowLocationRequest(true)}
                 className="text-blue-600 text-sm hover:underline"
               >
                 Can't find your Panchayath or District ?
-              </button>
+              </button> */}
 
             </div>
             <FormField

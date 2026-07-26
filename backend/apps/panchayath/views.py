@@ -1996,3 +1996,43 @@ class WardAccountListAPIView(APIView):
             message="Ward accounts fetched successfully.",
             data=data
         )
+        
+        
+        
+        
+class AvailableWardListAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        if request.user.role != "PANCHAYATH":
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        wards = Ward.objects.filter(
+            panchayath=request.user.panchayath,
+            authority_users__isnull=True
+        ).order_by("ward_number")
+
+        data = []
+
+        for ward in wards:
+
+            data.append({
+
+                "id": ward.id,
+
+                "ward_number": ward.ward_number,
+
+                "ward_name": ward.ward_name,
+
+            })
+
+        return success_response(
+            message="Available wards fetched successfully.",
+            data=data
+        )
