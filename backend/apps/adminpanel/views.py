@@ -2652,9 +2652,9 @@ class CreatePanchayathAPIView(APIView):
             data=request.data
         )
 
-        serializer.is_valid(
-            raise_exception=True
-        )
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return Response(serializer.errors, status=400)
 
         data = serializer.validated_data
         

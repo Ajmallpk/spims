@@ -40,9 +40,8 @@ urlpatterns = [
     
     
     path(
-    "set-password/<uuid:token>/",
+    "set-password/<str:token>/",
     views.SetPasswordView.as_view(),
     name="set_password",
-),
-
+)
 ]

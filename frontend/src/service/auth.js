@@ -29,15 +29,31 @@ export const resetPassword = (data) => {
 }
 
 
-export const setPassword = (
+export const setPassword = async (
   token,
   data
 ) => {
 
-  return axiosInstance.post(
-    `auth/set-password/${token}/`,
-    data
-  );
+  console.log("INSIDE SERVICE");
+
+  try {
+
+    const response = await axiosInstance.post(
+      `auth/set-password/${token}/`,
+      data
+    );
+
+    console.log("API SUCCESS", response);
+
+    return response;
+
+  } catch (error) {
+
+    console.log("API ERROR", error);
+
+    throw error;
+  }
+
 };
 
 

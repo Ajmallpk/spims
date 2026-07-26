@@ -10,14 +10,21 @@ export default function SetPasswordPage() {
 
     const navigate = useNavigate();
 
-    const [password, setPassword] = useState("");
+    const [password, setPasswordValue] = useState("");
     const [confirmPassword, setConfirmPassword] =
         useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+
+        console.log("TOKEN =", token);
+        console.log("SUBMIT CLICKED");
+
         try {
+
+
+            console.log("CALLING API...");
             await setPassword(
                 token,
                 {
@@ -32,7 +39,7 @@ export default function SetPasswordPage() {
             );
 
             navigate(
-                "/authority-login"
+                "/login"
             );
 
         } catch (error) {
@@ -59,7 +66,7 @@ export default function SetPasswordPage() {
                     placeholder="New Password"
                     value={password}
                     onChange={(e) =>
-                        setPassword(
+                        setPasswordValue(
                             e.target.value
                         )
                     }

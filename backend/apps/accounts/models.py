@@ -63,7 +63,8 @@ class User(AbstractUser):
         default=False
     )
     
-    set_password_token = models.UUIDField(
+    set_password_token = models.CharField(
+        max_length=100,
         null=True,
         blank=True,
         unique=True

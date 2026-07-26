@@ -54,4 +54,9 @@ urlpatterns = [
     "wards/<int:user_id>/replace-officer/",
     views.UpdateWardOfficerEmailAPIView.as_view(),
 ),
+    
+    path(
+    "ward-accounts/",
+    views.WardAccountListAPIView.as_view(),
+),
 ]

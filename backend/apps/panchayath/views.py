@@ -1614,19 +1614,55 @@ class PanchayathResolveView(APIView):
             
             
             
+# class PanchayathMeView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         return Response({
+#             "id": request.user.id,
+#             "username": request.user.username,
+#             "email": request.user.email,
+#             "official_phone": request.user.official_phone,
+#             "role": request.user.role,
+#             "status": request.user.status,
+#             "is_verified": request.user.is_verified,
+#         })
+        
+        
+        
 class PanchayathMeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
         return Response({
+
             "id": request.user.id,
+
             "username": request.user.username,
+
             "email": request.user.email,
+
             "official_phone": request.user.official_phone,
+
             "role": request.user.role,
+
             "status": request.user.status,
+
             "is_verified": request.user.is_verified,
+
+            "district": {
+                "id": request.user.district.id if request.user.district else None,
+                "name": request.user.district.name if request.user.district else None,
+            },
+
+            "panchayath": {
+                "id": request.user.panchayath.id if request.user.panchayath else None,
+                "name": request.user.panchayath.name if request.user.panchayath else None,
+            }
+
         })
+        
         
         
 import uuid
@@ -1897,4 +1933,66 @@ class UpdateWardOfficerEmailAPIView(APIView):
 
         return success_response(
             message="Ward officer replaced successfully."
+        )
+        
+        
+        
+class WardAccountListAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        if request.user.role != "PANCHAYATH":
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        wards = User.objects.filter(
+            role="WARD",
+            panchayath=request.user.panchayath
+        ).select_related(
+            "district",
+            "panchayath",
+            "ward"
+        ).order_by(
+            "ward__ward_number"
+        )
+
+        data = []
+
+        for ward in wards:
+
+            data.append({
+
+                "id": ward.id,
+
+                "ward_name": (
+                    ward.ward.ward_name
+                    if ward.ward
+                    else None
+                ),
+
+                "ward_number": (
+                    ward.ward.ward_number
+                    if ward.ward
+                    else None
+                ),
+
+                "official_email": ward.email,
+
+                "official_phone": ward.official_phone,
+
+                "officer_personal_email":
+                    ward.officer_personal_email,
+
+                "status": ward.status,
+
+            })
+
+        return success_response(
+            message="Ward accounts fetched successfully.",
+            data=data
         )

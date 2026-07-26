@@ -216,21 +216,58 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
   };
 
 
+  // const loadUser = async () => {
+  //   try {
+  //     const res = await panchayathapi.me();
+
+  //     setFields((prev) => ({
+  //       ...prev,
+  //       full_name: "",
+  //       email: res.data.email,
+  //       official_contact: res.data.official_phone,
+  //     }));
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
+
+
   const loadUser = async () => {
     try {
+
       const res = await panchayathapi.me();
 
       setFields((prev) => ({
         ...prev,
+
         full_name: "",
+
         email: res.data.email,
+
         official_contact: res.data.official_phone,
+
+        district: res.data.district?.id || "",
+
+        panchayath_master: res.data.panchayath?.id || "",
+
+        panchayath_name: res.data.panchayath?.name || "",
       }));
+
+      if (res.data.panchayath) {
+
+        setPanchayaths([
+          res.data.panchayath,
+        ]);
+
+      }
+
     } catch (err) {
+
       console.log(err);
+
     }
   };
-
 
 
   const handleFieldChange = (e) => {
@@ -272,15 +309,15 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
       const formData = new FormData();
       formData.append("full_name", fields.full_name.trim());
       formData.append("panchayath_name", fields.panchayath_name.trim());
-      formData.append(
-        "district",
-        fields.district
-      );
+      // formData.append(
+      //   "district",
+      //   fields.district
+      // );
 
-      formData.append(
-        "panchayath_master",
-        fields.panchayath_master
-      );
+      // formData.append(
+      //   "panchayath_master",
+      //   fields.panchayath_master
+      // );
       formData.append("phone", fields.official_contact.trim());
       formData.append("email", fields.email.trim());
       formData.append("aadhaar_image", aadhaarImage);
@@ -384,7 +421,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
             label="Full Name (Officer Name)"
             name="full_name"
             value={fields.full_name}
-            disabled={true}
+            // disabled={true}
             onChange={handleFieldChange}
             error={errors.full_name}
             placeholder="e.g. Rajeev Kumar"
@@ -403,6 +440,8 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
                 <SearchableSelect
                   placeholder="Search District..."
+                  isDisabled={true}
+
                   options={districts.map((district) => ({
                     value: district.id,
                     label: district.name,
@@ -420,13 +459,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
                       ) || null
                   }
 
-                  onChange={(selected) =>
-                    handleDistrictChange({
-                      target: {
-                        value: selected ? selected.value : "",
-                      },
-                    })
-                  }
+                  onChange={() => { }}
                 />
               </div>
 
@@ -438,7 +471,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
 
                 <SearchableSelect
                   placeholder="Search Panchayath..."
-                  isDisabled={!fields.district}
+                  isDisabled={true}
 
                   options={panchayaths.map((p) => ({
                     value: p.id,
@@ -457,13 +490,7 @@ export default function VerificationForm({ onSuccess, isRejected = false }) {
                       ) || null
                   }
 
-                  onChange={(selected) =>
-                    handlePanchayathChange({
-                      target: {
-                        value: selected ? selected.value : "",
-                      },
-                    })
-                  }
+                  onChange={() => { }}
                 />
 
               </div>

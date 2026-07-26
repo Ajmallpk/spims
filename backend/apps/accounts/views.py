@@ -577,6 +577,10 @@ class SetPasswordView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, token):
+        
+        print("===== SET PASSWORD VIEW =====")
+        print("TOKEN:", token)
+        print("REQUEST DATA:", request.data)
 
         try:
 
@@ -605,6 +609,9 @@ class SetPasswordView(APIView):
             user = User.objects.filter(
                 set_password_token=token
             ).first()
+            
+            
+            print("USER:", user)
 
             if not user:
 
@@ -621,12 +628,21 @@ class SetPasswordView(APIView):
                 )
 
             user.set_password(password)
+            
+            
+            print("PASSWORD SET")
 
             user.must_change_password = False
 
             user.set_password_token = None
 
             user.save()
+            
+            
+            
+            print("USER SAVED")
+            print("CHECK:", user.check_password(password))
+            print("MUST CHANGE:", user.must_change_password)
 
             return success_response(
                 message="Password set successfully"

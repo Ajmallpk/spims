@@ -52,6 +52,28 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+
+  {
+    id: "ward-management",
+    label: "Ward Management",
+    path: "/panchayath/ward-management",
+    locked: true,
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        className="w-5 h-5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M4.5 6.75h15m-15 5.25h15m-15 5.25h15"
+        />
+      </svg>
+    ),
+  },
   {
     id: "profile",
     label: "Profile",

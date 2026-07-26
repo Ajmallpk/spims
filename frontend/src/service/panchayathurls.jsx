@@ -170,6 +170,12 @@ const panchayathApi = {
     );
   },
 
+  listWardAccounts: () => {
+    return panchayathAxios.get(
+      "/panchayath/ward-accounts/"
+    );
+  },
+
 };
 
 
