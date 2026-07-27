@@ -156,9 +156,7 @@ class SubmitWardVerificationView(APIView):
 
             panchayath_master = user.panchayath
 
-            ward_master = Ward.objects.filter(
-                user=user
-            ).first()
+            ward_master = user.ward
 
             if not district or not panchayath_master or not ward_master:
 
@@ -1633,48 +1631,91 @@ class WardReassignedComplaintDetailView(APIView):
         
         
 
+# class WardMeView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+
+#         verification = WardVerification.objects.filter(
+#             user=request.user
+#         ).first()
+
+#         return Response({
+#             "id": request.user.id,
+
+#             "username": request.user.username,
+
+#             "email": request.user.email,
+
+#             "official_phone":
+#                 request.user.official_phone,
+
+#             "district":
+#                 verification.district.id
+#                 if verification and verification.district
+#                 else "",
+
+#             "panchayath_master":
+#                 verification.panchayath_master.id
+#                 if verification and verification.panchayath_master
+#                 else "",
+
+#             "ward_master":
+#                 verification.ward_master.id
+#                 if verification and verification.ward_master
+#                 else "",
+
+#             "ward_name":
+#                 verification.ward_name
+#                 if verification
+#                 else "",
+
+#             "role": request.user.role,
+
+#             "status": request.user.status,
+
+#             "is_verified": request.user.is_verified,
+#         })
+
+
 class WardMeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
-        verification = WardVerification.objects.filter(
-            user=request.user
-        ).first()
+        user = request.user
+
+        ward = user.ward
 
         return Response({
-            "id": request.user.id,
 
-            "username": request.user.username,
+            "id": user.id,
 
-            "email": request.user.email,
+            "username": user.username,
 
-            "official_phone":
-                request.user.official_phone,
+            "email": user.email,
 
-            "district":
-                verification.district.id
-                if verification and verification.district
-                else "",
+            "official_phone": user.official_phone,
 
-            "panchayath_master":
-                verification.panchayath_master.id
-                if verification and verification.panchayath_master
-                else "",
+            "district": {
+                "id": user.district.id,
+                "name": user.district.name,
+            } if user.district else None,
 
-            "ward_master":
-                verification.ward_master.id
-                if verification and verification.ward_master
-                else "",
+            "panchayath": {
+                "id": user.panchayath.id,
+                "name": user.panchayath.name,
+            } if user.panchayath else None,
 
-            "ward_name":
-                verification.ward_name
-                if verification
-                else "",
+            "ward": {
+                "id": ward.id,
+                "ward_number": ward.ward_number,
+                "ward_name": ward.ward_name,
+            } if ward else None,
 
-            "role": request.user.role,
+            "role": user.role,
 
-            "status": request.user.status,
+            "status": user.status,
 
-            "is_verified": request.user.is_verified,
+            "is_verified": user.is_verified,
         })

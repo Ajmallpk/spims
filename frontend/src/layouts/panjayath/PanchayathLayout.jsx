@@ -213,6 +213,7 @@ export default function PanchayathLayout() {
   useEffect(() => {
 
     let socket = null
+    let isUnmounting = false;
 
     const connectSocket = () => {
 
@@ -311,7 +312,7 @@ export default function PanchayathLayout() {
       // }
 
 
-      let isUnmounting = false;
+      
 
       socket.onclose = () => {
 

@@ -9,10 +9,8 @@ import SearchableSelect from "@/components/common/SearchableSelect";
 const INITIAL_FIELDS = {
   officer_full_name: "",
 
-  district: "",
-  panchayath_master: "",
-  ward_master: "",
-
+  district_name: "",
+  panchayath_name: "",
   ward_name: "",
 
   official_email: "",
@@ -126,9 +124,9 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [districts, setDistricts] = useState([]);
-  const [panchayaths, setPanchayaths] = useState([]);
-  const [wards, setWards] = useState([]);
+  // const [districts, setDistricts] = useState([]);
+  // const [panchayaths, setPanchayaths] = useState([]);
+  // const [wards, setWards] = useState([]);
   const [showLocationRequest, setShowLocationRequest] = useState(false);
 
 
@@ -136,23 +134,23 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    loadDistricts();
+    // loadDistricts();
     loadUser();
   }, []);
 
-  const loadDistricts = async () => {
-    try {
+  // const loadDistricts = async () => {
+  //   try {
 
-      const res = await wardapi.getDistricts();
+  //     const res = await wardapi.getDistricts();
 
-      setDistricts(res.data.data);
+  //     setDistricts(res.data.data);
 
-    } catch (err) {
+  //   } catch (err) {
 
-      console.log(err);
+  //     console.log(err);
 
-    }
-  };
+  //   }
+  // };
 
 
 
@@ -167,23 +165,20 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
         officer_full_name: "",
 
-        official_email:
-          res.data.email,
+        official_email: res.data.email,
 
-        official_contact:
-          res.data.official_phone,
+        official_contact: res.data.official_phone,
 
-        district:
-          res.data.district,
+        district_name: res.data.district?.name || "",
 
-        panchayath_master:
-          res.data.panchayath_master,
+        panchayath_name: res.data.panchayath?.name || "",
 
-        ward_master:
-          res.data.ward_master,
-
-        ward_name:
-          res.data.ward_name,
+        ward_name: res.data.ward
+          ? `Ward ${res.data.ward.ward_number}${res.data.ward.ward_name
+            ? ` - ${res.data.ward.ward_name}`
+            : ""
+          }`
+          : "",
       }));
 
     } catch (err) {
@@ -192,26 +187,26 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
   };
 
 
-  const handleDistrictChange = async (e) => {
+  // const handleDistrictChange = async (e) => {
 
-    const districtId = e.target.value;
+  //   const districtId = e.target.value;
 
-    setFields(prev => ({
-      ...prev,
-      district: districtId,
-      panchayath_master: "",
-      ward_master: "",
-    }));
+  //   setFields(prev => ({
+  //     ...prev,
+  //     district: districtId,
+  //     panchayath_master: "",
+  //     ward_master: "",
+  //   }));
 
-    setPanchayaths([]);
-    setWards([]);
+  //   setPanchayaths([]);
+  //   setWards([]);
 
-    if (!districtId) return;
+  //   if (!districtId) return;
 
-    const res = await wardapi.getPanchayaths(districtId);
+  //   const res = await wardapi.getPanchayaths(districtId);
 
-    setPanchayaths(res.data.data);
-  };
+  //   setPanchayaths(res.data.data);
+  // };
 
 
 
@@ -239,21 +234,21 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
 
 
 
-  const handleWardChange = (e) => {
+  // const handleWardChange = (e) => {
 
-    const id = e.target.value;
+  //   const id = e.target.value;
 
-    const ward = wards.find(w => w.id == id);
+  //   const ward = wards.find(w => w.id == id);
 
-    setFields(prev => ({
-      ...prev,
-      ward_master: id,
-      ward_name: ward
-        ? ward.ward_name || `Ward ${ward.ward_number}`
-        : "",
-    }));
+  //   setFields(prev => ({
+  //     ...prev,
+  //     ward_master: id,
+  //     ward_name: ward
+  //       ? ward.ward_name || `Ward ${ward.ward_number}`
+  //       : "",
+  //   }));
 
-  };
+  // };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFields((prev) => ({ ...prev, [name]: value }));
@@ -306,14 +301,6 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
     if (!fields.officer_full_name.trim() || fields.officer_full_name.trim().length < 3)
       errs.officer_full_name = "Full name must be at least 3 characters.";
 
-    if (!fields.district)
-      errs.district = "Please select a District.";
-
-    if (!fields.panchayath_master)
-      errs.panchayath_master = "Please select a Panchayath.";
-
-    if (!fields.ward_master)
-      errs.ward_master = "Please select a Ward.";
 
     if (!fields.official_email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.official_email))
       errs.official_email = "Enter a valid official email address.";
@@ -346,12 +333,6 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
       const fd = new FormData();
 
       fd.append("officer_full_name", fields.officer_full_name.trim());
-
-      fd.append("district", fields.district);
-
-      fd.append("panchayath_master", fields.panchayath_master);
-
-      fd.append("ward_master", fields.ward_master);
 
       fd.append("ward_name", fields.ward_name.trim());
 
@@ -434,7 +415,7 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
               name="officer_full_name"
               value={fields.officer_full_name}
               onChange={handleChange}
-              disabled={true}
+              // disabled={true}
               required
               placeholder="e.g. Rajan Mathew"
               error={errors.officer_full_name}
@@ -471,112 +452,42 @@ export default function WardVerificationForm({ onSuccess, prefillData }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
             <div>
-
-              <label className="text-xs font-semibold">
+              <label className="text-xs font-semibold text-gray-700">
                 District
               </label>
 
-              {/* <SearchableSelect
-                placeholder="Select District"
-                options={districts.map((d) => ({
-                  value: d.id,
-                  label: d.name,
-                }))}
-                value={
-                  districts
-                    .map((d) => ({
-                      value: d.id,
-                      label: d.name,
-                    }))
-                    .find((option) => option.value == fields.district)
-                }
-                onChange={(selected) =>
-                  handleDistrictChange({
-                    target: {
-                      value: selected?.value || "",
-                    },
-                  })
-                }
-              /> */}
-
+              <input
+                type="text"
+                value={fields.district_name}
+                disabled
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-300 bg-gray-50 text-sm text-gray-800 cursor-not-allowed"
+              />
             </div>
 
-
             <div>
-
-              <label className="text-xs font-semibold">
+              <label className="text-xs font-semibold text-gray-700">
                 Panchayath
               </label>
 
-              {/* <SearchableSelect
-                placeholder="Select Panchayath"
-                options={panchayaths.map((p) => ({
-                  value: p.id,
-                  label: p.name,
-                }))}
-                value={
-                  panchayaths
-                    .map((p) => ({
-                      value: p.id,
-                      label: p.name,
-                    }))
-                    .find((option) => option.value == fields.panchayath_master)
-                }
-                onChange={(selected) =>
-                  handlePanchayathChange({
-                    target: {
-                      value: selected?.value || "",
-                    },
-                  })
-                }
-                isDisabled={!fields.district}
-              /> */}
-
+              <input
+                type="text"
+                value={fields.panchayath_name}
+                disabled
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-300 bg-gray-50 text-sm text-gray-800 cursor-not-allowed"
+              />
             </div>
 
-
-
             <div>
-
-              <label className="text-xs font-semibold">
+              <label className="text-xs font-semibold text-gray-700">
                 Ward
               </label>
 
-              {/* <SearchableSelect
-                placeholder="Select Ward"
-                options={wards.map((w) => ({
-                  value: w.id,
-                  label: `Ward ${w.ward_number}${w.ward_name ? ` - ${w.ward_name}` : ""}`,
-                }))}
-                value={
-                  wards
-                    .map((w) => ({
-                      value: w.id,
-                      label: `Ward ${w.ward_number}${w.ward_name ? ` - ${w.ward_name}` : ""}`,
-                    }))
-                    .find((option) => option.value == fields.ward_master)
-                }
-                onChange={(selected) =>
-                  handleWardChange({
-                    target: {
-                      value: selected?.value || "",
-                    },
-                  })
-                }
-                isDisabled={!fields.panchayath_master}
-              /> */}
-
-
-              {/* <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  className="text-sm text-blue-600 hover:underline"
-                  onClick={() => setShowLocationRequest(true)}
-                >
-                  Can't find your District / Panchayath / Ward?
-                </button>
-              </div> */}
-
+              <input
+                type="text"
+                value={fields.ward_name}
+                disabled
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-300 bg-gray-50 text-sm text-gray-800 cursor-not-allowed"
+              />
             </div>
 
           </div>
