@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { adminapi } from "@/service/adminurls";
+import panchayathApi from "@/service/panchayathurls";
 import getErrorMessage from "@/utils/getErrorMessage";
 
 const EditOfficeDetailsModal = ({
@@ -146,7 +146,7 @@ const EditOfficeDetailsModal = ({
             }
 
             const response =
-                await adminapi.updateOfficeDetails(
+                await panchayathApi.updateWardOfficeDetails(
                     account.id,
                     payload
                 );
@@ -181,7 +181,7 @@ const EditOfficeDetailsModal = ({
             <div className="bg-white rounded-xl w-full max-w-xl p-6">
 
                 <h2 className="text-2xl font-semibold mb-6">
-                    Edit Office Details
+                    Edit Ward Office Details
                 </h2>
 
                 <div className="space-y-5">
@@ -255,7 +255,7 @@ const EditOfficeDetailsModal = ({
                         <ul className="list-disc list-inside text-sm text-blue-700 mt-2 space-y-1">
 
                             <li>
-                                Updating the official email will revoke the current password.
+                                Updating the Ward official email will revoke the current password.
                             </li>
 
                             <li>

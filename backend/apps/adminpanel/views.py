@@ -2694,7 +2694,7 @@ class CreatePanchayathAPIView(APIView):
                 status=User.Status.PENDING,
             )
 
-            user.set_unusable_password()
+            
 
             set_password_link = prepare_password_setup(user)
             

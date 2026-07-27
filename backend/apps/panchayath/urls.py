@@ -66,4 +66,9 @@ urlpatterns = [
 ),
     
     
+    path(
+    "wards/<int:user_id>/office-details/",
+    views.UpdateWardOfficeDetailsAPIView.as_view(),
+),
+    
 ]

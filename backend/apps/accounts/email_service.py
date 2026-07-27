@@ -161,7 +161,7 @@ Password Setup Link
 
 IMPORTANT
 
-• Your Panchayath account remains the same.
+• Your SPIMS office account remains the same.
 • Your verification status remains unchanged.
 • Your complaints remain unchanged.
 • Your citizens remain unchanged.

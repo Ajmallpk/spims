@@ -40,12 +40,24 @@ from .serializers import (
 )
 
 
-from apps.accounts.otp_utils import (
-    send_set_password_email
+from apps.accounts.email_service import (
+    send_account_created_email,
+    send_password_reset_email,
+    send_officer_replaced_email,
+    send_official_email_updated_email,
+    send_official_phone_updated_email,
 )
 
+from apps.accounts.auth_helpers import (
+    prepare_password_setup,
+)
 
-import uuid
+from apps.accounts.email_service import (
+    send_password_reset_email,
+)
+
+from .serializers import UpdateOfficeDetailsSerializer
+
 
 from django.contrib.auth import get_user_model
 
@@ -1665,7 +1677,7 @@ class PanchayathMeView(APIView):
         
         
         
-import uuid
+
 
 class CreateWardAccountAPIView(APIView):
 
@@ -1682,7 +1694,10 @@ class CreateWardAccountAPIView(APIView):
             )
 
         serializer = CreateWardSerializer(
-            data=request.data
+            data=request.data,
+            context={
+                "request": request
+            }
         )
 
         if not serializer.is_valid():
@@ -1693,9 +1708,7 @@ class CreateWardAccountAPIView(APIView):
                 status=400
             )
 
-        ward_id = serializer.validated_data[
-            "ward_id"
-        ]
+        ward = serializer.validated_data["ward"]
 
         official_email = serializer.validated_data[
             "official_email"
@@ -1711,90 +1724,45 @@ class CreateWardAccountAPIView(APIView):
             ]
         )
 
-        
-        if User.objects.filter(
-            email=official_email
-        ).exists():
 
-            return error_response(
-                message=(
-                    "Official email already exists."
-                ),
-                status=400
+
+        
+        with transaction.atomic():
+
+            user = User.objects.create(
+
+                username=ward.ward_name or f"Ward {ward.ward_number}",
+
+                email=official_email,
+
+                role="WARD",
+
+                district=request.user.district,
+
+                panchayath=request.user.panchayath,
+
+                ward=ward,
+
+                official_phone=official_phone,
+
+                officer_personal_email=officer_personal_email,
+
+                is_verified=False,
+
+                status=User.Status.PENDING,
             )
 
-  
-        ward = Ward.objects.filter(
-            id=ward_id,
-            panchayath=request.user.panchayath
-        ).first()
+            set_password_link = prepare_password_setup(user)
 
-        if not ward:
+            send_account_created_email(
 
-            return error_response(
-                message=(
-                    "Ward not found or does not belong "
-                    "to your Panchayath."
-                ),
-                status=404
+                personal_email=user.officer_personal_email,
+
+                official_email=user.email,
+
+                set_password_link=set_password_link,
+
             )
-
-        
-        if User.objects.filter(
-            ward=ward,
-            role="WARD"
-        ).exists():
-
-            return error_response(
-                message="This Ward already has an account.",
-                status=400
-            )
-
-        
-        token = uuid.uuid4()
-
-    
-        user = User.objects.create(
-            username=ward.ward_name or f"Ward {ward.ward_number}",
-            email=official_email,
-            role="WARD",
-            district=request.user.district,
-            panchayath=request.user.panchayath,
-            ward=ward,
-            official_phone=official_phone,
-            officer_personal_email=officer_personal_email,
-            must_change_password=True,
-            is_verified=False,
-            status=User.Status.PENDING,
-        )
-
-        # Link Ward with User
-        
-        user.set_unusable_password()
-        user.save()
-        
-        
-        user.set_password_token = token
-        user.save()
-        
-
-        # Send Set Password Mail
-        set_password_link = (
-            f"http://localhost:5173/"
-            f"set-password/{token}"
-        )
-
-        send_set_password_email(
-            personal_email=(
-                officer_personal_email
-            ),
-
-            official_email=(
-                official_email
-            ),
-
-            link=set_password_link,
-        )
 
         return success_response(
             message=(
@@ -1804,7 +1772,7 @@ class CreateWardAccountAPIView(APIView):
         
         
         
-import uuid
+
 
 class ResetWardPasswordAPIView(APIView):
 
@@ -1821,7 +1789,8 @@ class ResetWardPasswordAPIView(APIView):
 
         user = User.objects.filter(
             id=user_id,
-            role="WARD"
+            role="WARD",
+            panchayath=request.user.panchayath,
         ).first()
 
         if not user:
@@ -1832,27 +1801,25 @@ class ResetWardPasswordAPIView(APIView):
             )
 
         
-        import secrets
+        with transaction.atomic():
 
-        token = secrets.token_urlsafe(32)
+            set_password_link = prepare_password_setup(user)
 
-        user.must_change_password = True
-        user.set_password_token = token
-        user.save()
+            send_password_reset_email(
 
-        set_password_link = (
-            f"http://localhost:5173/set-password/{token}"
-        )
+                personal_email=user.officer_personal_email,
 
-        send_set_password_email(
-            personal_email=user.officer_personal_email,
-            official_email=user.email,
-            link=set_password_link,
-        )
+                official_email=user.email,
 
-        return success_response(
-            message="Password reset email sent successfully."
-        )
+                set_password_link=set_password_link,
+
+            )
+
+            return success_response(
+                message="Password reset email sent successfully."
+            )
+
+        
         
         
         
@@ -1884,8 +1851,13 @@ class UpdateWardOfficerEmailAPIView(APIView):
                 status=404
             )
 
-        officer_email = request.data.get(
-            "officer_personal_email"
+        officer_email = (
+            request.data.get(
+                "officer_personal_email",
+                ""
+            )
+            .strip()
+            .lower()
         )
 
         if not officer_email:
@@ -1905,32 +1877,23 @@ class UpdateWardOfficerEmailAPIView(APIView):
                 status=400
             )
 
-        user.officer_personal_email = officer_email
+        with transaction.atomic():
 
-        # Revoke old officer access
-        user.set_unusable_password()
+            user.officer_personal_email = officer_email
 
-        # Generate new password setup token
-        user.set_password_token = secrets.token_urlsafe(32)
+            user.save(update_fields=["officer_personal_email"])
 
-        user.must_change_password = True
+            set_password_link = prepare_password_setup(user)
 
-        # Reset login security
-        user.failed_attempts = 0
-        user.lock_until = None
+            send_officer_replaced_email(
 
-        user.save()
+                personal_email=user.officer_personal_email,
 
-        set_password_link = (
-            f"http://localhost:5173/"
-            f"set-password/{user.set_password_token}"
-        )
+                official_email=user.email,
 
-        send_set_password_email(
-            personal_email=user.officer_personal_email,
-            official_email=user.email,
-            link=set_password_link,
-        )
+                set_password_link=set_password_link,
+
+            )
 
         return success_response(
             message="Ward officer replaced successfully."
@@ -2035,4 +1998,114 @@ class AvailableWardListAPIView(APIView):
         return success_response(
             message="Available wards fetched successfully.",
             data=data
+        )
+        
+        
+        
+class UpdateWardOfficeDetailsAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, user_id):
+
+        if request.user.role != "PANCHAYATH":
+
+            return error_response(
+                message="Permission denied.",
+                status=403
+            )
+
+        user = User.objects.filter(
+            id=user_id,
+            role="WARD",
+            panchayath=request.user.panchayath
+        ).first()
+
+        if not user:
+
+            return error_response(
+                message="Ward account not found.",
+                status=404
+            )
+
+        serializer = UpdateOfficeDetailsSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        reason = data["reason"]
+
+        email_changed = False
+        phone_changed = False
+
+        old_email = user.email
+        old_phone = user.official_phone
+
+        if "official_email" in data:
+
+            if data["official_email"] != user.email:
+
+                if User.objects.filter(
+                    email=data["official_email"]
+                ).exclude(
+                    id=user.id
+                ).exists():
+
+                    return error_response(
+                        message="Official email already exists.",
+                        status=400
+                    )
+
+                user.email = data["official_email"]
+
+                email_changed = True
+
+        if "official_phone" in data:
+
+            if data["official_phone"] != user.official_phone:
+
+                user.official_phone = data["official_phone"]
+
+                phone_changed = True
+
+        with transaction.atomic():
+
+            if email_changed:
+
+                set_password_link = prepare_password_setup(user)
+
+                send_official_email_updated_email(
+                    personal_email=user.officer_personal_email,
+                    previous_official_email=old_email,
+                    new_official_email=user.email,
+                    reason=reason,
+                    set_password_link=set_password_link,
+                )
+
+            elif phone_changed:
+
+                user.save()
+
+            if phone_changed:
+
+                send_official_phone_updated_email(
+                    personal_email=user.officer_personal_email,
+                    official_email=user.email,
+                    previous_phone=old_phone,
+                    new_phone=user.official_phone,
+                    reason=reason,
+                )
+
+        if not email_changed and not phone_changed:
+
+            return error_response(
+                message="No changes detected.",
+                status=400
+            )
+
+        return success_response(
+            message="Office details updated successfully."
         )

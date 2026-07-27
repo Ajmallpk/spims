@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { adminapi } from "@/service/adminurls";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 const ResetPasswordModal = ({
     open,
@@ -35,8 +36,7 @@ const ResetPasswordModal = ({
             console.error(error);
 
             toast.error(
-                error?.response?.data?.message ||
-                "Failed to reset password."
+                getErrorMessage(error)
             );
 
         } finally {

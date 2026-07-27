@@ -6,6 +6,13 @@ from django.utils import timezone
 from apps.complaints.utils import can_change_status
 from apps.complaints.serializers import HoldComplaintSerializer
 
+
+from django.contrib.auth import get_user_model
+from apps.accounts.models import Ward
+import re
+
+User = get_user_model()
+
 class PanchayathVerificationSerializer(serializers.ModelSerializer):
     
     aadhaar_image = serializers.ImageField(required=True)
@@ -139,25 +146,127 @@ class ReassignComplaintSerializer(serializers.ModelSerializer):
 
 
 
-from rest_framework import serializers
-
-
-class CreateWardSerializer(
-    serializers.Serializer
-):
+class CreateWardSerializer(serializers.Serializer):
 
     ward_id = serializers.IntegerField()
 
-    official_email = (
-        serializers.EmailField()
+    official_email = serializers.EmailField()
+
+    official_phone = serializers.CharField(
+        max_length=15
     )
 
-    official_phone = (
-        serializers.CharField(
-            max_length=15
+    officer_personal_email = serializers.EmailField()
+
+    def validate(self, attrs):
+
+        request = self.context["request"]
+
+        attrs["official_email"] = (
+            attrs["official_email"]
+            .strip()
+            .lower()
         )
+
+        attrs["officer_personal_email"] = (
+            attrs["officer_personal_email"]
+            .strip()
+            .lower()
+        )
+
+        attrs["official_phone"] = (
+            attrs["official_phone"]
+            .strip()
+        )
+
+        if not re.fullmatch(
+            r"^[6-9]\d{9}$",
+            attrs["official_phone"]
+        ):
+            raise serializers.ValidationError({
+                "official_phone":
+                "Enter a valid 10-digit Indian mobile number."
+            })
+
+        if User.objects.filter(
+            email=attrs["official_email"]
+        ).exists():
+            raise serializers.ValidationError({
+                "official_email":
+                "Official email already exists."
+            })
+
+        ward = Ward.objects.filter(
+            id=attrs["ward_id"],
+            panchayath=request.user.panchayath,
+        ).first()
+
+        if not ward:
+            raise serializers.ValidationError({
+                "ward_id":
+                "Ward not found or does not belong to your Panchayath."
+            })
+
+        if User.objects.filter(
+            role=User.Role.WARD,
+            ward=ward,
+        ).exists():
+            raise serializers.ValidationError({
+                "ward_id":
+                "This Ward already has an account."
+            })
+
+        attrs["ward"] = ward
+
+        return attrs
+
+class UpdateOfficeDetailsSerializer(serializers.Serializer):
+
+    official_email = serializers.EmailField(
+        required=False
     )
 
-    officer_personal_email = (
-        serializers.EmailField()
+    official_phone = serializers.CharField(
+        required=False,
+        max_length=10
     )
+
+    reason = serializers.CharField()
+
+    def validate(self, attrs):
+
+        if (
+            "official_email" not in attrs and
+            "official_phone" not in attrs
+        ):
+            raise serializers.ValidationError(
+                "Nothing to update."
+            )
+
+        if "official_email" in attrs:
+
+            attrs["official_email"] = (
+                attrs["official_email"]
+                .strip()
+                .lower()
+            )
+
+        if "official_phone" in attrs:
+
+            attrs["official_phone"] = (
+                attrs["official_phone"]
+                .strip()
+            )
+
+            if not re.fullmatch(
+                r"^[6-9]\d{9}$",
+                attrs["official_phone"]
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "official_phone":
+                        "Enter a valid 10-digit Indian mobile number."
+                    }
+                )
+
+        return attrs

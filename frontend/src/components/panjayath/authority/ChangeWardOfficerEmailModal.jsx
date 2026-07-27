@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import panchayathApi from "@/service/panchayathurls";
+import getErrorMessage from "@/utils/getErrorMessage";
 
 const ChangeWardOfficerEmailModal = ({
     open,
@@ -60,8 +61,7 @@ const ChangeWardOfficerEmailModal = ({
             console.error(error);
 
             toast.error(
-                error?.response?.data?.message ||
-                "Failed to update officer email."
+                getErrorMessage(error)
             );
 
         }
