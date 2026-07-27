@@ -76,6 +76,8 @@ from apps.accounts.email_service import (
     send_official_phone_updated_email,
 )
 
+from django.db import transaction
+
 import uuid
 logger = logging.getLogger(__name__)
 
@@ -2663,47 +2665,49 @@ class CreatePanchayathAPIView(APIView):
                 message="Permission denied",
                 status=403
             )
+            
+        with transaction.atomic():
 
-        serializer = CreatePanchayathSerializer(
-            data=request.data
-        )
+            serializer = CreatePanchayathSerializer(
+                data=request.data
+            )
 
-        if not serializer.is_valid():
-            print(serializer.errors)
-            return Response(serializer.errors, status=400)
+            if not serializer.is_valid():
+                print(serializer.errors)
+                return Response(serializer.errors, status=400)
 
-        data = serializer.validated_data
-        
-        officer_personal_email = request.data.get(
-            "officer_personal_email"
-        )
+            data = serializer.validated_data
+            
+            officer_personal_email = request.data.get(
+                "officer_personal_email"
+            )
 
-        user = User.objects.create(
-            username=data["panchayath"].name,
-            email=data["official_email"],
-            role="PANCHAYATH",
-            district=data["district"],
-            panchayath=data["panchayath"],
-            official_phone=data["official_phone"],
-            officer_personal_email=data["officer_personal_email"],
-            is_verified=False,
-            status=User.Status.PENDING,
-        )
+            user = User.objects.create(
+                username=data["panchayath"].name,
+                email=data["official_email"],
+                role="PANCHAYATH",
+                district=data["district"],
+                panchayath=data["panchayath"],
+                official_phone=data["official_phone"],
+                officer_personal_email=data["officer_personal_email"],
+                is_verified=False,
+                status=User.Status.PENDING,
+            )
 
-        user.set_unusable_password()
+            user.set_unusable_password()
 
-        set_password_link = prepare_password_setup(user)
-        
-        
-        send_account_created_email(
-            personal_email=user.officer_personal_email,
-            official_email=user.email,
-            set_password_link=set_password_link,
-        )
+            set_password_link = prepare_password_setup(user)
+            
+            
+            send_account_created_email(
+                personal_email=user.officer_personal_email,
+                official_email=user.email,
+                set_password_link=set_password_link,
+            )
 
-        return success_response(
-            message="Panchayath account created"
-        )
+            return success_response(
+                message="Panchayath account created"
+            )
         
         
         
@@ -2740,18 +2744,20 @@ class ResetPanchayathPasswordAPIView(
                 status=404
             )
             
-        set_password_link = prepare_password_setup(user)
+        with transaction.atomic():
+            
+            set_password_link = prepare_password_setup(user)
 
-        send_password_reset_email(
-            personal_email=user.officer_personal_email,
-            official_email=user.email,
-            set_password_link=set_password_link,
-        )
-        
-        
-        return success_response(
-            message="Password reset email sent successfully."
-        )
+            send_password_reset_email(
+                personal_email=user.officer_personal_email,
+                official_email=user.email,
+                set_password_link=set_password_link,
+            )
+            
+            
+            return success_response(
+                message="Password reset email sent successfully."
+            )
         
         
         
@@ -2800,19 +2806,23 @@ class ReplacePanchayathOfficerAPIView(
                 status=400
             )
 
-        user.officer_personal_email = officer_email
+        with transaction.atomic():
 
-        set_password_link = prepare_password_setup(user)
+            user.officer_personal_email = officer_email
 
-        send_officer_replaced_email(
-            personal_email=user.officer_personal_email,
-            official_email=user.email,
-            set_password_link=set_password_link,
-        )
+            user.save(update_fields=["officer_personal_email"])
 
-        return success_response(
-            message="Officer replaced successfully."
-        )
+            set_password_link = prepare_password_setup(user)
+
+            send_officer_replaced_email(
+                personal_email=user.officer_personal_email,
+                official_email=user.email,
+                set_password_link=set_password_link,
+            )
+
+            return success_response(
+                message="Officer replaced successfully."
+            )
         
         
 class AuthorityPanchayathListAPIView(APIView):
@@ -2919,32 +2929,35 @@ class UpdateOfficeDetailsAPIView(APIView):
                 phone_changed = True
                 
         set_password_link = None
+        
+        
+        with transaction.atomic():
 
-        if email_changed:
+            if email_changed:
 
-            set_password_link = prepare_password_setup(user)
+                set_password_link = prepare_password_setup(user)
 
-            send_official_email_updated_email(
-                personal_email=user.officer_personal_email,
-                previous_official_email=old_email,
-                new_official_email=user.email,
-                reason=reason,
-                set_password_link=set_password_link,
-            )
+                send_official_email_updated_email(
+                    personal_email=user.officer_personal_email,
+                    previous_official_email=old_email,
+                    new_official_email=user.email,
+                    reason=reason,
+                    set_password_link=set_password_link,
+                )
 
-        elif phone_changed:
+            elif phone_changed:
 
-            user.save()
+                user.save()
 
-        if phone_changed:
+            if phone_changed:
 
-            send_official_phone_updated_email(
-                personal_email=user.officer_personal_email,
-                official_email=user.email,
-                previous_phone=old_phone,
-                new_phone=user.official_phone,
-                reason=reason,
-            )
+                send_official_phone_updated_email(
+                    personal_email=user.officer_personal_email,
+                    official_email=user.email,
+                    previous_phone=old_phone,
+                    new_phone=user.official_phone,
+                    reason=reason,
+                )
 
         if not email_changed and not phone_changed:
 

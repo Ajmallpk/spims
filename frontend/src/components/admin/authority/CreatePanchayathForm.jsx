@@ -212,12 +212,16 @@ const CreatePanchayathForm = ({ onSuccess }) => {
 
         panchayath_id: formData.panchayath.value,
 
-        official_email: formData.official_email.trim(),
+        official_email:
+          formData.official_email.trim().toLowerCase(),
 
-        official_phone: formData.official_phone.trim(),
+        official_phone:
+          formData.official_phone.trim(),
 
         officer_personal_email:
-          formData.officer_personal_email.trim(),
+          formData.officer_personal_email
+            .trim()
+            .toLowerCase(),
 
       });
 

@@ -119,19 +119,35 @@ const EditOfficeDetailsModal = ({
 
             setLoading(true);
 
+            const payload = {
+                reason: reason.trim(),
+            };
+
+            const emailChanged =
+                officialEmail.trim().toLowerCase() !==
+                (account.official_email || "")
+                    .trim()
+                    .toLowerCase();
+
+            const phoneChanged =
+                officialPhone.trim() !==
+                (account.official_phone || "")
+                    .trim();
+
+            if (emailChanged) {
+                payload.official_email =
+                    officialEmail.trim().toLowerCase();
+            }
+
+            if (phoneChanged) {
+                payload.official_phone =
+                    officialPhone.trim();
+            }
+
             const response =
                 await adminapi.updateOfficeDetails(
                     account.id,
-                    {
-                        official_email:
-                            officialEmail.trim(),
-
-                        official_phone:
-                            officialPhone.trim(),
-
-                        reason:
-                            reason.trim(),
-                    }
+                    payload
                 );
 
             toast.success(

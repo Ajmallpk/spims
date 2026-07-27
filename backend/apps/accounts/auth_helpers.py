@@ -1,7 +1,5 @@
 import secrets
-
-
-FRONTEND_URL = "http://localhost:5173"
+from django.conf import settings
 
 
 def prepare_password_setup(user):
@@ -27,6 +25,6 @@ def prepare_password_setup(user):
     user.save()
 
     return (
-        f"{FRONTEND_URL}/set-password/"
+        f"{settings.FRONTEND_URL}/set-password/"
         f"{user.set_password_token}"
     )

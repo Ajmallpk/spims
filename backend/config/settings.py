@@ -334,3 +334,7 @@ CELERY_TIMEZONE = "UTC"
 
 from .firebase.firebase_config import *
 
+
+
+FRONTEND_URL = "http://localhost:5173"
+

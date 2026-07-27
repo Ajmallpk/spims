@@ -22,8 +22,13 @@ const ReplaceOfficerModal = ({
 
     const handleReplace = async () => {
 
-        if (!email.trim()) {
-            toast.error("Officer personal email is required.");
+        const emailRegex =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email.trim())) {
+
+            toast.error("Enter a valid email address.");
+
             return;
         }
 
