@@ -44,10 +44,10 @@ urlpatterns = [
 ),
     
     
-    path(
-    "wards/<int:user_id>/reset-password/",
-    views.ResetWardPasswordAPIView.as_view(),
-),
+#     path(
+#     "wards/<int:user_id>/reset-password/",
+#     views.ResetWardPasswordAPIView.as_view(),
+# ),
     
     
     path(

@@ -9,29 +9,49 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSendOtp = async () => {
-    if (!email) {
+
+    if (!email.trim()) {
       setError("Email is required");
       toast.error("Email is required");
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setError("Enter a valid email address");
+      toast.error("Enter a valid email address");
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
+
       await citizenapi.forgotPassword({ email });
-      // toast.success("OTP sent successfully");
-      navigate("/citizen/verify-reset-otp", { state: { email } });
+
+      toast.success("OTP sent successfully");
+
+      navigate("/citizen/verify-reset-otp", {
+        state: { email },
+      });
+
     } catch (err) {
 
       const message =
         err.response?.data?.error ||
+        err.response?.data?.message ||
         "Failed to send OTP";
 
       setError(message);
-
       toast.error(message);
 
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,9 +137,10 @@ export default function ForgotPassword() {
 
             <button
               onClick={handleSendOtp}
+              disabled={isSubmitting}
               className="w-full bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold py-3 rounded-xl text-sm transition-colors duration-150 shadow-sm"
             >
-              Send OTP
+              {isSubmitting ? "Sending..." : "Send OTP"}
             </button>
 
           </div>
@@ -128,7 +149,7 @@ export default function ForgotPassword() {
           <p className="mt-6 text-center text-sm text-gray-500">
             Remembered your password?{" "}
             <button
-              onClick={() => navigate("/citizen/login")}
+              onClick={() => navigate("/citizen/registration")}
               className="text-teal-600 font-medium hover:underline"
             >
               Back to login

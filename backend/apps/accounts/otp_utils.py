@@ -4,10 +4,14 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
+from datetime import timedelta
 
-OTP_EXPIRY = 300
+
+
+OTP_EXPIRY = 300          
 MAX_ATTEMPTS = 5
-RESEND_LIMIT = 3
+RESEND_LIMIT = 5
+RESEND_COOLDOWN = 1800    
 
 
 def generate_otp():
@@ -18,12 +22,19 @@ def get_cache_key(email, purpose):
     return f"otp_{purpose}_{email}"
 
 
+
+
+def get_cooldown_key(email, purpose):
+    return f"otp_cooldown:{purpose}:{email.lower()}"
+
+
 def store_otp(email, otp, purpose):
     data = {
         "otp": otp,
         "attempts": 0,
         "resend_count": 0,
-        "verified": False
+        "verified": False,
+        
     }
     cache.set(get_cache_key(email, purpose), data, timeout=OTP_EXPIRY)
 
@@ -54,31 +65,62 @@ def verify_otp(email, entered_otp, purpose):
     return True, "OTP verified"
 
 
+
+from datetime import timedelta
+
 def resend_otp(email, purpose):
-    key = get_cache_key(email, purpose)
-    data = cache.get(key)
+    otp_key = get_cache_key(email, purpose)
+    cooldown_key = get_cooldown_key(email, purpose)
+
+    data = cache.get(otp_key)
 
     if not data:
-        return False, "OTP expired"
+        return False, "OTP has expired. Please request a new OTP."
+
+    cooldown = cache.get(cooldown_key)
+
+    if cooldown:
+        remaining = int((cooldown - timezone.now()).total_seconds())
+
+        if remaining > 0:
+            minutes = (remaining + 59) // 60
+            return False, (
+                f"Resend limit exceeded. Please try again after {minutes} minute(s)."
+            )
 
     if data["resend_count"] >= RESEND_LIMIT:
-        return False, "Resend limit reached"
+        blocked_until = timezone.now() + timedelta(seconds=RESEND_COOLDOWN)
+
+        cache.set(
+            cooldown_key,
+            blocked_until,
+            timeout=RESEND_COOLDOWN,
+        )
+
+        return False, (
+            "Resend limit exceeded. Please try again after 30 minutes."
+        )
 
     new_otp = generate_otp()
 
     data["otp"] = new_otp
-
-    
     data["attempts"] = 0
-
     data["resend_count"] += 1
 
-    cache.set(key, data, timeout=OTP_EXPIRY)
+    cache.set(
+        otp_key,
+        data,
+        timeout=OTP_EXPIRY,
+    )
 
-    remaining = RESEND_LIMIT - data["resend_count"]
-    return True, {"otp": new_otp, "remaining": remaining}
-
-
+    return True, {
+        "otp": new_otp,
+        "remaining": RESEND_LIMIT - data["resend_count"],
+    }
+    
+    
+    
+    
 def clear_otp(email, purpose):
     cache.delete(get_cache_key(email, purpose))
 

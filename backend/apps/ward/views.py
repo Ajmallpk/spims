@@ -838,6 +838,13 @@ class WardChangePasswordView(APIView):
                     message="Current password is incorrect",
                     status=400
                 )
+                
+                
+            if current_password == new_password:
+                return error_response(
+                    message="New password must be different from the current password.",
+                    status=400
+                )
 
             user.set_password(new_password)
             user.save()

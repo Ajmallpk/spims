@@ -885,6 +885,14 @@ class PanchayathChangePasswordView(APIView):
                     message="Current password is incorrect",
                     status=400
                 )
+                
+                
+                
+            if current_password == new_password:
+                return error_response(
+                    message="New password must be different from the current password.",
+                    status=400
+                )
 
             if len(new_password) < 6:
                 return error_response(
@@ -1774,50 +1782,50 @@ class CreateWardAccountAPIView(APIView):
         
 
 
-class ResetWardPasswordAPIView(APIView):
+# class ResetWardPasswordAPIView(APIView):
 
-    permission_classes = [IsAuthenticated]
+#     permission_classes = [IsAuthenticated]
 
-    def post(self, request, user_id):
+#     def post(self, request, user_id):
 
-        if request.user.role != "PANCHAYATH":
+#         if request.user.role != "PANCHAYATH":
 
-            return error_response(
-                message="Permission denied.",
-                status=403
-            )
+#             return error_response(
+#                 message="Permission denied.",
+#                 status=403
+#             )
 
-        user = User.objects.filter(
-            id=user_id,
-            role="WARD",
-            panchayath=request.user.panchayath,
-        ).first()
+#         user = User.objects.filter(
+#             id=user_id,
+#             role="WARD",
+#             panchayath=request.user.panchayath,
+#         ).first()
 
-        if not user:
+#         if not user:
 
-            return error_response(
-                message="Ward account not found.",
-                status=404
-            )
+#             return error_response(
+#                 message="Ward account not found.",
+#                 status=404
+#             )
 
         
-        with transaction.atomic():
+#         with transaction.atomic():
 
-            set_password_link = prepare_password_setup(user)
+#             set_password_link = prepare_password_setup(user)
 
-            send_password_reset_email(
+#             send_password_reset_email(
 
-                personal_email=user.officer_personal_email,
+#                 personal_email=user.officer_personal_email,
 
-                official_email=user.email,
+#                 official_email=user.email,
 
-                set_password_link=set_password_link,
+#                 set_password_link=set_password_link,
 
-            )
+#             )
 
-            return success_response(
-                message="Password reset email sent successfully."
-            )
+#             return success_response(
+#                 message="Password reset email sent successfully."
+#             )
 
         
         

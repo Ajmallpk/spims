@@ -12,6 +12,16 @@ logger = logging.getLogger(__name__)
 from .otp_utils import (generate_otp,verify_otp,get_cache_key,resend_otp,store_signup_data,
                        store_otp,RESEND_LIMIT,clear_otp,get_signup_data,delete_signup_data,send_otp_email)
 
+
+from .otp_utils import (
+    store_otp,
+    verify_otp,
+    clear_otp,
+    send_otp_email,
+    generate_otp,
+    resend_otp,
+)
+
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
@@ -439,7 +449,7 @@ class ForgotPasswordView(APIView):
                     status=400
                 )
 
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(email__iexact=email).first()
 
             if not user:
                 logger.warning(f"Password reset attempted for non-existing email: {email}")
@@ -466,6 +476,51 @@ class ForgotPasswordView(APIView):
                 message="Something went wrong",
                 status=500
             )
+            
+            
+            
+            
+class ResendResetOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email", "").strip().lower()
+
+        if not email:
+            return Response(
+                {"error": "Email is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email__iexact=email).first()
+
+        if not user:
+            return Response(
+                {"error": "No account found with this email."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        success, result = resend_otp(email, purpose="reset")
+
+        if not success:
+            return Response(
+                {"error": result},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        send_otp_email(
+            email=email,
+            otp=result["otp"],
+            purpose="reset",
+        )
+
+        return Response(
+            {
+                "message": "OTP resent successfully.",
+                "remaining_resends": result["remaining"],
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 
@@ -543,7 +598,7 @@ class ResetPasswordView(APIView):
                     status=400
                 )
 
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(email__iexact=email).first()
 
             if not user:
                 return error_response(

@@ -8,6 +8,7 @@ export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,15 +17,37 @@ export default function ResetPassword() {
 
   const handleReset = async () => {
 
+    if (isSubmitting) return;
+
+    if (!newPassword.trim()) {
+      setError("New password is required");
+      toast.error("New password is required");
+      return;
+    }
+
+    if (!confirmPassword.trim()) {
+      setError("Confirm password is required");
+      toast.error("Confirm password is required");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
+    }
+
     try {
+
+      setIsSubmitting(true);
+      setError("");
 
       await citizenapi.resetPassword({
         email,
         new_password: newPassword,
-        confirm_password: confirmPassword
+        confirm_password: confirmPassword,
       });
 
-      // alert("Password reset successful");
       toast.success("Password reset successful");
 
       navigate("/citizen/registration");
@@ -39,7 +62,11 @@ export default function ResetPassword() {
         "Reset failed";
 
       setError(message);
-      // toast.error(message);
+      toast.error(message);
+
+    } finally {
+
+      setIsSubmitting(false);
 
     }
 
@@ -75,9 +102,10 @@ export default function ResetPassword() {
 
         <button
           onClick={handleReset}
-          className="w-full bg-black text-white py-3 rounded"
+          disabled={isSubmitting}
+          className="w-full bg-black text-white py-3 rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Reset Password
+          {isSubmitting ? "Resetting..." : "Reset Password"}
         </button>
 
       </div>

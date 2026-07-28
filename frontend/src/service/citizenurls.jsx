@@ -60,6 +60,14 @@ const citizenapi = {
     return citizenAxios.post("auth/forgot-password/", data);
   },
 
+
+  resendResetOtp: (data) => {
+    return citizenAxios.post(
+      "auth/resend-reset-otp/",
+      data
+    );
+  },
+
   verifyResetOtp: (data) => {
     return citizenAxios.post("auth/verify-reset-otp/", data);
   },

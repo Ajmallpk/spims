@@ -190,11 +190,11 @@ const panchayathApi = {
     );
   },
 
-  resetWardPassword: (userId) => {
-  return panchayathAxios.post(
-    `/panchayath/wards/${userId}/reset-password/`
-  );
-},
+//   resetWardPassword: (userId) => {
+//   return panchayathAxios.post(
+//     `/panchayath/wards/${userId}/reset-password/`
+//   );
+// },
 
 
 updateWardOfficeDetails: (userId, data) => {

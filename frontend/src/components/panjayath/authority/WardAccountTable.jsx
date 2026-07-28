@@ -357,7 +357,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, KeyRound, MailPlus, Settings2, Inbox } from "lucide-react";
 import panchayathApi from "@/service/panchayathurls";
-import ResetWardPasswordModal from "./ResetWardPasswordModal";
+// import ResetWardPasswordModal from "./ResetWardPasswordModal";
 import ChangeWardOfficerEmailModal from "./ChangeWardOfficerEmailModal";
 import EditWardOfficeDetailsModal from "./EditWardOfficeDetailsModal";
 
@@ -405,7 +405,7 @@ const WardAccountTable = ({ refreshKey }) => {
 
     const [selectedAccount, setSelectedAccount] = useState(null);
 
-    const [resetModalOpen, setResetModalOpen] = useState(false);
+    // const [resetModalOpen, setResetModalOpen] = useState(false);
 
     const [emailModalOpen, setEmailModalOpen] = useState(false);
 
@@ -670,7 +670,7 @@ const WardAccountTable = ({ refreshKey }) => {
             </div>
 
 
-            <ResetWardPasswordModal
+            {/* <ResetWardPasswordModal
                 open={resetModalOpen}
                 userId={selectedAccount?.id}
                 onClose={() => {
@@ -682,7 +682,7 @@ const WardAccountTable = ({ refreshKey }) => {
                     fetchAccounts();
 
                 }}
-            />
+            /> */}
 
 
             <ChangeWardOfficerEmailModal

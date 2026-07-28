@@ -14,11 +14,38 @@ const PanchayathChangePasswordForm = () => {
 
     e.preventDefault();
 
-    // confirm password validation
+
+    if (!currentPassword.trim()) {
+      toast.error("Current password is required");
+      return;
+    }
+
+    if (!newPassword.trim()) {
+      toast.error("New password is required");
+      return;
+    }
+
+    if (!confirmPassword.trim()) {
+      toast.error("Confirm password is required");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      toast.error("New password must be different from your current password");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       toast.error("New password and confirm password do not match");
       return;
     }
+
+    
 
     setLoading(true);
 

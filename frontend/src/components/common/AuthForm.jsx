@@ -8,9 +8,11 @@ import {
   // signupUser,
   // verifyOtp,
   // resendOtp,
+
   loginUser,
   forgotPassword,
   verifyResetOtp,
+  resendResetOtp,
   resetPassword
 } from "@/service/auth"
 import { replace, useNavigate } from "react-router-dom"
@@ -422,9 +424,24 @@ export function AuthForm() {
   }
 
   const handleForgotPassword = async () => {
+
+    if (!resetEmail.trim()) {
+      toast.error("Email is required")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    if (!emailRegex.test(resetEmail)) {
+      toast.error("Enter a valid email address")
+      return
+    }
+
+
+    setIsSubmitting(true)
     try {
       await forgotPassword({ email: resetEmail })
-      alert("OTP sent to email")
+      toast.success("OTP sent successfully")
 
       setResetStep(2)
 
@@ -438,16 +455,20 @@ export function AuthForm() {
         "Failed"
       )
 
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleVerifyResetOtp = async () => {
+
+    setIsSubmitting(true)
     try {
       await verifyResetOtp({
         email: resetEmail,
         otp: resetOtp,
       })
-      alert("OTP verified")
+      toast.success("OTP verified successfully")
       setResetStep(3)
     } catch (error) {
 
@@ -456,12 +477,16 @@ export function AuthForm() {
         "Invalid OTP"
       )
 
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleResetPassword = async () => {
 
     if (!validateResetPassword()) return
+
+    setIsSubmitting(true)
 
     try {
       await resetPassword({
@@ -470,9 +495,19 @@ export function AuthForm() {
         confirm_password: confirmResetPassword
       })
 
-      alert("Password reset successful")
+      toast.success("Password reset successfully")
       setForgotMode(false)
       setMode("login")
+
+      // Reset Forgot Password State
+      setResetStep(1)
+      setResetEmail("")
+      setResetOtp("")
+      setNewPassword("")
+      setConfirmResetPassword("")
+      setResetTimer(60)
+      setResetCanResend(false)
+      setErrors({})
 
     } catch (error) {
 
@@ -481,6 +516,8 @@ export function AuthForm() {
         "Reset failed"
       )
 
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -490,11 +527,11 @@ export function AuthForm() {
     setIsResetResending(true)
 
     try {
-      const response = await forgotPassword({
-        email: resetEmail
-      })
+      const response = await resendResetOtp({
+        email: resetEmail,
+      });
 
-      alert("OTP resent successfully")
+      toast.success(response.message);
 
       setResetTimer(60)
       setResetCanResend(false)
@@ -529,9 +566,20 @@ export function AuthForm() {
                 onChange={(e) => setResetEmail(e.target.value)}
               />
 
-              <Button onClick={handleForgotPassword}>
-                Send OTP
+              <Button
+                onClick={handleForgotPassword}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send OTP"
+                )}
               </Button>
+
             </>
           )}
 
@@ -563,9 +611,21 @@ export function AuthForm() {
 
               </div>
 
-              <Button onClick={handleVerifyResetOtp}>
-                Verify OTP
+              <Button
+                onClick={handleVerifyResetOtp}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify OTP"
+                )}
               </Button>
+
+
             </>
           )}
 
@@ -607,8 +667,18 @@ export function AuthForm() {
                 </p>
               )}
 
-              <Button onClick={handleResetPassword}>
-                Reset Password
+              <Button
+                onClick={handleResetPassword}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  "Reset Password"
+                )}
               </Button>
             </>
           )}

@@ -223,12 +223,12 @@ export const adminapi = {
         return response.data;
     },
 
-    resetPanchayathPassword: async (userId) => {
-        const response = await adminAxios.post(
-            `/admin/panchayaths/${userId}/reset-password/`
-        );
-        return response.data;
-    },
+    // resetPanchayathPassword: async (userId) => {
+    //     const response = await adminAxios.post(
+    //         `/admin/panchayaths/${userId}/reset-password/`
+    //     );
+    //     return response.data;
+    // },
 
     updateOfficerEmail: async (userId, data) => {
         const response = await adminAxios.patch(

@@ -94,10 +94,10 @@ urlpatterns = [
     views.CreatePanchayathAPIView.as_view(),
 ),
     
-    path(
-    "panchayaths/<int:user_id>/reset-password/",
-    views.ResetPanchayathPasswordAPIView.as_view(),
-),
+#     path(
+#     "panchayaths/<int:user_id>/reset-password/",
+#     views.ResetPanchayathPasswordAPIView.as_view(),
+# ),
     
     
     path(

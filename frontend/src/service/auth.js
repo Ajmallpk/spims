@@ -20,6 +20,17 @@ export const forgotPassword = (data) => {
   return axiosInstance.post("auth/forgot-password/", data)
 }
 
+
+
+export const resendResetOtp = async (data) => {
+    const response = await api.post(
+        "/auth/resend-reset-otp/",
+        data
+    );
+
+    return response.data;
+};
+
 export const verifyResetOtp = (data) => {
   return axiosInstance.post("auth/verify-reset-otp/", data)
 }

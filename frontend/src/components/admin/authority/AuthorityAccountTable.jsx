@@ -306,7 +306,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, KeyRound, UserCog, Settings2, Inbox } from "lucide-react";
 import { adminapi } from "@/service/adminurls";
-import ResetPasswordModal from "./ResetPasswordModal";
+// import ResetPasswordModal from "./ResetPasswordModal";
 import ReplaceOfficerModal from "./ReplaceOfficerModal";
 import EditOfficeDetailsModal from "./EditOfficeDetailsModal";
 
@@ -347,7 +347,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
     const [selectedAccount, setSelectedAccount] = useState(null);
 
-    const [resetModalOpen, setResetModalOpen] = useState(false);
+    // const [resetModalOpen, setResetModalOpen] = useState(false);
 
     const [replaceOfficerModalOpen, setReplaceOfficerModalOpen] = useState(false);
 
@@ -528,7 +528,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
                                         <div className="flex flex-wrap justify-center gap-2">
 
-                                            <button
+                                            {/* <button
                                                 onClick={() => {
                                                     setSelectedAccount(account);
                                                     setResetModalOpen(true);
@@ -538,7 +538,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                                             >
                                                 <KeyRound size={13} />
                                                 Reset Password
-                                            </button>
+                                            </button> */}
 
                                             <button
                                                 onClick={() => {
@@ -580,7 +580,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
             </div>
 
-            <ResetPasswordModal
+            {/* <ResetPasswordModal
                 open={resetModalOpen}
                 userId={selectedAccount?.id}
                 onClose={() => {
@@ -588,7 +588,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                     setSelectedAccount(null);
                     fetchAccounts();
                 }}
-            />
+            /> */}
 
             <ReplaceOfficerModal
                 open={replaceOfficerModalOpen}
