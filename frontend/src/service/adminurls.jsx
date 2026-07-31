@@ -231,8 +231,8 @@ export const adminapi = {
     // },
 
     updateOfficerEmail: async (userId, data) => {
-        const response = await adminAxios.patch(
-            `/admin/panchayaths/${userId}/update-officer-email/`,
+        const response = await adminAxios.post(
+            `/admin/panchayath/${userId}/replace-officer/`,
             data
         );
         return response.data;

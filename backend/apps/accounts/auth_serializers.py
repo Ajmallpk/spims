@@ -60,7 +60,40 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
             
             
         data["role"] = "ADMIN" if user.is_superuser else user.role
-        data["status"] = user.status
+        if user.is_superuser:
+            verification_status = "APPROVED"
+
+        elif user.role == User.Role.PANCHAYATH:
+            verification = getattr(
+                user,
+                "panchayath_verification",
+                None
+            )
+
+            verification_status = (
+                verification.status
+                if verification
+                else "NOT_SUBMITTED"
+            )
+
+        elif user.role == User.Role.WARD:
+            verification = getattr(
+                user,
+                "ward_verification",
+                None
+            )
+
+            verification_status = (
+                verification.status
+                if verification
+                else "NOT_SUBMITTED"
+            )
+
+        else:
+            verification_status = user.status
+
+
+        data["status"] = verification_status
         data["is_superuser"] = user.is_superuser
         data["is_verified"] = user.is_verified
         data["must_change_password"] = (

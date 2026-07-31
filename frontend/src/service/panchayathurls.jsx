@@ -163,9 +163,9 @@ const panchayathApi = {
   },
 
 
-  replaceWardOfficer: (userId, data) => {
-    return panchayathAxios.patch(
-      `/panchayath/wards/${userId}/replace-officer/`,
+  replaceWardOfficer(id, data) {
+    return panchayathAxios.post(
+      `/panchayath/ward/${id}/replace-officer/`,
       data
     );
   },
@@ -190,19 +190,19 @@ const panchayathApi = {
     );
   },
 
-//   resetWardPassword: (userId) => {
-//   return panchayathAxios.post(
-//     `/panchayath/wards/${userId}/reset-password/`
-//   );
-// },
+  //   resetWardPassword: (userId) => {
+  //   return panchayathAxios.post(
+  //     `/panchayath/wards/${userId}/reset-password/`
+  //   );
+  // },
 
 
-updateWardOfficeDetails: (userId, data) => {
+  updateWardOfficeDetails: (userId, data) => {
     return panchayathAxios.patch(
-        `/panchayath/wards/${userId}/office-details/`,
-        data
+      `/panchayath/wards/${userId}/office-details/`,
+      data
     );
-},
+  },
 
 };
 

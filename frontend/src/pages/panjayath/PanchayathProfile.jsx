@@ -248,10 +248,19 @@ export default function PanchayathProfile() {
   };
 
   // ── Derive current status key ─────────────────────────────────────────────
-  const currentStatus = (verificationStatus?.status || "NOT_SUBMITTED").toUpperCase();
-  const showForm = currentStatus === "NOT_SUBMITTED" || currentStatus === "REJECTED";
-  const showPending = currentStatus === "PENDING";
-  const showApproved = currentStatus === "APPROVED";
+  const currentStatus =
+    (verificationStatus?.status ?? "NOT_SUBMITTED").toUpperCase();
+
+  const showForm = [
+    "NOT_SUBMITTED",
+    "REJECTED",
+  ].includes(currentStatus);
+
+  const showPending =
+    currentStatus === "PENDING";
+
+  const showApproved =
+    currentStatus === "APPROVED";
 
   const pageError = profileError && statusError;
 

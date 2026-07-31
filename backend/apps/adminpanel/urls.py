@@ -101,8 +101,9 @@ urlpatterns = [
     
     
     path(
-    "panchayaths/<int:user_id>/update-officer-email/",
-    views.ReplacePanchayathOfficerAPIView.as_view()
+    "panchayath/<int:pk>/replace-officer/",
+    views.ReplacePanchayathOfficerAPIView.as_view(),
+    name="replace-panchayath-officer",
 ),
     
     path(

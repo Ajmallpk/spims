@@ -56,6 +56,14 @@ from apps.accounts.email_service import (
     send_password_reset_email,
 )
 
+
+from apps.ward.models import (
+    WardVerification,
+    WardOfficerHistory,
+)
+
+from .serializers import ReplaceWardOfficerSerializer
+
 from .serializers import UpdateOfficeDetailsSerializer
 
 
@@ -183,13 +191,15 @@ class SubmitPanchayathVerificationView(APIView):
                 )
 
             if verification:
-                if verification.status == "PENDING":
-                    return error_response(
-                        message="Verification already pending",
-                        status=400
-                    )
+                if verification.status == (
+                        PanchayathVerification.Status.PENDING
+                    ):
+                        return error_response(
+                            message="Verification already pending",
+                            status=400
+                        )
 
-                if verification.status == "APPROVED":
+                if verification.status == PanchayathVerification.Status.APPROVED:
                     return error_response(
                         message="Already verified",
                         status=400
@@ -199,7 +209,9 @@ class SubmitPanchayathVerificationView(APIView):
                     if value is not None:
                         setattr(verification, field, value)
 
-                verification.status = "PENDING"
+                verification.status = (
+                    PanchayathVerification.Status.PENDING
+                )
                 verification.reject_reason = None
                 verification.reviewed_at = None
                 verification.district_master = district
@@ -232,6 +244,9 @@ class SubmitPanchayathVerificationView(APIView):
                 user=user,
                 district_master=district,
                 panchayath_master=panchayath_master,
+                status=PanchayathVerification.Status.PENDING,
+                reject_reason=None,
+                reviewed_at=None,
                 **serializer.validated_data
             )
             
@@ -1830,85 +1845,143 @@ class CreateWardAccountAPIView(APIView):
         
         
         
-        
-import secrets
+class ReplaceWardOfficerAPIView(APIView):
 
-class UpdateWardOfficerEmailAPIView(APIView):
+    permission_classes = [IsPanchayath]
 
-    permission_classes = [IsAuthenticated]
+    def post(self, request, pk):
 
-    def patch(self, request, user_id):
-
-        if request.user.role != "PANCHAYATH":
-
-            return error_response(
-                message="Permission denied.",
-                status=403
-            )
-
-        user = User.objects.filter(
-            id=user_id,
-            role="WARD",
-            panchayath=request.user.panchayath
-        ).first()
-
-        if not user:
-
-            return error_response(
-                message="Ward account not found.",
-                status=404
-            )
-
-        officer_email = (
-            request.data.get(
-                "officer_personal_email",
-                ""
-            )
-            .strip()
-            .lower()
+        serializer = ReplaceWardOfficerSerializer(
+            data=request.data
         )
 
-        if not officer_email:
-
-            return error_response(
-                message="Officer email is required.",
-                status=400
-            )
-
-        # Optional: Prevent duplicate officer personal emails
-        if User.objects.filter(
-            officer_personal_email=officer_email
-        ).exclude(id=user.id).exists():
-
-            return error_response(
-                message="Officer personal email already exists.",
-                status=400
-            )
-
-        with transaction.atomic():
-
-            user.officer_personal_email = officer_email
-
-            user.save(update_fields=["officer_personal_email"])
-
-            set_password_link = prepare_password_setup(user)
-
-            send_officer_replaced_email(
-
-                personal_email=user.officer_personal_email,
-
-                official_email=user.email,
-
-                set_password_link=set_password_link,
-
-            )
-
-        return success_response(
-            message="Ward officer replaced successfully."
+        serializer.is_valid(
+            raise_exception=True
         )
         
+        try:
+    
+            with transaction.atomic():
+
+                office = get_object_or_404(
+                    User,
+                    pk=pk,
+                    role=User.Role.WARD,
+                    panchayath=request.user.panchayath,
+                )
+
+                verification = get_object_or_404(
+                    WardVerification,
+                    user=office,
+                )
+
+                if verification.status != WardVerification.Status.APPROVED:
+                    return error_response(
+                        message="Only approved officers can be replaced.",
+                        status=400,
+                    )
+
+                WardOfficerHistory.objects.create(
+                    office=office,
+                    full_name=verification.officer_full_name,
+                    official_email=verification.official_email,
+                    personal_email=office.officer_personal_email,
+                    official_phone=verification.official_contact,
+                    ward_name=verification.ward_name,
+                    status=verification.status,
+                    approved_at=verification.reviewed_at,
+                    replaced_by=request.user,
+                    replacement_reason=serializer.validated_data["reason"],
+                    snapshot={
+                        "verification_id": verification.id,
+                        "district_master": verification.district_id,
+                        "panchayath_master": verification.panchayath_master_id,
+                        "ward_master": verification.ward_master_id,
+                        "ward_name": verification.ward_name,
+                        "official_email": verification.official_email,
+                        "official_contact": verification.official_contact,
+                        "office_address": verification.office_address,
+                        "submitted_at": (
+                            verification.submitted_at.isoformat()
+                            if verification.submitted_at
+                            else None
+                        ),
+                        "reviewed_at": (
+                            verification.reviewed_at.isoformat()
+                            if verification.reviewed_at
+                            else None
+                        ),
+                        "status": verification.status,
+                        "reject_reason": verification.reject_reason,
+                        "aadhaar_image": (
+                            str(verification.aadhaar_image)
+                            if verification.aadhaar_image
+                            else None
+                        ),
+                        "selfie_image": (
+                            str(verification.selfie_image)
+                            if verification.selfie_image
+                            else None
+                        ),
+                        "supporting_document": (
+                            str(verification.supporting_document)
+                            if verification.supporting_document
+                            else None
+                        ),
+                    },
+                )
+
+                office.officer_personal_email = serializer.validated_data[
+                    "officer_personal_email"
+                ]
+
+                office.is_verified = False
+                office.status = User.Status.PENDING
+
+                office.save(
+                    update_fields=[
+                        "officer_personal_email",
+                        "is_verified",
+                        "status",
+                    ]
+                )
+
+                link = prepare_password_setup(office)
+
+                verification.officer_full_name = ""
+                verification.office_address = ""
+                verification.aadhaar_image = None
+                verification.selfie_image = None
+                verification.supporting_document = None
+                verification.status = (
+                    WardVerification.Status.NOT_SUBMITTED
+                )
+                verification.reject_reason = None
+                verification.reviewed_at = None
+
+                verification.save()
+
+                send_officer_replaced_email(
+                    personal_email=office.officer_personal_email,
+                    official_email=office.email,
+                    set_password_link=link,
+                )
+
+                return success_response(
+                    message="Ward officer replaced successfully."
+                )
         
         
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+
+            return error_response(
+                message=str(e),
+                status=500,
+            )        
+            
+            
 class WardAccountListAPIView(APIView):
 
     permission_classes = [IsAuthenticated]

@@ -148,12 +148,12 @@ export default function WardProfile() {
 
       const res = await wardapi.profile();
 
-      console.log("profiledata=",res.data.data)
+      console.log("profiledata=", res.data.data)
 
       setProfile(res.data.data);
     } catch (err) {
       // interceptor will show toast
-      
+
     } finally {
       setIsLoadingProfile(false);
     }
@@ -208,10 +208,22 @@ export default function WardProfile() {
   // ── Derived state ─────────────────────────────────────────────────────────────
 
   const isLoading = isLoadingProfile || isLoadingVerification;
-  const status = (verificationStatus?.status ?? "not_submitted").toLowerCase();
-  const showForm = status === "not_submitted" || status === "rejected";
-  const showPending = status === "pending";
-  const showApproved = status === "approved";
+  const status =
+    (verificationStatus?.status ?? "NOT_SUBMITTED").toUpperCase();
+
+  const showForm = [
+    "NOT_SUBMITTED",
+    "REJECTED",
+  ].includes(status);
+
+  const showPending =
+    status === "PENDING";
+
+  const showApproved =
+    status === "APPROVED";
+
+  const showWaitingForPanchayath =
+    status === "WAITING_FOR_PANCHAYATH";
 
   // ── Render ────────────────────────────────────────────────────────────────────
 

@@ -11,11 +11,13 @@ const ReplaceOfficerModal = ({
 }) => {
 
     const [email, setEmail] = useState("");
+    const [reason, setReason] = useState("");
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (open) {
             setEmail(currentEmail || "");
+            setReason("");
         }
     }, [currentEmail, open]);
 
@@ -33,6 +35,12 @@ const ReplaceOfficerModal = ({
             return;
         }
 
+
+        if (reason.trim().length < 10) {
+            toast.error("Replacement reason must be at least 10 characters.");
+            return;
+        }
+
         try {
 
             setLoading(true);
@@ -43,6 +51,9 @@ const ReplaceOfficerModal = ({
                     {
                         officer_personal_email:
                             email.trim().toLowerCase(),
+
+                        reason:
+                            reason.trim(),
                     }
                 );
 
@@ -111,6 +122,19 @@ const ReplaceOfficerModal = ({
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full border rounded-lg px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Enter new officer email"
+                />
+
+
+                <label className="block mb-2 font-medium">
+                    Replacement Reason
+                </label>
+
+                <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    className="w-full border rounded-lg px-4 py-3 mb-6 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    rows={4}
+                    placeholder="Enter replacement reason"
                 />
 
                 <div className="flex justify-end gap-3">

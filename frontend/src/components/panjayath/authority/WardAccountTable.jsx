@@ -611,7 +611,7 @@ const WardAccountTable = ({ refreshKey }) => {
 
                                         <div className="flex flex-wrap justify-center gap-2">
 
-                                            <button
+                                            {/* <button
                                                 onClick={() => {
 
                                                     setSelectedAccount(account);
@@ -624,7 +624,7 @@ const WardAccountTable = ({ refreshKey }) => {
                                             >
                                                 <KeyRound size={13} />
                                                 Reset Password
-                                            </button>
+                                            </button> */}
 
                                             <button
                                                 onClick={() => {

@@ -2,15 +2,17 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from cloudinary.models import CloudinaryField
 from apps.accounts.models import District, Panchayath
+from django.conf import settings
+
 User = get_user_model()
 
 
 class PanchayathVerification(models.Model):
-    STATUS_CHOICES =(
-        ("PENDING","Pending"),
-        ("APPROVED","Approved"),
-        ("REJECTED","Rejected")
-    )
+    class Status(models.TextChoices):
+        NOT_SUBMITTED = "NOT_SUBMITTED", "Not Submitted"
+        PENDING = "PENDING", "Pending"
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
     
     user = models.OneToOneField(
         User,
@@ -43,14 +45,22 @@ class PanchayathVerification(models.Model):
     # selfie_image = models.ImageField(upload_to="panchayath/selfie/")
     
     aadhaar_image = CloudinaryField(
-        resource_type="image"
+        resource_type="image",
+        null=True,
+        blank=True,
     )
 
     selfie_image = CloudinaryField(
-        resource_type="image"
+        resource_type="image",
+        null=True,
+        blank=True,
     )
     
-    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default="PENDING")
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NOT_SUBMITTED,
+    )
     reject_reason = models.TextField(blank=True,null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
@@ -61,3 +71,65 @@ class PanchayathVerification(models.Model):
     
     
     
+
+
+
+class PanchayathOfficerHistory(models.Model):
+
+    office = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="panchayath_officer_history",
+        limit_choices_to={"role": User.Role.PANCHAYATH},
+    )
+
+    full_name = models.CharField(
+        max_length=255
+    )
+
+    official_email = models.EmailField()
+
+    personal_email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    official_phone = models.CharField(
+        max_length=15
+    )
+
+    status = models.CharField(
+        max_length=20
+    )
+
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    replaced_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    replaced_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="replaced_panchayath_officers"
+    )
+
+    replacement_reason = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    snapshot = models.JSONField(
+        default=dict
+    )
+
+    class Meta:
+        ordering = ["-replaced_at"]
+
+    def __str__(self):
+        return f"{self.full_name} ({self.official_email})"

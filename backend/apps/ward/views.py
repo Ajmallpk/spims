@@ -185,6 +185,9 @@ class SubmitWardVerificationView(APIView):
             # panchayath_user = panchayath_verification.user
 
             verification = WardVerification.objects.filter(user=user).first()
+            
+            
+           
 
             # data = {
             #     "officer_full_name": request.data.get("officer_full_name"),
@@ -224,7 +227,9 @@ class SubmitWardVerificationView(APIView):
 
             if verification:
 
-                if verification.status == "PENDING":
+                if verification.status == (
+                    WardVerification.Status.PENDING
+                ):
                     return error_response(
                         message="Verification already under review",
                         status=400
@@ -243,9 +248,9 @@ class SubmitWardVerificationView(APIView):
                 verification.panchayath = panchayath_user
 
                 verification.status = (
-                    "PENDING"
+                    WardVerification.Status.PENDING
                     if panchayath_user
-                    else "WAITING_FOR_PANCHAYATH"
+                    else WardVerification.Status.WAITING_FOR_PANCHAYATH
                 )
                 verification.district = district
                 verification.panchayath_master = panchayath_master
@@ -331,7 +336,10 @@ class WardVerificationStatusView(APIView):
                 user=request.user
             ).first()
 
-            if not verification:
+            if (
+                not verification or
+                verification.status == WardVerification.Status.NOT_SUBMITTED
+            ):
                 return success_response(
                     message="Verification not submitted",
                     data={

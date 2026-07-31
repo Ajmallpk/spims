@@ -11,14 +11,17 @@ const ChangeWardOfficerEmailModal = ({
 }) => {
 
     const [email, setEmail] = useState("");
-
+    const [reason, setReason] = useState("");
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
 
-        setEmail(currentEmail || "");
+        if (open) {
+            setEmail(currentEmail || "");
+            setReason("");
+        }
 
-    }, [currentEmail]);
+    }, [currentEmail, open]);
 
     if (!open) return null;
 
@@ -34,6 +37,18 @@ const ChangeWardOfficerEmailModal = ({
 
         }
 
+
+
+        if (reason.trim().length < 10) {
+
+            toast.error(
+                "Replacement reason must be at least 10 characters."
+            );
+
+            return;
+
+        }
+
         try {
 
             setLoading(true);
@@ -43,7 +58,10 @@ const ChangeWardOfficerEmailModal = ({
                     userId,
                     {
                         officer_personal_email:
-                            email.trim(),
+                            email.trim().toLowerCase(),
+
+                        reason:
+                            reason.trim(),
                     }
                 );
 
@@ -82,7 +100,7 @@ const ChangeWardOfficerEmailModal = ({
 
                 <h2 className="text-xl font-semibold mb-4">
 
-                    Change Officer Email
+                    Replace Ward Officer
 
                 </h2>
 
@@ -95,6 +113,19 @@ const ChangeWardOfficerEmailModal = ({
                         )
                     }
                     className="w-full border rounded-lg px-4 py-3 mb-6"
+                />
+
+
+                <label className="block mb-2 font-medium">
+                    Replacement Reason
+                </label>
+
+                <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    rows={4}
+                    className="w-full border rounded-lg px-4 py-3 mb-6"
+                    placeholder="Enter replacement reason"
                 />
 
                 <div className="flex justify-end gap-3">
@@ -113,8 +144,8 @@ const ChangeWardOfficerEmailModal = ({
                     >
                         {
                             loading
-                                ? "Saving..."
-                                : "Update Email"
+                                ? "Replacing..."
+                                : "Replace Officer"
                         }
                     </button>
 

@@ -270,3 +270,26 @@ class UpdateOfficeDetailsSerializer(serializers.Serializer):
                 )
 
         return attrs
+    
+    
+class ReplaceWardOfficerSerializer(serializers.Serializer):
+
+    officer_personal_email = serializers.EmailField()
+
+    reason = serializers.CharField(
+        min_length=10,
+        max_length=500
+    )
+
+    def validate_officer_personal_email(self, value):
+
+        value = value.strip().lower()
+
+        if User.objects.filter(
+            officer_personal_email=value
+        ).exists():
+            raise serializers.ValidationError(
+                "This personal email is already being used."
+            )
+
+        return value

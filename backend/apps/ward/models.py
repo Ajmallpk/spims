@@ -6,6 +6,8 @@ from apps.complaints.models import Complaint
 from cloudinary.models import CloudinaryField
 from apps.accounts.models import District, Panchayath, Ward
 
+from django.conf import settings
+
 User = get_user_model()
 
 
@@ -15,6 +17,10 @@ class WardVerification(models.Model):
         WAITING_FOR_PANCHAYATH = (
             "WAITING_FOR_PANCHAYATH",
             "Waiting for Panchayath Officer"
+        )
+        NOT_SUBMITTED = (
+            "NOT_SUBMITTED",
+            "Not Submitted"
         )
         PENDING = "PENDING", "Pending"
         APPROVED = "APPROVED", "Approved"
@@ -62,12 +68,17 @@ class WardVerification(models.Model):
         blank=True
     )
 
-    officer_full_name = models.CharField(max_length=255)
+    officer_full_name = models.CharField(
+        max_length=255,
+        blank=True,
+    )
     official_email = models.EmailField()
     official_contact = models.CharField(max_length=15)
 
     ward_name = models.CharField(max_length=255)
-    office_address = models.TextField()
+    office_address = models.TextField(
+        blank=True,
+    )
 
     # aadhaar_image = models.ImageField(upload_to="ward/aadhaar/")
     # selfie_image = models.ImageField(upload_to="ward/selfie/")
@@ -79,11 +90,15 @@ class WardVerification(models.Model):
 
     
     aadhaar_image = CloudinaryField(
-        resource_type="image"
+        resource_type="image",
+        null=True,
+        blank=True,
     )
 
     selfie_image = CloudinaryField(
-        resource_type="image"
+        resource_type="image",
+        null=True,
+        blank=True,
     )
     
     
@@ -100,7 +115,7 @@ class WardVerification(models.Model):
     status = models.CharField(
         max_length=50,
         choices=Status.choices,
-        default=Status.PENDING
+        default=Status.NOT_SUBMITTED
     )
 
     reject_reason = models.TextField(blank=True, null=True)
@@ -160,3 +175,74 @@ class EscalationMedia(models.Model):
             ("VIDEO", "Video")
         ]
     )
+    
+    
+    
+
+
+
+
+
+class WardOfficerHistory(models.Model):
+
+    office = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ward_officer_history",
+        limit_choices_to={"role": User.Role.WARD},
+    )
+
+    full_name = models.CharField(
+        max_length=255
+    )
+
+    official_email = models.EmailField()
+
+    personal_email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    official_phone = models.CharField(
+        max_length=15
+    )
+
+    ward_name = models.CharField(
+        max_length=255
+    )
+
+    status = models.CharField(
+        max_length=20
+    )
+
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    replaced_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    replaced_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="replaced_ward_officers"
+    )
+
+    replacement_reason = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    snapshot = models.JSONField(
+        default=dict
+    )
+
+    class Meta:
+        ordering = ["-replaced_at"]
+
+    def __str__(self):
+        return f"{self.full_name} ({self.ward_name})"

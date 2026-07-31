@@ -78,6 +78,26 @@ from apps.accounts.email_service import (
 
 from django.db import transaction
 
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from apps.accounts.models import User
+from apps.panchayath.models import (
+    PanchayathVerification,
+    PanchayathOfficerHistory,
+)
+
+from .serializers import ReplacePanchayathOfficerSerializer
+
+from apps.accounts.auth_helpers import (
+    prepare_password_setup,
+)
+
+from apps.accounts.email_service import (
+    send_officer_replaced_email,
+)
+
 import uuid
 logger = logging.getLogger(__name__)
 
@@ -2682,28 +2702,42 @@ class CreatePanchayathAPIView(APIView):
                 "officer_personal_email"
             )
 
-            user = User.objects.create(
-                username=data["panchayath"].name,
-                email=data["official_email"],
-                role="PANCHAYATH",
-                district=data["district"],
-                panchayath=data["panchayath"],
-                official_phone=data["official_phone"],
-                officer_personal_email=data["officer_personal_email"],
-                is_verified=False,
-                status=User.Status.PENDING,
-            )
+            print("========== VALIDATED DATA ==========")
+            print(data)
 
-            
+            try:
+                print("Creating user...")
 
-            set_password_link = prepare_password_setup(user)
-            
-            
-            send_account_created_email(
-                personal_email=user.officer_personal_email,
-                official_email=user.email,
-                set_password_link=set_password_link,
-            )
+                user = User.objects.create(
+                    username=data["panchayath"].name,
+                    email=data["official_email"],
+                    role="PANCHAYATH",
+                    district=data["district"],
+                    panchayath=data["panchayath"],
+                    official_phone=data["official_phone"],
+                    officer_personal_email=data["officer_personal_email"],
+                    is_verified=False,
+                    status=User.Status.PENDING,
+                )
+
+                print("✅ User created")
+
+                set_password_link = prepare_password_setup(user)
+                print("✅ Password link created")
+
+                send_account_created_email(
+                    personal_email=user.officer_personal_email,
+                    official_email=user.email,
+                    set_password_link=set_password_link,
+                )
+
+                print("✅ Email sent")
+
+            except Exception as e:
+                print("❌ ERROR OCCURRED:")
+                print(type(e))
+                print(e)
+                raise
 
             return success_response(
                 message="Panchayath account created"
@@ -2761,63 +2795,173 @@ class CreatePanchayathAPIView(APIView):
         
         
         
-class ReplacePanchayathOfficerAPIView(
-    APIView
-):
-    permission_classes = [
-        IsAuthenticated
-    ]
+# class ReplacePanchayathOfficerAPIView(
+#     APIView
+# ):
+#     permission_classes = [
+#         IsAuthenticated
+#     ]
 
-    def patch(
-        self,
-        request,
-        user_id
-    ):
+#     def patch(
+#         self,
+#         request,
+#         user_id
+#     ):
 
-        if not request.user.is_superuser:
+#         if not request.user.is_superuser:
 
-            return error_response(
-                message="Permission denied.",
-                status=403
-            )
+#             return error_response(
+#                 message="Permission denied.",
+#                 status=403
+#             )
 
-        user = User.objects.filter(
-            id=user_id,
-            role="PANCHAYATH"
-        ).first()
+#         user = User.objects.filter(
+#             id=user_id,
+#             role="PANCHAYATH"
+#         ).first()
 
-        if not user:
+#         if not user:
 
-            return error_response(
-                message="Panchayath not found.",
-                status=404
-            )
+#             return error_response(
+#                 message="Panchayath not found.",
+#                 status=404
+#             )
 
-        officer_email = request.data.get(
-            "officer_personal_email"
+#         officer_email = request.data.get(
+#             "officer_personal_email"
+#         )
+
+#         if not officer_email:
+
+#             return error_response(
+#                 message=(
+#                     "Officer email is required."
+#                 ),
+#                 status=400
+#             )
+
+#         with transaction.atomic():
+
+#             user.officer_personal_email = officer_email
+
+#             user.save(update_fields=["officer_personal_email"])
+
+#             set_password_link = prepare_password_setup(user)
+
+#             send_officer_replaced_email(
+#                 personal_email=user.officer_personal_email,
+#                 official_email=user.email,
+#                 set_password_link=set_password_link,
+#             )
+
+#             return success_response(
+#                 message="Officer replaced successfully."
+#             )
+        
+        
+        
+        
+        
+class ReplacePanchayathOfficerAPIView(APIView):
+
+    permission_classes = [IsSuperAdmin]
+
+    def post(self, request, pk):
+
+        serializer = ReplacePanchayathOfficerSerializer(
+            data=request.data
         )
 
-        if not officer_email:
-
-            return error_response(
-                message=(
-                    "Officer email is required."
-                ),
-                status=400
-            )
+        serializer.is_valid(
+            raise_exception=True
+        )
 
         with transaction.atomic():
 
-            user.officer_personal_email = officer_email
+            office = get_object_or_404(
+                User,
+                pk=pk,
+                role=User.Role.PANCHAYATH,
+            )
 
-            user.save(update_fields=["officer_personal_email"])
+            verification = get_object_or_404(
+                PanchayathVerification,
+                user=office,
+            )
+            
+            
+            if verification.status != "APPROVED":
+                return error_response(
+                    message="Only approved officers can be replaced.",
+                    status=400,
+                )
 
-            set_password_link = prepare_password_setup(user)
+            history = PanchayathOfficerHistory.objects.create(
+                office=office,
+                full_name=verification.full_name,
+                official_email=office.email,
+                personal_email=office.officer_personal_email,
+                official_phone=office.official_phone,
+                status=verification.status,
+                approved_at=verification.reviewed_at,
+                replaced_by=request.user,
+                replacement_reason=serializer.validated_data["reason"],
+                snapshot={
+                    "verification_id": verification.id,
+                    "district_master": verification.district_master_id,
+                    "panchayath_master": verification.panchayath_master_id,
+                    "district": verification.district,
+                    "panchayath_name": verification.panchayath_name,
+                    "phone": verification.phone,
+                    "email": verification.email,
+                    "submitted_at": verification.submitted_at.isoformat() if verification.submitted_at else None,
+                    "reviewed_at": verification.reviewed_at.isoformat() if verification.reviewed_at else None,
+                    "status": verification.status,
+                    "reject_reason": verification.reject_reason,
+                    "aadhaar_image": str(verification.aadhaar_image) if verification.aadhaar_image else None,
+                    "selfie_image": str(verification.selfie_image) if verification.selfie_image else None,
+                }
+            )
+
+            office.officer_personal_email = serializer.validated_data[
+                "officer_personal_email"
+            ]
+
+            office.is_verified = False
+            office.status = User.Status.PENDING
+
+            # Save these changes first
+            office.save(
+                update_fields=[
+                    "officer_personal_email",
+                    "is_verified",
+                    "status",
+                ]
+            )
+
+            # This function will now update:
+            # - must_change_password
+            # - set_password_token
+            # - unusable password
+            # - failed_attempts
+            # - lock_until
+            link = prepare_password_setup(office)
+
+            verification.full_name = ""
+            verification.aadhaar_image = None
+            verification.selfie_image = None
+            verification.status = (
+                PanchayathVerification.Status.NOT_SUBMITTED
+            )
+            verification.reject_reason = None
+            verification.reviewed_at = None
+
+            verification.save()
 
             send_officer_replaced_email(
-                personal_email=user.officer_personal_email,
-                official_email=user.email,
-                set_password_link=set_password_link,
+                personal_email=office.officer_personal_email,
+                official_email=office.email,
+                set_password_link=link,
             )
 
             return success_response(
