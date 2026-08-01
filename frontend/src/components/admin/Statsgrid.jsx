@@ -11,21 +11,21 @@ import StatCard from "@/components/admin/Statcard";
 const statConfig = [
   {
     key: "total_panchayaths",
-    label: "Total Panchayaths",
+    label: "Total Panchayath Accounts created",
     icon: Building2,
     gradient: "bg-gradient-to-br from-blue-600 to-blue-800",
     iconBg: "bg-blue-500/50",
   },
   {
     key: "total_wards",
-    label: "Total Wards",
+    label: "Total Ward Account created",
     icon: MapPin,
     gradient: "bg-gradient-to-br from-violet-600 to-violet-800",
     iconBg: "bg-violet-500/50",
   },
   {
     key: "total_complaints",
-    label: "Total Complaints",
+    label: "Total Complaints Registerd",
     icon: MessageSquareWarning,
     gradient: "bg-gradient-to-br from-amber-500 to-orange-700",
     iconBg: "bg-amber-500/50",
