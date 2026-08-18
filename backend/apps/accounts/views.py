@@ -37,6 +37,8 @@ from .serializers import (
 )
 
 from .models import District, Panchayath, Ward,LocationRequest
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 
 
@@ -47,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
-"""Handles signup POST requests, validates user data through the serializer, creates the user, and returns success or error response."""
+
 
 
 
@@ -727,9 +729,7 @@ class SetCSRFTokenView(APIView):
 
 
 
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -746,9 +746,7 @@ class MeView(APIView):
     
     
     
-# ===================================================
-# Kerala Location APIs
-# ===================================================
+
 
 class DistrictListAPIView(APIView):
     permission_classes = [AllowAny]

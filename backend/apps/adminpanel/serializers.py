@@ -1,4 +1,5 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from apps.accounts.models import LocationRequest
@@ -12,21 +13,59 @@ import re
 User = get_user_model()
 
 
+# class AdminLoginSerializer(TokenObtainPairSerializer):
+
+#     username_field = User.EMAIL_FIELD
+
+#     def validate(self, attrs):
+        
+#         attrs["username"] = attrs.get("email")
+
+#         data = super().validate(attrs)
+
+#         user = self.user
+
+#         if not user.is_superuser:
+#             raise serializers.ValidationError(
+#                 "You are not authorized as system administrator."
+#             )
+
+#         data["role"] = "ADMIN"
+#         data["status"] = "ACTIVE"
+#         data["username"] = user.username
+
+#         return data
+    
+    
+    
 class AdminLoginSerializer(TokenObtainPairSerializer):
 
     username_field = User.EMAIL_FIELD
 
     def validate(self, attrs):
-        
-        attrs["username"] = attrs.get("email")
 
-        data = super().validate(attrs)
+        email = attrs.get("email", "").strip().lower()
+
+        attrs["username"] = email
+
+        try:
+            data = super().validate(attrs)
+
+        except AuthenticationFailed:
+            raise AuthenticationFailed(
+                "Invalid email or password."
+            )
 
         user = self.user
 
         if not user.is_superuser:
-            raise serializers.ValidationError(
+            raise AuthenticationFailed(
                 "You are not authorized as system administrator."
+            )
+
+        if not user.is_active:
+            raise AuthenticationFailed(
+                "Your account is inactive."
             )
 
         data["role"] = "ADMIN"
@@ -34,6 +73,8 @@ class AdminLoginSerializer(TokenObtainPairSerializer):
         data["username"] = user.username
 
         return data
+    
+    
     
     
     
@@ -154,6 +195,8 @@ class CreatePanchayathSerializer(
         return attrs
     
     
+    
+    
 class AuthorityPanchayathListSerializer(serializers.ModelSerializer):
 
     district = serializers.CharField(
@@ -183,6 +226,8 @@ class AuthorityPanchayathListSerializer(serializers.ModelSerializer):
             "status",
             "is_verified",
         ]
+        
+        
         
         
         

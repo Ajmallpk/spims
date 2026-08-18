@@ -425,7 +425,7 @@ class HoldComplaintSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         user = request.user
 
-        # Ward can only hold their own complaint
+        
         if user.role == "WARD":
 
             if instance.assigned_ward_officer != user:

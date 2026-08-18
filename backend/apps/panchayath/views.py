@@ -1321,6 +1321,8 @@ class PanchayathComplaintDetailView(APIView):
                     "hold_by_name": complaint.hold_by.username if complaint.hold_by else None,
                     "location": complaint.location,
                     "created_at": complaint.created_at,
+                    "escalation_reason":complaint.escalation_reason,
+                    
 
                     "media": media,
                     "timeline": timeline,

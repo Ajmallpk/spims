@@ -8,7 +8,7 @@ const AuthorityResponse = ({ response }) => {
 
 
   return (
-    <div className="bg-green-500 text-white rounded-xl p-4 space-y-3">
+    <div className="bg-blue-500 text-white rounded-xl p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center gap-2.5">
         <Avatar alt={response.authorityName} size="sm" className="ring-2 ring-white/40" />

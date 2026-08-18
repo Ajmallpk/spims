@@ -109,10 +109,10 @@ class User(AbstractUser):
         return self.email
     
     
-    
-# ==========================================================
-# Kerala Location Master Tables
-# ==========================================================
+
+
+
+
 
 class District(models.Model):
     code = models.CharField(
@@ -211,9 +211,7 @@ class Ward(models.Model):
     
     
     
- # ==========================================================
-# Location Request
-# ==========================================================
+
 
 class LocationRequest(models.Model):
 

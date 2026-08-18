@@ -104,13 +104,82 @@ logger = logging.getLogger(__name__)
 
 
 User = get_user_model()
-
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 
 
 
 
 
+# class AdminLoginView(TokenObtainPairView):
+#     serializer_class = AdminLoginSerializer
+
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             response = super().post(request, *args, **kwargs)
+
+#             access = response.data.get("access")
+#             refresh = response.data.get("refresh")
+
+#             if not access or not refresh:
+#                 return error_response(
+#                     message="Invalid login response",
+#                     status=400
+#                 )
+#             response.data = {
+#                 "message": "Login successful",
+#                 "data": {
+
+#                     "access": access,
+#                     "refresh": refresh,
+
+#                     "role": "ADMIN",
+#                     "status": "ACTIVE",
+#                 }
+#             }
+            
+            
+#             # response.delete_cookie("ward_access_token")
+#             # response.delete_cookie("ward_refresh_token")
+
+#             # response.delete_cookie("panchayath_access_token")
+#             # response.delete_cookie("panchayath_refresh_token")
+
+#             # response.delete_cookie("citizen_access_token")
+#             # response.delete_cookie("citizen_refresh_token")
+            
+#             response.set_cookie(
+#                 key="admin_access_token",
+#                 value=access,
+#                 httponly=True,
+#                 secure=False,  
+#                 samesite="Lax"
+#             )
+            
+            
+
+#             response.set_cookie(
+#                 key="admin_refresh_token",
+#                 value=refresh,
+#                 httponly=True,
+#                 secure=False,
+#                 samesite="Lax"
+#             )
+
+#             logger.info(f"Admin login success: {request.data.get('email')}")
+
+#             return response
+
+#         except Exception as e:
+#             logger.error(f"AdminLogin error: {str(e)}")
+
+#             return error_response(
+#                 message="Login failed",
+#                 status=500
+#             )
+    
+    
+    
 class AdminLoginView(TokenObtainPairView):
     serializer_class = AdminLoginSerializer
 
@@ -126,37 +195,25 @@ class AdminLoginView(TokenObtainPairView):
                     message="Invalid login response",
                     status=400
                 )
+
             response.data = {
+                "success": True,
                 "message": "Login successful",
                 "data": {
-
                     "access": access,
                     "refresh": refresh,
-
                     "role": "ADMIN",
                     "status": "ACTIVE",
                 }
             }
-            
-            
-            # response.delete_cookie("ward_access_token")
-            # response.delete_cookie("ward_refresh_token")
 
-            # response.delete_cookie("panchayath_access_token")
-            # response.delete_cookie("panchayath_refresh_token")
-
-            # response.delete_cookie("citizen_access_token")
-            # response.delete_cookie("citizen_refresh_token")
-            
             response.set_cookie(
                 key="admin_access_token",
                 value=access,
                 httponly=True,
-                secure=False,  
+                secure=False,
                 samesite="Lax"
             )
-            
-            
 
             response.set_cookie(
                 key="admin_refresh_token",
@@ -166,18 +223,34 @@ class AdminLoginView(TokenObtainPairView):
                 samesite="Lax"
             )
 
-            logger.info(f"Admin login success: {request.data.get('email')}")
+            logger.info(
+                f"Admin login success: {request.data.get('email')}"
+            )
 
             return response
 
-        except Exception as e:
-            logger.error(f"AdminLogin error: {str(e)}")
+        except AuthenticationFailed as e:
+
+            logger.warning(
+                f"Admin login failed: {request.data.get('email')}"
+            )
 
             return error_response(
-                message="Login failed",
+                message=str(e.detail),
+                status=401
+            )
+
+        except Exception as e:
+
+            logger.error(
+                f"AdminLogin error: {str(e)}",
+                exc_info=True
+            )
+
+            return error_response(
+                message="Something went wrong. Please try again later.",
                 status=500
             )
-    
     
 
 class AdminProfileView(APIView):
@@ -775,6 +848,8 @@ class AdminPanchayathListView(APIView):
                 message="Something went wrong",
                 status=500
             )
+
+
 
 
 class SuspendPanchayathView(APIView):
@@ -2939,12 +3014,7 @@ class ReplacePanchayathOfficerAPIView(APIView):
                 ]
             )
 
-            # This function will now update:
-            # - must_change_password
-            # - set_password_token
-            # - unusable password
-            # - failed_attempts
-            # - lock_until
+            
             link = prepare_password_setup(office)
 
             verification.full_name = ""

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import District, Panchayath, Ward,LocationRequest
-
+import re
 User = get_user_model()
 
 
@@ -12,6 +12,28 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "password", "confirm_password"]
+        
+        
+    def validate_username(self, username):
+
+        if len(username) < 3:
+            raise serializers.ValidationError(
+                "Username must be at least 3 characters long."
+            )
+
+        if len(username) > 30:
+            raise serializers.ValidationError(
+                "Username must not exceed 30 characters."
+            )
+
+        if not re.fullmatch(r"[A-Za-z0-9_]+", username):
+            raise serializers.ValidationError(
+                "Username can contain only letters, numbers, and underscores."
+            )
+
+        return username
+    
+    
 
     def validate(self, data):
         if data["password"] != data["confirm_password"]:
@@ -20,9 +42,7 @@ class SignupSerializer(serializers.ModelSerializer):
     
     
     
-# ============================================
-# Location Serializers
-# ============================================
+
 
 class DistrictSerializer(serializers.ModelSerializer):
     class Meta:
