@@ -208,12 +208,21 @@ export const adminapi = {
     },
 
 
-    getAuthorityPanchayaths: async () => {
+    getAuthorityPanchayaths: async (page = 1, search = "") => {
         const response = await adminAxios.get(
-            "/admin/authority/panchayaths/"
+            "/admin/authority/panchayaths/",
+            {
+                params: {
+                    page,
+                    search,
+                },
+            }
         );
+
         return response.data;
     },
+
+    
 
     createPanchayathAuthority: async (data) => {
         const response = await adminAxios.post(
@@ -240,7 +249,7 @@ export const adminapi = {
 
 
 
-    updateOfficeDetails : async (userId, data) => {
+    updateOfficeDetails: async (userId, data) => {
         const response = await adminAxios.patch(
             `/admin/panchayaths/${userId}/office-details/`,
             data

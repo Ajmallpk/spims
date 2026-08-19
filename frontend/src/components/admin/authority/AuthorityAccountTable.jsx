@@ -345,6 +345,11 @@ const AuthorityAccountTable = ({ refreshKey }) => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalAccounts, setTotalAccounts] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
+    const [hasPrevious, setHasPrevious] = useState(false);
+
     const [selectedAccount, setSelectedAccount] = useState(null);
 
     // const [resetModalOpen, setResetModalOpen] = useState(false);
@@ -360,12 +365,17 @@ const AuthorityAccountTable = ({ refreshKey }) => {
             setLoading(true);
 
             const response =
-                await adminapi.getAuthorityPanchayaths();
-
+                await adminapi.getAuthorityPanchayaths(
+                    currentPage,
+                    search
+                );
 
             console.log("API RESPONSE:", response);
 
-            setAccounts(response.data || []);
+            setAccounts(response.results || []);
+            setTotalAccounts(response.count || 0);
+            setHasNext(!!response.next);
+            setHasPrevious(!!response.previous);
 
         } catch (error) {
 
@@ -383,23 +393,23 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
         fetchAccounts();
 
-    }, [refreshKey]);
+    }, [refreshKey, currentPage, search]);
 
-    const filteredAccounts = useMemo(() => {
+    // const filteredAccounts = useMemo(() => {
 
-        return accounts.filter((account) => {
+    //     return accounts.filter((account) => {
 
-            const keyword = search.toLowerCase();
+    //         const keyword = search.toLowerCase();
 
-            return (
-                (account.district ?? "").toLowerCase().includes(keyword) ||
-                (account.panchayath ?? "").toLowerCase().includes(keyword) ||
-                (account.official_email ?? "").toLowerCase().includes(keyword)
-            );
+    //         return (
+    //             (account.district ?? "").toLowerCase().includes(keyword) ||
+    //             (account.panchayath ?? "").toLowerCase().includes(keyword) ||
+    //             (account.official_email ?? "").toLowerCase().includes(keyword)
+    //         );
 
-        });
+    //     });
 
-    }, [accounts, search]);
+    // }, [accounts, search]);
 
     return (
 
@@ -412,7 +422,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                         Existing Panchayath Accounts
                     </h2>
                     <p className="text-gray-500 text-sm mt-0.5">
-                        {accounts.length} account{accounts.length === 1 ? "" : "s"} registered
+                        {totalAccounts} account{totalAccounts === 1 ? "" : "s"} registered
                     </p>
                 </div>
 
@@ -420,7 +430,10 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                     <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setCurrentPage(1);
+                        }}
                         placeholder="Search district, panchayath, email..."
                         className="border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 w-full sm:w-80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     />
@@ -474,7 +487,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
                             Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
 
-                        ) : filteredAccounts.length === 0 ? (
+                        ) : accounts.length === 0 ? (
 
                             <tr>
 
@@ -491,7 +504,7 @@ const AuthorityAccountTable = ({ refreshKey }) => {
 
                         ) : (
 
-                            filteredAccounts.map((account) => (
+                            accounts.map((account) => (
 
                                 <tr
                                     key={account.id}
@@ -579,6 +592,39 @@ const AuthorityAccountTable = ({ refreshKey }) => {
                 </table>
 
             </div>
+
+
+            {/* Pagination */}
+
+            {totalAccounts > 0 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+
+                    <p className="text-sm text-gray-500">
+                        Page {currentPage}
+                    </p>
+
+                    <div className="flex items-center gap-2">
+
+                        <button
+                            disabled={!hasPrevious}
+                            onClick={() => setCurrentPage((prev) => prev - 1)}
+                            className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+
+                        <button
+                            disabled={!hasNext}
+                            onClick={() => setCurrentPage((prev) => prev + 1)}
+                            className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
+
+                    </div>
+
+                </div>
+            )}
 
             {/* <ResetPasswordModal
                 open={resetModalOpen}

@@ -41,7 +41,22 @@ const authoritychatapi = {
     return axiosInstance.post(
       `/chat/authority/${chatId}/mark-read/`
     )
-  }
+  },
+
+  getContacts: () =>
+    axiosInstance.get(
+      "chat/authority/contacts/"
+    ),
+
+
+  startChat: async (receiverId) => {
+    return await axiosInstance.post(
+      "chat/authority/start/",
+      {
+        receiver_id: receiverId,
+      }
+    );
+  },
 
 };
 

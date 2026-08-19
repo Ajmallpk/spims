@@ -3039,6 +3039,44 @@ class ReplacePanchayathOfficerAPIView(APIView):
             )
         
         
+# class AuthorityPanchayathListAPIView(APIView):
+
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+
+#         if not request.user.is_superuser:
+#             return error_response(
+#                 message="Permission denied.",
+#                 status=403
+#             )
+
+#         users = (
+#             User.objects.filter(
+#                 role=User.Role.PANCHAYATH
+#             )
+#             .select_related(
+#                 "district",
+#                 "panchayath",
+#             )
+#             .order_by(
+#                 "district__name",
+#                 "panchayath__name",
+#             )
+#         )
+
+#         serializer = AuthorityPanchayathListSerializer(
+#             users,
+#             many=True
+#         )
+
+#         return success_response(
+#             message="Authority accounts fetched successfully.",
+#             data=serializer.data,
+#         )
+        
+        
+        
 class AuthorityPanchayathListAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -3051,6 +3089,8 @@ class AuthorityPanchayathListAPIView(APIView):
                 status=403
             )
 
+        search = request.GET.get("search", "").strip()
+
         users = (
             User.objects.filter(
                 role=User.Role.PANCHAYATH
@@ -3059,21 +3099,39 @@ class AuthorityPanchayathListAPIView(APIView):
                 "district",
                 "panchayath",
             )
-            .order_by(
-                "district__name",
-                "panchayath__name",
+        )
+
+        
+        if search:
+            users = users.filter(
+                Q(district__name__icontains=search) |
+                Q(panchayath__name__icontains=search) |
+                Q(email__icontains=search) |
+                Q(officer_personal_email__icontains=search)
             )
+
+        users = users.order_by(
+            "district__name",
+            "panchayath__name",
+        )
+
+       
+        paginator = CustomPagination()
+
+        paginated_users = paginator.paginate_queryset(
+            users,
+            request
         )
 
         serializer = AuthorityPanchayathListSerializer(
-            users,
+            paginated_users,
             many=True
         )
 
-        return success_response(
-            message="Authority accounts fetched successfully.",
-            data=serializer.data,
+        return paginator.get_paginated_response(
+            serializer.data
         )
+        
         
         
 class UpdateOfficeDetailsAPIView(APIView):

@@ -7,7 +7,7 @@ import EmptyChatState from "@/components/chat/EmptyChatState";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import authoritychatapi from "@/service/authoritychaturls";
 import { handleApiError } from "@/utils/handleApiError";
-import toast  from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const PanchayathAuthorityChat = () => {
   const [contacts, setContacts] = useState([]);
@@ -38,25 +38,19 @@ const PanchayathAuthorityChat = () => {
 
         setIsLoading(true);
 
-        const res = await authoritychatapi.getInbox();
+        const res = await authoritychatapi.getContacts();
 
         console.log("AUTHORITY INBOX:", res.data);
 
-        const formattedContacts = (res.data || []).map((chat) => ({
-          id: chat.id,
-
-          chat_user: chat.chat_user,
-
-          name: chat.chat_user,
-
-          lastMessage:
-            chat.last_message?.message || "",
-
-          isOnline: false,
-
-          unreadCount:
-            chat.unread_count || 0,
-
+        const formattedContacts = (res.data?.data || []).map((contact) => ({
+          id: contact.user_id,
+          chatId: contact.chat_id,
+          chat_user: contact.name,
+          name: contact.name,
+          lastMessage: "",
+          isOnline: contact.is_online,
+          lastSeen: contact.last_seen,
+          unreadCount: 0,
           role: "Ward",
         }));
 
@@ -139,38 +133,101 @@ const PanchayathAuthorityChat = () => {
 
   const handleSelectContact = async (contact) => {
 
-    setSelectedContact(contact);
-
-    setContacts(prev =>
-      prev.map(c =>
-        c.id === contact.id
-          ? {
-            ...c,
-            unreadCount: 0
-          }
-          : c
-      )
-    );
-
     try {
 
-      // await authoritychatapi.markChatRead(
-      //   contact.id
-      // )
+      let chatId = contact.chatId;
+
+      // --------------------------------
+      // CHAT DOES NOT EXIST
+      // --------------------------------
+
+      if (!chatId) {
+
+        console.log(
+          "Chat does not exist. Creating chat..."
+        );
+
+        const response =
+          await authoritychatapi.startChat(
+            contact.id
+          );
+
+        console.log(
+          "START CHAT RESPONSE:",
+          response.data
+        );
+
+        chatId =
+          response.data?.data?.chat_id;
+
+        if (!chatId) {
+
+          console.error(
+            "Chat ID was not returned"
+          );
+
+          return;
+        }
+
+        // Save newly created chat ID
+        setContacts(prev =>
+          prev.map(c =>
+            c.id === contact.id
+              ? {
+                ...c,
+                chatId: chatId
+              }
+              : c
+          )
+        );
+
+        contact = {
+          ...contact,
+          chatId: chatId
+        };
+      }
+
+      // --------------------------------
+      // SELECT CONTACT
+      // --------------------------------
+
+      setSelectedContact(contact);
+
+      setContacts(prev =>
+        prev.map(c =>
+          c.id === contact.id
+            ? {
+              ...c,
+              unreadCount: 0
+            }
+            : c
+        )
+      );
+
+      // --------------------------------
+      // LOAD CHAT MESSAGES
+      // --------------------------------
+
+      fetchMessages(
+        chatId,
+        1,
+        true
+      );
+
+      setIsMobileSidebarOpen(false);
 
     } catch (error) {
 
-      console.log(error)
+      console.error(
+        "Failed to open authority chat:",
+        error
+      );
 
+      handleApiError(
+        error,
+        "Failed to open chat"
+      );
     }
-
-    fetchMessages(
-      contact.id,
-      1,
-      true
-    );
-
-    setIsMobileSidebarOpen(false);
   };
 
   const fetchMessages = async (
@@ -263,7 +320,7 @@ const PanchayathAuthorityChat = () => {
 
 
     socketRef.current = new WebSocket(
-      `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/?role=panchayath`
+      `ws://localhost:8000/ws/chat/authority/${selectedContact.chatId}/?role=panchayath`
     );
 
     socketRef.current.onopen = () => {
@@ -274,7 +331,7 @@ const PanchayathAuthorityChat = () => {
 
       reconnectAttemptsRef.current = 0;
 
-      
+
 
     };
 
@@ -563,10 +620,8 @@ const PanchayathAuthorityChat = () => {
 
   useEffect(() => {
 
-    if (!selectedContact?.id) {
-
+    if (!selectedContact?.chatId) {
       return;
-
     }
 
     connectWebSocket();
@@ -581,7 +636,7 @@ const PanchayathAuthorityChat = () => {
 
     };
 
-  }, [selectedContact?.id]);
+  }, [selectedContact?.chatId]);
 
 
 
@@ -614,12 +669,12 @@ const PanchayathAuthorityChat = () => {
 
         const res =
           await authoritychatapi.sendMessage(
-            selectedContact.id,
+            selectedContact.chatId,
             formData
           );
 
 
-          toast.success("File sent successfully");
+        toast.success("File sent successfully");
 
         setContacts(prev =>
           prev.map(c =>
@@ -712,7 +767,7 @@ const PanchayathAuthorityChat = () => {
         .searchParams.get("page");
 
     await fetchMessages(
-      selectedContact.id,
+      selectedContact.chatId,
       nextPageNumber
     );
 

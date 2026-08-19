@@ -1110,6 +1110,67 @@ class AuthorityMessageListView(ListAPIView):
         
         
         
+        
+        
+        
+        
+class AuthorityChatContactsView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        user = request.user
+
+        if user.role != "PANCHAYATH":
+            return error_response(
+                message="Only Panchayath authority can access this",
+                status=403
+            )
+
+        wards = WardVerification.objects.filter(
+            panchayath=user,
+            status="APPROVED"
+        ).select_related("user")
+
+        data = []
+
+        for verification in wards:
+
+            ward = verification.user
+
+            chat = Chat.objects.filter(
+                chat_type="AUTHORITY"
+            ).filter(
+                Q(
+                    sender_authority=user,
+                    receiver_authority=ward
+                )
+                |
+                Q(
+                    sender_authority=ward,
+                    receiver_authority=user
+                )
+            ).first()
+
+            data.append({
+                "user_id": ward.id,
+                "name": ward.username,
+                "role": "WARD",
+                "chat_id": chat.id if chat else None,
+                "is_online": ward.is_online,
+                "last_seen": ward.last_seen,
+            })
+
+        return success_response(
+            message="Authority contacts fetched successfully",
+            data=data
+        )
+        
+        
+        
+        
+        
 class StartAuthorityChatView(APIView):
 
     permission_classes = [IsAuthenticated]
