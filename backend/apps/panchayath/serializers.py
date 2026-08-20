@@ -122,14 +122,16 @@ class ReassignComplaintSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        
+
         if instance.status not in ["ESCALATED", "IN_PROGRESS"]:
             raise serializers.ValidationError(
                 f"cannot reassign from {instance.status}"
             )
-        
-        
+
         instance.status = "PENDING"
+
+        instance.panchayath_viewed = False
+
         instance.reassign_note = validated_data.get("reassign_note")
 
         instance.save()

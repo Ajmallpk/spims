@@ -1127,7 +1127,13 @@ class ComplaintDetailView(APIView):
                 "status": complaint.status,
                 "hold_reason": complaint.hold_reason,
                 "hold_at": complaint.hold_at,
+                "panchayath_viewed": complaint.panchayath_viewed,
                 "hold_by_name": complaint.hold_by.username if complaint.hold_by else None,
+                "can_resume": (
+                    complaint.hold_by_id == request.user.id
+                    if complaint.hold_by_id
+                    else False
+                ),
                 "created_at": complaint.created_at,
                 "citizen": {
                     "id": verification.id if verification else None,
@@ -1247,6 +1253,13 @@ class EscalateComplaintView(APIView):
                     message="Permission denied",
                     status=403
                 )
+                
+                
+            if complaint.panchayath_viewed:
+                return error_response(
+                    message="Panchayath is currently handling this complaint.",
+                    status=403
+                )
 
             serializer = EscalateComplaintSerializer(
                 complaint,
@@ -1343,6 +1356,13 @@ class HoldComplaintView(APIView):
             Complaint,
             id=complaint_id
         )
+        
+        
+        if request.user.role == "WARD" and complaint.panchayath_viewed:
+            return error_response(
+                message="Panchayath is currently handling this complaint.",
+                status=403
+            )
 
         serializer = HoldComplaintSerializer(
             complaint,
@@ -1369,8 +1389,37 @@ class HoldComplaintView(APIView):
     
     
     
-class ResumeComplaintView(APIView):
+# class ResumeComplaintView(APIView):
 
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request, complaint_id):
+
+#         complaint = get_object_or_404(
+#             Complaint,
+#             id=complaint_id
+#         )
+
+#         serializer = ResumeComplaintSerializer(
+#             complaint,
+#             data={},
+#             partial=True,
+#             context={"request": request}
+#         )
+
+#         serializer.is_valid(
+#             raise_exception=True
+#         )
+
+#         serializer.save()
+
+#         return success_response(
+#             "Complaint resumed."
+#         )
+
+
+
+class ResumeComplaintView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, complaint_id):
@@ -1379,6 +1428,19 @@ class ResumeComplaintView(APIView):
             Complaint,
             id=complaint_id
         )
+
+      
+        if complaint.hold_by_id != request.user.id:
+            return error_response(
+                message="Only the authority who put this complaint on hold can resume it.",
+                status=403
+            )
+
+        if complaint.status != "HOLD":
+            return error_response(
+                message="Only a complaint on hold can be resumed.",
+                status=400
+            )
 
         serializer = ResumeComplaintSerializer(
             complaint,
@@ -1396,6 +1458,14 @@ class ResumeComplaintView(APIView):
         return success_response(
             "Complaint resumed."
         )
+
+
+
+
+
+
+
+
 
 
 class WardReassignedComplaintListView(APIView):
@@ -1479,6 +1549,12 @@ class WardResolveComplaintView(APIView):
             if user.role != "WARD" or complaint.ward != ward_master:
                 return error_response(
                     message="Permission denied",
+                    status=403
+                )
+                
+            if complaint.panchayath_viewed:
+                return error_response(
+                    message="Panchayath is currently handling this complaint.",
                     status=403
                 )
 

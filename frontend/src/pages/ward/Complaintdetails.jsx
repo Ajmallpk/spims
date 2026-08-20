@@ -129,6 +129,7 @@ export default function ComplaintDetails() {
   const isChatClosed = complaintData?.chat_closed ?? complaint?.chat_closed ?? false;
   const status = complaint?.status ?? "";
   const wardViewed = complaint?.ward_viewed;
+  const panchayathViewed = complaint?.panchayath_viewed ?? false;
   console.log("COMPLAINT 👉", complaint);
   console.log("STATUS 👉", status);
 
@@ -233,9 +234,11 @@ export default function ComplaintDetails() {
               status={status}
               // chatOpen={chatOpen}
               wardViewed={wardViewed}
+              panchayathViewed={panchayathViewed}
               onResolve={() => setShowResolveModal(true)}
               onEscalate={() => setShowEscalateModal(true)}
               onHold={() => setShowHoldModal(true)}
+              canResume={complaint?.can_resume}
               onResume={handleResumeComplaint}
               onStartWork={handleStartWork}
               onToggleChat={handleOpenChat}

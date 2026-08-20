@@ -1076,7 +1076,12 @@ class PanchayathComplaintListView(APIView):
                 "citizen", "ward"
             ).filter(
                 panchayath=user,
-                status="ESCALATED"
+                status__in=[
+                    "ESCALATED",
+                    "IN_PROGRESS",
+                    "HOLD",
+                    "RESOLVED",
+                ]
             ).order_by("-created_at")
 
             paginator = PanchayathComplaintPagination()
@@ -1190,7 +1195,9 @@ class ReassignComplaintView(APIView):
             
 class HoldComplaintView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    
+    permission_classes = [IsActivePanchayath]
 
     def post(self, request, complaint_id):
 
@@ -1319,6 +1326,11 @@ class PanchayathComplaintDetailView(APIView):
                     "hold_reason": complaint.hold_reason,
                     "hold_at": complaint.hold_at,
                     "hold_by_name": complaint.hold_by.username if complaint.hold_by else None,
+                    "can_resume": (
+                        complaint.hold_by_id == request.user.id
+                        if complaint.hold_by_id
+                        else False
+                    ),
                     "location": complaint.location,
                     "created_at": complaint.created_at,
                     "escalation_reason":complaint.escalation_reason,
@@ -1372,29 +1384,53 @@ class PanchayathComplaintDetailView(APIView):
 
             action = request.data.get("action")
 
-            if action == "START_WORK":
+            if action == "VIEWED":
 
                 if complaint.status != "ESCALATED":
                     return error_response(
-                        message="Invalid state",
+                        message="Only escalated complaints can be viewed.",
                         status=400
                     )
 
-                complaint.status = "IN_PROGRESS"
+                
                 complaint.panchayath_viewed = True
-                complaint.save()
-                
-                
+
+          
+                complaint.status = "IN_PROGRESS"
+
+                complaint.save(
+                    update_fields=[
+                        "panchayath_viewed",
+                        "status",
+                        "updated_at",
+                    ]
+                )
+
+               
+                ComplaintHistory.objects.create(
+                    complaint=complaint,
+                    action="VIEWED",
+                    performed_by=user
+                )
+
+                ComplaintHistory.objects.create(
+                    complaint=complaint,
+                    action="STATUS_CHANGED",
+                    performed_by=user,
+                    note="Panchayath viewed escalated complaint and started work."
+                )
+
+           
                 send_notification(
                     user=complaint.citizen,
                     title="Complaint In Progress",
-                    message="Panchayath has started working on your complaint.",
+                    message="Panchayath has viewed your escalated complaint and started working on it.",
                     n_type="COMPLAINT_STATUS",
                     complaint=complaint,
-                    sender=request.user,
+                    sender=user,
                 )
-                
-                
+
+              
                 ward_verification = WardVerification.objects.filter(
                     ward_master=complaint.ward
                 ).first()
@@ -1402,30 +1438,25 @@ class PanchayathComplaintDetailView(APIView):
                 if ward_verification:
                     send_notification(
                         user=ward_verification.user,
-                        title="Complaint Started",
-                        message="Panchayath has started working on the escalated complaint.",
+                        title="Complaint In Progress",
+                        message="Panchayath has viewed the escalated complaint and started working on it.",
                         n_type="COMPLAINT_STATUS",
                         complaint=complaint,
-                        sender=request.user,
+                        sender=user,
                     )
-                
-                ComplaintHistory.objects.create(
-                    complaint=complaint,
-                    action="STARTED_WORK",
-                    performed_by=user
-                )
 
-                logger.info(f"Panchayath {user.id} started work on complaint {complaint.id}")
+                logger.info(
+                    f"Panchayath {user.id} viewed and started work on complaint {complaint.id}"
+                )
 
                 return success_response(
-                    message="Complaint moved to IN_PROGRESS"
+                    message="Complaint viewed and moved to IN_PROGRESS",
+                    data={
+                        "status": complaint.status,
+                        "panchayath_viewed": complaint.panchayath_viewed,
+                    }
                 )
-
-            return error_response(
-                message="Invalid action",
-                status=400
-            )
-
+        
         except Exception as e:
             logger.error(f"PanchayathComplaintDetail POST error: {str(e)}")
 
@@ -1573,9 +1604,10 @@ class PanchayathResolveView(APIView):
                     message="Complaint not found",
                     status=404
                 )
-            if complaint.status != "IN_PROGRESS":
+                
+            if complaint.status not in ["ESCALATED", "IN_PROGRESS"]:
                 return error_response(
-                    message="Complaint must be IN_PROGRESS to resolve",
+                    message="Complaint cannot be resolved from its current status.",
                     status=400
                 )
 

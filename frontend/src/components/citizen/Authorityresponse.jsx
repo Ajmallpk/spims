@@ -79,7 +79,7 @@ const AuthorityResponse = ({ response }) => {
             {currentIndex > 0 && (
               <button
                 onClick={() => setCurrentIndex(prev => prev - 1)}
-                className="absolute left-2 top-1/2 bg-white p-2 rounded-full"
+                className="absolute left-2 top-1/2 bg-blue-500 p-2 rounded-full"
               >
                 ‹
               </button>
@@ -89,7 +89,7 @@ const AuthorityResponse = ({ response }) => {
             {currentIndex < response.media.length - 1 && (
               <button
                 onClick={() => setCurrentIndex(prev => prev + 1)}
-                className="absolute right-2 top-1/2 bg-white p-2 rounded-full"
+                className="absolute right-2 top-1/2 bg-blue-500 p-2 rounded-full"
               >
                 ›
               </button>

@@ -43,11 +43,16 @@ const panchayathApi = {
     return panchayathAxios.get(`/panchayath/complaints/${id}/`)
   },
 
-  startWork: (id) =>
-    panchayathAxios.post(`/panchayath/complaints/${id}/`, {
-      action: "START_WORK"
-    }),
+  // startWork: (id) =>
+  //   panchayathAxios.post(`/panchayath/complaints/${id}/`, {
+  //     action: "START_WORK"
+  //   }),
 
+
+  markViewed: (id) =>
+    panchayathAxios.post(`/panchayath/complaints/${id}/`, {
+        action: "VIEWED"
+    }),
 
   resolveComplaint: (id, formData) => {
     return panchayathAxios.post(

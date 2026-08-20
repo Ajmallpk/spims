@@ -2,9 +2,11 @@ export default function ComplaintActionPanel({
   status,
   chatOpen,
   wardViewed,
+  panchayathViewed,
   onResolve,
   onEscalate,
   onHold,
+  canResume,
   onResume,
   onToggleChat,
   onStartWork,
@@ -56,35 +58,46 @@ export default function ComplaintActionPanel({
       )} */}
 
 
-
       {statusKey === "in_progress" && (
-        <div className="space-y-2.5">
+        <>
+          {panchayathViewed ? (
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
+              <p className="font-semibold">
+                Panchayath is currently handling this complaint.
+              </p>
 
-          <button
-            // disabled={!wardViewed}
-            onClick={onResolve}
-            className="w-full px-4 py-2.5 bg-green-600 text-white rounded-xl"
-          >
-            Mark as Resolved
-          </button>
+              <p className="mt-1 text-xs text-blue-600">
+                Ward actions are temporarily disabled until the complaint is
+                reassigned back to the Ward.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
 
-          <button
-            // disabled={!wardViewed}
-            onClick={onHold}
-            className="w-full px-4 py-2.5 bg-yellow-500 text-white rounded-xl"
-          >
-            Put On Hold
-          </button>
+              <button
+                onClick={onResolve}
+                className="w-full px-4 py-2.5 bg-green-600 text-white rounded-xl"
+              >
+                Mark as Resolved
+              </button>
 
-          <button
-            // disabled={!wardViewed}
-            onClick={onEscalate}
-            className="w-full px-4 py-2.5 bg-red-600 text-white rounded-xl"
-          >
-            Escalate Complaint
-          </button>
+              <button
+                onClick={onHold}
+                className="w-full px-4 py-2.5 bg-yellow-500 text-white rounded-xl"
+              >
+                Put On Hold
+              </button>
 
-        </div>
+              <button
+                onClick={onEscalate}
+                className="w-full px-4 py-2.5 bg-red-600 text-white rounded-xl"
+              >
+                Escalate Complaint
+              </button>
+
+            </div>
+          )}
+        </>
       )}
 
 
@@ -93,15 +106,26 @@ export default function ComplaintActionPanel({
         <div className="space-y-3">
 
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-700">
-            Complaint is currently on hold.
+            <p className="font-semibold">
+              Complaint is currently on hold.
+            </p>
+
+            {!canResume && (
+              <p className="mt-1 text-xs text-yellow-600">
+                This complaint was put on hold by the Panchayath.
+                Ward actions are temporarily disabled.
+              </p>
+            )}
           </div>
 
-          <button
-            onClick={onResume}
-            className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
-          >
-            Resume Work
-          </button>
+          {canResume && (
+            <button
+              onClick={onResume}
+              className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+            >
+              Resume Work
+            </button>
+          )}
 
         </div>
       )}

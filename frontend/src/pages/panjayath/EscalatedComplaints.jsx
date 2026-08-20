@@ -28,6 +28,17 @@ const STATUS_CONFIG = {
         label: "In Progress",
         cardAccent: "border-l-amber-400",
     },
+
+    HOLD: {
+        bg: "bg-slate-100",
+        text: "text-slate-700",
+        border: "border-slate-200",
+        dot: "bg-slate-500",
+        label: "On Hold",
+        cardAccent: "border-l-slate-400",
+    },
+
+
     RESOLVED: {
         bg: "bg-emerald-50",
         text: "text-emerald-700",
@@ -36,6 +47,7 @@ const STATUS_CONFIG = {
         label: "Resolved",
         cardAccent: "border-l-emerald-500",
     },
+
 };
 
 
@@ -83,7 +95,8 @@ function CategoryBadge({ category }) {
 }
 
 function StatusBadge({ status }) {
-    const s = STATUS_CONFIG[status];
+    // const s = STATUS_CONFIG[status];
+    const s = STATUS_CONFIG[status] || STATUS_CONFIG.ESCALATED;
     return (
         <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${s.bg} ${s.text} ${s.border}`}
@@ -253,6 +266,9 @@ export default function EscalatedComplaints() {
         ALL: complaints.length,
         ESCALATED: complaints.filter((c) => c.status === "ESCALATED").length,
         IN_PROGRESS: complaints.filter((c) => c.status === "IN_PROGRESS").length,
+        HOLD: complaints.filter(
+            (c) => c.status === "HOLD"
+        ).length,
         RESOLVED: complaints.filter((c) => c.status === "RESOLVED").length,
     };
 
@@ -260,6 +276,11 @@ export default function EscalatedComplaints() {
         { label: "All", value: "ALL", count: counts.ALL },
         { label: "Escalated", value: "ESCALATED", count: counts.ESCALATED },
         { label: "In Progress", value: "IN_PROGRESS", count: counts.IN_PROGRESS },
+        {
+            label: "On Hold",
+            value: "HOLD",
+            count: counts.HOLD
+        },
         { label: "Resolved", value: "RESOLVED", count: counts.RESOLVED },
     ];
 
@@ -388,7 +409,7 @@ export default function EscalatedComplaints() {
                                 onChange={(e) => { setStatusFilter(e.target.value); setActiveToggle(e.target.value); }}
                                 className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 cursor-pointer"
                             >
-                                {["ALL", "ESCALATED", "IN_PROGRESS", "RESOLVED"].map((s) => (
+                                {["ALL", "ESCALATED", "IN_PROGRESS", "HOLD", "RESOLVED"].map((s) => (
                                     <option key={s} value={s}>
                                         {s === "ALL" ? "All Statuses" : s.replace("_", " ")}
                                     </option>

@@ -26,6 +26,15 @@ const STATUS_CONFIG = {
     },
     RESOLVED: { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500", label: "Resolved" },
 
+
+    HOLD: {
+        bg: "bg-yellow-50",
+        text: "text-yellow-700",
+        border: "border-yellow-200",
+        dot: "bg-yellow-500",
+        label: "On Hold",
+        cardAccent: "border-l-yellow-500",
+    },
     // 👉 ADD THIS
     PENDING: { bg: "bg-yellow-100", text: "text-yellow-700", border: "border-yellow-200", dot: "bg-yellow-500", label: "Pending" },
 };
@@ -359,20 +368,24 @@ export default function PanchayathComplaintDetail() {
         }
     };
 
-    const handleStartWork = async () => {
+    const handleMarkViewed = async () => {
         try {
-            await panchayathApi.startWork(id);
+            const res = await panchayathApi.markViewed(id);
 
-            // toast.success("Complaint marked as In Progress.");
-            const res = await panchayathApi.getComplaintDetail(id);
             const data = res.data.data;
-            setComplaint(data);
+
+            setComplaint((prev) => ({
+                ...prev,
+                status: data.status,
+                panchayath_viewed: data.panchayath_viewed,
+            }));
+
             setCurrentStatus(data.status);
 
         } catch (err) {
             handleApiError(
                 err,
-                "Failed to update complaint status"
+                "Failed to mark complaint as viewed"
             );
         }
     };
@@ -548,12 +561,12 @@ export default function PanchayathComplaintDetail() {
                         {/* Description */}
                         <SectionCard title="Complaint Description" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                             <p className="text-sm text-slate-600 leading-relaxed">{complaint.description}</p>
-                            
+
                         </SectionCard>
 
                         <SectionCard title="Escalated Reson from Ward" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            
-                            <p  class="text-red-500">{complaint.escalation_reason}</p>
+
+                            <p class="text-red-500">{complaint.escalation_reason}</p>
                         </SectionCard>
 
                         {/* Media Evidence */}
@@ -688,9 +701,9 @@ export default function PanchayathComplaintDetail() {
                                     </div>
                                 ) : (
                                     <>
-                                        {currentStatus === "ESCALATED" && (
+                                        {currentStatus === "ESCALATED" && !panchayathViewed && (
                                             <button
-                                                onClick={handleStartWork}
+                                                onClick={handleMarkViewed}
                                                 className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-3 rounded-xl"
                                             >
                                                 Viewed
@@ -699,7 +712,7 @@ export default function PanchayathComplaintDetail() {
 
 
 
-                                        
+
 
                                         {currentStatus === "IN_PROGRESS" && (
                                             <button
