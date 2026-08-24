@@ -18,9 +18,7 @@ ENV/
 media/
 staticfiles/
 
-# Migrations (optional)
-*/migrations/*
-!*/migrations/__init__.py
+
 
 # VS Code
 .vscode/
