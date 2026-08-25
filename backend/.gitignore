@@ -39,3 +39,4 @@ htmlcov/
 
 # Firebase secret key
 config/firebase/serviceAccountKey.json
+db.sqlite3

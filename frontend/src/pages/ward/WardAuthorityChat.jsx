@@ -87,7 +87,7 @@ const WardAuthorityChat = () => {
 
 
         inboxSocketRef.current = new WebSocket(
-            "ws://localhost:8000/ws/inbox/?role=ward"
+            `${import.meta.env.VITE_WS_BASE_URL}/ws/inbox/?role=ward`
         );
 
 
@@ -280,7 +280,7 @@ const WardAuthorityChat = () => {
 
 
         socketRef.current = new WebSocket(
-            `ws://localhost:8000/ws/chat/authority/${selectedContact.id}/?role=ward`
+            `${import.meta.env.VITE_WS_BASE_URL}/ws/chat/authority/${selectedContact.id}/?role=ward`
         );
 
         socketRef.current.onopen = () => {

@@ -184,7 +184,7 @@ const CitizenComplaintChatList = () => {
   useEffect(() => {
 
     socketRef.current = new WebSocket(
-      "ws://localhost:8000/ws/inbox/?role=citizen"
+      `${import.meta.env.VITE_WS_BASE_URL}/ws/inbox/?role=citizen`
     );
 
     socketRef.current.onopen = () => {

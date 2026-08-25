@@ -231,7 +231,7 @@ const IssueCard = ({ issue, targetComplaintId, targetCommentId, }) => {
             }}
           >
             {issue.media.map((media, index) => {
-              const BASE_URL = "http://127.0.0.1:8000";
+              const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
               const url = media.file.startsWith("http")
                 ? media.file
@@ -384,7 +384,7 @@ const IssueCard = ({ issue, targetComplaintId, targetCommentId, }) => {
             {/* MEDIA */}
             {(() => {
               const media = issue.media[previewIndex];
-              const BASE_URL = "http://127.0.0.1:8000";
+              const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
               const url = media.file.startsWith("http")
                 ? media.file

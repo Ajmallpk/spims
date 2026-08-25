@@ -158,7 +158,7 @@ const CommentSection = ({ issueId, onCommentAdded, refreshKey, targetCommentId, 
     loadComments();
 
     socketRef.current = new WebSocket(
-      `ws://127.0.0.1:8000/ws/comments/${issueId}/`
+      `${import.meta.env.VITE_WS_BASE_URL}/ws/comments/${issueId}/`
     );
 
     socketRef.current.onopen = () => {

@@ -82,7 +82,7 @@ const PanchayathAuthorityChat = () => {
 
 
     inboxSocketRef.current = new WebSocket(
-      "ws://localhost:8000/ws/inbox/?role=panchayath"
+      `${import.meta.env.VITE_WS_BASE_URL}/ws/inbox/?role=panchayath`
     );
 
     inboxSocketRef.current.onopen = () => {
@@ -320,7 +320,7 @@ const PanchayathAuthorityChat = () => {
 
 
     socketRef.current = new WebSocket(
-      `ws://localhost:8000/ws/chat/authority/${selectedContact.chatId}/?role=panchayath`
+      `${import.meta.env.VITE_WS_BASE_URL}/ws/chat/authority/${selectedContact.chatId}/?role=panchayath`
     );
 
     socketRef.current.onopen = () => {

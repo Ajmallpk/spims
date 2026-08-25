@@ -11,7 +11,7 @@ const AdminLayout = () => {
   const [unreadCount, setUnreadCount] = useState(0)
 
   const WS_BASE_URL =
-    "ws://localhost:8000";
+    import.meta.env.VITE_WS_BASE_URL;
 
 
 
