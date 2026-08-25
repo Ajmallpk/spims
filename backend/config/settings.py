@@ -30,7 +30,14 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1"
+    ).split(",")
+    if host.strip()
+]
 
 
 
@@ -125,11 +132,20 @@ CACHES = {
 # CORS_ALLOW_ALL_ORIGINS = True
 
 
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:5173"
+)
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    FRONTEND_URL,
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    FRONTEND_URL,
+]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "x-role",
@@ -164,11 +180,16 @@ ASGI_APPLICATION = "config.asgi.application"
 # }
 
 
+REDIS_URL = os.getenv(
+    "REDIS_URL",
+    "redis://127.0.0.1:6379/0"
+)
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [REDIS_URL],
         },
     },
 }
@@ -320,9 +341,7 @@ CSRF_COOKIE_SAMESITE = "Lax"
 
 
 
-CELERY_BROKER_URL = (
-    "redis://127.0.0.1:6379/0"
-)
+CELERY_BROKER_URL = REDIS_URL
 
 CELERY_ACCEPT_CONTENT = ["json"]
 
@@ -336,5 +355,5 @@ from .firebase.firebase_config import *
 
 
 
-FRONTEND_URL = "http://localhost:5173"
+
 
