@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import WardStatsGrid from "@/components/admin/Wardstatsgrid";
 import WardMemberTable from "@/components/admin/Wardmembertable";
-import StatusBadge from "@/components/admin/Statusbadge";
+import StatusBadge from "@/components/admin/StatusBadge";
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
 

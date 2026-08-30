@@ -9,10 +9,10 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import CitizenInfoCard from "@/components/citizen/Citizeninfocard";
-import VerificationStatusCard from "@/components/citizen/Verificationstatuscard";
-import VerificationProgress from "@/components/citizen/Verificationprogress";
-import CitizenVerificationForm from "@/components/citizen/Citizenverificationform";
+import CitizenInfoCard from "@/components/citizen/CitizeninFocard";
+import VerificationStatusCard from "@/components/citizen/VerificationStatuscard";
+import VerificationProgress from "@/components/citizen/VerificationProgress";
+import CitizenVerificationForm from "@/components/citizen/CitizenVerificationform";
 import citizenapi from "@/service/citizenurls";
 import { useSearchParams } from "react-router-dom";
 

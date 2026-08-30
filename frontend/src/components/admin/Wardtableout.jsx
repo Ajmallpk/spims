@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import StatusBadge from "@/components/admin/Statusbadge";
+import StatusBadge from "@/components/admin/StatusBadge";
 
 const formatNumber = (n) =>
   n !== undefined && n !== null ? n.toLocaleString() : "—";

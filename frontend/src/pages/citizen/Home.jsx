@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 // import CitizenLayout from "@/layouts/citizen/Citizenlayout";
-import IssueCard from "@/components/citizen/Issuecard";
-import PostIssueButton from "@/components/citizen/Postissuebutton";
+import IssueCard from "@/components/citizen/IssueCard";
+import PostIssueButton from "@/components/citizen/PostissueButton";
 import CreateIssueModal from "@/components/citizen/Createissuemodal";
-import VerificationRequiredModal from "@/components/citizen/Verificationrequiredmodal";
+import VerificationRequiredModal from "@/components/citizen/VerificationRequiredmodal";
 import complaintapi from "@/service/complaintsurls";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";

@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import Avatar from "@/components/ui/Avatar";
 import AuthorityResponse from "@/components/citizen/Authorityresponse";
-import CommentSection from "@/components/citizen/Commentsection";
+import CommentSection from "@/components/citizen/CommentSection";
 import complaintapi from "@/service/complaintsurls";
-import StatusBadge from "../../components/ward/Statusbadge";
+import StatusBadge from "../../components/ward/StatusBadge";
 import CreateIssueModal from "@/components/citizen/Createissuemodal";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";

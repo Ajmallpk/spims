@@ -7,8 +7,8 @@
  *   token   : string – Bearer auth token
  */
 
-import ChangePasswordForm from "@/components/citizen/Changepasswordform";
-import ChangeEmailForm from "@/components/citizen/Changeemailform";
+import ChangePasswordForm from "@/components/citizen/ChangePasswordform";
+import ChangeEmailForm from "@/components/citizen/ChangeEmailform";
 
 const SecuritySettings = ({ profile, token }) => {
   return (

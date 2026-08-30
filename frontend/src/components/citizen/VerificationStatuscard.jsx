@@ -6,7 +6,7 @@
  *   loading: boolean
  */
 
-import StatusBadge from "@/components/citizen/Statusbadge";
+import StatusBadge from "@/components/citizen/StatusBadge";
 import { useNavigate } from "react-router-dom";
 const STATUS_META = {
   NOT_SUBMITTED: {
