@@ -6,6 +6,10 @@
       "destination": "https://52.66.253.103/api/admin/login/"
     },
     {
+      "source": "/api/admin/auth/me/",
+      "destination": "https://52.66.253.103/api/admin/auth/me/"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://52.66.253.103/api/:path*"
     },
