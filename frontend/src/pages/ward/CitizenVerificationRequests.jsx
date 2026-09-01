@@ -8,7 +8,7 @@ import citizenapi from "@/service/citizenurls";
 
 
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export default function CitizenVerificationRequests() {
   const token = localStorage.getItem("access");

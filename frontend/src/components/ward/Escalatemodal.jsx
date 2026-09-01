@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import wardapi from "@/service/wardurls";
 import ConfirmModal from '../../components/ward/ConfirmModal'
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const MIN_CHARS = 10;
 
 export default function EscalateModal({ complaintId, onClose, onSuccess }) {
