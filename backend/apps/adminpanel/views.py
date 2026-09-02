@@ -107,6 +107,8 @@ User = get_user_model()
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 
+from apps.complaints.models import Complaint
+
 
 
 
@@ -261,6 +263,8 @@ class AdminProfileView(APIView):
             user = request.user
 
             logger.info(f"Admin {user.id} fetched profile")
+            
+            total_tickets = Complaint.objects.all().count()
 
             return success_response(
                 message="Admin profile fetched",
@@ -271,6 +275,7 @@ class AdminProfileView(APIView):
                     "role": "ADMIN",
                     "date_joined": user.date_joined,
                     "last_login": user.last_login,
+                    "total_tickets":total_tickets,
                     "is_superuser": user.is_superuser,
                 }
             )
