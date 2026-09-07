@@ -3,7 +3,7 @@ import ChatMessage from "@/pages/ward/Chatmessage";
 import toast from "react-hot-toast";
 
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const POLL_INTERVAL = 8000;
 
 export default function ChatPanel({ complaintId, isChatClosed: initialClosed }) {

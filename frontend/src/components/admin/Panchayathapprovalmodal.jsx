@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import StatusBadge from "@/components/admin/Statusbadge";
+import StatusBadge from "@/components/admin/StatusBadge";
 import RejectReasonSection from "@/components/admin/Rejectreasonsection";
 import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";

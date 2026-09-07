@@ -2,7 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import complaintapi from "@/service/complaintsurls";
 import ConfirmModal from '../../components/ward/ConfirmModal'
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const MIN_CHARS = 10;
 
 export default function ResolveModal({ complaintId, onClose, onSuccess }) {

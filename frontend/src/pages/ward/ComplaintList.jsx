@@ -6,7 +6,7 @@ import SearchBar from "@/components/ward/Searchbar";
 import Pagination from "@/components/panjayath/Pagination";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export default function ComplaintList() {
   const navigate = useNavigate();

@@ -6,16 +6,16 @@
  * Replace getAuthToken() with your own auth utility.
  */
 import { useState, useEffect, useCallback } from "react";
-import ProfileHeader from "@/components/citizen/Profileheader";
-import ProfileInfoCard from "@/components/citizen/Profileinfocard";
+import ProfileHeader from "@/components/citizen/ProfileHeader";
+import ProfileInfoCard from "@/components/citizen/ProfileInfocard";
 import ProfileStats from "@/components/citizen/Profilestats";
 import SecuritySettings from "@/components/citizen/Securitysettings";
 import IssueHistory from "@/components/citizen/Issuehistory";
 import EditProfileModal from "@/components/citizen/Editprofilemodal";
 import citizenapi from "@/service/citizenurls";
 import complaintapi from "@/service/complaintsurls";
-import VerificationStatusCard from "@/components/citizen/Verificationstatuscard";
-import VerificationProgress from "@/components/citizen/Verificationprogress";
+import VerificationStatusCard from "@/components/citizen/VerificationStatuscard";
+import VerificationProgress from "@/components/citizen/VerificationProgress";
 import { handleApiError } from "@/utils/handleApiError";
 
 

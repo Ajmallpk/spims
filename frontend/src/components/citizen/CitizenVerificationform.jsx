@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect } from "react";
-import DocumentUploadField from "@/components/citizen/Documentuploadfield";
+import DocumentUploadField from "@/components/citizen/DocumentUploadfield";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
 import SearchableSelect from "@/components/common/SearchableSelect";

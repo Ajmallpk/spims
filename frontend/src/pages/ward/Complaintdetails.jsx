@@ -14,7 +14,7 @@ import ComplaintTimeline from "@/components/ward/ComplaintTimeline";
 import { complaintchatapi } from "@/service/complaintchaturls";
 
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export default function ComplaintDetails() {
   const { id } = useParams();

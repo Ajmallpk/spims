@@ -169,7 +169,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
-import IssueCard from "@/components/citizen/Issuecard";
+import IssueCard from "@/components/citizen/IssueCard";
 import { useSearchParams } from "react-router-dom";
 
 // const StatusBadge = ({ status }) => {
