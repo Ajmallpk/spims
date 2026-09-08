@@ -4,6 +4,7 @@ import panchayathApi from "@/service/panchayathurls";
 import { handleApiError } from "@/utils/handleApiError";
 import HoldModal from "@/components/panjayath/HoldModal";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 const CATEGORY_CONFIG = {
     ROAD: { bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-200" },
@@ -462,6 +463,8 @@ export default function PanchayathComplaintDetail() {
     }
 
     return (
+        <>
+        <PageTitle title="Complaint Details" />
         <div className="min-h-screen bg-slate-50">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -824,5 +827,6 @@ export default function PanchayathComplaintDetail() {
                 />
             )}
         </div>
+        </>
     );
 }

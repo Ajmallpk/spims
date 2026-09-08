@@ -103,6 +103,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, Check, X, ShieldCheck, Loader2 } from "lucide-react";
+import PageTitle from "@/components/common/PageTitle";
 
 // Purely cosmetic strength scoring — does not gate submission.
 function getPasswordStrength(password) {
@@ -163,6 +164,9 @@ export default function SetPasswordPage() {
     };
 
     return (
+
+        <>
+        <PageTitle title="Setpassword" />
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
             <div className="w-full max-w-4xl grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-xl shadow-slate-200/60 border border-slate-100">
                 {/* Decorative panel */}
@@ -341,5 +345,6 @@ export default function SetPasswordPage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }

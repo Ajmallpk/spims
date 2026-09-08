@@ -5,6 +5,7 @@ import SearchBar from "@/components/ward/Searchbar";
 import Pagination from "@/components/panjayath/Pagination";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 
 export default function CitizenList() {
@@ -54,6 +55,8 @@ export default function CitizenList() {
   };
 
   return (
+    <>
+    <PageTitle title="Citizens" />
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -102,5 +105,6 @@ export default function CitizenList() {
         isLoading={isLoading}
       />
     </div>
+    </>
   );
 }

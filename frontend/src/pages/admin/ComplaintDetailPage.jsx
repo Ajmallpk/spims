@@ -19,13 +19,15 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import PageTitle from "@/components/common/PageTitle";
+
 /* ─── helpers ─────────────────────────────────────────────── */
 
 const STATUS_STYLES = {
-  PENDING:     "bg-amber-50  text-amber-700  border-amber-200",
+  PENDING: "bg-amber-50  text-amber-700  border-amber-200",
   IN_PROGRESS: "bg-blue-50   text-blue-700   border-blue-200",
-  RESOLVED:    "bg-green-50  text-green-700  border-green-200",
-  REJECTED:    "bg-red-50    text-red-700    border-red-200",
+  RESOLVED: "bg-green-50  text-green-700  border-green-200",
+  REJECTED: "bg-red-50    text-red-700    border-red-200",
 };
 
 const statusStyle = (s = "") =>
@@ -97,158 +99,161 @@ const ComplaintDetailPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5 pb-12">
+    <>
+      <PageTitle title="Complaint Details" />
+      <div className="max-w-4xl mx-auto space-y-5 pb-12">
 
-      {/* ── back button ── */}
-      <button
-        onClick={() => navigate(-1)}
-        className="group inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
-      >
-        <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-50 group-hover:bg-indigo-100 transition-colors">
-          <ArrowLeft size={14} />
-        </span>
-        Back
-      </button>
-
-      {/* ── hero card ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 leading-tight">{data.title}</h1>
-            <p className="mt-2 text-gray-500 text-sm leading-relaxed">{data.description}</p>
-          </div>
-          <span
-            className={`flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${statusStyle(data.status)}`}
-          >
-            {data.status}
+        {/* ── back button ── */}
+        <button
+          onClick={() => navigate(-1)}
+          className="group inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+        >
+          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-50 group-hover:bg-indigo-100 transition-colors">
+            <ArrowLeft size={14} />
           </span>
-        </div>
+          Back
+        </button>
 
-        {/* meta pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-gray-50">
-          <InfoPill icon={Tag}     label="Category" value={data.category} />
-          <InfoPill icon={MapPin}  label="Location" value={data.location} />
-          <InfoPill icon={Clock}   label="Created"  value={new Date(data.created_at).toLocaleString()} />
-          <InfoPill icon={CheckCircle2} label="Status" value={data.status} />
-        </div>
-      </div>
-
-      {/* ── image proof ── */}
-      {data.image_proof && (
-        <SectionCard title="Complaint Image" icon={ImageIcon}>
-          <div className="relative group w-fit">
-            <img
-              src={data.image_proof}
-              alt="complaint"
-              className="rounded-xl border border-gray-100 max-h-80 object-cover cursor-pointer transition-opacity group-hover:opacity-90"
-              onClick={() => window.open(data.image_proof)}
-            />
-            <div
-              className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition cursor-pointer"
-              onClick={() => window.open(data.image_proof)}
+        {/* ── hero card ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold text-gray-900 leading-tight">{data.title}</h1>
+              <p className="mt-2 text-gray-500 text-sm leading-relaxed">{data.description}</p>
+            </div>
+            <span
+              className={`flex-shrink-0 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${statusStyle(data.status)}`}
             >
-              <div className="opacity-0 group-hover:opacity-100 transition bg-white/90 rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-700 shadow">
-                <ExternalLink size={12} /> Open full image
+              {data.status}
+            </span>
+          </div>
+
+          {/* meta pills */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-gray-50">
+            <InfoPill icon={Tag} label="Category" value={data.category} />
+            <InfoPill icon={MapPin} label="Location" value={data.location} />
+            <InfoPill icon={Clock} label="Created" value={new Date(data.created_at).toLocaleString()} />
+            <InfoPill icon={CheckCircle2} label="Status" value={data.status} />
+          </div>
+        </div>
+
+        {/* ── image proof ── */}
+        {data.image_proof && (
+          <SectionCard title="Complaint Image" icon={ImageIcon}>
+            <div className="relative group w-fit">
+              <img
+                src={data.image_proof}
+                alt="complaint"
+                className="rounded-xl border border-gray-100 max-h-80 object-cover cursor-pointer transition-opacity group-hover:opacity-90"
+                onClick={() => window.open(data.image_proof)}
+              />
+              <div
+                className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition cursor-pointer"
+                onClick={() => window.open(data.image_proof)}
+              >
+                <div className="opacity-0 group-hover:opacity-100 transition bg-white/90 rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-700 shadow">
+                  <ExternalLink size={12} /> Open full image
+                </div>
               </div>
             </div>
-          </div>
-        </SectionCard>
-      )}
+          </SectionCard>
+        )}
 
-      {/* ── video proof ── */}
-      {data.video_proof && (
-        <SectionCard title="Complaint Video" icon={VideoIcon}>
-          <video controls className="rounded-xl border border-gray-100 max-h-80 w-full">
-            <source src={data.video_proof} />
-          </video>
-        </SectionCard>
-      )}
+        {/* ── video proof ── */}
+        {data.video_proof && (
+          <SectionCard title="Complaint Video" icon={VideoIcon}>
+            <video controls className="rounded-xl border border-gray-100 max-h-80 w-full">
+              <source src={data.video_proof} />
+            </video>
+          </SectionCard>
+        )}
 
-      {/* ── extra media ── */}
-      {data.media?.length > 0 && (
-        <SectionCard title="Extra Media" icon={Layers}>
-          <div className="grid grid-cols-2 gap-4">
-            {data.media.map((media) =>
-              media.file_type === "IMAGE" ? (
-                <div key={media.id} className="relative group">
-                  <img
-                    src={media.file}
-                    alt="media"
-                    className="rounded-xl border border-gray-100 w-full object-cover cursor-pointer transition-opacity group-hover:opacity-90"
-                    onClick={() => window.open(media.file)}
-                  />
-                  <div
-                    className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition cursor-pointer"
-                    onClick={() => window.open(media.file)}
-                  >
-                    <div className="opacity-0 group-hover:opacity-100 transition bg-white/90 rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-700 shadow">
-                      <ExternalLink size={12} /> Open
+        {/* ── extra media ── */}
+        {data.media?.length > 0 && (
+          <SectionCard title="Extra Media" icon={Layers}>
+            <div className="grid grid-cols-2 gap-4">
+              {data.media.map((media) =>
+                media.file_type === "IMAGE" ? (
+                  <div key={media.id} className="relative group">
+                    <img
+                      src={media.file}
+                      alt="media"
+                      className="rounded-xl border border-gray-100 w-full object-cover cursor-pointer transition-opacity group-hover:opacity-90"
+                      onClick={() => window.open(media.file)}
+                    />
+                    <div
+                      className="absolute inset-0 rounded-xl flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition cursor-pointer"
+                      onClick={() => window.open(media.file)}
+                    >
+                      <div className="opacity-0 group-hover:opacity-100 transition bg-white/90 rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-gray-700 shadow">
+                        <ExternalLink size={12} /> Open
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <video key={media.id} controls className="rounded-xl border border-gray-100 w-full">
-                  <source src={media.file} />
-                </video>
-              )
-            )}
+                ) : (
+                  <video key={media.id} controls className="rounded-xl border border-gray-100 w-full">
+                    <source src={media.file} />
+                  </video>
+                )
+              )}
+            </div>
+          </SectionCard>
+        )}
+
+        {/* ── citizen ── */}
+        <SectionCard title="Reported User Details" icon={User}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InfoPill icon={User} label="Name" value={data.citizen?.name} />
+            <InfoPill icon={Tag} label="Email" value={data.citizen?.email} />
+            <InfoPill icon={MapPin} label="Phone" value={data.citizen?.phone} />
+            <button
+              onClick={() => navigate(`/admin/citizens/${data.citizen?.id}`)}
+              className="flex items-center gap-2 p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold text-sm hover:bg-indigo-100 transition-colors group"
+            >
+              Open Citizen Profile
+              <ChevronRight size={15} className="ml-auto group-hover:translate-x-0.5 transition-transform" />
+            </button>
           </div>
         </SectionCard>
-      )}
 
-      {/* ── citizen ── */}
-      <SectionCard title="Reported User Details" icon={User}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <InfoPill icon={User}   label="Name"  value={data.citizen?.name} />
-          <InfoPill icon={Tag}    label="Email" value={data.citizen?.email} />
-          <InfoPill icon={MapPin} label="Phone" value={data.citizen?.phone} />
-          <button
-            onClick={() => navigate(`/admin/citizens/${data.citizen?.id}`)}
-            className="flex items-center gap-2 p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold text-sm hover:bg-indigo-100 transition-colors group"
-          >
-            Open Citizen Profile
-            <ChevronRight size={15} className="ml-auto group-hover:translate-x-0.5 transition-transform" />
-          </button>
-        </div>
-      </SectionCard>
-
-      {/* ── ward ── */}
-      <SectionCard title="Ward Details" icon={Building2}>
-        <InfoPill icon={Building2} label="Ward" value={data.ward?.name} />
-      </SectionCard>
-
-      {/* ── panchayath ── */}
-      <SectionCard title="Panchayath Details" icon={Building2}>
-        <InfoPill icon={Building2} label="Panchayath Name" value={data.panchayath?.name} />
-      </SectionCard>
-
-      {/* ── timeline ── */}
-      {data.timeline?.length > 0 && (
-        <SectionCard title="Timeline" icon={Clock}>
-          <ol className="relative space-y-0">
-            {data.timeline.map((item, index) => (
-              <li key={index} className="relative pl-8 pb-6 last:pb-0">
-                {/* connector line */}
-                {index < data.timeline.length - 1 && (
-                  <span className="absolute left-[11px] top-5 bottom-0 w-px bg-gray-100" />
-                )}
-                {/* dot */}
-                <span className="absolute left-0 top-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 border-2 border-indigo-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                </span>
-
-                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-1">
-                  <p className="font-bold text-sm text-gray-800">{item.action}</p>
-                  <p className="text-sm text-gray-500">{item.note || "No note"}</p>
-                  <p className="text-xs text-gray-400 font-medium pt-0.5">{item.user}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+        {/* ── ward ── */}
+        <SectionCard title="Ward Details" icon={Building2}>
+          <InfoPill icon={Building2} label="Ward" value={data.ward?.name} />
         </SectionCard>
-      )}
 
-    </div>
+        {/* ── panchayath ── */}
+        <SectionCard title="Panchayath Details" icon={Building2}>
+          <InfoPill icon={Building2} label="Panchayath Name" value={data.panchayath?.name} />
+        </SectionCard>
+
+        {/* ── timeline ── */}
+        {data.timeline?.length > 0 && (
+          <SectionCard title="Timeline" icon={Clock}>
+            <ol className="relative space-y-0">
+              {data.timeline.map((item, index) => (
+                <li key={index} className="relative pl-8 pb-6 last:pb-0">
+                  {/* connector line */}
+                  {index < data.timeline.length - 1 && (
+                    <span className="absolute left-[11px] top-5 bottom-0 w-px bg-gray-100" />
+                  )}
+                  {/* dot */}
+                  <span className="absolute left-0 top-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 border-2 border-indigo-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                  </span>
+
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-1">
+                    <p className="font-bold text-sm text-gray-800">{item.action}</p>
+                    <p className="text-sm text-gray-500">{item.note || "No note"}</p>
+                    <p className="text-xs text-gray-400 font-medium pt-0.5">{item.user}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </SectionCard>
+        )}
+
+      </div>
+    </>
   );
 };
 

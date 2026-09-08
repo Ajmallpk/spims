@@ -1,9 +1,12 @@
 import { AuthForm } from "@/components/common/AuthForm"
 import { Shield, ShieldCheck } from "lucide-react"
 import { Link } from "react-router-dom"
+import PageTitle from "@/components/common/PageTitle";
 
 export default function AuthPage() {
   return (
+    <>
+    <PageTitle title="Auth" />
     <div
       style={{
         minHeight: "100vh",
@@ -258,5 +261,6 @@ export default function AuthPage() {
         * { box-sizing: border-box; }
       `}</style>
     </div>
+    </>
   )
 }

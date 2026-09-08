@@ -9,6 +9,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { complaintchatapi } from "@/service/complaintchaturls";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 
 
@@ -838,6 +839,8 @@ const ComplaintChatPage = () => {
 
 
     return (
+        <>
+        <PageTitle title="Complaint Chat" />
         <div className="flex flex-col h-[calc(100vh-120px)] bg-slate-50 rounded-xl overflow-hidden">
             {/* 1 — Top header bar */}
             <ComplaintChatPageHeader
@@ -874,6 +877,7 @@ const ComplaintChatPage = () => {
                 />
             )}
         </div>
+        </>
     );
 };
 

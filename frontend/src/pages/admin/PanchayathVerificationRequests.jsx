@@ -7,7 +7,7 @@ import { adminapi } from "@/service/adminurls";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
 import { useNavigate } from "react-router-dom";
-
+import PageTitle from "@/components/common/PageTitle";
 
 
 
@@ -76,6 +76,8 @@ const PanchayathVerificationRequests = () => {
   ).length;
 
   return (
+    <>
+    <PageTitle title="Panchayath Verification Requests" />
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -172,6 +174,7 @@ const PanchayathVerificationRequests = () => {
 
 
     </div>
+    </>
   );
 };
 

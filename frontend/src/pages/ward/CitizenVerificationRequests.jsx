@@ -4,6 +4,7 @@ import CitizenApprovalModal from "@/components/ward/Citizenapprovalmodal";
 import toast from "react-hot-toast";
 import wardapi from "@/service/wardurls";
 import citizenapi from "@/service/citizenurls";
+import PageTitle from "@/components/common/PageTitle";
 
 
 
@@ -109,6 +110,8 @@ export default function CitizenVerificationRequests() {
 
 
   return (
+    <>
+    <PageTitle title="Citizen Verification Requests" />
     <div className="space-y-6">
 
       {/* Page Header */}
@@ -206,5 +209,6 @@ export default function CitizenVerificationRequests() {
         />
       )}
     </div>
+    </>
   );
 }

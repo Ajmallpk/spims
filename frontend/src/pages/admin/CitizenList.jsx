@@ -340,6 +340,7 @@ import Pagination from "@/components/admin/Pagination";
 import { handleApiError } from "@/utils/handleApiError";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 /* ─── status badge ────────────────────────────────────────── */
 
@@ -492,6 +493,9 @@ const CitizenList = () => {
   const isSuspend = actionModal.type === "suspend";
 
   return (
+    <>
+
+    <PageTitle title="Citizens" />
     <div className="max-w-7xl mx-auto space-y-5 pb-12">
 
       {/* ── page header ── */}
@@ -781,6 +785,7 @@ const CitizenList = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

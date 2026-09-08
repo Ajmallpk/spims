@@ -8,6 +8,7 @@ import Pagination from "@/components/admin/Pagination";
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 /* ─── main component ──────────────────────────────────────── */
 
@@ -82,6 +83,10 @@ const WardList = () => {
   const isSuspend  = actionModal.type === "suspend";
 
   return (
+
+    <>
+
+    <PageTitle title="Wards" />
     <div className="max-w-7xl mx-auto space-y-5 pb-12">
 
       {/* ── page header ── */}
@@ -291,6 +296,7 @@ const WardList = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

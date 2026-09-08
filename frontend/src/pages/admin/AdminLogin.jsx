@@ -36,12 +36,15 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginCard from "@/components/admin/Logincard";
+import PageTitle from "@/components/common/PageTitle";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
 
 
   return (
+    <>
+    <PageTitle title="Admin Login" />
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-500 to-zinc-800 flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
       {/* Civic grid texture */}
       <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(130, 112, 112, 0.08)_1px,transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
@@ -63,6 +66,7 @@ const AdminLogin = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 

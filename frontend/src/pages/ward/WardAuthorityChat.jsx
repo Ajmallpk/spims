@@ -7,6 +7,7 @@ import EmptyChatState from "@/components/chat/EmptyChatState";
 import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import authoritychatapi from "@/service/authoritychaturls";
 import axiosInstance from "@/api/axiosInstance";
+import PageTitle from "@/components/common/PageTitle";
 
 const WardAuthorityChat = () => {
     const [contacts, setContacts] = useState([]);
@@ -741,6 +742,8 @@ const WardAuthorityChat = () => {
 
 
     return (
+        <>
+        <PageTitle title="Authority Chat" />
         <div className="h-[calc(100vh-140px)] flex bg-white rounded-2xl border border-slate-200 overflow-hidden font-sans">
             <div
                 className={`
@@ -833,6 +836,7 @@ const WardAuthorityChat = () => {
                 )}
             </div>
         </div>
+        </>
     );
 };
 

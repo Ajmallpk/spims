@@ -10,6 +10,7 @@ import { complaintchatapi } from "@/service/complaintchaturls";
 import wardapi from "@/service/wardurls";
 import citizenapi from "@/service/citizenurls";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 
 
@@ -812,6 +813,8 @@ const CitizenComplaintChatPage = () => {
 
 
   return (
+    <>
+    <PageTitle title="ComplaintChat" />
     <div className="flex flex-col h-[calc(100vh-120px)] bg-slate-50 rounded-xl overflow-hidden">
       {/* 1 — Top header bar */}
       <ComplaintChatPageHeader
@@ -866,6 +869,7 @@ const CitizenComplaintChatPage = () => {
 
       )}
     </div>
+    </>
   );
 };
 

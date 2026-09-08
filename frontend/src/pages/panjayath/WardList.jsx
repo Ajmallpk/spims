@@ -6,6 +6,7 @@ import Pagination from "@/components/panjayath/Pagination";
 import panchayathApi from "@/service/panchayathurls";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -260,6 +261,8 @@ export default function WardList() {
   const showTable = !isLoading && !fetchError && wards.length > 0;
 
   return (
+    <>
+    <PageTitle title="Ward List" />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-7">
 
@@ -444,5 +447,6 @@ export default function WardList() {
 
       </div>
     </div>
+    </>
   );
 }

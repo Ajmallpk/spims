@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance"; // adjust path as needed
 import ComplaintCard from "../../components/ward/ComplaintCard";
+import PageTitle from "@/components/common/PageTitle";
 
 const ReassignedComplaintList = () => {
   const [complaints, setComplaints] = useState([]);
@@ -67,6 +68,9 @@ const ReassignedComplaintList = () => {
 
   // ── Main Render ────────────────────────────────────────────────────────────
   return (
+
+    <>
+    <PageTitle title="Reassigned Complaints" />
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
@@ -124,6 +128,7 @@ const ReassignedComplaintList = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

@@ -20,6 +20,7 @@ import complaintapi from "@/service/complaintsurls";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 // ----------------------------------------------------------------
 // Mock data
@@ -693,6 +694,8 @@ const ExploreIssuesPage = () => {
   };
 
   return (
+    <>
+    <PageTitle title="Explore Issues" />
     <div className="min-h-screen bg-[#f3f4f6] pb-16">
       <div className="max-w-5xl mx-auto px-4 pt-8 overflow-visible">
         {/* Top Section */}
@@ -1019,6 +1022,7 @@ const ExploreIssuesPage = () => {
         )
       }
     </div>
+    </>
   );
 };
 

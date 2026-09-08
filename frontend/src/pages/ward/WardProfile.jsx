@@ -7,7 +7,7 @@ import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 import WardSecuritySettings from "@/components/ward/WardSecuritySettings";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import PageTitle from "@/components/common/PageTitle";
 // ── Right panel states ────────────────────────────────────────────────────────
 
 function PendingPanel() {
@@ -228,7 +228,8 @@ export default function WardProfile() {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-
+    <>
+    <PageTitle title="Ward Profile" />
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -427,5 +428,6 @@ export default function WardProfile() {
         </div>
       )}
     </div>
+    </>
   );
 }

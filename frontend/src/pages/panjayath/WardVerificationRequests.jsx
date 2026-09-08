@@ -13,6 +13,7 @@ import StatusBadge from "@/components/panjayath/StatusBadge";
 // import { handleAuthError } from "@/service/panchayathurls";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -259,6 +260,8 @@ export default function WardVerificationRequests() {
     requests.filter((r) => (r.status || "").toUpperCase() === status).length;
 
   return (
+    <>
+    <PageTitle title="Ward Verification Requests" />
     <div className="space-y-6">
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -515,5 +518,6 @@ export default function WardVerificationRequests() {
         />
       )}
     </div>
+    </>
   );
 }

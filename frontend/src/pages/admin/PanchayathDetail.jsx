@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 const PanchayathDetail = () => {
   const { id } = useParams();
@@ -56,6 +57,8 @@ const PanchayathDetail = () => {
   }
 
   return (
+    <>
+    <PageTitle title="Panchayath Details" />
     <div className="space-y-6">
 
       <h1 className="text-xl font-bold">Panchayath Detail</h1>
@@ -90,6 +93,7 @@ const PanchayathDetail = () => {
       </div>
 
     </div>
+    </>
   );
 };
 

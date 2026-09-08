@@ -352,6 +352,7 @@ import {
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
 import VerificationQueueDetailModal from "@/components/admin/VerificationQueueDetailModal";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function VerificationQueue() {
     const [citizens, setCitizens] = useState([]);
@@ -554,6 +555,8 @@ export default function VerificationQueue() {
     );
 
     return (
+        <>
+        <PageTitle title="Verification Queue" />
         <div className="space-y-8 p-6 bg-gray-50 min-h-screen">
 
             <div className="mb-2">
@@ -993,5 +996,6 @@ export default function VerificationQueue() {
             />
 
         </div>
+        </>
     );
 }

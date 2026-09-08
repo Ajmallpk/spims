@@ -4,6 +4,7 @@ import StatsGrid from "@/components/ward/Statsgrid";
 import VerificationAlertSection from "@/components/ward/Verificationalertsection";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 
 export default function WardDashboard() {
@@ -71,6 +72,8 @@ export default function WardDashboard() {
   ];
 
   return (
+    <>
+    <PageTitle title="Ward Dashboard" />
     <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
@@ -90,5 +93,6 @@ export default function WardDashboard() {
         onViewAll={() => navigate("/ward/citizen-verifications")}
       />
     </div>
+    </>
   );
 }

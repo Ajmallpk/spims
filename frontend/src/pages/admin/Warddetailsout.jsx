@@ -17,6 +17,7 @@ import WardMemberTable from "@/components/admin/Wardmembertable";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -92,6 +93,9 @@ const WardDetailsPage = () => {
   const complaints = data?.complaints || [];
 
   return (
+    <>
+
+    <PageTitle title="Warddetails" />
     <div className="space-y-6">
       {/* Back + Title */}
       <div className="flex items-center gap-3">
@@ -279,6 +283,7 @@ const WardDetailsPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -420,6 +420,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import panchayathApi from "@/service/panchayathurls";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 const STATUS_CONFIG = {
     RESOLVED: { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500", label: "Resolved" },
@@ -556,6 +557,8 @@ export default function ComplaintDetail() {
     const formattedDate = (d) => d ? new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
     return (
+        <>
+        <PageTitle title="Complaint Details" />
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
             {/* Back + Header */}
@@ -673,5 +676,6 @@ export default function ComplaintDetail() {
             )}
 
         </div>
+        </>
     );
 }

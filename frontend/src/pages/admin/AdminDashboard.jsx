@@ -9,6 +9,7 @@ import CriticalAlertSection from "@/components/admin/Criticalalertsection";
 // import toast from "react-hot-toast";
 import ComplaintStatusChart from "@/components/admin/ComplaintStatusChart";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -119,6 +120,8 @@ const AdminDashboard = () => {
   }, []);
 
   return (
+    <>
+    <PageTitle title="Admin Dashboard" />
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-emerald-900 rounded-xl p-6 text-white shadow-md">
         <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-1">
@@ -217,6 +220,8 @@ const AdminDashboard = () => {
         />
       </div> */}
     </div>
+
+    </>
   );
 };
 

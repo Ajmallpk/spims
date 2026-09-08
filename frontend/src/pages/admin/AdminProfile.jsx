@@ -6,6 +6,7 @@ import SecuritySettingsCard from "@/components/admin/Securitysettingscard";
 import { adminapi } from "@/service/adminurls";
 // import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 
 
@@ -29,6 +30,9 @@ const AdminProfile = () => {
   }, []);
 
   return (
+    <>
+
+    <PageTitle title="Profile" />
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-start gap-3">
@@ -54,6 +58,7 @@ const AdminProfile = () => {
         <SecuritySettingsCard profile={profile} />
       </div>
     </div>
+    </>
   );
 };
 

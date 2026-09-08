@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import wardapi from "@/service/wardurls";
+import PageTitle from "@/components/common/PageTitle";
 
 // ─────────────────────────────────────────────
 // CONFIG
@@ -527,6 +528,8 @@ export default function ReassignedComplaintDetail() {
   // PAGE
   // ─────────────────────────────────────────
   return (
+    <>
+    <PageTitle title="Reassigned Complaint Details" />
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -833,5 +836,6 @@ export default function ReassignedComplaintDetail() {
         />
       )}
     </div>
+    </>
   );
 }

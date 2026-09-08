@@ -680,6 +680,7 @@ import LocationRequestDetailModal from "@/components/admin/LocationRequestDetail
 import LocationActionModal from "@/components/admin/LocationActionModal";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 const filters = [
     "PENDING",
@@ -964,131 +965,135 @@ export default function LocationRequests() {
     ];
 
     return (
+        <>
+            <PageTitle title="Location Requests" />
 
-        <div className="p-6 bg-gray-50 min-h-screen">
+            <div className="p-6 bg-gray-50 min-h-screen">
 
-            <div className="mb-6">
+                <div className="mb-6">
 
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Location Requests
-                </h1>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        Location Requests
+                    </h1>
 
-                <p className="text-gray-500 mt-1 text-sm">
-                    Manage district, panchayath and ward location requests.
-                </p>
+                    <p className="text-gray-500 mt-1 text-sm">
+                        Manage district, panchayath and ward location requests.
+                    </p>
 
-            </div>
+                </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 
-                {statCards.map(({ key, label, value, icon: Icon, iconBg, iconColor, valueColor }) => (
+                    {statCards.map(({ key, label, value, icon: Icon, iconBg, iconColor, valueColor }) => (
 
-                    <div
-                        key={key}
-                        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4"
-                    >
+                        <div
+                            key={key}
+                            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4"
+                        >
 
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
 
-                            <Icon size={20} className={iconColor} />
+                                <Icon size={20} className={iconColor} />
+
+                            </div>
+
+                            <div>
+
+                                <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">
+                                    {label}
+                                </p>
+
+                                <h2 className={`text-2xl font-bold ${valueColor}`}>
+                                    {value}
+                                </h2>
+
+                            </div>
 
                         </div>
 
-                        <div>
+                    ))}
 
-                            <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">
-                                {label}
-                            </p>
+                </div>
 
-                            <h2 className={`text-2xl font-bold ${valueColor}`}>
-                                {value}
-                            </h2>
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+
+                        <div className="flex flex-wrap gap-2">
+
+                            {filters.map((item) => (
+
+                                <button
+                                    key={item}
+                                    onClick={() => {
+
+                                        setStatus(item);
+
+                                        setPage(1);
+
+                                    }}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+
+                    ${status === item
+                                            ? "bg-emerald-600 text-white shadow-sm"
+                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                        }`}
+                                >
+                                    {item.charAt(0) + item.slice(1).toLowerCase()}
+                                </button>
+
+                            ))}
 
                         </div>
 
-                    </div>
+                        <div className="flex flex-col sm:flex-row gap-3 lg:ml-auto w-full lg:w-auto">
 
-                ))}
+                            <select
+                                value={requestType}
+                                onChange={(e) => {
 
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
-
-                <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-
-                    <div className="flex flex-wrap gap-2">
-
-                        {filters.map((item) => (
-
-                            <button
-                                key={item}
-                                onClick={() => {
-
-                                    setStatus(item);
+                                    setRequestType(e.target.value);
 
                                     setPage(1);
 
                                 }}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
-
-                    ${status === item
-                                        ? "bg-emerald-600 text-white shadow-sm"
-                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                    }`}
+                                className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                             >
-                                {item.charAt(0) + item.slice(1).toLowerCase()}
-                            </button>
 
-                        ))}
+                                <option value="">
+                                    All Types
+                                </option>
 
-                    </div>
+                                <option value="DISTRICT">
+                                    District
+                                </option>
 
-                    <div className="flex flex-col sm:flex-row gap-3 lg:ml-auto w-full lg:w-auto">
+                                <option value="PANCHAYATH">
+                                    Panchayath
+                                </option>
 
-                        <select
-                            value={requestType}
-                            onChange={(e) => {
+                                <option value="WARD">
+                                    Ward
+                                </option>
 
-                                setRequestType(e.target.value);
+                            </select>
 
-                                setPage(1);
+                            <div className="relative w-full sm:w-64">
 
-                            }}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                        >
+                                <Search
+                                    size={16}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                />
 
-                            <option value="">
-                                All Types
-                            </option>
+                                <input
+                                    type="text"
+                                    placeholder="Search user..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full rounded-lg border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                />
 
-                            <option value="DISTRICT">
-                                District
-                            </option>
-
-                            <option value="PANCHAYATH">
-                                Panchayath
-                            </option>
-
-                            <option value="WARD">
-                                Ward
-                            </option>
-
-                        </select>
-
-                        <div className="relative w-full sm:w-64">
-
-                            <Search
-                                size={16}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            />
-
-                            <input
-                                type="text"
-                                placeholder="Search user..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full rounded-lg border border-gray-200 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            />
+                            </div>
 
                         </div>
 
@@ -1096,346 +1101,346 @@ export default function LocationRequests() {
 
                 </div>
 
-            </div>
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
 
-                <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
 
-                    <table className="w-full text-sm">
+                            <thead>
 
-                        <thead>
+                                <tr className="border-b border-gray-100 bg-gray-50/80">
 
-                            <tr className="border-b border-gray-100 bg-gray-50/80">
+                                    <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                                        User
+                                    </th>
 
-                                <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                                    User
-                                </th>
+                                    <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                                        Type
+                                    </th>
 
-                                <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                                    Type
-                                </th>
+                                    <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                                        Requested Location
+                                    </th>
 
-                                <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                                    Requested Location
-                                </th>
+                                    <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                                        Status
+                                    </th>
 
-                                <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                                    Status
-                                </th>
+                                    <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                                        Action
+                                    </th>
 
-                                <th className="p-4 text-left font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                                    Action
-                                </th>
+                                </tr>
 
-                            </tr>
+                            </thead>
 
-                        </thead>
+                            <tbody>
 
-                        <tbody>
+                                {loading && (
 
-                            {loading && (
+                                    Array.from({ length: 5 }).map((_, i) => (
 
-                                Array.from({ length: 5 }).map((_, i) => (
+                                        <tr key={i} className="border-b border-gray-50">
 
-                                    <tr key={i} className="border-b border-gray-50">
+                                            <td className="p-4" colSpan={5}>
 
-                                        <td className="p-4" colSpan={5}>
+                                                <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
 
-                                            <div className="h-10 bg-gray-100 rounded-lg animate-pulse" />
+                                            </td>
+
+                                        </tr>
+
+                                    ))
+
+                                )}
+
+                                {!loading && filteredRequests.length === 0 && (
+
+                                    <tr>
+
+                                        <td colSpan={5} className="p-12">
+
+                                            <div className="flex flex-col items-center justify-center text-center gap-2">
+
+                                                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+
+                                                    <Inbox size={22} className="text-gray-400" />
+
+                                                </div>
+
+                                                <p className="text-gray-600 font-medium">
+                                                    No requests found
+                                                </p>
+
+                                                <p className="text-gray-400 text-sm">
+                                                    Try adjusting your filters or search term.
+                                                </p>
+
+                                            </div>
 
                                         </td>
 
                                     </tr>
 
-                                ))
+                                )}
 
-                            )}
+                                {!loading && filteredRequests.map((item) => (
 
-                            {!loading && filteredRequests.length === 0 && (
+                                    <tr
+                                        key={item.id}
+                                        className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors"
+                                    >
 
-                                <tr>
+                                        <td className="p-4">
 
-                                    <td colSpan={5} className="p-12">
+                                            <div className="flex items-center gap-3">
 
-                                        <div className="flex flex-col items-center justify-center text-center gap-2">
+                                                <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold text-sm shrink-0">
 
-                                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                                    {item.requested_by?.charAt(0)?.toUpperCase()}
 
-                                                <Inbox size={22} className="text-gray-400" />
+                                                </div>
 
-                                            </div>
+                                                <div>
 
-                                            <p className="text-gray-600 font-medium">
-                                                No requests found
-                                            </p>
+                                                    <p className="font-semibold text-gray-800">
 
-                                            <p className="text-gray-400 text-sm">
-                                                Try adjusting your filters or search term.
-                                            </p>
+                                                        {item.requested_by}
 
-                                        </div>
+                                                    </p>
 
-                                    </td>
+                                                    <p className="text-xs text-gray-400">
 
-                                </tr>
+                                                        {item.role}
 
-                            )}
+                                                    </p>
 
-                            {!loading && filteredRequests.map((item) => (
-
-                                <tr
-                                    key={item.id}
-                                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors"
-                                >
-
-                                    <td className="p-4">
-
-                                        <div className="flex items-center gap-3">
-
-                                            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold text-sm shrink-0">
-
-                                                {item.requested_by?.charAt(0)?.toUpperCase()}
+                                                </div>
 
                                             </div>
 
-                                            <div>
+                                        </td>
 
-                                                <p className="font-semibold text-gray-800">
+                                        <td className="p-4">
 
-                                                    {item.requested_by}
+                                            <span
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 font-medium text-xs"
+                                            >
 
-                                                </p>
+                                                <span>{typeLabels[item.request_type]?.icon}</span>
 
-                                                <p className="text-xs text-gray-400">
+                                                <span>{typeLabels[item.request_type]?.label}</span>
 
-                                                    {item.role}
+                                            </span>
 
-                                                </p>
+                                        </td>
 
-                                            </div>
+                                        <td className="p-4">
 
-                                        </div>
+                                            <div className="space-y-1.5 text-sm">
 
-                                    </td>
+                                                <div className="flex items-center gap-2">
 
-                                    <td className="p-4">
+                                                    <MapPin
+                                                        size={14}
+                                                        className="text-blue-500 shrink-0"
+                                                    />
 
-                                        <span
-                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 font-medium text-xs"
-                                        >
+                                                    <span className="text-gray-700">
 
-                                            <span>{typeLabels[item.request_type]?.icon}</span>
+                                                        {item.district_name || "-"}
 
-                                            <span>{typeLabels[item.request_type]?.label}</span>
+                                                    </span>
 
-                                        </span>
+                                                </div>
 
-                                    </td>
+                                                <div className="flex items-center gap-2">
 
-                                    <td className="p-4">
+                                                    <Building2
+                                                        size={14}
+                                                        className="text-emerald-500 shrink-0"
+                                                    />
 
-                                        <div className="space-y-1.5 text-sm">
+                                                    <span className="text-gray-700">
 
-                                            <div className="flex items-center gap-2">
+                                                        {item.panchayath_name || "-"}
 
-                                                <MapPin
-                                                    size={14}
-                                                    className="text-blue-500 shrink-0"
-                                                />
+                                                    </span>
 
-                                                <span className="text-gray-700">
+                                                </div>
 
-                                                    {item.district_name || "-"}
+                                                <div className="flex items-center gap-2">
 
-                                                </span>
+                                                    <Flag
+                                                        size={14}
+                                                        className="text-orange-500 shrink-0"
+                                                    />
 
-                                            </div>
+                                                    <span className="text-gray-700">
 
-                                            <div className="flex items-center gap-2">
+                                                        {item.ward_number
+                                                            ? `Ward ${item.ward_number}`
+                                                            : "-"}
 
-                                                <Building2
-                                                    size={14}
-                                                    className="text-emerald-500 shrink-0"
-                                                />
+                                                        {item.ward_name &&
+                                                            ` (${item.ward_name})`}
 
-                                                <span className="text-gray-700">
+                                                    </span>
 
-                                                    {item.panchayath_name || "-"}
-
-                                                </span>
-
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-
-                                                <Flag
-                                                    size={14}
-                                                    className="text-orange-500 shrink-0"
-                                                />
-
-                                                <span className="text-gray-700">
-
-                                                    {item.ward_number
-                                                        ? `Ward ${item.ward_number}`
-                                                        : "-"}
-
-                                                    {item.ward_name &&
-                                                        ` (${item.ward_name})`}
-
-                                                </span>
+                                                </div>
 
                                             </div>
 
-                                        </div>
+                                        </td>
 
-                                    </td>
+                                        <td className="p-4">
 
-                                    <td className="p-4">
+                                            <span
+                                                className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusStyles[item.status] || "bg-gray-100 text-gray-600"}`}
+                                            >
 
-                                        <span
-                                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusStyles[item.status] || "bg-gray-100 text-gray-600"}`}
-                                        >
+                                                {item.status}
 
-                                            {item.status}
+                                            </span>
 
-                                        </span>
+                                        </td>
 
-                                    </td>
+                                        <td className="p-4">
 
-                                    <td className="p-4">
+                                            <button
 
-                                        <button
+                                                onClick={() => openRequest(item)}
 
-                                            onClick={() => openRequest(item)}
+                                                className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
 
-                                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+                                            >
 
-                                        >
+                                                View
 
-                                            View
+                                            </button>
 
-                                        </button>
+                                        </td>
 
-                                    </td>
+                                    </tr>
 
-                                </tr>
+                                ))}
 
-                            ))}
+                            </tbody>
 
-                        </tbody>
+                        </table>
 
-                    </table>
+                    </div>
 
                 </div>
 
+                <div className="flex justify-center items-center gap-3 mt-6">
+
+                    <button
+                        disabled={page === 1}
+                        onClick={() => setPage(page - 1)}
+                        className="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <ChevronLeft size={16} />
+                        Previous
+                    </button>
+
+                    <span className="text-sm font-medium text-gray-600">
+                        Page {page} of {totalPages}
+                    </span>
+
+                    <button
+                        disabled={page === totalPages}
+                        onClick={() => setPage(page + 1)}
+                        className="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Next
+                        <ChevronRight size={16} />
+                    </button>
+
+                </div>
+
+
+                <LocationRequestDetailModal
+
+                    open={showModal}
+
+                    onClose={closeModal}
+
+                    request={selectedRequest}
+
+                    onComplete={(id) => {
+
+                        closeModal();
+
+                        openActionModal("COMPLETE", id);
+
+                    }}
+
+                    onHold={(id) => {
+
+                        closeModal();
+
+                        openActionModal("HOLD", id);
+
+                    }}
+
+                    onReject={(id) => {
+
+                        closeModal();
+
+                        openActionModal("REJECT", id);
+
+                    }}
+
+                />
+
+
+                <LocationActionModal
+
+                    open={modalOpen}
+
+                    loading={loadingAction}
+
+                    onClose={closeActionModal}
+
+                    onSubmit={submitAction}
+
+                    title={
+                        modalType === "COMPLETE"
+                            ? "Complete Request"
+
+                            : modalType === "HOLD"
+                                ? "Put Request On Hold"
+
+                                : "Reject Request"
+                    }
+
+                    actionLabel={
+                        modalType === "COMPLETE"
+                            ? "Complete"
+
+                            : modalType === "HOLD"
+                                ? "Hold"
+
+                                : "Reject"
+                    }
+
+                    buttonColor={
+                        modalType === "COMPLETE"
+                            ? "bg-green-600"
+
+                            : modalType === "HOLD"
+                                ? "bg-yellow-500"
+
+                                : "bg-red-600"
+                    }
+
+                />
+
             </div>
 
-            <div className="flex justify-center items-center gap-3 mt-6">
-
-                <button
-                    disabled={page === 1}
-                    onClick={() => setPage(page - 1)}
-                    className="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                    <ChevronLeft size={16} />
-                    Previous
-                </button>
-
-                <span className="text-sm font-medium text-gray-600">
-                    Page {page} of {totalPages}
-                </span>
-
-                <button
-                    disabled={page === totalPages}
-                    onClick={() => setPage(page + 1)}
-                    className="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                    Next
-                    <ChevronRight size={16} />
-                </button>
-
-            </div>
-
-
-            <LocationRequestDetailModal
-
-                open={showModal}
-
-                onClose={closeModal}
-
-                request={selectedRequest}
-
-                onComplete={(id) => {
-
-                    closeModal();
-
-                    openActionModal("COMPLETE", id);
-
-                }}
-
-                onHold={(id) => {
-
-                    closeModal();
-
-                    openActionModal("HOLD", id);
-
-                }}
-
-                onReject={(id) => {
-
-                    closeModal();
-
-                    openActionModal("REJECT", id);
-
-                }}
-
-            />
-
-
-            <LocationActionModal
-
-                open={modalOpen}
-
-                loading={loadingAction}
-
-                onClose={closeActionModal}
-
-                onSubmit={submitAction}
-
-                title={
-                    modalType === "COMPLETE"
-                        ? "Complete Request"
-
-                        : modalType === "HOLD"
-                            ? "Put Request On Hold"
-
-                            : "Reject Request"
-                }
-
-                actionLabel={
-                    modalType === "COMPLETE"
-                        ? "Complete"
-
-                        : modalType === "HOLD"
-                            ? "Hold"
-
-                            : "Reject"
-                }
-
-                buttonColor={
-                    modalType === "COMPLETE"
-                        ? "bg-green-600"
-
-                        : modalType === "HOLD"
-                            ? "bg-yellow-500"
-
-                            : "bg-red-600"
-                }
-
-            />
-
-        </div>
+        </>
 
     );
 

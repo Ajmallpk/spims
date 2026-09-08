@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import LoginForm from "@/components/auth/LoginForm";
 import axiosInstance from "@/api/axiosInstance";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ export default function AdminLogin() {
   };
 
   return (
+    <>
+    <PageTitle title="AdminLogin" />
     <div
       className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden"
       style={{
@@ -133,5 +136,6 @@ export default function AdminLogin() {
         }
       `}</style>
     </div>
+    </>
   );
 }

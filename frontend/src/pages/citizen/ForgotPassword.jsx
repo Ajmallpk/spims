@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
 import illustration from "@/assets/illustrations/forgot-password.png.png";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -56,6 +57,8 @@ export default function ForgotPassword() {
   };
 
   return (
+    <>
+    <PageTitle title="ForgotPassword" />
     <div className="min-h-screen flex">
 
       {/* LEFT ILLUSTRATION PANEL */}
@@ -159,5 +162,6 @@ export default function ForgotPassword() {
         </div>
       </div>
     </div>
+    </>
   );
 }

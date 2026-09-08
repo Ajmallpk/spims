@@ -171,6 +171,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
 import IssueCard from "@/components/citizen/IssueCard";
 import { useSearchParams } from "react-router-dom";
+import PageTitle from "@/components/common/PageTitle";
 
 // const StatusBadge = ({ status }) => {
 //     const styles = {
@@ -356,6 +357,8 @@ const CitizenComplaintDetailPage = () => {
         return <SkeletonLoader />;
 
     return (
+        <>
+        <PageTitle title="ComplaintDetail" />
         <div className="max-w-3xl mx-auto py-6">
             <IssueCard
                 issue={issue}
@@ -367,6 +370,7 @@ const CitizenComplaintDetailPage = () => {
                 }
             />
         </div>
+        </>
     );
 };
 

@@ -7,6 +7,7 @@ import Pagination from "@/components/panjayath/Pagination";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function ComplaintList() {
   const navigate = useNavigate();
@@ -74,6 +75,8 @@ export default function ComplaintList() {
   };
 
   return (
+    <>
+    <PageTitle title="Complaints" />
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -162,5 +165,6 @@ export default function ComplaintList() {
         isLoading={isLoading}
       />
     </div>
+    </>
   );
 }

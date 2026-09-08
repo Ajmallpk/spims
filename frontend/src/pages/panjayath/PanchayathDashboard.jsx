@@ -9,6 +9,7 @@ import panchayathApi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 
 
@@ -279,6 +280,9 @@ export default function Dashboard() {
   }
 
   return (
+
+    <>
+    <PageTitle title="Panchayath Dashboard" />
     <div className="space-y-8">
       {/* ── Welcome banner ── */}
       <div className="rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 p-6 text-white shadow-lg shadow-blue-200 relative overflow-hidden">
@@ -387,5 +391,6 @@ export default function Dashboard() {
         </section>
       </div>
     </div>
+    </>
   );
 }

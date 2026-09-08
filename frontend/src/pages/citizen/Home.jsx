@@ -10,6 +10,7 @@ import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
 import { RefreshCw } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import PageTitle from "@/components/common/PageTitle";
 
 // Verification status constants
 const VERIFICATION_STATUS = {
@@ -288,6 +289,7 @@ const Home = () => {
 
   return (
     <>
+    <PageTitle title="Home" />
       {/* Pending verification toast */}
       {pendingMessage && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl px-5 py-3 text-sm shadow-lg font-medium">

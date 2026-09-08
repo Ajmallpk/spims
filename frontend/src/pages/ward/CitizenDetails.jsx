@@ -6,6 +6,7 @@ import ComplaintHistoryTable from "@/components/ward/Complainthistorytable";
 import wardapi from "@/service/wardurls";
 import toast from "react-hot-toast";
 import VerificationDetailsModal from "@/components/ward/VerificationDetailsModal";
+import PageTitle from "@/components/common/PageTitle";
 
 
 export default function CitizenDetails() {
@@ -89,6 +90,8 @@ export default function CitizenDetails() {
   const verification = citizenData?.verification;
 
   return (
+    <>
+    <PageTitle title="Citizen Details" />
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between gap-4">
@@ -197,5 +200,6 @@ export default function CitizenDetails() {
         />
       )}
     </div>
+    </>
   );
 }

@@ -39,6 +39,7 @@ import { UserPlus, Users } from "lucide-react";
 
 import CreatePanchayathForm from "@/components/admin/authority/CreatePanchayathForm";
 import AuthorityAccountTable from "@/components/admin/authority/AuthorityAccountTable";
+import PageTitle from "@/components/common/PageTitle";
 
 const AuthorityManagement = () => {
 
@@ -55,6 +56,9 @@ const AuthorityManagement = () => {
     ];
 
     return (
+
+        <>
+        <PageTitle title="Authority Management" />
 
         <div className="max-w-6xl mx-auto space-y-6">
 
@@ -133,7 +137,7 @@ const AuthorityManagement = () => {
             `}</style>
 
         </div>
-
+        </>
     );
 };
 

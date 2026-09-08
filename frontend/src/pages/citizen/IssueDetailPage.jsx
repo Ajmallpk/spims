@@ -463,7 +463,7 @@ import {
   MapPin, Tag, ChevronDown, ChevronUp, Send,
   Pencil, Trash2, CornerDownRight, X, ChevronRight
 } from "lucide-react";
-
+import PageTitle from "@/components/common/PageTitle";
 import toast from "react-hot-toast";
 
 const Avatar = ({ name, size = "md" }) => {
@@ -836,6 +836,8 @@ const IssueDetailPage = () => {
   };
 
   return (
+    <>
+    <PageTitle title="IssueDetailPage" />
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
 
       <div className="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-blue-100 px-4 py-3 flex items-center gap-3">
@@ -1035,6 +1037,7 @@ const IssueDetailPage = () => {
         {...sharedCommentProps}
       />
     </div>
+    </>
   );
 };
 

@@ -17,6 +17,7 @@ import complaintapi from "@/service/complaintsurls";
 import VerificationStatusCard from "@/components/citizen/VerificationStatuscard";
 import VerificationProgress from "@/components/citizen/VerificationProgress";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
@@ -107,6 +108,8 @@ const Profile = () => {
   };
 
   return (
+    <>
+    <PageTitle title="Profile" />
     <div className="min-h-screen bg-gray-100">
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-gray-100 pt-4 pb-3 border-b border-gray-200/60">
@@ -230,6 +233,7 @@ const Profile = () => {
 
       )}
     </div>
+    </>
   );
 };
 

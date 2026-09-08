@@ -7,6 +7,7 @@ import {
 import { adminapi } from "@/service/adminurls";
 import SearchableSelect from "@/components/common/SearchableSelect";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 const tabs = [
     {
@@ -267,6 +268,10 @@ const LocationManagement = () => {
     };
 
     return (
+
+        <>
+
+        <PageTitle title="Location Management" />
         <div className="p-6 space-y-6">
 
             {/* Header */}
@@ -560,6 +565,7 @@ const LocationManagement = () => {
             </div>
 
         </div>
+        </>
     );
 };
 

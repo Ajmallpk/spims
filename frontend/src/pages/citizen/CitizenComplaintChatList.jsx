@@ -6,6 +6,7 @@ import ComplaintChatEmptyState from "@/components/ward/ComplaintChatEmptyState";
 import ComplaintChatSkeleton from "@/components/ward/ComplaintChatListSkeleton";
 import { complaintchatapi } from "@/service/complaintchaturls";
 import { useNavigate } from "react-router-dom";
+import PageTitle from "@/components/common/PageTitle";
 
 // ── Dummy data ─────────────────────────────────────────────────────────────
 const DUMMY_CHATS = [
@@ -280,6 +281,8 @@ const CitizenComplaintChatList = () => {
     ).length;
 
   return (
+    <>
+    <PageTitle title="ComplaintChats" />
     <div className="min-h-screen bg-slate-50 font-sans">
       <div className="max-w-2xl mx-auto px-4 pt-8 pb-16">
 
@@ -337,6 +340,7 @@ const CitizenComplaintChatList = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

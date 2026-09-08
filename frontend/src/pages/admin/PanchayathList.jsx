@@ -7,6 +7,8 @@ import Pagination from "@/components/admin/Pagination";
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
+
 
 /* ─── reusable components ─────────────────────────────────── */
 
@@ -97,6 +99,10 @@ const PanchayathList = () => {
   const isSuspend = actionModal.type === "suspend";
 
   return (
+
+    <>
+
+    <PageTitle title="Panchayaths" />
     <div className="max-w-7xl mx-auto space-y-5 pb-12">
 
       {/* ── page header ── */}
@@ -247,6 +253,7 @@ const PanchayathList = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

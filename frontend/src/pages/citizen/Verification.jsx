@@ -15,6 +15,7 @@ import VerificationProgress from "@/components/citizen/VerificationProgress";
 import CitizenVerificationForm from "@/components/citizen/CitizenVerificationform";
 import citizenapi from "@/service/citizenurls";
 import { useSearchParams } from "react-router-dom";
+import PageTitle from "@/components/common/PageTitle";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -83,6 +84,8 @@ const Verification = () => {
   const status = verificationStatus?.status ?? "NOT_SUBMITTED";
 
   return (
+    <>
+    <PageTitle title="Verification" />
     <div className="min-h-screen bg-gray-100">
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-gray-100 pt-4 pb-3 border-b border-gray-200/60">
@@ -175,6 +178,7 @@ const Verification = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 

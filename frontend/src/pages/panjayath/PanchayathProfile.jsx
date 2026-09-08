@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import PanchayathSecuritySettings from "@/components/panjayath/PanchayathSecuritySettings";
 import { useLocation, useNavigate } from "react-router-dom";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
@@ -266,6 +267,8 @@ export default function PanchayathProfile() {
 
 
   return (
+    <>
+    <PageTitle title="Panchayath Profile" />
     <div className="space-y-6">
       {/* ── Page Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -464,5 +467,6 @@ export default function PanchayathProfile() {
         </div>
       )}
     </div>
+    </>
   );
 }

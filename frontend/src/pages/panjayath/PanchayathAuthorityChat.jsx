@@ -8,6 +8,7 @@ import ChatSkeleton from "@/components/chat/ChatSkeleton";
 import authoritychatapi from "@/service/authoritychaturls";
 import { handleApiError } from "@/utils/handleApiError";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 const PanchayathAuthorityChat = () => {
   const [contacts, setContacts] = useState([]);
@@ -775,91 +776,94 @@ const PanchayathAuthorityChat = () => {
 
 
   return (
-    <div className="h-[calc(100vh-140px)] flex bg-white rounded-2xl border border-slate-200 overflow-hidden font-sans">
-      <div
-        className={`
+    <>
+      <PageTitle title="Authority Chat" />
+      <div className="h-[calc(100vh-140px)] flex bg-white rounded-2xl border border-slate-200 overflow-hidden font-sans">
+        <div
+          className={`
           ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 fixed md:relative z-30 md:z-auto
           transition-transform duration-300 ease-in-out
           h-full flex-shrink-0
         `}
-      >
-        <ChatSidebar
-          contacts={contacts}
-          selectedId={selectedContact?.id}
-          onSelectContact={handleSelectContact}
-          currentUser={currentUser}
-          isLoading={isLoading}
-          title="SPIMS Chat"
-          subtitle="Internal Authority Communication"
-          searchPlaceholder="Search ward chats..."
-          sectionTitle="WARDS"
-          currentRoleLabel="Panchayath Authority"
-        />
-      </div>
+        >
+          <ChatSidebar
+            contacts={contacts}
+            selectedId={selectedContact?.id}
+            onSelectContact={handleSelectContact}
+            currentUser={currentUser}
+            isLoading={isLoading}
+            title="SPIMS Chat"
+            subtitle="Internal Authority Communication"
+            searchPlaceholder="Search ward chats..."
+            sectionTitle="WARDS"
+            currentRoleLabel="Panchayath Authority"
+          />
+        </div>
 
-      {isMobileSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 z-20 md:hidden"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
-        {!selectedContact ? (
-          <>
-            <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
-              <button
-                onClick={() => setIsMobileSidebarOpen(true)}
-                className="p-2 rounded-xl hover:bg-gray-100 text-gray-500"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <span className="font-semibold text-gray-800">SPIMS Chat</span>
-            </div>
-            <EmptyChatState />
-          </>
-        ) : (
-          <>
-            <ChatHeader
-              contact={selectedContact}
-              onBack={() => {
-                setIsMobileSidebarOpen(true);
-                setSelectedContact(null);
-              }}
-            />
-
-            {isLoading ? (
-              <div className="flex-1 overflow-hidden">
-                <ChatSkeleton type="messages" />
-              </div>
-            ) : (
-              <MessageList
-                messages={messages}
-                currentUserId={currentUser?.id}
-                isTyping={isTyping}
-                typingUser={selectedContact?.name?.split("–")[0]?.trim()}
-                onReply={setReplyMessage}
-                onDelete={handleDeleteMessage}
-                loadMoreMessages={loadMoreMessages}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-              />
-            )}
-
-            <ChatInput
-              onSendMessage={handleSendMessage}
-              disabled={isLoading}
-              socketRef={socketRef}
-              replyMessage={replyMessage}
-              clearReply={() => setReplyMessage(null)}
-            />
-          </>
+        {isMobileSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/30 z-20 md:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
         )}
+
+        <div className="flex-1 flex flex-col min-w-0 h-full bg-slate-50">
+          {!selectedContact ? (
+            <>
+              <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+                <button
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  className="p-2 rounded-xl hover:bg-gray-100 text-gray-500"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <span className="font-semibold text-gray-800">SPIMS Chat</span>
+              </div>
+              <EmptyChatState />
+            </>
+          ) : (
+            <>
+              <ChatHeader
+                contact={selectedContact}
+                onBack={() => {
+                  setIsMobileSidebarOpen(true);
+                  setSelectedContact(null);
+                }}
+              />
+
+              {isLoading ? (
+                <div className="flex-1 overflow-hidden">
+                  <ChatSkeleton type="messages" />
+                </div>
+              ) : (
+                <MessageList
+                  messages={messages}
+                  currentUserId={currentUser?.id}
+                  isTyping={isTyping}
+                  typingUser={selectedContact?.name?.split("–")[0]?.trim()}
+                  onReply={setReplyMessage}
+                  onDelete={handleDeleteMessage}
+                  loadMoreMessages={loadMoreMessages}
+                  hasMore={hasMore}
+                  loadingMore={loadingMore}
+                />
+              )}
+
+              <ChatInput
+                onSendMessage={handleSendMessage}
+                disabled={isLoading}
+                socketRef={socketRef}
+                replyMessage={replyMessage}
+                clearReply={() => setReplyMessage(null)}
+              />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

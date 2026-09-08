@@ -178,6 +178,7 @@ import {
   BadgeCheck,
   Camera,
 } from "lucide-react";
+import PageTitle from "@/components/common/PageTitle";
 
 /* ─── reusable helpers ────────────────────────────────────── */
 
@@ -315,6 +316,10 @@ export default function CitizenDetail() {
   }
 
   return (
+
+    <>
+
+    <PageTitle title="Citizen Details" />
     <div className="max-w-4xl mx-auto space-y-5 pb-12">
 
       {/* ── back button ── */}
@@ -380,5 +385,6 @@ export default function CitizenDetail() {
       </SectionCard>
 
     </div>
+    </>
   );
 }

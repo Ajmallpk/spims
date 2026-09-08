@@ -12,6 +12,7 @@ import complaintapi from "@/service/complaintsurls";
 import toast from "react-hot-toast";
 import ComplaintTimeline from "@/components/ward/ComplaintTimeline";
 import { complaintchatapi } from "@/service/complaintchaturls";
+import PageTitle from "@/components/common/PageTitle";
 
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -152,6 +153,8 @@ export default function ComplaintDetails() {
   }
 
   return (
+    <>
+    <PageTitle title="Complaint Details" />
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between gap-3">
@@ -286,5 +289,6 @@ export default function ComplaintDetails() {
         />
       )}
     </div>
+    </>
   );
 }

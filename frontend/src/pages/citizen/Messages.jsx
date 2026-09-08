@@ -11,6 +11,7 @@ import ConversationList from "@/components/citizen/Conversationlist";
 import ChatWindow from "@/components/citizen/Chatwindow";
 import EmptyMessagesState from "@/components/citizen/Emptymessagesstate";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 // ─── Auth helper ──────────────────────────────────────────────────────────────
 const getAuthToken = () => localStorage.getItem("spims_token") || "";
@@ -156,6 +157,8 @@ const Messages = () => {
   };
 
   return (
+    <>
+    <PageTitle title="Messages" />
     <div className="min-h-screen bg-gray-100">
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-gray-100 pt-4 pb-3 border-b border-gray-200/60">
@@ -239,6 +242,7 @@ const Messages = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

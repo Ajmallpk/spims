@@ -4,6 +4,7 @@ import panchayathApi from "@/service/panchayathurls";
 // import { handleAuthError } from "@/service/panchayathurls";
 import toast from "react-hot-toast";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function WardDetail() {
   const { id } = useParams();
@@ -76,6 +77,9 @@ export default function WardDetail() {
   }
 
   return (
+
+    <>
+    <PageTitle title="Ward Details" />
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -329,6 +333,7 @@ export default function WardDetail() {
 
       </div>
     </div>
+    </>
   );
 }
 

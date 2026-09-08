@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import citizenapi from "@/service/citizenurls";
 import { handleApiError } from "@/utils/handleApiError";
 import { getNotificationRoute } from "@/utils/notificationRouter";
+import PageTitle from "@/components/common/PageTitle";
 
 // ─── Types & config ───────────────────────────────────────────────────────────
 const NOTIF_CONFIG = {
@@ -384,6 +385,7 @@ const NotificationPanel = ({
 
     return (
         <>
+        <PageTitle title="Notification" />
             {/* Backdrop (mobile) */}
             <div className="fixed inset-0 z-40 sm:hidden bg-black/20" onClick={onClose} />
 

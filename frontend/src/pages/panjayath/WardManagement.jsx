@@ -39,6 +39,7 @@ import { UserPlus, Users } from "lucide-react";
 
 import CreateWardForm from "@/components/panjayath/authority/CreateWardForm";
 import WardAccountTable from "@/components/panjayath/authority/WardAccountTable";
+import PageTitle from "@/components/common/PageTitle";
 
 const WardManagement = () => {
 
@@ -55,7 +56,8 @@ const WardManagement = () => {
     ];
 
     return (
-
+        <>
+        <PageTitle title="Ward Management" />
         <div className="max-w-6xl mx-auto space-y-6">
 
             <div>
@@ -133,7 +135,7 @@ const WardManagement = () => {
             `}</style>
 
         </div>
-
+        </>
     );
 
 };

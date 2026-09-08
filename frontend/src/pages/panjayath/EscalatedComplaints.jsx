@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import panchayathApi from "@/service/panchayathurls";
 import { handleApiError } from "@/utils/handleApiError";
-
+import PageTitle from "@/components/common/PageTitle";
 
 const CATEGORY_COLORS = {
     ROAD: { bg: "bg-orange-100", text: "text-orange-700", border: "border-orange-200", dot: "bg-orange-500" },
@@ -294,6 +294,9 @@ export default function EscalatedComplaints() {
     ];
 
     return (
+
+        <>
+        <PageTitle title="Escalated Complaints" />
         <div className="min-h-screen bg-slate-50 font-sans">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -495,5 +498,6 @@ export default function EscalatedComplaints() {
                 )}
             </div>
         </div>
+        </>
     );
 }

@@ -15,6 +15,7 @@ import PanchayathStatsGrid from "@/components/admin/Panchayathstatsgrid";
 import WardTable from "@/components/admin/Wardtable";
 import { adminapi } from "@/service/adminurls";
 import { handleApiError } from "@/utils/handleApiError";
+import PageTitle from "@/components/common/PageTitle";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("access")}`,
@@ -68,6 +69,8 @@ const PanchayathDetails = () => {
   const wards = data?.wards || [];
 
   return (
+    <>
+    <PageTitle title="Panchayath Details" />
     <div className="space-y-6">
       {/* Back + Title */}
       <div className="flex items-center gap-3">
@@ -154,6 +157,7 @@ const PanchayathDetails = () => {
       {/* Ward Table */}
       <WardTable wards={wards} isLoading={loading} />
     </div>
+    </>
   );
 };
 

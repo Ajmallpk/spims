@@ -2,6 +2,7 @@ import { useState } from "react";
 import citizenapi from "@/service/citizenurls";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import PageTitle from "@/components/common/PageTitle";
 
 export default function ResetPassword() {
 
@@ -74,6 +75,9 @@ export default function ResetPassword() {
 
   return (
 
+    <>
+    <PageTitle title="ResetPassword" />
+
     <div className="flex justify-center items-center min-h-screen">
 
       <div className="bg-white p-6 rounded-xl shadow w-96">
@@ -111,6 +115,8 @@ export default function ResetPassword() {
       </div>
 
     </div>
+
+    </>
 
   );
 }

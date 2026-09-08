@@ -194,6 +194,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom"
 // import MeanFixLogo from "./MeanFixLogo";
 import FixItLogo from "./FixItLogo";
+import PageTitle from "@/components/common/PageTitle";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Outfit:wght@300;400;500;600;700&display=swap');
