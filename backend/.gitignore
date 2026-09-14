@@ -1,15 +1,4 @@
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual Environment
-venv/
-env/
-ENV/
-.venv/
-
-# Environment Variables
+# Environment variables
 .env
 .env.*
 
@@ -18,7 +7,8 @@ ENV/
 media/
 staticfiles/
 
-
+# Local SQLite database
+db.sqlite3
 
 # VS Code
 .vscode/
@@ -39,4 +29,8 @@ htmlcov/
 
 # Firebase secret key
 config/firebase/serviceAccountKey.json
-db.sqlite3
+
+
+# Python cache
+__pycache__/
+*.py[cod]
