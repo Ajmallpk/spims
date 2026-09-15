@@ -34,7 +34,7 @@ urlpatterns = [
     
     
     
-    
+    path("api/practice/", include("apps.practice.urls")),
   
 ]
 
