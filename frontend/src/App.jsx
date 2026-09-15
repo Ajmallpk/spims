@@ -87,7 +87,7 @@ import CitizenComplaintChatPage from "./pages/citizen/CitizenComplaintChatPage";
 import CitizenComplaintDetailPage from "./pages/citizen/CitizenComplaintDetailPage";
 import ExploreIssuesPage from "@/pages/citizen/ExploreIssuesPage";
 import IssueDetailPage from "./pages/citizen/IssueDetailPage";
-import DeploymentPractice from "./pages/DeploymentPractice";
+
 
 
 
@@ -130,10 +130,7 @@ export default function App() {
           element={<SetPasswordPage />}
         />
 
-        <Route
-          path="/deployment-practice"
-          element={<DeploymentPractice />}
-        />
+        
 
 
       // ADMIN LOGIN (NO LAYOUT) //
