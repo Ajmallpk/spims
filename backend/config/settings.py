@@ -95,7 +95,6 @@ INSTALLED_APPS = [
     "apps.complaints",
     "apps.notification",
     "apps.chat",
-    "apps.practice",
     "channels",
     'rest_framework_simplejwt.token_blacklist',
     
