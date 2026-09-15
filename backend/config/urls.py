@@ -31,6 +31,10 @@ urlpatterns = [
     path("api/complaints/",include("apps.complaints.urls")),
     path("api/notification/",include("apps.notification.urls")),
     path("api/chat/", include("apps.chat.urls")),
+    
+    
+    
+    path("api/practice/", include("apps.practice.urls")),
   
 ]
 
