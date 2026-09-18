@@ -95,7 +95,7 @@ class PanchayathProfileView(APIView):
                 "email": user.email,
                 "status": user.status,
                 "panchayath_name": verification.panchayath_name if verification else None,
-                "phone": verification.phone if verification else None,
+                "phone": user.official_phone,
                 "district": verification.district if verification else None,
                 "verification_status": verification.status if verification else "NOT_SUBMITTED",
                 "created_at": verification.reviewed_at if verification else None,
