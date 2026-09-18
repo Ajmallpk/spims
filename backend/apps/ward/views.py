@@ -81,7 +81,7 @@ class WardProfile(APIView):
 
                     "officer_full_name": verification.officer_full_name,
                     "official_email": verification.official_email,
-                    "official_contact": verification.official_contact,
+                    "official_contact": user.official_phone,
 
                     "ward_name": verification.ward_name,
                     "panchayath_name": (
