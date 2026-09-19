@@ -110,6 +110,9 @@ from rest_framework.response import Response
 from apps.complaints.models import Complaint
 
 
+from datetime import date 
+
+
 
 
 
@@ -261,6 +264,20 @@ class AdminProfileView(APIView):
     def get(self, request):
         try:
             user = request.user
+            
+            today = date.today()
+            
+            
+            if today.month == 1:
+                last_month = 12
+                
+            else:
+                last_month = today.month - 1
+                
+                
+            last_mont_complaints = Complaint.objects.filter(
+                created_at__month = last_month
+            ).count
 
             logger.info(f"Admin {user.id} fetched profile")
             return success_response(
@@ -273,6 +290,7 @@ class AdminProfileView(APIView):
                     "date_joined": user.date_joined,
                     "last_login": user.last_login,
                     "is_superuser": user.is_superuser,
+                    "last_month_complaints":last_mont_complaints
                 }
             )
 

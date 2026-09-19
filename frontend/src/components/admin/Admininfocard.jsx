@@ -125,11 +125,7 @@ const AdminInfoCard = ({ profile, isLoading }) => {
           value={formatDateTime(profile?.last_login)}
         />
 
-        <InfoRow
-          icon={Clock}
-          label="Total Tickets"
-          value={profile.total_tickets}
-        />
+        <p>{profile.last_month_complaints}</p>
       </div>
     </div>
   );
