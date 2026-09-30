@@ -124,8 +124,6 @@ const AdminInfoCard = ({ profile, isLoading }) => {
           label="Last Login"
           value={formatDateTime(profile?.last_login)}
         />
-
-        <p>{profile.last_month_complaints}</p>
       </div>
     </div>
   );
